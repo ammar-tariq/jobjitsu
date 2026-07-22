@@ -1,0 +1,16 @@
+---
+description: Commit with Conventional Commits after each completed prompt
+alwaysApply: true
+---
+
+# Commit after completion
+
+When a user prompt’s requested work is **finished** (code/docs land and DoD gates for that slice are met):
+
+1. Create a git commit using [commit-messages.mdc](./commit-messages.mdc) (Conventional Commits + Commitlint).
+2. Follow the repo git safety protocol (status/diff/log → stage → HEREDOC message → verify).
+3. Prefer **one commit per prompt** focused on that prompt’s outcome; split only if unrelated concerns are clearly separable.
+4. Do **not** push unless the user explicitly asks.
+5. Skip commit only if there are truly no changes, or the user said not to commit.
+
+Never use `--no-verify`. Never amend unless the amend rules in the user git protocol are fully satisfied.

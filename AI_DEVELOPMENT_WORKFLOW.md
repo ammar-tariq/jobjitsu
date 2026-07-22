@@ -34,8 +34,12 @@ Before writing any code:
 14. Satisfy the full [Definition of Done](./DEFINITION_OF_DONE.md) before starting the next task:
     documented · tested · typed · reviewed · follows architecture · passes lint · passes build.
 
+15. Commit the completed work with a [Conventional Commit](./.cursor/rules/commit-messages.mdc)
+    (see `.cursor/rules/commit-after-completion.mdc`). Do not push unless asked.
+
 Never skip planning.
 Never bypass tests.
 Never violate architecture.
 Never introduce unnecessary complexity.
 Never call a task done without meeting the Definition of Done.
+Never leave completed work uncommitted when the change set is ready.
