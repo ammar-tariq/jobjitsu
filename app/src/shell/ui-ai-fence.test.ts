@@ -28,4 +28,15 @@ describe("UI → AI fence", () => {
       expect(source, file).not.toMatch(/from\s+["']@jobjitsu\/ai["']/);
     }
   });
+
+  it("forbids shell UI from importing Node storage entrypoints", () => {
+    const files = listShellSources(shellDir);
+    expect(files.length).toBeGreaterThan(0);
+
+    for (const file of files) {
+      const source = readFileSync(file, "utf8");
+      expect(source, file).not.toMatch(/@jobjitsu\/storage\/node/);
+      expect(source, file).not.toMatch(/from\s+["']node:fs["']/);
+    }
+  });
 });

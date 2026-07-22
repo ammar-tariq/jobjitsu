@@ -412,8 +412,8 @@ export function PreferencesView({
           Data folder
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Profile, resumes, and library files are stored here. Choose a folder on this device — for
-          example an encrypted volume or backup location you control.
+          Profile, resumes, and preferences are saved as files in this folder on this device. Choose
+          a location you control — for example an encrypted volume or backup drive.
         </Typography>
         {dataRoot ? (
           <Typography color="text.secondary" variant="body2" data-testid="jj-data-folder-default">

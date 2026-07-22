@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-data-directory"
+description = "Registers the active on-device data folder in the FS scope so profile and resume files can be written there."
+commands.allow = ["allow_data_directory"]

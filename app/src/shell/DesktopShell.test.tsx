@@ -193,6 +193,24 @@ describe("DesktopShell", () => {
     expect((await runtime.dataRoot.get()).isCustom).toBe(false);
   });
 
+  it("lets the user choose a data folder with the system picker", async () => {
+    const user = userEvent.setup();
+    const dataRoot = createMemoryDataRootStore({
+      defaultPath: "/Users/sam/Library/Application Support/JobJitsu",
+    });
+    const folderPicker = createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu");
+    const runtime = createHostRuntime({ dataRoot, folderPicker });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    await user.click(screen.getByRole("button", { name: "Choose folder" }));
+
+    expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
+    expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
+    expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
+  });
+
   it("keeps approval-before-send on by default and updates through preferences", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

@@ -4,7 +4,7 @@ import "@jobjitsu/ui/tokens.css";
 import "@jobjitsu/ui/JjAgentPrivacyPill.css";
 import "./shell/shell.css";
 import { App } from "./App.js";
-import { createHostRuntime } from "./host/runtime.js";
+import { createAppHostRuntime } from "./host/durable-runtime.js";
 
 document.documentElement.setAttribute("data-theme", "dark");
 
@@ -13,12 +13,14 @@ if (!rootEl) {
   throw new Error("JobJitsu shell requires #root");
 }
 
-const runtime = createHostRuntime({ version: "0.0.0" });
+void (async () => {
+  const runtime = await createAppHostRuntime({ version: "0.0.0" });
 
-createRoot(rootEl).render(
-  <StrictMode>
-    <App runtime={runtime} />
-  </StrictMode>,
-);
+  createRoot(rootEl).render(
+    <StrictMode>
+      <App runtime={runtime} />
+    </StrictMode>,
+  );
 
-void runtime.start();
+  await runtime.start();
+})();

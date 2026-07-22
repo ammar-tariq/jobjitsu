@@ -17,6 +17,8 @@
     { "path": "../packages/ai" },
     { "path": "../packages/identity" },
     { "path": "../packages/preferences" },
+    { "path": "../packages/storage" },
+    { "path": "../packages/config" },
     { "path": "../packages/send" },
     { "path": "../packages/ui" }
   ]

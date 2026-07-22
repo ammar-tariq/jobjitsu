@@ -1,7 +1,30 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Minimal host capabilities. Dialog open is for choosing the on-device data folder only — no fs/shell/HTTP career egress (ADR 0013).",
+  "description": "Minimal host capabilities. Dialog + scoped FS for the on-device data folder only — no shell/HTTP career egress (ADR 0013).",
   "windows": ["main"],
-  "permissions": ["core:default", "dialog:allow-open"]
+  "permissions": [
+    "core:default",
+    "allow-data-directory",
+    "dialog:allow-open",
+    "fs:allow-mkdir",
+    "fs:allow-read-dir",
+    "fs:allow-read-file",
+    "fs:allow-read-text-file",
+    "fs:allow-write-file",
+    "fs:allow-write-text-file",
+    "fs:allow-exists",
+    "fs:allow-remove",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$HOME/Library/Application Support/JobJitsu" },
+        { "path": "$HOME/Library/Application Support/JobJitsu/**" },
+        { "path": "$HOME/.local/share/JobJitsu" },
+        { "path": "$HOME/.local/share/JobJitsu/**" },
+        { "path": "$LOCALAPPDATA/JobJitsu" },
+        { "path": "$LOCALAPPDATA/JobJitsu/**" }
+      ]
+    }
+  ]
 }
