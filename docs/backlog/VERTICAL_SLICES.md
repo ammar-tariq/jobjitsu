@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | PE04 Preferences & Privacy Chrome |
 | **Story** | PE04-S04 — Fit, tone, and constraint preferences (this slice) |
-| **Status** | In progress → PR gate |
+| **Status** | PR gate — [#75](https://github.com/ammar-tariq/jobjitsu/pull/75) |
 | **Note** | Persist fit/tone/constraints via façade + IPC; Preferences.Changed |
 
 ## Completed slices
