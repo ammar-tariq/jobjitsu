@@ -20,3 +20,4 @@ export { createFsKvStore } from "./fs-kv.js";
 export { createFsBlobStore } from "./fs-blobs.js";
 export { createFsStorageProvider, type CreateFsStorageProviderOptions } from "./fs-provider.js";
 export { createDocumentStore } from "./document-store.js";
+export { createMemoryKvStore } from "./memory-kv.js";

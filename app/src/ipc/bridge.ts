@@ -1,5 +1,10 @@
 import type { Result } from "@jobjitsu/shared";
-import type { AiStatusSnapshot, IpcResultMap, ThemePreference } from "./commands.js";
+import type {
+  AiStatusSnapshot,
+  IpcResultMap,
+  ProfilePatchInput,
+  ThemePreference,
+} from "./commands.js";
 import type { IpcDispatcher } from "./dispatcher.js";
 
 export type IpcBridge = {
@@ -7,6 +12,10 @@ export type IpcBridge = {
   readonly getTheme: () => Promise<Result<IpcResultMap["theme.get"]>>;
   readonly setTheme: (theme: ThemePreference) => Promise<Result<IpcResultMap["theme.set"]>>;
   readonly getAiStatus: () => Promise<Result<AiStatusSnapshot>>;
+  readonly getProfile: () => Promise<Result<IpcResultMap["identity.getProfile"]>>;
+  readonly setProfile: (
+    patch: ProfilePatchInput,
+  ) => Promise<Result<IpcResultMap["identity.setProfile"]>>;
 };
 
 /**
@@ -25,6 +34,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     },
     async getAiStatus() {
       return (await dispatcher.invoke("ai.getStatus")) as Result<AiStatusSnapshot>;
+    },
+    async getProfile() {
+      return (await dispatcher.invoke("identity.getProfile")) as Result<
+        IpcResultMap["identity.getProfile"]
+      >;
+    },
+    async setProfile(patch: ProfilePatchInput) {
+      return (await dispatcher.invoke("identity.setProfile", patch)) as Result<
+        IpcResultMap["identity.setProfile"]
+      >;
     },
   };
 }

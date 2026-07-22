@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createMemoryProfileRepository } from "@jobjitsu/identity";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -8,14 +9,22 @@ import {
 } from "./index.js";
 
 describe("IPC allowlist", () => {
-  it("exports ping and W0 stubs only", () => {
-    expect(IPC_ALLOWLIST).toEqual(["ping", "theme.get", "theme.set", "ai.getStatus"]);
+  it("exports ping, theme, ai status, and identity profile commands", () => {
+    expect(IPC_ALLOWLIST).toEqual([
+      "ping",
+      "theme.get",
+      "theme.set",
+      "ai.getStatus",
+      "identity.getProfile",
+      "identity.setProfile",
+    ]);
   });
 
   it("rejects AI complete as an allowlisted name", () => {
     expect(isIpcCommandName("ai.complete")).toBe(false);
     expect(isIpcCommandName("ai.embed")).toBe(false);
     expect(isIpcCommandName("ping")).toBe(true);
+    expect(isIpcCommandName("identity.getProfile")).toBe(true);
   });
 });
 
@@ -72,6 +81,36 @@ describe("typed IPC bridge", () => {
     expect(status.ok && status.value).toEqual({ ready: true, locality: "local" });
 
     expect(bridge).not.toHaveProperty("complete");
-    expect(Object.keys(bridge).sort()).toEqual(["getAiStatus", "getTheme", "ping", "setTheme"]);
+    expect(Object.keys(bridge).sort()).toEqual([
+      "getAiStatus",
+      "getProfile",
+      "getTheme",
+      "ping",
+      "setProfile",
+      "setTheme",
+    ]);
+  });
+
+  it("reads and writes profile through identity APIs", async () => {
+    const profiles = createMemoryProfileRepository();
+    const bridge = createIpcBridge(createHostIpcDispatcher({ profiles }));
+
+    const empty = await bridge.getProfile();
+    expect(empty.ok && empty.value.profile).toBeNull();
+
+    const saved = await bridge.setProfile({
+      displayName: "Sam Chen",
+      email: "sam@example.com",
+      location: "On this device",
+    });
+    expect(saved.ok).toBe(true);
+    if (saved.ok) {
+      expect(saved.value.profile.displayName).toBe("Sam Chen");
+      expect(saved.value.profile.location).toMatch(/device/i);
+    }
+
+    const loaded = await bridge.getProfile();
+    expect(loaded.ok && loaded.value.profile?.displayName).toBe("Sam Chen");
+    expect(await profiles.get()).toEqual(saved.ok ? saved.value.profile : undefined);
   });
 });

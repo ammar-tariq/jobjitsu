@@ -4,7 +4,14 @@ import { createAppError, err, ok, type Result } from "@jobjitsu/shared";
  * Deny-by-default host↔UI command allowlist (ADR 0013).
  * Career egress / AI complete are intentionally absent.
  */
-export const IPC_ALLOWLIST = ["ping", "theme.get", "theme.set", "ai.getStatus"] as const;
+export const IPC_ALLOWLIST = [
+  "ping",
+  "theme.get",
+  "theme.set",
+  "ai.getStatus",
+  "identity.getProfile",
+  "identity.setProfile",
+] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
 
@@ -16,11 +23,27 @@ export type AiStatusSnapshot = {
   readonly locality: "local" | "unavailable";
 };
 
+export type ProfileSnapshot = {
+  readonly id: string;
+  readonly displayName: string;
+  readonly email?: string;
+  readonly location?: string;
+  readonly updatedAt: string;
+};
+
+export type ProfilePatchInput = {
+  readonly displayName: string;
+  readonly email?: string;
+  readonly location?: string;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
   readonly "theme.set": { readonly theme: ThemePreference };
   readonly "ai.getStatus": undefined;
+  readonly "identity.getProfile": undefined;
+  readonly "identity.setProfile": ProfilePatchInput;
 };
 
 export type IpcResultMap = {
@@ -28,6 +51,8 @@ export type IpcResultMap = {
   readonly "theme.get": { readonly theme: ThemePreference };
   readonly "theme.set": { readonly theme: ThemePreference };
   readonly "ai.getStatus": AiStatusSnapshot;
+  readonly "identity.getProfile": { readonly profile: ProfileSnapshot | null };
+  readonly "identity.setProfile": { readonly profile: ProfileSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

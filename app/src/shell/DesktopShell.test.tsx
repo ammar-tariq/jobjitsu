@@ -79,4 +79,27 @@ describe("DesktopShell", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
     expect(await appearance.getTheme()).toBe("light");
   });
+
+  it("saves profile on-device through the identity bridge", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-profile-form")).toBeInTheDocument();
+    expect(screen.getByText(/stay on this device/i)).toBeInTheDocument();
+    expect(screen.queryByText(/cloud sync/i)).not.toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.type(screen.getByRole("textbox", { name: /^email$/i }), "sam@example.com");
+    await user.type(screen.getByRole("textbox", { name: /location/i }), "On this device");
+    await user.click(screen.getByRole("button", { name: "Save profile" }));
+
+    expect(await screen.findByText("Stored on this device.")).toBeInTheDocument();
+    const profile = await runtime.profiles.get();
+    expect(profile?.displayName).toBe("Sam Chen");
+    expect(profile?.email).toBe("sam@example.com");
+    expect(profile?.location).toMatch(/device/i);
+  });
 });
