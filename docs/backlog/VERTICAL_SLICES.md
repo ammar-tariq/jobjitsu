@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | Desktop Foundation + fake providers |
-| **Story** | Fake AI / Gmail / Jobs / Resume available for local demos |
-| **Status** | Fake providers landed (no real integrations) |
-| **Note** | Still no Ollama, Gmail API, or Playwright |
+| **Epic** | Event-driven host |
+| **Story** | Startup cascade on the bus; UI never calls AI |
+| **Status** | Host runtime + Dojo activity view |
+| **Note** | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced` |
 
 ## Completed slices
 
@@ -27,6 +27,7 @@ Never build multiple features in parallel in the same change set.
 | Foundation spine | 2026-07-22 | shared, events, logger, config, core, sdk, testing |
 | DF-10 | 2026-07-22 | Extension SDK manager, lifecycle, DI, events |
 | E06-F02 + fakes | 2026-07-22 | Fake AI, Gmail, Jobs, Resume providers |
+| Event cascade | 2026-07-22 | Host runtime cascade; UI↛AI fence |
 
 ## Sprint 1 sequence
 

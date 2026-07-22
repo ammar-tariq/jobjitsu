@@ -56,9 +56,27 @@ importers:
 
   app:
     dependencies:
+      '@jobjitsu/ai':
+        specifier: workspace:*
+        version: link:../packages/ai
       '@jobjitsu/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@jobjitsu/events':
+        specifier: workspace:*
+        version: link:../packages/events
+      '@jobjitsu/identity':
+        specifier: workspace:*
+        version: link:../packages/identity
+      '@jobjitsu/logger':
+        specifier: workspace:*
+        version: link:../packages/logger
+      '@jobjitsu/send':
+        specifier: workspace:*
+        version: link:../packages/send
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
       '@jobjitsu/ui':
         specifier: workspace:*
         version: link:../packages/ui

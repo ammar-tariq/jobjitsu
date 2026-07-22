@@ -18,6 +18,13 @@ describe("@jobjitsu/events", () => {
     expect(DURABLE_EVENT_NAMES).toContain("Extension.Disabled");
   });
 
+  it("includes host lifecycle cascade events", () => {
+    expect(EVENT_NAMES).toContain("App.Started");
+    expect(EVENT_NAMES).toContain("Plugin.Loaded");
+    expect(EVENT_NAMES).toContain("Resume.Generated");
+    expect(EVENT_NAMES).toContain("Email.Synced");
+  });
+
   it("types EventBus without providing an implementation", () => {
     const keys: Array<keyof EventBus> = ["publish", "subscribe", "subscribeAll"];
     expect(keys).toHaveLength(3);

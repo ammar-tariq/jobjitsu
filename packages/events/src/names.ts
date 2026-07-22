@@ -3,6 +3,7 @@
  * @see docs/architecture/EVENT_SYSTEM.md
  */
 export const EVENT_NAMES = [
+  "App.Started",
   "Agent.Started",
   "Agent.Paused",
   "Agent.Resumed",
@@ -32,6 +33,7 @@ export const EVENT_NAMES = [
   "Privacy.EgressRecorded",
   "Preferences.Changed",
   "Scheduler.JobRan",
+  "Plugin.Loaded",
   "Plugin.Enabled",
   "Plugin.Disabled",
   "Extension.Registered",
@@ -39,6 +41,8 @@ export const EVENT_NAMES = [
   "Extension.Disabled",
   "Extension.Unloaded",
   "Extension.Failed",
+  "Resume.Generated",
+  "Email.Synced",
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];

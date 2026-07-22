@@ -11,7 +11,7 @@ function isDurableName(
 
 /**
  * In-process event bus — local only, no network I/O.
- * Handlers for a given publish run synchronously in subscription order.
+ * Handlers run in subscription order; async handlers are awaited so cascades stay sequential.
  */
 export function createInMemoryEventBus(options: EventBusOptions = {}): EventBus {
   const named = new Map<EventName, Set<EventHandler>>();
@@ -38,28 +38,30 @@ export function createInMemoryEventBus(options: EventBusOptions = {}): EventBus 
     };
   };
 
-  const publish = <N extends EventName>(
+  const publish = async <N extends EventName>(
     name: N,
     payload: EventPayloadMap[N],
-  ): void | Promise<void> => {
+  ): Promise<void> => {
     const event: DomainEvent<N> = {
       name,
       payload,
       occurredAt: new Date().toISOString(),
     };
 
+    // Observers first so facts appear before nested work they trigger.
+    for (const handler of all) {
+      await handler(event as DomainEvent);
+    }
+
     const specific = named.get(name);
     if (specific) {
       for (const handler of specific) {
-        void handler(event as DomainEvent);
+        await handler(event as DomainEvent);
       }
-    }
-    for (const handler of all) {
-      void handler(event as DomainEvent);
     }
 
     if (durableSink && isDurableName(name, durableNames)) {
-      return durableSink.persist(event as DomainEvent<DurableEventName>);
+      await durableSink.persist(event as DomainEvent<DurableEventName>);
     }
   };
 

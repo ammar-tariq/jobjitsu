@@ -8,10 +8,11 @@ import {
   type ShellNavId,
 } from "../index.js";
 import { ComingSoonView } from "./ComingSoonView.js";
+import { EventActivityView } from "./EventActivityView.js";
 
 /**
- * Desktop shell only — sidebar + main + status.
- * No product features; every view is a calm Coming Soon placeholder.
+ * Desktop shell — sidebar + main + status.
+ * Subscribes to host activity only; must never import `@jobjitsu/ai`.
  */
 export function DesktopShell(): JSX.Element {
   const [activeId, setActiveId] = useState<ShellNavId>(DEFAULT_SHELL_NAV_ID);
@@ -51,7 +52,7 @@ export function DesktopShell(): JSX.Element {
         </nav>
 
         <main className="jj-shell__main" id="main-content">
-          <ComingSoonView title={title} />
+          {activeId === "dojo" ? <EventActivityView /> : <ComingSoonView title={title} />}
         </main>
       </div>
 

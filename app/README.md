@@ -1,8 +1,8 @@
 # `@jobjitsu/app`
 
-Desktop **shell** for JobJitsu — title bar, sidebar, main pane, status chrome.
+Desktop **shell** + event-driven **host runtime** for JobJitsu.
 
-This is not the product application. Every destination is a calm **Coming Soon** placeholder so we can prove layout and navigation architecture first.
+Dojo shows the startup cascade. Other destinations stay **Coming Soon**.
 
 ## Run the shell
 
@@ -15,7 +15,7 @@ pnpm --filter @jobjitsu/app dev
 Open **http://localhost:1420** — window title **JobJitsu**, Midnight Ink dark theme.
 
 ```bash
-pnpm --filter @jobjitsu/app build    # typecheck + Vite → dist-ui/
+pnpm --filter @jobjitsu/app build
 pnpm --filter @jobjitsu/app test
 ```
 
@@ -25,14 +25,11 @@ pnpm --filter @jobjitsu/app test
 ┌────────────────────────────────────────────┐
 │ JobJitsu                                   │
 ├──────────────┬─────────────────────────────┤
-│ Dojo         │                             │
-│ Opportunities│                             │
-│ Resume       │    Welcome / Coming Soon    │
-│ Inbox        │                             │
-│ Recruiters   │                             │
-│ Analytics    │                             │
-│ Extensions   │                             │
-│ Settings     │                             │
+│ Dojo         │  App.Started                │
+│ Opportunities│  Plugin.Loaded              │
+│ Resume       │  Resume.Generated           │
+│ Inbox        │  Email.Synced               │
+│ …            │                             │
 ├──────────────┴─────────────────────────────┤
 │                    Agent · On-device        │
 └────────────────────────────────────────────┘
@@ -40,18 +37,19 @@ pnpm --filter @jobjitsu/app test
 
 ## Architecture notes
 
-| Concern               | Choice                                                                       |
-| --------------------- | ---------------------------------------------------------------------------- |
-| UI                    | React (ADR 0002) in this package                                             |
-| Tokens / privacy pill | `@jobjitsu/ui`                                                               |
-| Desktop host          | **Tauri later** (ADR 0001) — Rust not required to develop the shell UI       |
-| TS in webview         | Vite + TypeScript; domain stays in packages; no ambient Node in the renderer |
-| AI                    | None in the shell                                                            |
+| Concern      | Choice                                                          |
+| ------------ | --------------------------------------------------------------- |
+| UI           | React (ADR 0002) — subscribes only                              |
+| Host         | `src/host` owns AI / resume / mail fakes                        |
+| Bus          | `@jobjitsu/events` — awaited async handlers                     |
+| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced` |
+| UI → AI      | **Forbidden** (`ui-ai-fence` test)                              |
+| Desktop host | Tauri later (ADR 0001)                                          |
 
-See [TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md) when the native host lands.
+See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 ## Boundaries
 
 - No career egress from the renderer.
-- No AI providers registered.
+- Shell must not import `@jobjitsu/ai`.
 - Narrow IPC only when the Tauri host arrives ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).

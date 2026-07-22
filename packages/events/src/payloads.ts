@@ -17,6 +17,7 @@ export type SendOutcome = "succeeded" | "failed" | "unknown";
  * ID-centric payloads — no résumé bodies on high-volume events.
  */
 export interface EventPayloadMap {
+  "App.Started": { readonly version?: string };
   "Agent.Started": { readonly runId?: string };
   "Agent.Paused": { readonly runId?: string };
   "Agent.Resumed": { readonly runId?: string };
@@ -75,6 +76,7 @@ export interface EventPayloadMap {
     readonly jobType: string;
     readonly status: "succeeded" | "failed" | "deferred";
   };
+  "Plugin.Loaded": { readonly pluginId: PluginId | string };
   "Plugin.Enabled": { readonly pluginId: PluginId };
   "Plugin.Disabled": { readonly pluginId: PluginId };
   "Extension.Registered": { readonly extensionId: string };
@@ -86,6 +88,10 @@ export interface EventPayloadMap {
     readonly code?: string;
     readonly message?: string;
   };
+  /** Résumé prepared on-device — ID only, never full body on the bus. */
+  "Resume.Generated": { readonly resumeId: string };
+  /** Fake or real mailbox sync finished — counts only. */
+  "Email.Synced": { readonly channelId: string; readonly messageCount: number };
 }
 
 export type DomainEvent<N extends EventName = EventName> = {

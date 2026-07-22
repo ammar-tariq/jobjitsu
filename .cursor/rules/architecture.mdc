@@ -22,13 +22,22 @@ Anything that leaves the device (apply, email, board submit) is an **explicit bo
 - Record what left vs what stayed in local timeline/logs.
 - Never imply success if send completion is unknown.
 
-## Module boundaries
+## Event-driven host
 
-Respect core modules in `docs/product/FEATURES.md`: Identity & Resume, Preferences, Local Intelligence, Agent, Discovery, Applications, Queue & Review, Send, Follow-ups, Timeline, Privacy chrome.
+Everything communicates through the local event bus (`@jobjitsu/events`).
 
-- Keep **Agent** preparative; keep **Send** sovereign.
-- **Local Intelligence** must not quietly fall back to cloud without an obvious, user-chosen path.
-- **Privacy & Trust Chrome** (e.g. Local LLM badge) is part of the architecture, not optional polish.
+```
+App.Started → Plugin.Loaded → Resume.Generated → Email.Synced
+```
+
+```
+✅ GOOD: UI publishes intent / subscribes to facts; host handlers call AI
+❌ BAD:  React components import `@jobjitsu/ai` and call complete() directly
+```
+
+- **UI never calls AI** — shell may depend on the bus and read models only.
+- Host (composition root) owns providers, plugins, identity, and send channels.
+- Cascade handlers live in the host; the renderer listens for calm status updates.
 
 ## Desktop OS, not SaaS cockpit
 

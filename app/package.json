@@ -17,7 +17,13 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@jobjitsu/ai": "workspace:*",
     "@jobjitsu/core": "workspace:*",
+    "@jobjitsu/events": "workspace:*",
+    "@jobjitsu/identity": "workspace:*",
+    "@jobjitsu/logger": "workspace:*",
+    "@jobjitsu/send": "workspace:*",
+    "@jobjitsu/shared": "workspace:*",
     "@jobjitsu/ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

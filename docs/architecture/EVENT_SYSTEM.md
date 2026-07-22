@@ -26,12 +26,29 @@ Events **never** stream career payloads to a JobJitsu cloud by default.
 4. **Batching at the edge** — UI and notifications collapse bursts (“3 applications queued”).
 5. **No urgency semantics** — event types do not encode streaks, guilt, or “you’re behind.”
 6. **Egress events are special** — send attempted/succeeded/failed/unknown always recorded.
+7. **UI never calls AI** — the renderer subscribes to facts; the host invokes providers inside event handlers.
+
+### Startup cascade (demo)
+
+```
+App.Started → Plugin.Loaded → Resume.Generated → Email.Synced
+```
+
+Host runtime (`app/src/host`) owns this chain with fake providers. See Dojo activity view.
 
 ---
 
 ## Event catalog (core)
 
 Naming: `Domain.Action` in past tense where possible (facts that happened).
+
+### App / identity / mail (host lifecycle)
+| Event | Meaning |
+|-------|---------|
+| `App.Started` | Desktop host finished boot wiring |
+| `Plugin.Loaded` | Plugin module loaded into host (may still be disabled) |
+| `Resume.Generated` | On-device résumé prepared (ID only on bus) |
+| `Email.Synced` | Mailbox channel sync finished (counts only; fake or real) |
 
 ### Agent
 | Event | Meaning |

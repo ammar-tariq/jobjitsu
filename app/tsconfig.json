@@ -9,5 +9,14 @@
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "dist", "dist-ui"],
-  "references": [{ "path": "../packages/core" }, { "path": "../packages/ui" }]
+  "references": [
+    { "path": "../packages/shared" },
+    { "path": "../packages/core" },
+    { "path": "../packages/events" },
+    { "path": "../packages/logger" },
+    { "path": "../packages/ai" },
+    { "path": "../packages/identity" },
+    { "path": "../packages/send" },
+    { "path": "../packages/ui" }
+  ]
 }

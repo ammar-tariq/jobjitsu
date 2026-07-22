@@ -113,6 +113,58 @@
   line-height: var(--jj-text-body-line);
 }
 
+.jj-activity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jj-space-4);
+  max-width: 40rem;
+}
+
+.jj-activity__cascade {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--jj-space-2);
+}
+
+.jj-activity__step {
+  display: grid;
+  grid-template-columns: minmax(10rem, auto) 1fr;
+  gap: var(--jj-space-3);
+  padding: var(--jj-space-3) var(--jj-space-4);
+  border-radius: var(--jj-radius-md);
+  border: 1px solid var(--jj-color-border-subtle);
+  background: var(--jj-color-bg-muted);
+  color: var(--jj-color-text-tertiary);
+  font-size: var(--jj-text-small-size);
+  line-height: var(--jj-text-small-line);
+}
+
+.jj-activity__step--done {
+  color: var(--jj-color-text-primary);
+  border-color: var(--jj-color-privacy-pill-border);
+  background: var(--jj-color-accent-muted);
+}
+
+.jj-activity__name {
+  font-family: var(--jj-font-mono);
+  font-weight: 500;
+  color: var(--jj-color-accent);
+}
+
+.jj-activity__summary {
+  color: var(--jj-color-text-secondary);
+}
+
+.jj-activity__status {
+  margin: 0;
+  color: var(--jj-color-text-secondary);
+  font-size: var(--jj-text-small-size);
+  line-height: var(--jj-text-small-line);
+}
+
 @media (max-width: 720px) {
   .jj-shell__body {
     grid-template-columns: 1fr;
