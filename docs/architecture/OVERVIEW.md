@@ -53,6 +53,7 @@ JobJitsu is a **local-first desktop OS for career craft**. All intimate state li
 | [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | Local LLM, context, honest AI |
 | [SCHEDULER.md](./SCHEDULER.md) | Local jobs, follow-ups, quiet automation |
 | [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) | Privacy, sovereignty, and quality bars |
+| [../adr/README.md](../adr/README.md) | Accepted ADRs (Tauri, React, bus, …) |
 
 ---
 
