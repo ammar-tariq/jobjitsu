@@ -13,23 +13,65 @@ pnpm + Turborepo workspace for the AI Career Operating System.
 pnpm install
 ```
 
-## Scripts
+`prepare` installs Husky git hooks automatically.
 
-| Command | Description |
-|---------|-------------|
-| `pnpm build` | Build all packages via Turborepo |
-| `pnpm typecheck` | Typecheck all packages |
-| `pnpm test` | Run Vitest in each package |
-| `pnpm test:coverage` | Coverage per package |
-| `pnpm dev` | Watch mode (parallel) |
-| `pnpm clean` | Remove build artifacts |
+## Workspace scripts
+
+| Command                 | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `pnpm build`            | Build all packages (Turborepo)                      |
+| `pnpm typecheck`        | Typecheck all packages                              |
+| `pnpm test`             | Vitest per package                                  |
+| `pnpm test:coverage`    | Coverage per package                                |
+| `pnpm test:watch`       | Vitest workspace watch mode                         |
+| `pnpm lint`             | ESLint per package (Turborepo)                      |
+| `pnpm lint:root`        | ESLint entire repo                                  |
+| `pnpm lint:fix`         | ESLint with autofix                                 |
+| `pnpm format`           | Prettier write                                      |
+| `pnpm format:check`     | Prettier check                                      |
+| `pnpm check`            | format:check + lint:root + typecheck + test + build |
+| `pnpm dev`              | Watch builds (parallel)                             |
+| `pnpm clean`            | Remove build artifacts / node_modules               |
+| `pnpm changeset`        | Add a Changeset                                     |
+| `pnpm version-packages` | Apply Changesets version bumps                      |
+| `pnpm release`          | Build + publish (when ready)                        |
 
 Filter a single package:
 
 ```bash
 pnpm --filter @jobjitsu/core build
 pnpm --filter @jobjitsu/core test
+pnpm --filter @jobjitsu/core lint
 ```
+
+## Tooling
+
+| Tool        | Config                                                 |
+| ----------- | ------------------------------------------------------ |
+| TypeScript  | `tsconfig.base.json`, per-package `tsconfig.json`      |
+| ESLint      | `eslint.config.js` (flat)                              |
+| Prettier    | `prettier.config.js`                                   |
+| Vitest      | `vitest.workspace.ts` + per-package `vitest.config.ts` |
+| Husky       | `.husky/pre-commit`, `.husky/commit-msg`               |
+| lint-staged | root `package.json` → `lint-staged`                    |
+| Commitlint  | `commitlint.config.js` (conventional)                  |
+| Changesets  | `.changeset/`                                          |
+
+### Git hooks
+
+- **pre-commit:** lint-staged (ESLint + Prettier on staged files)
+- **commit-msg:** Commitlint (Conventional Commits)
+
+Example commit: `feat(core): add pipeline stage ids`
+
+### Changesets
+
+```bash
+pnpm changeset
+pnpm version-packages
+```
+
+See [.changeset/README.md](./.changeset/README.md).
 
 ## Structure
 
@@ -40,6 +82,11 @@ jobjitsu/
 ├── plugins/             # Official plugins (future workspace members)
 ├── examples/            # Fixtures / samples (future)
 ├── docs/                # Brand, product, architecture, backlog, ADRs
+├── .changeset/
+├── .husky/
+├── eslint.config.js
+├── prettier.config.js
+├── commitlint.config.js
 ├── pnpm-workspace.yaml
 ├── turbo.json
 ├── tsconfig.base.json
@@ -54,18 +101,6 @@ See [packages/README.md](./packages/README.md) and [docs/architecture/MONOREPO.m
 - Career data egress only through `@jobjitsu/send`
 - Domain packages must not depend on `@jobjitsu/app`
 
-## Testing
-
-Vitest is configured per package (`vitest.config.ts`) and aggregated via `vitest.workspace.ts`.
-
-```bash
-pnpm test
-# or
-pnpm exec vitest run --workspace vitest.workspace.ts
-```
-
-Privacy / sovereignty must-pass suites arrive with backlog QA tasks — scaffolding includes smoke identity tests only.
-
 ## Status
 
-**Scaffold only** — no business logic. Implementation follows [docs/backlog](./docs/backlog/README.md).
+**Scaffold + tooling only** — no business logic. Implementation follows [docs/backlog](./docs/backlog/README.md).

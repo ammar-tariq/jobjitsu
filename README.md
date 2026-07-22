@@ -1,7 +1,7 @@
 # JobJitsu
 
 **The gentle art of landing the job.**  
-*On-device. On-target. On your terms.*
+_On-device. On-target. On your terms._
 
 JobJitsu is an open-source **AI Career Operating System** — a desktop-native companion that gives you a local AI black belt for the job hunt. It runs a local agent and local LLM. Your résumé, preferences, and drafts stay on your machine. Nothing leaves the dojo except what you choose to send.
 
@@ -15,10 +15,10 @@ Job hunting is often sold as a grind: spray applications, chase algorithms, rent
 
 We treat the hunt as a craft. Like jujitsu, it rewards leverage over force — precision over panic. The agent prepares; you approve. Progress is quiet. Privacy is architecture, not a settings toggle.
 
-| Promise | Meaning |
-|---------|---------|
-| **On-device** | Local agent + local LLM |
-| **On-target** | Fit and technique over spray-and-pray |
+| Promise           | Meaning                                      |
+| ----------------- | -------------------------------------------- |
+| **On-device**     | Local agent + local LLM                      |
+| **On-target**     | Fit and technique over spray-and-pray        |
 | **On your terms** | Preferences, pause, and approval before send |
 
 ---
@@ -45,47 +45,46 @@ Your belt will be tied. Waiting for the first throw.
 
 ```bash
 pnpm install
-pnpm build
-pnpm test
+pnpm check    # format + lint + typecheck + test + build
 ```
 
-Monorepo details: [MONOREPO.md](./MONOREPO.md)
+Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 
 ### Product
 
-| Doc | Description |
-|-----|-------------|
-| [Product vision](docs/product/PRODUCT_VISION.md) | Vision & mission |
-| [Roadmap](docs/product/ROADMAP.md) | Long-term horizons |
-| [Features & modules](docs/product/FEATURES.md) | Core and future modules |
-| [Principles](docs/product/PRINCIPLES.md) | Decision filters |
-| [Non-goals](docs/product/NON_GOALS.md) | What we will not become |
+| Doc                                              | Description             |
+| ------------------------------------------------ | ----------------------- |
+| [Product vision](docs/product/PRODUCT_VISION.md) | Vision & mission        |
+| [Roadmap](docs/product/ROADMAP.md)               | Long-term horizons      |
+| [Features & modules](docs/product/FEATURES.md)   | Core and future modules |
+| [Principles](docs/product/PRINCIPLES.md)         | Decision filters        |
+| [Non-goals](docs/product/NON_GOALS.md)           | What we will not become |
 
 ### Brand
 
-| Doc | Description |
-|-----|-------------|
-| [Brand guidelines](docs/brand/BRAND_GUIDELINES.md) | Logo, color, type, voice overview |
-| [Product philosophy](docs/brand/PRODUCT_PHILOSOPHY.md) | Beliefs and metaphor map |
-| [Voice & tone](docs/brand/VOICE_AND_TONE.md) | How JobJitsu sounds |
-| [Design system (brand)](docs/brand/DESIGN_SYSTEM.md) | Naming, icons, illustration |
-| [Design system (production)](docs/design-system/README.md) | Tokens, themes, components |
-| [Copy guidelines](docs/brand/COPY_GUIDELINES.md) | Product string architecture |
+| Doc                                                        | Description                       |
+| ---------------------------------------------------------- | --------------------------------- |
+| [Brand guidelines](docs/brand/BRAND_GUIDELINES.md)         | Logo, color, type, voice overview |
+| [Product philosophy](docs/brand/PRODUCT_PHILOSOPHY.md)     | Beliefs and metaphor map          |
+| [Voice & tone](docs/brand/VOICE_AND_TONE.md)               | How JobJitsu sounds               |
+| [Design system (brand)](docs/brand/DESIGN_SYSTEM.md)       | Naming, icons, illustration       |
+| [Design system (production)](docs/design-system/README.md) | Tokens, themes, components        |
+| [Copy guidelines](docs/brand/COPY_GUIDELINES.md)           | Product string architecture       |
 
 ### Architecture
 
-| Doc | Description |
-|-----|-------------|
-| [Architecture overview](docs/architecture/OVERVIEW.md) | Local-first Career OS design |
-| [Monorepo](docs/architecture/MONOREPO.md) | Repository & package map |
-| [ADRs](docs/adr/README.md) | Accepted decisions (Tauri, React, …) |
-| [Full index](docs/architecture/README.md) | Events, plugins, desktop, AI, tests |
+| Doc                                                    | Description                          |
+| ------------------------------------------------------ | ------------------------------------ |
+| [Architecture overview](docs/architecture/OVERVIEW.md) | Local-first Career OS design         |
+| [Monorepo](docs/architecture/MONOREPO.md)              | Repository & package map             |
+| [ADRs](docs/adr/README.md)                             | Accepted decisions (Tauri, React, …) |
+| [Full index](docs/architecture/README.md)              | Events, plugins, desktop, AI, tests  |
 
 ### Backlog
 
-| Doc | Description |
-|-----|-------------|
-| [Backlog index](docs/backlog/README.md) | Epics → tasks |
+| Doc                                                  | Description                 |
+| ---------------------------------------------------- | --------------------------- |
+| [Backlog index](docs/backlog/README.md)              | Epics → tasks               |
 | [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md) | Build waves & critical path |
 
 ---

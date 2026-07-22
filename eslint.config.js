@@ -4,7 +4,8 @@ import tseslint from "typescript-eslint";
 
 /**
  * Flat ESLint config for the JobJitsu monorepo.
- * No business-logic rules beyond TypeScript hygiene.
+ * Type-aware linting applies to package `src` (excluding tests).
+ * Config/test files use non-type-aware rules so every file still lints cleanly.
  */
 export default tseslint.config(
   {
@@ -16,12 +17,14 @@ export default tseslint.config(
       "pnpm-lock.yaml",
       "docs/**",
       "assets/**",
+      ".changeset/**",
     ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["**/*.{ts,tsx,mts,cts}"],
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.{test,spec}.ts", "**/*.{test,spec}.tsx"],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -41,7 +44,16 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.{test,spec}.ts", "**/vitest.*.ts", "**/vitest.config.ts"],
+    files: [
+      "**/*.{test,spec}.ts",
+      "**/vitest.config.ts",
+      "vitest.*.ts",
+      "*.config.js",
+      "*.config.ts",
+      "commitlint.config.js",
+      "prettier.config.js",
+      "eslint.config.js",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },

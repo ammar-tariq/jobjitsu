@@ -4,21 +4,10 @@
     "outDir": "dist",
     "rootDir": "src",
     "composite": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.test.ts",
-    "src/**/*.spec.ts",
-    "dist",
-    "tests"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts", "dist", "tests"],
   "references": [
     {
       "path": "../core"
