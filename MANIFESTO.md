@@ -121,7 +121,233 @@ If a cloud provider disappears tomorrow, JobJitsu should continue to function.
 ## Human in Control
 
 AI should assist people.
+# JobJitsu Manifesto
 
+## The Gentle Art of Landing the Job
+
+Finding meaningful work has always required skill, persistence, and timing.
+
+But the modern job market has changed.
+
+The path from discovering an opportunity to getting an interview has become increasingly difficult.
+
+Candidates are no longer competing only with other people.
+
+They are competing with:
+
+- automated screening systems
+- AI-assisted applications
+- overwhelming job platforms
+- thousands of applications submitted within minutes
+- increasingly complex hiring workflows
+
+The result is a frustrating reality:
+
+Many qualified people never reach the conversation stage.
+
+Their experience, skills, and potential are filtered before they ever meet another human.
+
+---
+
+# A New Era of Job Searching
+
+Artificial intelligence has transformed how companies hire.
+
+Organizations use AI to:
+
+- analyze candidates
+- filter applications
+- rank profiles
+- automate communication
+- optimize recruiting workflows
+
+These tools are powerful.
+
+But technology should not only benefit one side of the hiring process.
+
+Candidates deserve access to intelligent tools that help them navigate this new environment.
+
+Not to replace human judgment.
+
+Not to automate their identity.
+
+But to amplify their ability to present themselves effectively.
+
+---
+
+# The Cost of Competing
+
+The modern job search increasingly requires access to better tools.
+
+AI assistants can help candidates:
+
+- improve resumes
+- prepare applications
+- analyze job descriptions
+- practice interviews
+- organize their search
+- communicate more effectively
+
+But many of these tools come with recurring subscription costs.
+
+Platforms offering AI-powered career assistance, resume optimization, interview preparation, and job search automation often require monthly payments to unlock their most useful features.
+
+For someone already employed and advancing their career, these costs may feel reasonable.
+
+For someone who has lost a job, is searching for their first opportunity, or is trying to change careers, recurring subscriptions can become another barrier.
+
+The people who need these tools the most are often the people who can least afford another monthly expense.
+
+---
+
+# Technology Should Not Become Another Barrier
+
+Access to powerful technology should not depend entirely on someone's ability to pay.
+
+JobJitsu believes career tools should be:
+
+- accessible
+- transparent
+- privacy-focused
+- community-driven
+
+By supporting local AI models and open-source development, JobJitsu explores a different approach:
+
+Powerful AI assistance without requiring users to send their personal career data to external services or maintain another subscription.
+
+The goal is not to replace existing tools.
+
+The goal is to make advanced assistance available to more people.
+
+# Why JobJitsu Exists
+
+JobJitsu is an open-source, privacy-first AI assistant designed for the modern job search.
+
+It helps people:
+
+- understand opportunities
+- tailor their resumes
+- create thoughtful applications
+- organize their job search
+- maintain communication
+- follow up at the right time
+
+The goal is simple:
+
+Give individuals the same level of technological support that organizations already have.
+
+---
+
+# AI Should Empower People
+
+Job hunting is not a numbers game.
+
+Behind every application is a person:
+
+- their experience
+- their ambitions
+- their skills
+- their story
+
+AI should not replace that story with generic automation.
+
+Instead, it should help people communicate their value more clearly.
+
+JobJitsu follows a human-first approach:
+
+The AI suggests.
+
+The human decides.
+
+The user remains in control.
+
+---
+
+# Privacy Is a Feature
+
+Career information is deeply personal.
+
+Resumes contain:
+
+- professional history
+- achievements
+- skills
+- personal goals
+- future plans
+
+JobJitsu believes this information should belong to the user.
+
+That is why JobJitsu is built around:
+
+- local execution
+- local AI models
+- transparent workflows
+- user-controlled data
+
+Your career data should not become another product.
+
+---
+
+# The Open Source Philosophy
+
+The future of personal AI should not belong only to large companies.
+
+It should be built openly.
+
+JobJitsu is an experiment in building:
+
+- transparent AI systems
+- community-driven development
+- privacy-respecting automation
+- tools that improve everyday lives
+
+The best technology is not the technology that replaces people.
+
+It is the technology that helps people achieve more.
+
+---
+
+# The Job Search Has Become a Skill
+
+In the modern world, finding a job is becoming its own discipline.
+
+It requires:
+
+- research
+- personalization
+- organization
+- communication
+- persistence
+
+JobJitsu represents the belief that this process can be improved.
+
+Not through shortcuts.
+
+Not through spam.
+
+Through better tools.
+
+---
+
+# The Gentle Art of Landing the Job
+
+The word Jitsu means technique.
+
+Not force.
+
+Not domination.
+
+Mastery through understanding.
+
+JobJitsu represents a different approach to career growth:
+
+A calm, intelligent companion that helps people navigate the modern job market.
+
+On-device.
+
+On-target.
+
+On your terms.
 Never replace their judgment.
 
 JobJitsu may draft.
