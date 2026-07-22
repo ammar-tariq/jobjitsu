@@ -4,6 +4,8 @@ import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
+import { JjHero } from "../components/JjHero";
+import { JjFeatureCards } from "../components/JjFeatureCards";
 
 const PIPELINE = ["search", "curate", "tailor", "queue", "approve", "send", "follow up"] as const;
 
@@ -29,34 +31,6 @@ const PATHS = [
     blurb: "Horizons for the Career OS.",
   },
 ] as const;
-
-function HomepageHeader(): ReactNode {
-  return (
-    <header className={clsx("hero hero--jj")}>
-      <div className="container hero--jj__compose">
-        <p className="hero--jj__brand">JobJitsu</p>
-        <Heading as="h1" className="hero__title">
-          The gentle art of landing the job.
-        </Heading>
-        <p className="hero__subtitle">
-          An open-source AI Career Operating System. Local Agent. On-device intelligence. Your
-          résumé stays on your machine — nothing leaves except what you choose to send.
-        </p>
-        <div className="margin-top--lg hero--jj__actions">
-          <Link className="button button--primary button--lg" to="/quick-start">
-            Quick start
-          </Link>
-          <Link className="button button--outline button--lg" to="/docs/product/PRODUCT_VISION">
-            Product vision
-          </Link>
-        </div>
-        <p className="hero--jj__promises" aria-label="Brand promises">
-          On-device · On-target · On your terms
-        </p>
-      </div>
-    </header>
-  );
-}
 
 function Pipeline(): ReactNode {
   return (
@@ -85,7 +59,10 @@ function Pipeline(): ReactNode {
 
 function Paths(): ReactNode {
   return (
-    <section className="jj-home-section jj-home-section--paths" aria-labelledby="jj-paths">
+    <section
+      className={clsx("jj-home-section", "jj-home-section--paths")}
+      aria-labelledby="jj-paths"
+    >
       <div className="container">
         <Heading as="h2" id="jj-paths">
           Explore
@@ -117,8 +94,9 @@ export default function Home(): ReactNode {
       title="Home"
       description="The gentle art of landing the job. On-device. On-target. On your terms."
     >
-      <HomepageHeader />
+      <JjHero />
       <main>
+        <JjFeatureCards />
         <Pipeline />
         <Paths />
         <p className="jj-home-footnote container">
