@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | PE04 Preferences & Privacy Chrome |
 | **Story** | PE04-S06 — Persist career data under data folder (this slice) |
-| **Status** | In progress → PR gate |
+| **Status** | PR gate — [#73](https://github.com/ammar-tariq/jobjitsu/pull/73) |
 | **Note** | Durable host binds profile/resume/prefs to selected data root |
 
 ## Completed slices
