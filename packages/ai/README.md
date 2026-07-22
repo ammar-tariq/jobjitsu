@@ -1,19 +1,15 @@
 # `@jobjitsu/ai`
 
-Local LLM provider interfaces and context assembly contracts
+Local Intelligence contracts: `AiProvider`, `AiProviderRegistry`, `ContextAssembler`.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Interfaces only — **no fake/local/remote provider implementations**.
 
-## Scripts
+## Laws
 
-```bash
-pnpm --filter @jobjitsu/ai build
-pnpm --filter @jobjitsu/ai test
-pnpm --filter @jobjitsu/ai typecheck
-```
+- Primary path is local
+- Remote only when user-configured; must not be labeled “Local LLM”
+- No egress tools on the provider
 
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/AI_ARCHITECTURE.md](../../docs/architecture/AI_ARCHITECTURE.md).

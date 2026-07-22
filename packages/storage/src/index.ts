@@ -1,2 +1,4 @@
-/** Package identity marker — domain logic lives in later tasks. */
+/** Package identity marker. */
 export const PACKAGE_NAME = "@jobjitsu/storage" as const;
+
+export type * from "./interfaces.js";

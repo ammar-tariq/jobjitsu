@@ -1,19 +1,15 @@
 # `@jobjitsu/events`
 
-Typed domain event contracts and local bus interfaces
+Typed domain event catalog, payloads, and **EventBus** / **DurableEventSink** interfaces.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Contracts only — **no bus implementation**.
 
-## Scripts
+## Laws
 
-```bash
-pnpm --filter @jobjitsu/events build
-pnpm --filter @jobjitsu/events test
-pnpm --filter @jobjitsu/events typecheck
-```
+- On-device only — must not stream career payloads to the cloud
+- ID-centric payloads (no résumé bodies on progress events)
+- Durable subset includes all `Send.*` and `Privacy.EgressRecorded`
 
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/EVENT_SYSTEM.md](../../docs/architecture/EVENT_SYSTEM.md).

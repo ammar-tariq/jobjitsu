@@ -1,19 +1,11 @@
 # `@jobjitsu/storage`
 
-On-device persistence adapters (documents, blobs)
+On-device persistence contracts: `KvStore`, `BlobStore`, `DocumentStore`, `StorageProvider`.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Interfaces only — **no SQLite/filesystem implementation**.
 
-## Scripts
+Must not sync to cloud object stores by default.
 
-```bash
-pnpm --filter @jobjitsu/storage build
-pnpm --filter @jobjitsu/storage test
-pnpm --filter @jobjitsu/storage typecheck
-```
-
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/adr/0006-storage.md](../../docs/adr/0006-storage.md).

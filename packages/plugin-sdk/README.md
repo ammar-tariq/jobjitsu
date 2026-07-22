@@ -1,19 +1,15 @@
 # `@jobjitsu/plugin-sdk`
 
-Plugin manifest and capability contracts
+Plugin manifest, capability, skill, and host contracts.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Interfaces + capability constants only — **no loader implementation**.
 
-## Scripts
+## Hard rules
 
-```bash
-pnpm --filter @jobjitsu/plugin-sdk build
-pnpm --filter @jobjitsu/plugin-sdk test
-pnpm --filter @jobjitsu/plugin-sdk typecheck
-```
+- Off until user-enabled
+- Fail closed on missing capabilities
+- `send.request` may create intents — never `send.execute` / mark success
 
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/PLUGIN_ARCHITECTURE.md](../../docs/architecture/PLUGIN_ARCHITECTURE.md).

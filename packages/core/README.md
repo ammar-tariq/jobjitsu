@@ -1,19 +1,16 @@
 # `@jobjitsu/core`
 
-Shared types, result/error model, pipeline stage IDs
+Shared foundations: entity IDs, pipeline stages, `Result` / `AppError`, and **logging interfaces**.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Interfaces and shared constants only — **no runtime implementations** (except exported constants like `PIPELINE_STAGES`).
 
-## Scripts
+## Exports
 
-```bash
-pnpm --filter @jobjitsu/core build
-pnpm --filter @jobjitsu/core test
-pnpm --filter @jobjitsu/core typecheck
-```
+- `EntityId` and branded ID aliases
+- `PIPELINE_STAGES` / `PipelineStage`
+- `Result`, `AppError`, `AppErrorCode`
+- `Logger`, `LogSink`, `LogRecord`
 
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/PACKAGE_BOUNDARIES.md](../../docs/architecture/PACKAGE_BOUNDARIES.md).

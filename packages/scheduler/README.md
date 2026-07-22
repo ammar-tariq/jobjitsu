@@ -1,19 +1,15 @@
 # `@jobjitsu/scheduler`
 
-Local job runner contracts
+Local job runner contracts: `Scheduler`, `JobStore`, `ScheduledJob`, core job types.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+Interfaces only — **no timer/persistence implementation**.
 
-## Scripts
+## Laws
 
-```bash
-pnpm --filter @jobjitsu/scheduler build
-pnpm --filter @jobjitsu/scheduler test
-pnpm --filter @jobjitsu/scheduler typecheck
-```
+- Local only — no cloud cron
+- Never auto-send applications
+- No inactivity-shame job types
 
-## Boundaries
-
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/SCHEDULER.md](../../docs/architecture/SCHEDULER.md).
