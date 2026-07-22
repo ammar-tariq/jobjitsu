@@ -13,17 +13,19 @@ function wrap(Icon: LucideIcon, defaultLabel: string) {
     size = 22,
     label = defaultLabel,
     className,
+    "aria-hidden": ariaHidden,
     ...rest
   }: JjIconProps): ReactNode {
+    const hidden = ariaHidden === true || ariaHidden === "true";
     return (
       <Icon
         size={size}
         strokeWidth={STROKE}
         absoluteStrokeWidth
         className={className ? `jj-icon ${className}` : "jj-icon"}
-        aria-hidden={label ? undefined : true}
-        role={label ? "img" : "presentation"}
-        aria-label={label}
+        aria-hidden={hidden ? true : undefined}
+        role={hidden ? "presentation" : "img"}
+        aria-label={hidden ? undefined : label}
         {...rest}
       />
     );
@@ -41,7 +43,7 @@ export const JjIconPrivacy = wrap(Eye, "Privacy");
 export function JjPrivacyPill(): ReactNode {
   return (
     <span className="jj-privacy-pill">
-      <JjIconPrivacy size={14} label="" />
+      <JjIconPrivacy size={14} aria-hidden />
       <span>Agent · On-device</span>
     </span>
   );

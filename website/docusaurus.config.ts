@@ -21,6 +21,31 @@ const config: Config = {
   organizationName: "ammar-tariq",
   projectName: "jobjitsu",
 
+  headTags: [
+    {
+      tagName: "link",
+      attributes: {
+        rel: "icon",
+        type: "image/svg+xml",
+        href: "/img/favicon.svg",
+      },
+    },
+    {
+      tagName: "link",
+      attributes: {
+        rel: "apple-touch-icon",
+        href: "/img/logo.svg",
+      },
+    },
+    {
+      tagName: "meta",
+      attributes: {
+        name: "theme-color",
+        content: "#0B0A1A",
+      },
+    },
+  ],
+
   markdown: {
     // Keep existing .md as Markdown (not MDX) so `{placeholders}` in brand docs don't break SSG.
     format: "detect",
@@ -62,6 +87,17 @@ const config: Config = {
 
   themeConfig: {
     image: "img/social-card.svg",
+    metadata: [
+      {
+        name: "description",
+        content:
+          "JobJitsu — the gentle art of landing the job. On-device. On-target. On your terms.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:image", content: "img/social-card.svg" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "img/social-card.svg" },
+    ],
     colorMode: {
       defaultMode: "dark",
       disableSwitch: false,
@@ -69,10 +105,13 @@ const config: Config = {
     },
     navbar: {
       title: "JobJitsu",
+      hideOnScroll: false,
       logo: {
-        alt: "JobJitsu",
+        alt: "JobJitsu Leverage Belt",
         src: "img/logo.svg",
         srcDark: "img/logo.svg",
+        width: 28,
+        height: 28,
       },
       items: [
         { to: "/features", label: "Features", position: "left" },
