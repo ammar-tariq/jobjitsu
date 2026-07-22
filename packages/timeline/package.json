@@ -1,0 +1,36 @@
+{
+  "name": "@jobjitsu/timeline",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local timeline and egress audit contracts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@jobjitsu/core": "workspace:*",
+    "@jobjitsu/storage": "workspace:*",
+    "@jobjitsu/events": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc -b --pretty false",
+    "clean": "rm -rf dist coverage .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

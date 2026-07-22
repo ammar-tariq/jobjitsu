@@ -35,13 +35,21 @@ One calm operating system for the loop — not a cockpit of anxiety, not a cloud
 
 ## Status
 
-This repository is in early foundation: brand, product vision, and engineering standards are in place. The desktop app is under active design.
+This repository is in early foundation: brand, product vision, engineering standards, and **monorepo scaffold** (Turborepo + packages) are in place. Domain business logic is not implemented yet.
 
 Your belt will be tied. Waiting for the first throw.
 
 ---
 
-## Documentation
+## Development
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+```
+
+Monorepo details: [MONOREPO.md](./MONOREPO.md)
 
 ### Product
 

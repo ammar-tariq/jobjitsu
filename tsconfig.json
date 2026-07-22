@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/events" },
+    { "path": "./packages/storage" },
+    { "path": "./packages/identity" },
+    { "path": "./packages/preferences" },
+    { "path": "./packages/ai" },
+    { "path": "./packages/agent" },
+    { "path": "./packages/discovery" },
+    { "path": "./packages/applications" },
+    { "path": "./packages/queue" },
+    { "path": "./packages/send" },
+    { "path": "./packages/followups" },
+    { "path": "./packages/timeline" },
+    { "path": "./packages/scheduler" },
+    { "path": "./packages/plugin-sdk" },
+    { "path": "./packages/extension-sdk" },
+    { "path": "./packages/ui" },
+    { "path": "./app" }
+  ]
+}
