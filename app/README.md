@@ -43,18 +43,19 @@ pnpm --filter @jobjitsu/app test
 
 ## Layout
 
+Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/docs/data/material/getting-started/templates/dashboard) pattern (permanent side drawer + main), themed with JobJitsu Midnight Ink / Electric Teal. No charts or SaaS cockpit chrome.
+
 ```
-┌────────────────────────────────────────────┐
-│ JobJitsu                                   │
-├──────────────┬─────────────────────────────┤
-│ Dojo         │  App.Started                │
-│ Opportunities│  Plugin.Loaded              │
-│ Resume       │  Resume.Generated           │
-│ Inbox        │  Email.Synced               │
+┌──────────────┬─────────────────────────────┐
+│ JobJitsu     │  Welcome                    │
+│──────────────│  App.Started                │
+│ Dojo         │  Plugin.Loaded              │
+│ Opportunities│  Resume.Generated           │
+│ Resume       │  Email.Synced               │
 │ …            │                             │
-├──────────────┴─────────────────────────────┤
-│                    Agent · On-device        │
-└────────────────────────────────────────────┘
+│ Agent · On-  │                             │
+│ device       │                             │
+└──────────────┴─────────────────────────────┘
 ```
 
 ## Architecture notes
@@ -62,7 +63,7 @@ pnpm --filter @jobjitsu/app test
 | Concern      | Choice                                                                                                          |
 | ------------ | --------------------------------------------------------------------------------------------------------------- |
 | Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                               |
-| UI           | React in webview (ADR 0002) — subscribes only                                                                   |
+| UI           | React + MUI (dashboard shell) in webview (ADR 0002) — subscribes only                                           |
 | TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md)) |
 | Host runtime | `src/host` owns AI / resume / mail fakes (process-local)                                                        |
 | Bus          | `@jobjitsu/events` — awaited async handlers                                                                     |

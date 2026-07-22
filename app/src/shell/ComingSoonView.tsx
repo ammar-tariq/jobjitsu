@@ -1,4 +1,6 @@
 import type { JSX } from "react";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 export type ComingSoonViewProps = {
   readonly title: string;
@@ -7,9 +9,11 @@ export type ComingSoonViewProps = {
 /** Placeholder main pane — proves shell routing without product features. */
 export function ComingSoonView({ title }: ComingSoonViewProps): JSX.Element {
   return (
-    <div className="jj-coming-soon" data-testid="jj-coming-soon">
-      <h2 className="jj-coming-soon__title">{title}</h2>
-      <p className="jj-coming-soon__body">Coming Soon</p>
-    </div>
+    <Stack spacing={1.5} data-testid="jj-coming-soon" sx={{ maxWidth: "40rem" }}>
+      <Typography component="h2" variant="h2">
+        {title}
+      </Typography>
+      <Typography color="text.secondary">Coming Soon</Typography>
+    </Stack>
   );
 }

@@ -1,17 +1,14 @@
 import { useState, type JSX } from "react";
-import { JjAgentPrivacyPill } from "@jobjitsu/ui";
-import {
-  APP_NAME,
-  DEFAULT_SHELL_NAV_ID,
-  SHELL_NAV_ITEMS,
-  shellPageTitle,
-  type ShellNavId,
-} from "../index.js";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import { DEFAULT_SHELL_NAV_ID, shellPageTitle, type ShellNavId } from "../index.js";
+import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { ComingSoonView } from "./ComingSoonView.js";
 import { EventActivityView } from "./EventActivityView.js";
+import { SideMenu } from "./SideMenu.js";
 
 /**
- * Desktop shell — sidebar + main + status.
+ * Desktop shell — Material dashboard layout (side menu + main), JobJitsu content.
  * Subscribes to host activity only; must never import `@jobjitsu/ai`.
  */
 export function DesktopShell(): JSX.Element {
@@ -19,46 +16,37 @@ export function DesktopShell(): JSX.Element {
   const title = shellPageTitle(activeId);
 
   return (
-    <div className="jj-shell" data-theme="dark" data-testid="jj-desktop-shell">
-      <header className="jj-shell__titlebar">
-        <h1 className="jj-shell__brand">{APP_NAME}</h1>
-      </header>
+    <Box
+      className="jj-shell"
+      data-theme="dark"
+      data-testid="jj-desktop-shell"
+      sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}
+    >
+      <SideMenu activeId={activeId} onSelect={setActiveId} />
 
-      <div className="jj-shell__body">
-        <nav className="jj-shell__nav" aria-label="Primary">
-          <ul className="jj-shell__nav-list">
-            {SHELL_NAV_ITEMS.map((item) => {
-              const selected = item.id === activeId;
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={
-                      selected
-                        ? "jj-shell__nav-item jj-shell__nav-item--active"
-                        : "jj-shell__nav-item"
-                    }
-                    aria-current={selected ? "page" : undefined}
-                    onClick={() => {
-                      setActiveId(item.id);
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <main className="jj-shell__main" id="main-content">
+      <Box
+        component="main"
+        id="main-content"
+        sx={(theme) => ({
+          flexGrow: 1,
+          backgroundColor: theme.palette.background.default,
+          overflow: "auto",
+          minHeight: "100vh",
+          width: `calc(100% - ${DRAWER_WIDTH}px)`,
+        })}
+      >
+        <Stack
+          spacing={2}
+          sx={{
+            alignItems: "stretch",
+            mx: 3,
+            pb: 5,
+            pt: 3,
+          }}
+        >
           {activeId === "dojo" ? <EventActivityView /> : <ComingSoonView title={title} />}
-        </main>
-      </div>
-
-      <footer className="jj-shell__status">
-        <JjAgentPrivacyPill />
-      </footer>
-    </div>
+        </Stack>
+      </Box>
+    </Box>
   );
 }

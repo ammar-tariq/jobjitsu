@@ -1,4 +1,7 @@
 import type { JSX } from "react";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useHostActivity } from "./HostProvider.js";
 
 const CASCADE = ["App.Started", "Plugin.Loaded", "Resume.Generated", "Email.Synced"] as const;
@@ -9,31 +12,68 @@ export function EventActivityView(): JSX.Element {
   const cascadeDone = CASCADE.every((name) => activity.some((entry) => entry.name === name));
 
   return (
-    <div className="jj-activity" data-testid="jj-event-activity">
-      <h2 className="jj-coming-soon__title">Welcome</h2>
-      <p className="jj-coming-soon__body">
+    <Stack spacing={2} data-testid="jj-event-activity" sx={{ maxWidth: "40rem" }}>
+      <Typography component="h2" variant="h2">
+        Welcome
+      </Typography>
+      <Typography color="text.secondary">
         The host talks through events. This view only listens — it never calls the Agent runtime
         directly.
-      </p>
+      </Typography>
 
-      <ol className="jj-activity__cascade" aria-label="Startup cascade">
+      <Box
+        component="ol"
+        aria-label="Startup cascade"
+        sx={{
+          listStyle: "none",
+          m: 0,
+          p: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+        }}
+      >
         {CASCADE.map((name) => {
           const hit = activity.find((entry) => entry.name === name);
           return (
-            <li
+            <Box
+              component="li"
               key={name}
-              className={hit ? "jj-activity__step jj-activity__step--done" : "jj-activity__step"}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "minmax(10rem, auto) 1fr",
+                gap: 1.5,
+                px: 2,
+                py: 1.5,
+                borderRadius: 1,
+                border: "1px solid",
+                borderColor: hit ? "primary.main" : "divider",
+                bgcolor: hit ? "rgba(45, 212, 191, 0.12)" : "rgba(255, 255, 255, 0.04)",
+                opacity: hit ? 1 : 0.75,
+              }}
             >
-              <span className="jj-activity__name">{name}</span>
-              <span className="jj-activity__summary">{hit?.summary ?? "Waiting…"}</span>
-            </li>
+              <Typography
+                component="span"
+                sx={{
+                  fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+                  fontWeight: 500,
+                  color: "primary.main",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {name}
+              </Typography>
+              <Typography component="span" color="text.secondary" variant="body2">
+                {hit?.summary ?? "Waiting…"}
+              </Typography>
+            </Box>
           );
         })}
-      </ol>
+      </Box>
 
-      <p className="jj-activity__status" role="status">
+      <Typography variant="body2" color="text.secondary" role="status">
         {cascadeDone ? "Startup cascade complete." : "Listening for host events…"}
-      </p>
-    </div>
+      </Typography>
+    </Stack>
   );
 }

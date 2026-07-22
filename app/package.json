@@ -20,6 +20,8 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@jobjitsu/ai": "workspace:*",
     "@jobjitsu/core": "workspace:*",
     "@jobjitsu/events": "workspace:*",
@@ -28,6 +30,8 @@
     "@jobjitsu/send": "workspace:*",
     "@jobjitsu/shared": "workspace:*",
     "@jobjitsu/ui": "workspace:*",
+    "@mui/icons-material": "^9.2.0",
+    "@mui/material": "^9.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
