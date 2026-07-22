@@ -108,6 +108,7 @@ Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 | [Definition of Done](DEFINITION_OF_DONE.md)             | Completion gates            |
 | [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md)   | Plan → implement → commit   |
 | [Docs prompts pipeline](docs/prompts/README.md)         | Phased docs checkpoints     |
+| [Roadmap user stories](docs/roadmap/USER_STORIES.md)    | Platform → PE* epics        |
 
 ---
 

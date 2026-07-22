@@ -4,7 +4,11 @@ You are refining the JobJitsu **implementation backlog** stories from product + 
 
 ## Goal
 
-Ensure [docs/backlog/](../backlog/) user stories and acceptance criteria cover Core (and labeled Experimental) capabilities without inventing Horizon-Future work as near-term commitments.
+Decompose the **documented** platform into epics and user stories without inventing features.
+
+Primary deliverable for this phase: [docs/roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md) (`PE*` epics).
+
+Keep day-to-day execution IDs in [docs/backlog/](../backlog/) (E01–E19); cross-link rather than fork conflicting scope.
 
 ## Required reading
 
@@ -26,17 +30,22 @@ Ensure [docs/backlog/](../backlog/) user stories and acceptance criteria cover C
 
 ## Process
 
-1. Gap analysis: product Core/Experimental vs existing stories. **Present plan; wait for approval.**
-2. After approval: add/update stories + AC; keep [TECHNICAL_TASKS.md](../backlog/TECHNICAL_TASKS.md) in sync only when tasks are obvious from stories (otherwise leave for phase 09).
-3. Do not create a parallel story file outside `docs/backlog/`.
+1. Gap analysis: product Core/Experimental/Future vs PLATFORM_SPEC sections. Prefer a short plan when scope is ambiguous; if the user already ordered Step 6, generate the roadmap file directly.
+2. Write/update [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md) with title, description, AC, dependencies, priority, technical notes, testing notes per story.
+3. Align backlog E* stories later (phase 06/09); do not renumber E01–E19 casually.
+4. Mark Future as deferred stubs; Experimental explicitly labeled.
 
-## Story shape
+## Story shape (roadmap file)
 
 ```text
-### Exx-Fyy-Szz — As a <role>, I can <capability>
-- Given / When / Then style AC bullets
-- Events or packages touched (if known)
-- Status: proposed | ready | done
+### PE0x-S0y — title
+**Description:** …
+**Acceptance criteria:** …
+**Dependencies:** …
+**Priority:** …
+**Technical notes:** …
+**Testing notes:** …
+**Status:** proposed | ready | done | deferred
 ```
 
 ## Done when

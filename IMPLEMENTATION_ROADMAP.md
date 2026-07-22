@@ -14,6 +14,8 @@ This file is an **index**. The living implementation plan lives under [`docs/bac
 | [Sprint 1](docs/backlog/sprint-1.md) | Desktop Foundation (current foundation sprint) |
 | [Vertical slices](docs/backlog/VERTICAL_SLICES.md) | One-story process and status |
 | [Product roadmap](docs/product/ROADMAP.md) | Directional horizons (H1–H4) |
+| [User stories (platform decomposition)](docs/roadmap/USER_STORIES.md) | PE* epics from PLATFORM_SPEC |
+| [Backlog user stories](docs/backlog/USER_STORIES.md) | E01–E19 execution stories |
 
 ## Related
 
