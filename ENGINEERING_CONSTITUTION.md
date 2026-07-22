@@ -2,15 +2,17 @@
 
 Version: 1.0
 
-> **This document is the highest engineering authority for the JobJitsu project.**
+> This document defines **how software is built** on JobJitsu — process, quality, and contributor expectations.
 >
-> Every contributor, maintainer, AI coding assistant, and automation tool must follow this constitution.
+> It is the engineering-process authority. It does **not** override product vision, brand, or architecture structure docs.
 >
-> If implementation conflicts with this document, the implementation is considered incorrect.
+> If implementation process conflicts with this document, the process should be corrected.
+
+See also: [Definition of Done](DEFINITION_OF_DONE.md) · [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md) · [Architecture principles](ARCHITECTURE_PRINCIPLES.md) · [Terminology](docs/product/TERMINOLOGY.md) · [Backlog](docs/backlog/README.md)
 
 ---
 
-# Purpose
+## Purpose
 
 The purpose of this constitution is to ensure that JobJitsu remains:
 
@@ -21,14 +23,16 @@ The purpose of this constitution is to ensure that JobJitsu remains:
 - Maintainable
 - Extensible
 - Beginner friendly
-- AI-friendly
+- AI-assistant friendly
 - Open-source friendly
 
 This document defines **how software is built**, not **what software is built**.
 
+Product scope: [docs/product/](docs/product/). Structure: [docs/architecture/](docs/architecture/).
+
 ---
 
-# Guiding Principles
+## Guiding Principles
 
 Every contribution should improve at least one of the following:
 
@@ -44,7 +48,7 @@ No contribution should intentionally make these worse.
 
 ---
 
-# Planning Before Coding
+## Planning Before Coding
 
 No implementation should begin immediately.
 
@@ -64,7 +68,7 @@ Only after planning is complete should implementation begin.
 
 ---
 
-# Documentation First
+## Documentation First
 
 Documentation is part of the product.
 
@@ -79,7 +83,7 @@ Code is not considered complete until documentation reflects reality.
 
 ---
 
-# Small, Incremental Changes
+## Small, Incremental Changes
 
 Large pull requests are discouraged.
 
@@ -89,7 +93,7 @@ Each pull request should solve one problem.
 
 ---
 
-# One Task at a Time
+## One Task at a Time
 
 AI coding assistants should never attempt multiple unrelated tasks simultaneously.
 
@@ -104,7 +108,7 @@ Only then should the next task begin.
 
 ---
 
-# Architecture Before Features
+## Architecture Before Features
 
 Infrastructure should exist before business logic.
 
@@ -119,7 +123,7 @@ Avoid shortcuts that introduce future technical debt.
 
 ---
 
-# Business Logic First
+## Business Logic First
 
 Business logic should be implemented before user interface.
 
@@ -143,7 +147,7 @@ The interface should consume business capabilities rather than contain them.
 
 ---
 
-# Test-Driven Mindset
+## Test-Driven Mindset
 
 Every feature should include automated tests.
 
@@ -157,7 +161,7 @@ Critical business logic should have comprehensive unit test coverage.
 
 ---
 
-# Definition of Done
+## Definition of Done
 
 A task is complete only when:
 
@@ -170,7 +174,7 @@ A task is complete only when:
 
 ---
 
-# Code Quality
+## Code Quality
 
 Code should prioritize clarity over cleverness.
 
@@ -192,7 +196,7 @@ Avoid:
 
 ---
 
-# Single Responsibility
+## Single Responsibility
 
 Every module should have one primary responsibility.
 
@@ -200,7 +204,7 @@ When a module grows beyond its responsibility, it should be decomposed.
 
 ---
 
-# Reuse Before Creation
+## Reuse Before Creation
 
 Before introducing new code, contributors should determine whether similar functionality already exists.
 
@@ -208,7 +212,7 @@ Avoid unnecessary duplication.
 
 ---
 
-# Keep the Core Small
+## Keep the Core Small
 
 The application core should remain lightweight.
 
@@ -216,7 +220,7 @@ Platform-specific functionality, integrations, and providers should live behind 
 
 ---
 
-# Dependency Rules
+## Dependency Rules
 
 Dependencies should only point inward toward abstractions.
 
@@ -226,7 +230,7 @@ Circular dependencies are prohibited.
 
 ---
 
-# Public APIs
+## Public APIs
 
 Every public API should be:
 
@@ -239,7 +243,7 @@ Avoid exposing internal implementation details.
 
 ---
 
-# Error Handling
+## Error Handling
 
 Every recoverable error should provide:
 
@@ -251,7 +255,7 @@ The application should fail gracefully whenever possible.
 
 ---
 
-# Logging Standards
+## Logging Standards
 
 Logs should assist debugging without exposing sensitive information.
 
@@ -268,7 +272,7 @@ Sensitive values should always be redacted.
 
 ---
 
-# Security
+## Security
 
 Security should never be an afterthought.
 
@@ -282,7 +286,7 @@ Every new feature should consider:
 
 ---
 
-# Privacy
+## Privacy
 
 JobJitsu is a privacy-first application.
 
@@ -294,7 +298,7 @@ If the answer is yes, local execution should be preferred.
 
 ---
 
-# AI Usage Principles
+## AI Usage Principles
 
 Artificial Intelligence is an implementation tool, not business logic.
 
@@ -310,7 +314,7 @@ Business rules should remain deterministic wherever possible.
 
 ---
 
-# AI Coding Assistant Rules
+## AI Coding Assistant Rules
 
 When an AI coding assistant contributes to the project, it must:
 
@@ -326,7 +330,7 @@ AI should never begin coding immediately after reading a feature request.
 
 ---
 
-# Performance
+## Performance
 
 Performance is a feature.
 
@@ -343,7 +347,7 @@ Avoid unnecessary background work.
 
 ---
 
-# Accessibility
+## Accessibility
 
 Accessibility should be considered during implementation.
 
@@ -351,7 +355,7 @@ Do not postpone accessibility until after feature completion.
 
 ---
 
-# Backward Compatibility
+## Backward Compatibility
 
 Public interfaces should evolve carefully.
 
@@ -361,7 +365,7 @@ Avoid unnecessary API churn.
 
 ---
 
-# Open Source Contributions
+## Open Source Contributions
 
 The project should remain approachable for new contributors.
 
@@ -374,7 +378,7 @@ Every contribution should strive to:
 
 ---
 
-# Pull Request Expectations
+## Pull Request Expectations
 
 Every pull request should include:
 
@@ -387,7 +391,7 @@ Large, unrelated changes should be split into separate pull requests.
 
 ---
 
-# Continuous Refactoring
+## Continuous Refactoring
 
 Refactoring is encouraged when it:
 
@@ -399,7 +403,7 @@ Refactoring should preserve existing behavior unless behavior changes are intent
 
 ---
 
-# Project Decision Process
+## Project Decision Process
 
 When multiple implementation approaches exist, contributors should evaluate them based on:
 
@@ -414,7 +418,7 @@ The simplest correct solution should usually be preferred.
 
 ---
 
-# Long-Term Thinking
+## Long-Term Thinking
 
 Every architectural decision should consider:
 
@@ -427,7 +431,7 @@ Avoid designs that create unnecessary coupling or hidden complexity.
 
 ---
 
-# Engineering Ethos
+## Engineering Ethos
 
 JobJitsu is not built to be the fastest project to develop.
 
@@ -437,7 +441,7 @@ Every contribution should leave the codebase in a better state than it was found
 
 ---
 
-# Final Principle
+## Final Principle
 
 Before writing code, ask:
 

@@ -53,7 +53,7 @@ Toasts auto-dismiss; inline confirmations can persist near the object.
 **Body:** A polite nudge is on its way.  
 **Action:** View timeline  
 
-### Local LLM connected
+### On-device model connected
 **Title:** On-device model connected  
 **Body:** Ready in this dojo. No cloud required.  
 **Action:** none  

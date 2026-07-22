@@ -2,28 +2,23 @@
 
 > Local Intelligence — on-device reasoning for craft, not cloud résumé farming.
 
-Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · Product: Local Intelligence module
+Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · Product: Local Intelligence module · Terms: [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md)
 
 ---
 
 ## Thesis
 
-AI in JobJitsu **helps draft, tailor, queue, and remind**. It does not guarantee interviews or own the send button. The primary path is a **user-provided local LLM** (and local embeddings when used). Privacy badge status must reflect reality.
+AI in JobJitsu **helps draft, tailor, queue, and remind**. It does not guarantee interviews or own the send button. The primary path is a **user-provided local LLM** (and local embeddings when used). Status chrome (**Agent · On-device**) must reflect provider locality honestly.
 
-```
-Identity + Role + Preferences + Application draft
-                    │
-                    ▼
-            Context assembler (local)
-                    │
-                    ▼
-         Provider adapter (local LLM)
-                    │
-                    ▼
-         Structured draft / suggestions
-                    │
-                    ▼
-         Applications / Queue  (not Send)
+```mermaid
+flowchart TD
+  inputs["Identity + Role + Preferences + Application draft"]
+  ctx["Context assembler (local)"]
+  provider["Provider adapter (local LLM)"]
+  draft["Structured draft / suggestions"]
+  queue["Applications / Queue (not Send)"]
+
+  inputs --> ctx --> provider --> draft --> queue
 ```
 
 ---
@@ -81,7 +76,7 @@ Avoid dumping entire timeline history into every prompt. No hidden training expo
 
 ## Honest AI product rules (architecture-enforced)
 
-1. Status badge says **Local LLM** only when the active provider is local.
+1. Status chrome shows **Agent · On-device** only when the active provider is local (technical locality remains “Local LLM” in provider/config docs).
 2. If user configures remote, chrome labels it plainly (e.g. “Remote model — user configured”).
 3. Failures use plain recovery (`Ai.LocalModelFailed` → preferences path).
 4. Outputs are suggestions; user remains author of final voice.

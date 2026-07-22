@@ -30,8 +30,9 @@ Events **never** stream career payloads to a JobJitsu cloud by default.
 
 ### Startup cascade (demo)
 
-```
-App.Started → Plugin.Loaded → Resume.Generated → Email.Synced
+```mermaid
+flowchart LR
+  A[App.Started] --> B[Plugin.Loaded] --> C[Resume.Generated] --> D[Email.Synced]
 ```
 
 Host runtime (`app/src/host`) owns this chain with fake providers. See Dojo activity view.
@@ -128,21 +129,27 @@ Full documents stay in storage; events reference them. Egress events may note **
 ## Flow examples
 
 ### Preparative path (no egress)
-```
-Agent.Started → Discovery.RolesCurated → Application.Tailored
-  → Queue.Enqueued → Agent.Progress (batched) → Agent.Idle
+
+```mermaid
+flowchart LR
+  A[Agent.Started] --> B[Discovery.RolesCurated] --> C[Application.Tailored]
+  C --> D[Queue.Enqueued] --> E["Agent.Progress (batched)"] --> F[Agent.Idle]
 ```
 
 ### Sovereign send
-```
-Queue.Approved → Send.Attempted → Send.Succeeded
-  → Privacy.EgressRecorded → FollowUp.Scheduled
+
+```mermaid
+flowchart LR
+  A[Queue.Approved] --> B[Send.Attempted] --> C[Send.Succeeded]
+  C --> D[Privacy.EgressRecorded] --> E[FollowUp.Scheduled]
 ```
 
 ### Honest failure
-```
-Send.Attempted → Send.Failed (or Send.Unknown)
-  → Timeline records uncertainty → UI recovery copy
+
+```mermaid
+flowchart LR
+  A[Send.Attempted] --> B["Send.Failed (or Send.Unknown)"]
+  B --> C[Timeline records uncertainty] --> D[UI recovery copy]
 ```
 
 ---

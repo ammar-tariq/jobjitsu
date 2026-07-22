@@ -4,6 +4,8 @@
 > Establish the runnable host: shell, composition root, events, settings, logging, errors, theme, and empty plugin/extension registries.  
 > **Still no AI.** No providers, no tailor, no model paths, no “intelligence” product surface.
 >
+> **IA note:** Sprint-1 nav labels (Dojo / Inbox / …) are **foundation shell** placeholders. Horizon 1 product IA uses Applications / Queue / Follow-ups / Preferences / Agent (see [../product/FEATURES.md](../product/FEATURES.md) and [../architecture/DESKTOP_ARCHITECTURE.md](../architecture/DESKTOP_ARCHITECTURE.md)); they may differ until shell IA is aligned.
+>
 > **Manifesto:** Privacy by default · Local first · Human in control · Calm technology · Quality over quantity  
 > **Brand UI:** Agent (not LLM) · On-device · Never pressure · Clean, uncluttered chrome  
 > **Process:** One vertical slice at a time ([VERTICAL_SLICES.md](./VERTICAL_SLICES.md) · [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md))

@@ -36,7 +36,7 @@ import { createExtensionManager, defineExtension } from "@jobjitsu/extension-sdk
 | `send.channel` | Board submit, mailto, file export | Always through Send policy + approval |
 | `agent.skill` | (delegates to plugin host) | Preparative only |
 | `ui.panel` | Optional module views | One job per view; brand tokens |
-| `ui.status` | Extra trust indicators | Cannot replace Local LLM honesty |
+| `ui.status` | Extra trust indicators | Cannot replace **Agent · On-device** honesty |
 | `timeline.exporter` | Portability dumps | User-triggered |
 | `scheduler.jobType` | Custom local jobs | Quiet hours respected |
 

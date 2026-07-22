@@ -40,7 +40,7 @@ Document shortcuts in a calm panel — no vim-only traps as the only path.
 
 - Real `<button>` / `<a>` / form controls — not clickable `div`s  
 - Landmarks: navigation, main, complementary (sidebar), status  
-- `JjLocalLlmPill` exposes accessible name (“Local LLM ready”)  
+- `JjAgentPrivacyPill` exposes accessible name (“Agent · On-device”)  
 - Toasts: `role="status"` polite; errors `role="alert"` assertive  
 
 ### Motion
@@ -62,7 +62,7 @@ Minimum **32×32px** for interactive controls on desktop; prefer 40px for primar
 
 ## Privacy & AT
 
-Privacy chrome is not decorative: screen readers must announce model locality honestly (Local vs user-configured remote).
+Privacy chrome is not decorative: screen readers must announce model locality honestly (**Agent · On-device** vs user-configured remote).
 
 ---
 

@@ -1,42 +1,31 @@
-Read every document inside /docs before beginning.
+# Implementation Roadmap
 
-Understand the platform completely.
+> Build order and delivery tracking — not product vision, not architecture design.
 
-Do not write code.
+This file is an **index**. The living implementation plan lives under [`docs/backlog/`](docs/backlog/).
 
-Your task is to produce a complete IMPLEMENTATION_ROADMAP.md.
+## Start here
 
-Break the entire platform into milestones.
+| Doc | Responsibility |
+|-----|----------------|
+| [Backlog index](docs/backlog/README.md) | Epics → features → stories → tasks |
+| [Epics](docs/backlog/EPICS.md) | E01–E19 catalog by horizon |
+| [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md) | Build waves and critical path |
+| [Sprint 1](docs/backlog/sprint-1.md) | Desktop Foundation (current foundation sprint) |
+| [Vertical slices](docs/backlog/VERTICAL_SLICES.md) | One-story process and status |
+| [Product roadmap](docs/product/ROADMAP.md) | Directional horizons (H1–H4) |
 
-Each milestone should be divided into Epics.
+## Related
 
-Each Epic should contain User Stories.
+| Doc | Responsibility |
+|-----|----------------|
+| [Platform specification](docs/product/PLATFORM_SPECIFICATION.md) | Functional behavior (**what**) |
+| [System architecture](SYSTEM_ARCHITECTURE.md) | Pointer to **how** docs |
+| [Definition of Done](DEFINITION_OF_DONE.md) | Completion gates |
+| [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md) | Plan → implement → commit loop |
 
-Each User Story should contain Technical Tasks.
+## Guidance
 
-Each Technical Task should contain Acceptance Criteria.
-
-Each task should identify:
-
-- dependencies
-- estimated complexity
-- testing requirements
-- documentation requirements
-
-The roadmap should begin with project foundations and continue until version 1.0.
-
-Implementation order should minimize risk and maximize incremental progress.
-
-Prioritize architecture before features.
-
-Prioritize reusable infrastructure before business logic.
-
-Every feature should be testable.
-
-Every feature should be independently mergeable.
-
-The roadmap should be suitable for GitHub Projects.
-
-Output in markdown.
-
-Think through the entire dependency graph before writing.
+- Prioritize architecture and reusable infrastructure before business features.
+- Prefer independently mergeable vertical slices ([VERTICAL_SLICES.md](docs/backlog/VERTICAL_SLICES.md)).
+- Do not treat horizon aspirational modules as Horizon 1 commitments — see [FEATURES.md](docs/product/FEATURES.md) status labels.

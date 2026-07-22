@@ -1,6 +1,8 @@
-# Features
+# Backlog epic features
 
-Features grouped by epic. Stories live in [USER_STORIES.md](./USER_STORIES.md).
+Build-order features grouped by epic (implementation backlog). These are **not** the product module map — for modules and Horizons, see [../product/FEATURES.md](../product/FEATURES.md).
+
+Stories live in [USER_STORIES.md](./USER_STORIES.md).
 
 ---
 
@@ -45,7 +47,7 @@ Features grouped by epic. Stories live in [USER_STORIES.md](./USER_STORIES.md).
 |----|---------|-------------|
 | E05-F01 | Preferences store | Persist prefs locally |
 | E05-F02 | Approval & quiet-hours prefs | Defaults match philosophy |
-| E05-F03 | Local LLM pill | Honest status component in chrome |
+| E05-F03 | Agent · On-device chrome | Honest status component in chrome (`JjAgentPrivacyPill`) |
 | E05-F04 | Preferences UI | Calm settings view |
 
 ## E06 Local Intelligence
@@ -56,7 +58,7 @@ Features grouped by epic. Stories live in [USER_STORIES.md](./USER_STORIES.md).
 | E06-F02 | Fake provider | Deterministic test/dev provider |
 | E06-F03 | Local adapter stub | Path-configured local runtime wiring |
 | E06-F04 | Context assembler | Minimal local context builder |
-| E06-F05 | AI status events | Ai.LocalModel* → pill |
+| E06-F05 | AI status events | Ai.LocalModel* → Agent · On-device chrome |
 
 ## E07 Discovery & Curation
 

@@ -49,8 +49,8 @@ Optional secondary text link
 **Body:** Your belt is tied. Waiting for your signal.  
 **CTA:** Start onboarding  
 
-### Local LLM not configured
-**Title:** Local LLM not connected  
+### On-device model not configured
+**Title:** Agent unavailable  
 **Body:** Point JobJitsu at your on-device model to keep the hunt in this dojo.  
 **CTA:** Choose model path  
 

@@ -86,7 +86,7 @@ Primary CTA fill may use teal-500 with indigo-950 label, or indigo-900 fill with
 
 ## Chrome checklist
 
-- [ ] Same Local LLM pill component; light colors from this map  
+- [ ] Same **Agent · On-device** pill component; light colors from this map  
 - [ ] Sidebars: white surface on cloud canvas (subtle border)  
 - [ ] Do not introduce warm cream or terracotta “AI template” palettes  
 - [ ] Illustrations: teal stroke on Soft Cloud  

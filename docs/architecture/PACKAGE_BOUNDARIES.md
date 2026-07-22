@@ -113,7 +113,7 @@ agent must not import send
 - **Enforced by:** `queue`, `send`, `scheduler`, `agent`.
 
 ### `ai`
-- Provider interface: `complete`, `embed`, health/status for Local LLM badge.
+- Provider interface: `complete`, `embed`, health/status for **Agent · On-device** chrome.
 - Context builder: identity + application + role — assembled locally.
 - **Must not:** default to a vendor cloud; optional remote requires explicit user config and UI honesty.
 

@@ -37,7 +37,7 @@ jobjitsu/
 
 | Path | Role | May perform egress? |
 |------|------|---------------------|
-| `app/` | Desktop host + renderer; wires packages; shows Local LLM badge | Only via `packages/send` APIs |
+| `app/` | Desktop host + renderer; wires packages; shows **Agent · On-device** chrome | Only via `packages/send` APIs |
 | `packages/*` | Domain and infrastructure libraries | Only `packages/send` (and explicitly documented egress adapters it owns) |
 | `plugins/` | Optional, user-enabled capabilities | Only through granted capabilities — never raw network by default |
 | `examples/` | Teaching & fixtures | No real career data; no production credentials |

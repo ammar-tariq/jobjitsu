@@ -35,7 +35,7 @@ It is **not** a cloud push service, streak enforcer, or guilt engine.
 |----------|---------|--------|
 | `followup.due` | Scheduled instant | Emit `FollowUp.Due`; notify politely |
 | `agent.prepWindow` | User window | Offer/start preparative run if enabled |
-| `ai.healthCheck` | Periodic light | Refresh Local LLM badge truth |
+| `ai.healthCheck` | Periodic light | Refresh Agent · On-device chrome truth |
 | `timeline.compact` | Maintenance | Local retention policy |
 | `extension.*` | Declared by extensions | Capability-gated |
 

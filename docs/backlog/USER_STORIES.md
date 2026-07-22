@@ -119,11 +119,11 @@ Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md]
 - Fresh profile has require-approval enabled.
 - Quiet hours fields exist (even if unused until scheduler).
 
-### E05-F03-S01 — As a user, I always see Local LLM status
+### E05-F03-S01 — As a user, I always see Agent · On-device status
 **AC**
-- Pill visible on main chrome.
+- Pill visible on main chrome (`JjAgentPrivacyPill`).
 - States: unavailable / loading / ready (and remote label if configured later).
-- Ready does not claim Local when provider is remote.
+- Ready does not claim on-device when provider is remote.
 
 ### E05-F04-S01 — As a user, I can edit preferences in a calm settings view
 **AC**
@@ -154,9 +154,9 @@ Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md]
 - Assembler includes résumé excerpts + role + prefs tone only as designed.
 - Unit test asserts full unrelated timeline not included.
 
-### E06-F05-S01 — As the pill, I reflect AI health events
+### E06-F05-S01 — As Agent · On-device chrome, I reflect AI health events
 **AC**
-- Loading/ready/failed events update pill within one UI tick subscription path.
+- Loading/ready/failed events update the privacy pill within one UI tick subscription path.
 - Copy matches brand loading line when loading (optional microcopy).
 
 ---

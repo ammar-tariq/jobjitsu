@@ -10,7 +10,7 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
 
 - Desktop-first experience with system tray/status, keyboard flows, and local resources.
 - Clear split: **host** (privileged) vs **ui** (presentation).
-- Privacy chrome always visible (Local LLM badge / belt mark).
+- Privacy chrome always visible (**Agent · On-device** / belt mark).
 - One job per view; dark mode first (Midnight Ink + Electric Teal).
 
 ---
@@ -57,7 +57,7 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
 |---------|----------|
 | Navigation | Product nouns; sentence case |
 | Review ritual | Approve / reject queue items |
-| Trust chrome | Local LLM status always glanceable |
+| Trust chrome | **Agent · On-device** status always glanceable |
 | Copy | Brand voice; errors plain; success quiet |
 | Motion | Status pulse, row settle, toast rise only |
 | A11y | Focus rings, live regions, keyboard paths |
@@ -103,7 +103,7 @@ Avoid multi-dashboard “mission control.” Deep links open one purpose.
 
 ## Privacy chrome
 
-- Status bar: **Local LLM** pill (indigo/teal) reflecting real adapter health.
+- Status bar: **Agent · On-device** pill (indigo/teal) reflecting real adapter health.
 - Optional belt mark for idle agent (“waiting for your signal”) — microcopy from brand.
 - Egress confirmation UI must state destination class plainly.
 

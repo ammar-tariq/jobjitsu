@@ -34,7 +34,7 @@ Alternatives considered:
 
 ### Positive
 - Aligns with “native, light, fast” and privacy-as-architecture.
-- Natural process boundary for Local LLM badge honesty and deny-by-default IPC ([ADR 0013](./0013-ipc-bridge.md)).
+- Natural process boundary for Agent · On-device chrome honesty and deny-by-default IPC ([ADR 0013](./0013-ipc-bridge.md)).
 - Smaller distributables; respectful of user machines.
 
 ### Negative / tradeoffs

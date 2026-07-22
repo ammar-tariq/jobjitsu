@@ -9,7 +9,7 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Brand beliefs: [../brand/PRO
 ## Principles
 
 ### 1. Privacy is the platform
-On-device by default. Outbound only when the user acts. Visible Local LLM / trust chrome is part of the product, not a footnote.
+On-device by default. Outbound only when the user acts. Visible **Agent · On-device** trust chrome is part of the product, not a footnote.
 
 ### 2. Sovereignty over convenience theater
 User owns preferences, pause, approve, and send. Convenience never removes the signal.

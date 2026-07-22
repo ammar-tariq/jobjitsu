@@ -83,7 +83,7 @@ Set `data-theme="dark"` (or OS preference when user selects System and OS is dar
 
 ## Chrome checklist
 
-- [ ] Local LLM pill visible in status bar  
+- [ ] **Agent · On-device** pill visible in status bar  
 - [ ] Scrollbars muted (neutral, not accent)  
 - [ ] Selection color: accent-muted  
 - [ ] Code/log panels use bg-muted + mono  

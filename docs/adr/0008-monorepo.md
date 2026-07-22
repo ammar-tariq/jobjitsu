@@ -28,7 +28,7 @@ Alternatives considered:
 - Domain packages do not depend on `app/`.
 - `agent` must not depend on `send` ([ADR 0009](./0009-send-boundary.md)).
 - Private packages until Horizon 4 public SDK publish.
-- Optional Turborepo/nx later for task caching — not required to accept this ADR.
+- Optional Turborepo/nx later for task caching — not required to accept this ADR. (**Note:** Turborepo is now wired at the repo root; this ADR’s monorepo choice stands.)
 
 ---
 
@@ -44,5 +44,5 @@ Alternatives considered:
 - CI must install with pnpm lockfile discipline.
 
 ### Follow-ups
-- Add root `package.json` / `pnpm-workspace.yaml` when implementation starts (not part of this ADR text).
+- ~~Add root `package.json` / `pnpm-workspace.yaml` when implementation starts (not part of this ADR text).~~ **Done** — root `package.json`, `pnpm-workspace.yaml`, and Turborepo (`turbo.json` / `turbo run …`) are in place.
 - Document package fence lint if dependency graph drifts.

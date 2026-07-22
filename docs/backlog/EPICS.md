@@ -6,7 +6,7 @@
 | [E02](#e02-storage--event-spine) | Storage & Event Spine | H1 | On-device DB + typed local event bus |
 | [E03](#e03-desktop-shell--ipc) | Desktop Shell & IPC | H1 | Host/UI split, deny-by-default bridge, nav chrome |
 | [E04](#e04-identity--resume) | Identity & Resume | H1 | Local profile/résumé source of truth |
-| [E05](#e05-preferences--privacy-chrome) | Preferences & Privacy Chrome | H1 | Approval gates + honest Local LLM pill |
+| [E05](#e05-preferences--privacy-chrome) | Preferences & Privacy Chrome | H1 | Approval gates + honest Agent · On-device pill |
 | [E06](#e06-local-intelligence) | Local Intelligence | H1 | Local LLM provider + context assembler |
 | [E07](#e07-discovery--curation) | Discovery & Curation | H1 | Fit-first role intake (local/file source first) |
 | [E08](#e08-applications) | Applications | H1 | Draft, tailor, version, track throws |
@@ -42,7 +42,7 @@ Import/store résumé and profile locally; readable by AI/applications; never im
 
 ## E05 Preferences & Privacy Chrome
 
-Fit rules, approval-before-send default on, quiet hours, model path prefs; always-visible Local LLM pill with honest states.
+Fit rules, approval-before-send default on, quiet hours, model path prefs; always-visible Agent · On-device pill with honest states.
 
 ## E06 Local Intelligence
 

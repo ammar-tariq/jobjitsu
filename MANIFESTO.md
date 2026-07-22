@@ -4,9 +4,13 @@
 >
 > *On-device. On-target. On your terms.*
 
+This document is **project philosophy only**. It does not define architecture or implementation.
+
+See also: [Product vision](docs/product/PRODUCT_VISION.md) · [Platform specification](docs/product/PLATFORM_SPECIFICATION.md) · [Principles](docs/product/PRINCIPLES.md) · [Non-goals](docs/product/NON_GOALS.md) · [Terminology](docs/product/TERMINOLOGY.md)
+
 ---
 
-# Why JobJitsu Exists
+## Why JobJitsu Exists
 
 Looking for a job has become unnecessarily exhausting.
 
@@ -18,19 +22,21 @@ We believe there is a better way.
 
 JobJitsu exists to give every job seeker a powerful, private, intelligent career companion that works entirely on their own computer.
 
-No subscriptions.
+No JobJitsu subscriptions.
 
 No vendor lock-in.
 
-No unnecessary cloud dependencies.
+No JobJitsu cloud backend holding your career data.
 
 No hidden data collection.
 
 Your career belongs to you.
 
+Optional remote AI Providers or job/mail integrations may require the network when **you** configure them — that is not a JobJitsu SaaS account.
+
 ---
 
-# Our Mission
+## Our Mission
 
 Build the world's best open-source, local-first AI Career Operating System.
 
@@ -44,7 +50,7 @@ Everything else is modular.
 
 ---
 
-# Our Vision
+## Our Vision
 
 JobJitsu is not just an automatic job application tool.
 
@@ -52,31 +58,31 @@ It is a platform for managing an entire career.
 
 Today, that means helping people:
 
-* Discover opportunities
-* Tailor resumes
-* Generate cover letters
-* Organize applications
-* Prepare for interviews
-* Track recruiter conversations
-* Follow up professionally
+- Discover opportunities
+- Tailor resumes
+- Generate cover letters
+- Organize applications
+- Prepare for interviews
+- Track recruiter conversations
+- Follow up professionally
 
-Tomorrow, it may include:
+Tomorrow, it may include (see [FEATURES.md](docs/product/FEATURES.md) **Future** status):
 
-* Portfolio optimization
-* Career planning
-* Salary analysis
-* Networking assistance
-* Skills development
-* Personal knowledge management
-* Community-built extensions we haven't imagined yet
+- Portfolio optimization
+- Career planning
+- Salary analysis
+- Networking assistance
+- Skills development
+- Personal knowledge management
+- Community-built Extensions we haven't imagined yet
 
 The platform should grow because the community grows.
 
 ---
 
-# Our Principles
+## Our Principles
 
-## Privacy by Default
+### Privacy by Default
 
 Your career history is deeply personal.
 
@@ -270,7 +276,7 @@ These define our community.
 
 ---
 
-# Engineering Philosophy
+## Engineering Philosophy
 
 Architecture comes before implementation.
 
@@ -292,7 +298,7 @@ Complexity should be earned, never assumed.
 
 ---
 
-# Design Philosophy
+## Design Philosophy
 
 Technology should disappear into the background.
 
@@ -314,7 +320,7 @@ Every interaction should respect the user's attention.
 
 ---
 
-# AI Philosophy
+## AI Philosophy
 
 AI should be invisible until it is useful.
 
@@ -335,7 +341,7 @@ Trust is built through transparency.
 
 ---
 
-# Our Promise
+## Our Promise
 
 We will never build features that compromise our principles for convenience.
 
@@ -347,7 +353,7 @@ We will build software that we would trust with our own careers.
 
 ---
 
-# What Success Looks Like
+## What Success Looks Like
 
 Success is not measured by downloads alone.
 
@@ -365,7 +371,7 @@ Open source succeeds when it empowers others.
 
 ---
 
-# The Way of JobJitsu
+## The Way of JobJitsu
 
 Mastery is not achieved through force.
 

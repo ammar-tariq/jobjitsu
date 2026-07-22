@@ -21,7 +21,7 @@ Notifications are **polite taps on the shoulder**, not sirens. They protect atte
 | **In-app toast** | Immediate result of a user action | Long policy text |
 | **In-app inbox / bell** | Follow-ups, agent needs review | Marketing tips |
 | **OS notification** | Time-sensitive follow-up while app backgrounded | Every queue tick |
-| **Status bar badge** | Local LLM / agent readiness | Vanity counts |
+| **Status bar badge** | Agent · On-device readiness | Vanity counts |
 
 ---
 
@@ -48,7 +48,7 @@ Notifications are **polite taps on the shoulder**, not sirens. They protect atte
 **Body:** Time to gently nudge — a polite reminder is ready.  
 **Action:** Open reminder  
 
-### Local LLM ready
+### Agent ready
 **Title:** On-device model ready  
 **Body:** Warming complete. No data leaves this dojo.  
 **Action:** none / Dismiss  

@@ -6,7 +6,7 @@
 
 Brand foundation: [../brand/PRODUCT_PHILOSOPHY.md](../brand/PRODUCT_PHILOSOPHY.md) · [../brand/BRAND_GUIDELINES.md](../brand/BRAND_GUIDELINES.md) · [../brand/VOICE_AND_TONE.md](../brand/VOICE_AND_TONE.md)
 
-Product companions: [FEATURES.md](./FEATURES.md) · [NON_GOALS.md](./NON_GOALS.md) · [PRINCIPLES.md](./PRINCIPLES.md) · [ROADMAP.md](./ROADMAP.md)
+Product companions: [FEATURES.md](./FEATURES.md) · [NON_GOALS.md](./NON_GOALS.md) · [PRINCIPLES.md](./PRINCIPLES.md) · [ROADMAP.md](./ROADMAP.md) · [TERMINOLOGY.md](./TERMINOLOGY.md) · [PLATFORM_SPECIFICATION.md](./PLATFORM_SPECIFICATION.md)
 
 This document defines **where the product is going**. It is not an implementation plan, API design, or engineering backlog.
 
@@ -64,7 +64,7 @@ We exist to:
 
 ## North Star (Career OS)
 
-A user opens JobJitsu. Midnight Ink. Teal accent. Local LLM ready. Their belt is tied.
+A user opens JobJitsu. Midnight Ink. Teal accent. Agent · On-device. Their belt is tied.
 
 They move through the OS as one continuous craft: preferences shape discovery; the agent prepares; they review; they send; they nudge; they learn — still on this machine.
 

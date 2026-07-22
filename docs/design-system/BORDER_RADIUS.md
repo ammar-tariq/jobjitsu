@@ -13,7 +13,7 @@ Subtle rounding — native tool, not toy. Prefer small radii; reserve pills for 
 | `--jj-radius-md` | `6px` | Buttons, list row hover, menus |
 | `--jj-radius-lg` | `8px` | Panels, dialogs, toasts |
 | `--jj-radius-xl` | `12px` | Rare large empty-state frames |
-| `--jj-radius-pill` | `999px` | Local LLM pill, status dots container |
+| `--jj-radius-pill` | `999px` | Agent · On-device pill, status dots container |
 
 ---
 
@@ -28,7 +28,7 @@ Subtle rounding — native tool, not toy. Prefer small radii; reserve pills for 
 | Toast | `--jj-radius-lg` |
 | Modal | `--jj-radius-lg` |
 | List row | `--jj-radius-md` (hover/selection bg) |
-| Local LLM pill | `--jj-radius-pill` |
+| Agent · On-device pill | `--jj-radius-pill` |
 | App window | OS-controlled (squircle icon only) |
 
 ---

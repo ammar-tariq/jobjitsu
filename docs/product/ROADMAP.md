@@ -2,7 +2,7 @@
 
 > Directional arc for the AI Career Operating System — not a release schedule or implementation plan.
 
-Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Modules: [FEATURES.md](./FEATURES.md) · Guardrails: [NON_GOALS.md](./NON_GOALS.md) · [PRINCIPLES.md](./PRINCIPLES.md)
+Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Modules: [FEATURES.md](./FEATURES.md) · Guardrails: [NON_GOALS.md](./NON_GOALS.md) · [PRINCIPLES.md](./PRINCIPLES.md) · [TERMINOLOGY.md](./TERMINOLOGY.md)
 
 ---
 
@@ -10,11 +10,11 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Modules: [FEATURES.md](./FEA
 
 Each horizon deepens the Career OS without abandoning JobJitsu identity: local-first, craft over volume, agent as belt not leash, calm confidence.
 
-```
-Horizon 1          Horizon 2           Horizon 3            Horizon 4
-Application   →    Full hunt loop  →   Career craft    →    Sovereign
-Dojo               (outcomes +         beyond apply         ecosystem
-                   learning)           (modular depth)
+```mermaid
+flowchart LR
+  H1[Horizon1_ApplicationDojo] --> H2[Horizon2_FullHuntLoop]
+  H2 --> H3[Horizon3_CareerCraft]
+  H3 --> H4[Horizon4_SovereignEcosystem]
 ```
 
 ---
@@ -27,7 +27,7 @@ Establish JobJitsu as the trusted local system for the classic pipeline:
 
 **Focus:** Identity & resume, preferences, local intelligence, agent, discovery, applications, queue & review, send, follow-ups, privacy chrome.
 
-**Outcome:** A calm desktop companion with visible Local LLM status, user-owned agent, and mastery-over-volume defaults.
+**Outcome:** A calm desktop companion with visible **Agent · On-device** status, user-owned agent, and mastery-over-volume defaults.
 
 ---
 

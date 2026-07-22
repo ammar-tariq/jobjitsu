@@ -20,6 +20,8 @@ This document covers structure, naming, motion overview, accessibility overview,
 
 ## 2. Foundations (Summary)
 
+High-level brand anchors only. **Production CSS tokens, themes, and component variants** live in [../design-system/](../design-system/) — see [DESIGN_TOKENS.md](../design-system/DESIGN_TOKENS.md), [THEME_DARK.md](../design-system/THEME_DARK.md), and [THEME_LIGHT.md](../design-system/THEME_LIGHT.md). Do not treat this table as the token source of truth.
+
 | Token | Value | Role |
 |-------|-------|------|
 | Deep Indigo | `#1E1B4B` | Primary brand, belt, dark surfaces |

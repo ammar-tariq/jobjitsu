@@ -1,77 +1,33 @@
-Read every document in the /docs directory before writing anything.
+# System Architecture
 
-You must understand:
+> **How** JobJitsu is structured — not product vision, not the build backlog.
 
-- MANIFESTO.md
-- PLATFORM_SPECIFICATION.md
-- BRAND_GUIDELINES.md
-- CONTRIBUTING.md
-- any architecture decisions
+This file is an **index**. The living architecture lives under [`docs/architecture/`](docs/architecture/).
 
-Your task is to create a complete SYSTEM_ARCHITECTURE.md.
+## Start here
 
-Do not implement code.
+| Doc | Responsibility |
+|-----|----------------|
+| [Architecture overview](docs/architecture/OVERVIEW.md) | Thesis, laws, module → package map |
+| [Architecture index](docs/architecture/README.md) | Full list (events, AI, desktop, plugins, …) |
+| [Architecture principles](ARCHITECTURE_PRINCIPLES.md) | Non-negotiable architectural rules |
+| [ADRs](docs/adr/README.md) | Accepted technical decisions |
+| [Monorepo (ops)](MONOREPO.md) | Tooling, scripts, workspace commands |
+| [Monorepo (design)](docs/architecture/MONOREPO.md) | Package map and dependency direction |
 
-Instead, design the complete architecture.
+## Related (not architecture)
 
-The architecture should explain HOW the platform will be built.
+| Doc | Responsibility |
+|-----|----------------|
+| [Platform specification](docs/product/PLATFORM_SPECIFICATION.md) | **What** the platform does |
+| [Product vision](docs/product/PRODUCT_VISION.md) | Direction and mission |
+| [Implementation roadmap](IMPLEMENTATION_ROADMAP.md) | Pointer to backlog / horizons |
+| [Engineering constitution](ENGINEERING_CONSTITUTION.md) | **How** we build (process) |
 
-Include:
+## Authority
 
-- overall architecture
-- monorepo structure
-- package boundaries
-- frontend architecture
-- backend architecture
-- Tauri architecture
-- IPC architecture
-- event bus
-- plugin architecture
-- AI runtime
-- agent orchestration
-- workflow engine
-- browser automation architecture
-- Gmail integration architecture
-- LinkedIn messaging architecture (where supported)
-- local storage
-- database schema
-- repositories
-- services
-- dependency injection
-- RAG pipeline
-- AI provider abstraction
-- model manager
-- task queue
-- state management
-- testing architecture
-- logging
-- configuration
-- security
-- secrets management
-- performance strategy
-- startup lifecycle
-- shutdown lifecycle
-- package dependency graph
-- module dependency rules
-- error handling
-- future extensibility
-
-For every architectural decision:
-
-Explain WHY it exists.
-
-List pros.
-
-List cons.
-
-List alternatives.
-
-Use Mermaid diagrams whenever useful.
-
-Follow C4 architecture where appropriate.
-
-Do not skip details.
-
-Think carefully before writing.
-
-Produce a professional software architecture document suitable for an open-source project.
+- **Product intent:** [`docs/product/`](docs/product/)
+- **Brand / UI nouns:** [`docs/brand/`](docs/brand/) · [`docs/design-system/`](docs/design-system/)
+- **Structure:** [`docs/architecture/`](docs/architecture/) · [`docs/adr/`](docs/adr/)
+- **Execution:** [`docs/backlog/`](docs/backlog/)
+- **Process:** [ENGINEERING_CONSTITUTION.md](ENGINEERING_CONSTITUTION.md) · [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md)

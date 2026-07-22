@@ -2,31 +2,32 @@
 
 Version: 1.0
 
-> This document defines the non-negotiable architectural principles that govern the JobJitsu codebase.
+> This document defines the non-negotiable **architectural rules** that govern the JobJitsu codebase.
 >
-> Every architectural decision should reinforce these principles.
+> It does **not** define product vision, engineering process, or the epic backlog.
 >
 > If an implementation conflicts with these principles, the implementation should be reconsidered.
 
+See also: [System architecture index](SYSTEM_ARCHITECTURE.md) · [Architecture overview](docs/architecture/OVERVIEW.md) · [Platform specification](docs/product/PLATFORM_SPECIFICATION.md) (**what**) · [Terminology](docs/product/TERMINOLOGY.md) · [Engineering constitution](ENGINEERING_CONSTITUTION.md) (**process**)
+
 ---
 
-# Purpose
+## Purpose
 
 The purpose of this document is to ensure that JobJitsu remains:
 
 - Maintainable
-- Scalable
 - Extensible
 - Testable
 - Understandable
 - Privacy-first
 - Local-first
 
-These principles apply to every package, module, plugin, and contribution.
+These principles apply to every package, module, Plugin, Extension, and contribution.
 
 ---
 
-# Core Philosophy
+## Core Philosophy
 
 The architecture should prioritize simplicity over cleverness.
 
@@ -40,7 +41,7 @@ Avoid unnecessary complexity.
 
 ---
 
-# Local First
+## Local First
 
 Local execution is the default.
 
@@ -57,7 +58,7 @@ The application should never require a JobJitsu backend server.
 
 ---
 
-# Privacy First
+## Privacy First
 
 User data belongs to the user.
 
@@ -73,7 +74,7 @@ Users always choose where their data is processed.
 
 ---
 
-# Human Control
+## Human Control
 
 The user always has the final decision.
 
@@ -95,7 +96,7 @@ These actions require user approval unless Trusted Automation has been explicitl
 
 ---
 
-# Event-Driven Architecture
+## Event-Driven Architecture
 
 The platform should be event-driven.
 
@@ -125,7 +126,7 @@ Modules should react to events instead of polling for changes.
 
 ---
 
-# Modular Design
+## Modular Design
 
 Every module should have a clearly defined responsibility.
 
@@ -145,7 +146,7 @@ No module should become responsible for unrelated concerns.
 
 ---
 
-# Clean Boundaries
+## Clean Boundaries
 
 Every package should expose a small, intentional public API.
 
@@ -157,7 +158,7 @@ Avoid reaching into another package's internals.
 
 ---
 
-# Dependency Direction
+## Dependency Direction
 
 Dependencies should always point toward lower-level abstractions.
 
@@ -183,7 +184,7 @@ Never the reverse.
 
 ---
 
-# Dependency Inversion
+## Dependency Inversion
 
 Business logic should depend on interfaces rather than implementations.
 
@@ -197,7 +198,7 @@ This makes providers replaceable without modifying business logic.
 
 ---
 
-# Composition Over Inheritance
+## Composition Over Inheritance
 
 Prefer composition whenever possible.
 
@@ -207,7 +208,7 @@ Avoid deep inheritance hierarchies.
 
 ---
 
-# Plugin First
+## Plugin First
 
 Everything that may reasonably vary should be implemented behind extension points.
 
@@ -222,7 +223,7 @@ The platform core should remain stable while plugins extend functionality.
 
 ---
 
-# AI Provider Independence
+## AI Provider Independence
 
 The application must never assume a specific AI provider.
 
@@ -234,7 +235,7 @@ Switching providers should not require changes elsewhere in the codebase.
 
 ---
 
-# AI Model Independence
+## AI Model Independence
 
 Business logic should not depend on specific AI models.
 
@@ -242,7 +243,7 @@ Changing models should require configuration changes, not code changes.
 
 ---
 
-# AI as Infrastructure
+## AI as Infrastructure
 
 Artificial Intelligence is infrastructure—not business logic.
 
@@ -260,7 +261,7 @@ Business decisions should remain deterministic whenever possible.
 
 ---
 
-# Event-Based AI
+## Event-Based AI
 
 AI should execute only when necessary.
 
@@ -296,7 +297,7 @@ Models should never remain loaded unnecessarily.
 
 ---
 
-# Resource Efficiency
+## Resource Efficiency
 
 System resources should be treated as valuable.
 
@@ -311,7 +312,7 @@ Efficiency is a feature.
 
 ---
 
-# Predictable Workflows
+## Predictable Workflows
 
 Long-running operations should follow predictable workflows.
 
@@ -339,7 +340,7 @@ Hidden behavior should be avoided.
 
 ---
 
-# Explicit State
+## Explicit State
 
 Every long-running task should expose its state.
 
@@ -361,7 +362,7 @@ State should never be inferred from implementation details.
 
 ---
 
-# Testability
+## Testability
 
 Every significant component should be testable in isolation.
 
@@ -373,7 +374,7 @@ Modules should support mocking during tests.
 
 ---
 
-# Testing Pyramid
+## Testing Pyramid
 
 Testing should prioritize:
 
@@ -385,7 +386,7 @@ Business logic should rely heavily on unit testing.
 
 ---
 
-# Documentation First
+## Documentation First
 
 Architecture should be documented before implementation.
 
@@ -395,7 +396,7 @@ Documentation is part of the implementation.
 
 ---
 
-# Logging
+## Logging
 
 Logging should provide useful diagnostic information.
 
@@ -411,7 +412,7 @@ Sensitive information must always be redacted.
 
 ---
 
-# Error Handling
+## Error Handling
 
 Errors should be:
 
@@ -423,7 +424,7 @@ Unexpected failures should not leave the platform in an inconsistent state.
 
 ---
 
-# Secure by Default
+## Secure by Default
 
 The safest behavior should be the default behavior.
 
@@ -436,7 +437,7 @@ Examples:
 
 ---
 
-# Secrets Management
+## Secrets Management
 
 Sensitive credentials should never be stored in plain text.
 
@@ -450,7 +451,7 @@ Examples:
 
 ---
 
-# Open Source Friendly
+## Open Source Friendly
 
 The architecture should encourage contribution.
 
@@ -460,7 +461,7 @@ Complexity should be minimized.
 
 ---
 
-# Backward Compatibility
+## Backward Compatibility
 
 Internal changes should avoid unnecessarily breaking plugins.
 
@@ -470,7 +471,7 @@ Breaking changes should be intentional and documented.
 
 ---
 
-# Single Source of Truth
+## Single Source of Truth
 
 Each piece of information should have one authoritative owner.
 
@@ -484,7 +485,7 @@ The Resume module should never duplicate the Knowledge Base.
 
 ---
 
-# Separation of Concerns
+## Separation of Concerns
 
 User Interface
 
@@ -506,7 +507,7 @@ Each layer should remain focused on its own responsibilities.
 
 ---
 
-# Observability
+## Observability
 
 Every important workflow should be observable.
 
@@ -521,7 +522,7 @@ Avoid hidden background behavior.
 
 ---
 
-# Simplicity
+## Simplicity
 
 The simplest correct solution should be preferred.
 
@@ -531,7 +532,7 @@ Architecture should evolve with the product rather than anticipating every possi
 
 ---
 
-# Guiding Question
+## Guiding Question
 
 Before introducing any new dependency, abstraction, feature, or architectural pattern, ask:
 

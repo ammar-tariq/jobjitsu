@@ -8,21 +8,28 @@ Version: 2.0
 
 ---
 
-# Purpose
+## Purpose
 
-This document defines the complete functional vision, product scope, and behavioral expectations of the JobJitsu platform.
+This document is the authoritative **functional** specification of JobJitsu platform behavior—**what** the platform should do. It is not the sole product authority.
 
-It acts as the authoritative source of truth for the product.
+Companion documents:
 
-Every future architecture document, implementation plan, user story, technical specification, API design, plugin interface, and engineering decision should align with this document.
+- [PRODUCT_VISION.md](./PRODUCT_VISION.md) — product vision
+- [FEATURES.md](./FEATURES.md) — modules and Feature Status (**Core** / **Experimental** / **Future**)
+- [TERMINOLOGY.md](./TERMINOLOGY.md) — canonical terms
+- [PRINCIPLES.md](./PRINCIPLES.md) — product principles
+- [NON_GOALS.md](./NON_GOALS.md) — deliberate non-goals
+- [ROADMAP.md](./ROADMAP.md) — sequencing horizons
+- [../architecture/OVERVIEW.md](../architecture/OVERVIEW.md) — architecture overview (**how**)
+- [../../ARCHITECTURE_PRINCIPLES.md](../../ARCHITECTURE_PRINCIPLES.md) — architectural rules
 
 This document intentionally describes **what JobJitsu should do**, not **how it should be implemented**.
 
-Implementation details belong within the Architecture documentation.
+Feature Status (**Core** / **Experimental** / **Future**) lives in [FEATURES.md](./FEATURES.md). Implementation details belong in Architecture documentation.
 
 ---
 
-# Product Vision
+## Product Vision
 
 JobJitsu is an open-source, local-first AI Career Operating System.
 
@@ -47,27 +54,27 @@ Artificial Intelligence is used to assist—not replace—the user's judgment.
 
 ---
 
-# Mission
+## Mission
 
 Build the world's best open-source AI Career Operating System that runs locally, respects user privacy, and empowers people rather than collecting their data.
 
 ---
 
-# Core Principles
+## Core Principles
 
 Every feature added to JobJitsu must reinforce the following principles.
 
-## Privacy First
+### Privacy First
 
 User career data belongs entirely to the user.
 
-JobJitsu should never require cloud services for its core functionality.
+JobJitsu should never require a JobJitsu cloud backend for its core functionality. Optional user-configured remote AI Providers are allowed when honestly labeled.
 
 The platform should minimize external communication whenever possible.
 
 ---
 
-## Local First
+### Local First
 
 Core functionality should continue working without internet access.
 
@@ -75,7 +82,7 @@ External services enhance the experience but should never become mandatory.
 
 ---
 
-## Human in Control
+### Human in Control
 
 The user always has the final decision.
 
@@ -89,7 +96,7 @@ But JobJitsu should never silently make important decisions on behalf of the use
 
 ---
 
-## AI as an Assistant
+### AI as an Assistant
 
 Artificial Intelligence should augment human capability.
 
@@ -99,7 +106,7 @@ Every AI-generated result should be reviewable and editable.
 
 ---
 
-## Open Source
+### Open Source
 
 Every architectural decision should be transparent.
 
@@ -111,7 +118,7 @@ Community contributions should be encouraged.
 
 ---
 
-## Extensible
+### Extensible
 
 Everything should be replaceable.
 
@@ -121,7 +128,7 @@ Every major capability should be exposed through plugin interfaces.
 
 ---
 
-## Modular
+### Modular
 
 The application should consist of independent modules with clear responsibilities.
 
@@ -129,7 +136,7 @@ Features should be composable rather than tightly coupled.
 
 ---
 
-## Test Driven
+### Test Driven
 
 Every feature must be accompanied by automated tests.
 
@@ -137,7 +144,7 @@ No implementation should be considered complete without testing.
 
 ---
 
-## Documentation First
+### Documentation First
 
 Architecture should be documented before implementation.
 
@@ -145,7 +152,7 @@ Implementation should update documentation whenever behavior changes.
 
 ---
 
-# Platform Overview
+## Platform Overview
 
 JobJitsu is a native desktop application designed for:
 
@@ -165,13 +172,13 @@ No Docker.
 
 No server deployment.
 
-No cloud infrastructure.
+No JobJitsu backend or cloud account required.
 
 Everything should happen from a polished desktop application.
 
 ---
 
-# What JobJitsu Manages
+## What JobJitsu Manages
 
 JobJitsu manages every major aspect of the job search process.
 
@@ -199,7 +206,7 @@ The goal is to replace dozens of disconnected tools with one cohesive experience
 
 ---
 
-# The AI Philosophy
+## The AI Philosophy
 
 Artificial Intelligence is one component of JobJitsu.
 
@@ -222,7 +229,7 @@ AI should be explainable rather than magical.
 
 ---
 
-# The AI Agent
+## The AI Agent
 
 The AI Agent is the heart of JobJitsu.
 
@@ -257,7 +264,7 @@ This minimizes memory usage while preserving a responsive user experience.
 
 ---
 
-# Agent Responsibilities
+## Agent Responsibilities
 
 The AI Agent is responsible for:
 
@@ -286,15 +293,15 @@ Human approval remains the default.
 
 ---
 
-# AI Agent Framework
+## AI Agent Framework
 
 The AI Agent Framework is the intelligence layer of JobJitsu.
 
-Rather than relying on a single monolithic AI assistant, JobJitsu uses an orchestrated collection of specialized agents.
+Rather than relying on a single monolithic AI assistant, JobJitsu uses a collection of specialized agents coordinated by the AI Workflow Planner & Engine.
 
 Each agent has a clearly defined responsibility.
 
-The user only interacts with a single "JobJitsu Agent" while the internal orchestration system coordinates the specialized agents.
+The user only interacts with a single "JobJitsu Agent" while the AI Workflow Planner & Engine coordinates Workflows, the Task Queue, and specialized agents.
 
 This architecture improves:
 
@@ -310,20 +317,20 @@ New agents should be addable without modifying the platform core.
 
 ---
 
-# Agent Orchestrator
+## AI Workflow Planner & Engine
 
-The Orchestrator Agent is the brain of the AI framework.
+The AI Workflow Planner & Engine is the brain of the AI framework.
 
 It does not generate content itself.
 
-Instead, it plans work and delegates tasks.
+Instead, it plans **Workflows**, schedules work on the **Task Queue**, and delegates tasks. The **Context Builder** assembles minimal prompt context before inference.
 
 Responsibilities include:
 
 - Understanding user intent
 - Breaking requests into tasks
 - Selecting specialized agents
-- Retrieving relevant context
+- Retrieving relevant context (via Context Builder)
 - Selecting AI providers
 - Selecting AI models
 - Monitoring execution
@@ -333,67 +340,28 @@ Responsibilities include:
 
 Example workflow:
 
-User clicks:
+```mermaid
+flowchart TD
+  A["User clicks: Apply to Job"] --> B[AI Workflow Planner & Engine]
+  B --> C[Analyze Job Description]
+  C --> D[Retrieve Resume Knowledge]
+  D --> E[Select Resume Agent]
+  E --> F[Generate Tailored Resume]
+  F --> G[Validate Output]
+  G --> H[Select Cover Letter Agent]
+  H --> I[Generate Cover Letter]
+  I --> J[Validate Output]
+  J --> K[Prepare Review Screen]
+  K --> L[Wait for User Approval]
+  L --> M[Submit Application]
+  M --> N[Record Analytics]
+```
 
-Apply to Job
-
-↓
-
-Orchestrator
-
-↓
-
-Analyze Job Description
-
-↓
-
-Retrieve Resume Knowledge
-
-↓
-
-Select Resume Agent
-
-↓
-
-Generate Tailored Resume
-
-↓
-
-Validate Output
-
-↓
-
-Select Cover Letter Agent
-
-↓
-
-Generate Cover Letter
-
-↓
-
-Validate Output
-
-↓
-
-Prepare Review Screen
-
-↓
-
-Wait for User Approval
-
-↓
-
-Submit Application
-
-↓
-
-Record Analytics
-
-The orchestrator is responsible for coordinating every AI workflow.
+The AI Workflow Planner & Engine is responsible for coordinating every AI Workflow.
 
 ---
 
-# Resume Agent
+## Resume Agent
 
 Purpose
 
@@ -429,7 +397,7 @@ Outputs
 
 ---
 
-# Cover Letter Agent
+## Cover Letter Agent
 
 Purpose
 
@@ -452,7 +420,7 @@ Outputs
 
 ---
 
-# Job Research Agent
+## Job Research Agent
 
 Purpose
 
@@ -479,7 +447,7 @@ Outputs
 
 ---
 
-# Recruiter Agent
+## Recruiter Agent
 
 Purpose
 
@@ -501,7 +469,7 @@ Outputs
 
 ---
 
-# Email Agent
+## Email Agent
 
 Purpose
 
@@ -526,7 +494,7 @@ Outputs
 
 ---
 
-# Interview Agent
+## Interview Agent
 
 Purpose
 
@@ -551,7 +519,7 @@ Outputs
 
 ---
 
-# Career Agent
+## Career Agent
 
 Purpose
 
@@ -574,7 +542,7 @@ Outputs
 
 ---
 
-# Model Manager Agent
+## Model Manager Agent
 
 Purpose
 
@@ -596,7 +564,7 @@ The user should rarely need to manually select models.
 
 ---
 
-# Knowledge Agent
+## Knowledge Agent
 
 Purpose
 
@@ -616,71 +584,28 @@ The Knowledge Agent should minimize hallucinations by providing grounded context
 
 ---
 
-# AI Execution Lifecycle
+## AI Execution Lifecycle
 
 Every AI request follows a predictable workflow.
 
-User Action
-
-↓
-
-Determine Intent
-
-↓
-
-Plan Workflow
-
-↓
-
-Select Specialized Agent
-
-↓
-
-Retrieve Context
-
-↓
-
-Retrieve Documents
-
-↓
-
-Select Provider
-
-↓
-
-Select Model
-
-↓
-
-Load Model
-
-↓
-
-Execute Task
-
-↓
-
-Validate Response
-
-↓
-
-Prepare Structured Result
-
-↓
-
-Present to User
-
-↓
-
-Wait for Approval (if required)
-
-↓
-
-Persist Results
-
-↓
-
-Unload Model After Idle Timeout
+```mermaid
+flowchart TD
+  A[User Action] --> B[Determine Intent]
+  B --> C[Plan Workflow]
+  C --> D[Select Specialized Agent]
+  D --> E[Retrieve Context]
+  E --> F[Retrieve Documents]
+  F --> G[Select Provider]
+  G --> H[Select Model]
+  H --> I[Load Model]
+  I --> J[Execute Task]
+  J --> K[Validate Response]
+  K --> L[Prepare Structured Result]
+  L --> M[Present to User]
+  M --> N["Wait for Approval (if required)"]
+  N --> O[Persist Results]
+  O --> P[Unload Model After Idle Timeout]
+```
 
 The execution lifecycle should be observable and debuggable.
 
@@ -688,7 +613,7 @@ Users should be able to inspect what happened during any AI workflow.
 
 ---
 
-# AI Context Retrieval
+## AI Context Retrieval
 
 Before generating any content, the AI should retrieve relevant information.
 
@@ -715,7 +640,7 @@ Irrelevant context should never be sent to AI models.
 
 ---
 
-# Prompt Templates
+## Prompt Templates
 
 Prompt templates should not be hardcoded.
 
@@ -740,7 +665,7 @@ Community members should be able to contribute improved prompts without modifyin
 
 ---
 
-# Human Approval
+## Human Approval
 
 JobJitsu should never silently perform irreversible actions.
 
@@ -762,7 +687,7 @@ Even then, the user should always have visibility into completed actions.
 
 ---
 
-# AI Provider Architecture
+## AI Provider Architecture
 
 JobJitsu is provider-agnostic.
 
@@ -775,8 +700,8 @@ Every provider must implement the same capabilities while allowing provider-spec
 Users should be free to:
 
 - Use local models only
-- Use cloud providers only
-- Mix local and cloud providers
+- Use user-configured remote AI Providers only
+- Mix local and remote AI Providers
 - Configure providers for specific tasks
 - Disable providers entirely
 
@@ -784,13 +709,13 @@ The rest of the application should not need to know which provider generated the
 
 ---
 
-# Provider Categories
+## Provider Categories
 
 JobJitsu supports two primary categories of AI providers.
 
-## Local Providers
+### Local Providers
 
-Local providers are the recommended default.
+Local providers are the recommended default. When the on-device path is active, status chrome should show **Agent · On-device** (not “Local LLM” in the UI).
 
 Advantages include:
 
@@ -816,11 +741,11 @@ The architecture should allow additional providers to be added through plugins.
 
 ---
 
-## Cloud Providers
+### Remote AI Providers
 
-Cloud providers are optional.
+Remote AI Providers are optional and user-configured. JobJitsu does not operate a backend that runs AI on the user's behalf.
 
-Users may choose to use paid AI services when they require higher quality models, faster inference, larger context windows, or advanced reasoning capabilities.
+Users may choose to connect their own paid AI services when they require higher quality models, faster inference, larger context windows, or advanced reasoning capabilities.
 
 Examples include:
 
@@ -838,11 +763,11 @@ Examples include:
 
 Additional providers should be installable through plugins.
 
-Cloud providers should never become mandatory.
+Remote AI Providers should never become mandatory.
 
 ---
 
-# User-Owned API Keys
+## User-Owned API Keys
 
 JobJitsu does not provide AI subscriptions.
 
@@ -894,7 +819,7 @@ Linux
 
 ---
 
-# Provider Preferences
+## Provider Preferences
 
 Users should be able to configure default providers globally or per task.
 
@@ -940,7 +865,7 @@ The platform should automatically use the configured provider whenever possible.
 
 ---
 
-# Automatic Provider Selection
+## Automatic Provider Selection
 
 Users may optionally allow JobJitsu to select providers automatically.
 
@@ -961,7 +886,7 @@ Users should be able to see why a provider was selected.
 
 ---
 
-# AI Model Catalog
+## AI Model Catalog
 
 JobJitsu should maintain a curated catalog of recommended AI models.
 
@@ -993,55 +918,55 @@ The catalog should be updateable independently of application releases whenever 
 
 ---
 
-# Model Categories
+## Model Categories
 
 Models should be grouped by capability.
 
 Examples include:
 
-## General Purpose
+### General Purpose
 
 Balanced models suitable for most AI tasks.
 
 ---
 
-## Resume Models
+### Resume Models
 
 Optimized for writing resumes and cover letters.
 
 ---
 
-## Coding Models
+### Coding Models
 
 Optimized for software engineering tasks.
 
 ---
 
-## Reasoning Models
+### Reasoning Models
 
 Optimized for planning, analysis, and complex decision making.
 
 ---
 
-## Embedding Models
+### Embedding Models
 
 Used for semantic search and retrieval.
 
 ---
 
-## Vision Models
+### Vision Models
 
 Used for OCR, screenshots, scanned resumes, and image understanding.
 
 ---
 
-## Multimodal Models
+### Multimodal Models
 
 Capable of processing both text and images.
 
 ---
 
-# Official Recommendations
+## Official Recommendations
 
 The project maintainers should publish recommended models.
 
@@ -1071,13 +996,13 @@ Community recommendations should be reviewed regularly.
 
 ---
 
-# AI Configuration Profiles
+## AI Configuration Profiles
 
 Many users will not know which models to install.
 
 JobJitsu should provide recommended presets.
 
-## Lightweight
+### Lightweight
 
 Designed for older laptops.
 
@@ -1089,7 +1014,7 @@ Prioritizes:
 
 ---
 
-## Balanced
+### Balanced
 
 Recommended for most users.
 
@@ -1097,7 +1022,7 @@ Balances quality and performance.
 
 ---
 
-## Professional
+### Professional
 
 Designed for developers and power users.
 
@@ -1105,7 +1030,7 @@ Prioritizes output quality while remaining practical.
 
 ---
 
-## Maximum Quality
+### Maximum Quality
 
 Designed for high-end workstations.
 
@@ -1113,13 +1038,13 @@ Prioritizes reasoning quality over inference speed.
 
 ---
 
-## Custom
+### Custom
 
 Allows complete manual configuration.
 
 ---
 
-# Model Downloads
+## Model Downloads
 
 The application should help users install local models.
 
@@ -1138,7 +1063,7 @@ The application should clearly display estimated storage requirements before dow
 
 ---
 
-# AI Playground
+## AI Playground
 
 JobJitsu should include an AI Playground.
 
@@ -1162,7 +1087,7 @@ The Playground should become the primary environment for testing prompts before 
 
 ---
 
-# Prompt Library
+## Prompt Library
 
 Prompt templates should be first-class assets.
 
@@ -1190,7 +1115,7 @@ Prompt templates should be replaceable without modifying source code.
 
 ---
 
-# Resource Management
+## Resource Management
 
 Running local AI models consumes significant resources.
 
@@ -1211,7 +1136,7 @@ Users should always understand why system resources are being used.
 
 ---
 
-# Offline Strategy
+## Offline Strategy
 
 The platform should continue functioning even when internet access is unavailable.
 
@@ -1233,14 +1158,14 @@ Internet should only be required for:
 - Downloading models
 - Syncing email
 - Searching online job boards
-- Cloud AI providers
+- Remote AI Providers (user-configured)
 - Software updates
 
 Core functionality should remain available offline.
 
 ---
 
-# Future AI Capabilities
+## Future AI Capabilities
 
 The architecture should support future AI enhancements without requiring major redesign.
 
@@ -1264,7 +1189,7 @@ The architecture should remain flexible enough to support capabilities that do n
 
 ---
 
-# User Profile
+## User Profile
 
 The User Profile is the foundation of the entire platform.
 
@@ -1276,11 +1201,11 @@ The user should always remain in control of their profile data.
 
 ---
 
-# Profile Information
+## Profile Information
 
 The platform should support storing information including, but not limited to:
 
-## Personal Information
+### Personal Information
 
 - Full Name
 - Preferred Name
@@ -1295,7 +1220,7 @@ The platform should support storing information including, but not limited to:
 
 ---
 
-## Professional Information
+### Professional Information
 
 - Current Role
 - Years of Experience
@@ -1306,7 +1231,7 @@ The platform should support storing information including, but not limited to:
 
 ---
 
-## Employment Preferences
+### Employment Preferences
 
 - Preferred Job Titles
 - Preferred Industries
@@ -1323,7 +1248,7 @@ The platform should support storing information including, but not limited to:
 
 ---
 
-## Skills
+### Skills
 
 The platform should maintain structured skill data.
 
@@ -1351,7 +1276,7 @@ Each skill may include:
 
 ---
 
-## Experience
+### Experience
 
 Each work experience should become structured knowledge.
 
@@ -1372,7 +1297,7 @@ Rather than treating experiences as plain text, JobJitsu should understand:
 
 ---
 
-## Projects
+### Projects
 
 Projects should become reusable knowledge.
 
@@ -1395,7 +1320,7 @@ Projects should later become reusable context for resumes, interviews and cover 
 
 ---
 
-## Education
+### Education
 
 Support:
 
@@ -1408,7 +1333,7 @@ Support:
 
 ---
 
-# Resume Intelligence
+## Resume Intelligence
 
 JobJitsu should not think of resumes as files.
 
@@ -1430,7 +1355,7 @@ This eliminates duplication while making tailoring significantly easier.
 
 ---
 
-# Resume Library
+## Resume Library
 
 Users should be able to maintain multiple resumes.
 
@@ -1466,7 +1391,7 @@ Each resume should remain linked to the same knowledge base.
 
 ---
 
-# Resume Import
+## Resume Import
 
 Users should be able to import resumes from multiple formats.
 
@@ -1484,7 +1409,7 @@ The original file should also be preserved.
 
 ---
 
-# Resume Versioning
+## Resume Versioning
 
 Every generated resume should become a version.
 
@@ -1500,7 +1425,7 @@ Version history should be searchable.
 
 ---
 
-# Resume Templates
+## Resume Templates
 
 Templates should be independent from resume data.
 
@@ -1519,7 +1444,7 @@ Future templates should be installable through extensions.
 
 ---
 
-# Resume Tailoring
+## Resume Tailoring
 
 Resume tailoring should become one of the platform's strongest capabilities.
 
@@ -1545,9 +1470,9 @@ Users should always preview changes before saving.
 
 ---
 
-# Resume Analysis
+## Resume Analysis
 
-The Resume Agent should continuously analyze resumes.
+The Resume Agent should analyze resumes on demand—when the user requests analysis or when a relevant event occurs—not continuously in the background.
 
 Possible insights include:
 
@@ -1565,7 +1490,7 @@ The system should explain every recommendation.
 
 ---
 
-# Resume Scoring
+## Resume Scoring
 
 Scores should not be arbitrary.
 
@@ -1580,7 +1505,7 @@ Scores should evolve as better analysis methods become available.
 
 ---
 
-# Cover Letter Intelligence
+## Cover Letter Intelligence
 
 Cover letters should become reusable assets.
 
@@ -1596,7 +1521,7 @@ Generated cover letters should always remain editable.
 
 ---
 
-# Cover Letter Styles
+## Cover Letter Styles
 
 Examples:
 
@@ -1612,7 +1537,7 @@ Users should be able to define their own preferred writing style.
 
 ---
 
-# Cover Letter Generation
+## Cover Letter Generation
 
 Generation should consider:
 
@@ -1630,7 +1555,7 @@ Each generated letter should feel personalized.
 
 ---
 
-# Portfolio Intelligence
+## Portfolio Intelligence
 
 The platform should maintain structured portfolio information.
 
@@ -1650,7 +1575,7 @@ Future AI workflows should reference portfolio data automatically.
 
 ---
 
-# Career Knowledge Base
+## Career Knowledge Base
 
 The Knowledge Base is one of JobJitsu's most valuable assets.
 
@@ -1675,7 +1600,7 @@ The AI should retrieve relevant knowledge before generating content.
 
 ---
 
-# Knowledge Retrieval
+## Knowledge Retrieval
 
 Before any AI generation, the platform should search the Knowledge Base.
 
@@ -1707,7 +1632,7 @@ Rather than relying on model memory, the AI should always work from structured u
 
 ---
 
-# Achievement Library
+## Achievement Library
 
 Users should maintain a reusable achievement library.
 
@@ -1730,7 +1655,7 @@ Achievements should be reusable across:
 
 ---
 
-# Story Library
+## Story Library
 
 Behavioral interviews often require repeating the same stories.
 
@@ -1755,7 +1680,7 @@ The Interview Agent should automatically retrieve appropriate stories when prepa
 
 ---
 
-# Job Discovery
+## Job Discovery
 
 JobJitsu should help users discover relevant opportunities from multiple job sources through a provider-based architecture.
 
@@ -1767,7 +1692,7 @@ This allows new providers to be added without modifying the platform core.
 
 ---
 
-# Job Providers
+## Job Providers
 
 Examples of supported providers include:
 
@@ -1786,7 +1711,7 @@ Each provider should expose a consistent interface so the rest of the platform r
 
 ---
 
-# Search Profiles
+## Search Profiles
 
 Users should be able to save multiple job searches.
 
@@ -1823,7 +1748,7 @@ Search profiles should be reusable and editable.
 
 ---
 
-# Job Synchronization
+## Job Synchronization
 
 Users may manually search for jobs or schedule synchronization.
 
@@ -1841,7 +1766,7 @@ AI should only execute after new jobs have been collected.
 
 ---
 
-# Job Analysis
+## Job Analysis
 
 After new opportunities have been synchronized, the AI Agent may analyze them.
 
@@ -1860,7 +1785,7 @@ The analysis should always explain why a recommendation was made.
 
 ---
 
-# Job Match Score
+## Job Match Score
 
 Each opportunity should receive a transparent match score.
 
@@ -1879,7 +1804,7 @@ Scores should never be presented as arbitrary numbers.
 
 ---
 
-# Company Summary
+## Company Summary
 
 For every opportunity, the platform should generate a concise company summary.
 
@@ -1895,7 +1820,7 @@ The summary should help users quickly determine whether they want to apply.
 
 ---
 
-# Resume Recommendation
+## Resume Recommendation
 
 Before generating a tailored resume, the platform should determine whether an existing resume already fits the role.
 
@@ -1910,63 +1835,36 @@ This avoids unnecessary AI execution.
 
 ---
 
-# Application Pipeline
+## Application Pipeline
 
 Every application should move through a structured lifecycle.
 
 Examples:
 
-Discovered
+```mermaid
+stateDiagram-v2
+  Discovered --> Saved
+  Saved --> Analyzed
+  Analyzed --> ResumeGenerated
+  ResumeGenerated --> CoverLetterGenerated
+  CoverLetterGenerated --> ReadyForReview
+  ReadyForReview --> Submitted
+  Submitted --> Assessment
+  Assessment --> Interview
+  Interview --> Offer
+  Offer --> Rejected
+  Rejected --> Archived
 
-↓
-
-Saved
-
-↓
-
-Analyzed
-
-↓
-
-Resume Generated
-
-↓
-
-Cover Letter Generated
-
-↓
-
-Ready for Review
-
-↓
-
-Submitted
-
-↓
-
-Assessment
-
-↓
-
-Interview
-
-↓
-
-Offer
-
-↓
-
-Rejected
-
-↓
-
-Archived
+  state "Resume Generated" as ResumeGenerated
+  state "Cover Letter Generated" as CoverLetterGenerated
+  state "Ready for Review" as ReadyForReview
+```
 
 Every transition should be recorded.
 
 ---
 
-# Browser Automation
+## Browser Automation
 
 Browser automation is responsible for reducing repetitive work during job applications.
 
@@ -1987,7 +1885,7 @@ The platform should avoid interacting with unsupported websites.
 
 ---
 
-# Human Review
+## Human Review
 
 Before submission, users should be presented with a review screen showing:
 
@@ -2002,7 +1900,7 @@ Users should be able to edit any generated content before submission.
 
 ---
 
-# Application Tracking
+## Application Tracking
 
 Every submitted application should be tracked.
 
@@ -2023,7 +1921,7 @@ The platform should maintain a complete application history.
 
 ---
 
-# Duplicate Detection
+## Duplicate Detection
 
 Before submitting an application, the platform should determine whether the user has already applied for the same position.
 
@@ -2033,7 +1931,7 @@ Users should decide whether to continue.
 
 ---
 
-# Email Integration
+## Email Integration
 
 JobJitsu should support optional email integration.
 
@@ -2045,7 +1943,7 @@ Email integration exists to help users manage their job search—not to replace 
 
 ---
 
-# Gmail Synchronization
+## Gmail Synchronization
 
 After connecting Gmail, the platform should synchronize career-related emails.
 
@@ -2062,7 +1960,7 @@ Synchronization should be incremental to avoid unnecessary processing.
 
 ---
 
-# Email Classification
+## Email Classification
 
 Once emails have been synchronized, the AI Agent may classify them.
 
@@ -2086,7 +1984,7 @@ Classification should occur after synchronization, allowing the AI to run only w
 
 ---
 
-# Draft Replies
+## Draft Replies
 
 For supported email providers, JobJitsu may generate suggested replies.
 
@@ -2101,7 +1999,7 @@ Drafts should always be reviewed before sending.
 
 ---
 
-# Follow-up Tracking
+## Follow-up Tracking
 
 The platform should help users maintain professional communication.
 
@@ -2121,7 +2019,7 @@ The AI may suggest follow-ups based on communication history but should never se
 
 ---
 
-# Recruiter Management
+## Recruiter Management
 
 Recruiters should be treated as long-term professional contacts.
 
@@ -2139,7 +2037,7 @@ Users should be able to search recruiters across all applications.
 
 ---
 
-# LinkedIn Messaging
+## LinkedIn Messaging
 
 Where technically possible and compliant with LinkedIn's terms of service, JobJitsu may assist with recruiter communication.
 
@@ -2155,7 +2053,7 @@ The platform should not encourage behavior that violates third-party platform po
 
 ---
 
-# Activity Timeline
+## Activity Timeline
 
 Every application should maintain a complete timeline.
 
@@ -2195,51 +2093,29 @@ The timeline should become the single source of truth for each opportunity.
 
 ---
 
-# Event-Driven AI
+## Event-Driven AI
 
 JobJitsu should avoid continuously running AI models.
 
 Instead, the workflow should be:
 
-Synchronize Jobs
-
-↓
-
-Synchronize Emails
-
-↓
-
-User Initiates Analysis
-
-↓
-
-AI Loads
-
-↓
-
-Jobs Analyzed
-
-↓
-
-Emails Classified
-
-↓
-
-Recommendations Generated
-
-↓
-
-Results Saved
-
-↓
-
-AI Unloads
+```mermaid
+flowchart TD
+  A[Synchronize Jobs] --> B[Synchronize Emails]
+  B --> C[User Initiates Analysis]
+  C --> D[AI Loads]
+  D --> E[Jobs Analyzed]
+  E --> F[Emails Classified]
+  F --> G[Recommendations Generated]
+  G --> H[Results Saved]
+  H --> I[AI Unloads]
+```
 
 This event-driven approach minimizes CPU, RAM, GPU usage, and power consumption while maintaining a responsive experience.
 
 ---
 
-# Settings
+## Settings
 
 The Settings module provides centralized configuration for the entire platform.
 
@@ -2260,7 +2136,7 @@ The initial settings categories should include:
 
 ---
 
-# General Settings
+## General Settings
 
 Users should be able to configure:
 
@@ -2272,7 +2148,7 @@ Users should be able to configure:
 
 ---
 
-# Appearance
+## Appearance
 
 The application should support:
 
@@ -2286,13 +2162,13 @@ The appearance should follow the JobJitsu brand guidelines.
 
 ---
 
-# AI Settings
+## AI Settings
 
 Users should be able to configure:
 
 - Default AI provider
 - Default local model
-- Default cloud provider
+- Default remote AI Provider
 - AI timeout
 - Model unload timeout
 - Maximum concurrent AI tasks
@@ -2303,7 +2179,7 @@ Users should always be able to see which model is currently active.
 
 ---
 
-# Integration Settings
+## Integration Settings
 
 Users should manage optional integrations from one location.
 
@@ -2322,7 +2198,7 @@ Users should be able to:
 
 ---
 
-# Automation Settings
+## Automation Settings
 
 Users should decide how much automation JobJitsu performs.
 
@@ -2341,7 +2217,7 @@ Trusted automation should remain disabled by default.
 
 ---
 
-# Privacy Settings
+## Privacy Settings
 
 Privacy should remain one of the platform's core strengths.
 
@@ -2353,11 +2229,11 @@ Users should be able to:
 - Delete generated documents
 - Disconnect integrations
 
-The application should clearly indicate whether AI processing is occurring locally or through a cloud provider.
+The application should clearly indicate whether AI processing is occurring locally or through a user-configured remote AI Provider. Status chrome for on-device intelligence is **Agent · On-device** (not “Local LLM” in the UI); remote Providers must be honestly labeled and never presented as on-device.
 
 ---
 
-# Storage Settings
+## Storage Settings
 
 Users should be able to:
 
@@ -2369,7 +2245,7 @@ Users should be able to:
 
 ---
 
-# Plugin Architecture
+## Plugin Architecture
 
 JobJitsu should expose a stable plugin system.
 
@@ -2381,7 +2257,7 @@ Plugins should communicate with the application through well-defined interfaces.
 
 ---
 
-# Plugin Categories
+## Plugin Categories
 
 The initial plugin categories include:
 
@@ -2401,7 +2277,7 @@ Each plugin should declare:
 
 ---
 
-# Plugin Loading
+## Plugin Loading
 
 Plugins should be discovered during application startup.
 
@@ -2415,7 +2291,7 @@ No plugin should be capable of crashing the entire application.
 
 ---
 
-# Local Storage
+## Local Storage
 
 The platform should store all user data locally.
 
@@ -2436,7 +2312,7 @@ The storage implementation should support future migrations without data loss.
 
 ---
 
-# Secrets Management
+## Secrets Management
 
 Sensitive credentials should never be stored in plain text.
 
@@ -2449,7 +2325,7 @@ Whenever possible, credentials should be stored using the operating system's sec
 
 ---
 
-# Logging
+## Logging
 
 Logging should assist debugging without exposing sensitive information.
 
@@ -2473,7 +2349,7 @@ Sensitive information should always be redacted.
 
 ---
 
-# Error Handling
+## Error Handling
 
 Errors should be:
 
@@ -2487,7 +2363,7 @@ Unexpected failures should never result in silent data loss.
 
 ---
 
-# Performance Goals
+## Performance Goals
 
 The platform should feel lightweight and responsive.
 
@@ -2504,7 +2380,7 @@ Long-running operations should execute in the background without blocking the us
 
 ---
 
-# Accessibility
+## Accessibility
 
 JobJitsu should follow modern accessibility practices.
 
@@ -2520,7 +2396,7 @@ Accessibility should be considered throughout development rather than added afte
 
 ---
 
-# Testing Requirements
+## Testing Requirements
 
 Testing is a core requirement of the project.
 
@@ -2538,7 +2414,7 @@ A feature is not considered complete until its corresponding tests have been imp
 
 ---
 
-# Documentation Requirements
+## Documentation Requirements
 
 Every significant feature should include documentation updates.
 
@@ -2548,7 +2424,7 @@ New contributors should be able to understand the platform by reading the docume
 
 ---
 
-# Contribution Standards
+## Contribution Standards
 
 The project should remain welcoming to contributors.
 
@@ -2563,7 +2439,7 @@ Architectural changes should be discussed before implementation.
 
 ---
 
-# AI Development Workflow
+## AI Development Workflow
 
 All AI-assisted development should follow the same workflow.
 
@@ -2585,7 +2461,7 @@ The AI should not begin coding until the planning phase has been completed.
 
 ---
 
-# Definition of Done
+## Definition of Done
 
 A feature is considered complete only when:
 
@@ -2597,7 +2473,7 @@ A feature is considered complete only when:
 
 ---
 
-# Conclusion
+## Conclusion
 
 JobJitsu is designed to be a privacy-first, local-first, open-source desktop platform that assists users throughout the job application process while keeping them in complete control.
 

@@ -5,7 +5,7 @@
 
 This folder defines **how the system is structured**. It is design intent — not runnable code, APIs, or a sprint backlog.
 
-**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Features](../product/FEATURES.md) · [Principles](../product/PRINCIPLES.md) · [Non-goals](../product/NON_GOALS.md) · [Architecture rule](../../.cursor/rules/architecture.mdc)
+**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Features](../product/FEATURES.md) · [Principles](../product/PRINCIPLES.md) · [Non-goals](../product/NON_GOALS.md) · [Terminology](../product/TERMINOLOGY.md) · [Architecture rule](../../.cursor/rules/architecture.mdc)
 
 ---
 
@@ -13,29 +13,24 @@ This folder defines **how the system is structured**. It is design intent — no
 
 JobJitsu is a **local-first desktop OS for career craft**. All intimate state lives on the machine. The agent prepares; **Send** is the only place career data may leave — and only with explicit user sovereignty. Automation is a belt, not a leash.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Desktop shell (app)                      │
-│   UI · Privacy chrome · IPC · one calm job per view          │
-└─────────────┬───────────────────────────────┬───────────────┘
-              │ events / commands             │
-┌─────────────▼──────────────┐   ┌────────────▼───────────────┐
-│     Domain packages         │   │  Local Intelligence (AI)   │
-│  identity · prefs · agent   │   │  local LLM · context       │
-│  discovery · apps · queue   │   │  no silent cloud fallback  │
-│  send · follow-ups · memory │   └────────────────────────────┘
-└─────────────┬──────────────┘
-              │
-┌─────────────▼──────────────┐   ┌────────────────────────────┐
-│  Storage · Scheduler        │   │ Plugins / Extensions       │
-│  on-device persistence       │   │ user-enabled · inspectable │
-│  calm local jobs            │   │ capability-gated           │
-└────────────────────────────┘   └────────────────────────────┘
+Status chrome for on-device intelligence is **Agent · On-device** (see [TERMINOLOGY.md](../product/TERMINOLOGY.md)). Technical docs may still say Local LLM when discussing model providers.
 
-                    ║  OUTBOUND BOUNDARY  ║
-                    ║  approve → send     ║
-                    ▼                     ▼
-              external boards / mail (user-initiated only)
+```mermaid
+flowchart TB
+  shell["Desktop shell (app)<br/>UI · Privacy chrome · IPC · one calm job per view"]
+  domain["Domain packages<br/>identity · prefs · agent<br/>discovery · apps · queue<br/>send · follow-ups · memory"]
+  ai["Local Intelligence (AI)<br/>local LLM · context<br/>no silent cloud fallback"]
+  storage["Storage · Scheduler<br/>on-device persistence<br/>calm local jobs"]
+  plugins["Plugins / Extensions<br/>user-enabled · inspectable<br/>capability-gated"]
+  boundary{{"OUTBOUND BOUNDARY<br/>approve → send"}}
+  external["external boards / mail<br/>user-initiated only"]
+
+  shell -->|events / commands| domain
+  shell --> ai
+  domain --> storage
+  domain --- plugins
+  storage --> boundary
+  boundary --> external
 ```
 
 ---

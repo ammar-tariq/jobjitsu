@@ -47,8 +47,8 @@ Metaphor: **off** in error titles. Plain language only.
 **Body:** Check the link and your connection, then try again. Your draft is still here.  
 **Actions:** Retry · Open draft  
 
-### Local LLM failed to load
-**Title:** Local LLM didn’t start  
+### On-device model failed to load
+**Title:** Agent didn’t start  
 **Body:** Confirm the model path in preferences. Nothing left this machine.  
 **Actions:** Open preferences · Retry  
 
@@ -82,7 +82,7 @@ Metaphor: **off** in error titles. Plain language only.
 | Auth to external board | “Sign-in needed for that board” |
 | Validation | “Missing {field} — add it to continue” |
 | Disk / FS | “Can’t access that file” |
-| Model OOM / crash | “Local LLM ran out of resources” |
+| Model OOM / crash | “On-device model ran out of resources” |
 
 ---
 

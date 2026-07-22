@@ -19,7 +19,7 @@ Rules for every sentence in the product, README, and marketing. Complements [VOI
 ### Capitalization
 - **Sentence case** for UI: buttons, menus, titles, toasts (“Send application”, not “Send Application”).
 - **JobJitsu** always as one word, capital J twice. Never “Job Jitsu”, “Jobjitsu”, or “JOBJITSU” in prose.
-- Product areas use sentence case: “Follow-up reminders”, “Local LLM”.
+- Product areas use sentence case: “Follow-up reminders”, “Agent · On-device”.
 
 ### Punctuation
 - Prefer periods over exclamation marks. Exclamations are rare and reserved for genuine milestones.

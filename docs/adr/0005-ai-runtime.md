@@ -8,7 +8,7 @@
 
 ## Context
 
-Local Intelligence is a core module: tailor, draft, embed, assist. Defaulting to a vendor cloud LLM would make privacy a toggle and contradict “Local LLM” trust chrome. Users still need a swappable runtime (different local runners/models).
+Local Intelligence is a core module: tailor, draft, embed, assist. Defaulting to a vendor cloud LLM would make privacy a toggle and contradict **Agent · On-device** trust chrome. Users still need a swappable runtime (different local runners/models).
 
 Alternatives considered:
 
