@@ -22,7 +22,7 @@ Drive documentation phases **in order**, with an **approval checkpoint** after e
 | Step | Prompt | After completion |
 |------|--------|------------------|
 | 1 | [01_cleanup_docs.md](./01_cleanup_docs.md) | **Stop. Wait for approval.** |
-| 2 | [02_validate_docs.md](./02_validate_docs.md) | **Stop. Wait for approval.** |
+| 2 | [02_validate_documentation.md](./02_validate_documentation.md) | **Stop. Wait for approval.** |
 | 3 | [03_generate_architecture.md](./03_generate_architecture.md) | **Stop. Wait for approval.** |
 | 4 | [04_review_architecture.md](./04_review_architecture.md) | **Stop. Wait for approval.** |
 | 5 | [05_generate_user_stories.md](./05_generate_user_stories.md) | **Stop. Wait for approval.** |

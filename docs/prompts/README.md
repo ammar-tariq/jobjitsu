@@ -20,7 +20,7 @@ the agent must open that file and follow it exactly.
 |--------|--------|
 | [00_PROJECT_WORKFLOW.md](./00_PROJECT_WORKFLOW.md) | Orchestration (all phases, approvals) |
 | [01_cleanup_docs.md](./01_cleanup_docs.md) | Normalize existing docs |
-| [02_validate_docs.md](./02_validate_docs.md) | Audit consistency |
+| [02_validate_documentation.md](./02_validate_documentation.md) | Full architecture readiness validation |
 | [03_generate_architecture.md](./03_generate_architecture.md) | Architecture docs (**how**) |
 | [04_review_architecture.md](./04_review_architecture.md) | Architecture review |
 | [05_generate_user_stories.md](./05_generate_user_stories.md) | Backlog stories |
