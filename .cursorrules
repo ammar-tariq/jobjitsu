@@ -1,0 +1,57 @@
+# JobJitsu — Generate Git commit message
+
+When Cursor auto-generates a Git commit message for this repository (Source Control sparkle / AI Commit), follow these rules exactly.
+
+## Required format
+
+```
+<type>(optional-scope): <lowercase imperative subject>
+
+- Short bullet about why or what changed
+- Another bullet if needed
+```
+
+Output **only** that message. No markdown fences. No preamble. No “This commit…”.
+
+## Types (header must start with one)
+
+`feat` | `fix` | `chore` | `docs` | `refactor` | `perf` | `test` | `build` | `ci` | `style` | `revert`
+
+## Hard rules (Commitlint will reject otherwise)
+
+- Header: `type` then optional `(kebab-scope)` then `: ` then subject
+- Subject: lowercase, imperative (“add”, “fix”, “drive”), no trailing period, max 100 chars
+- Body: one blank line after header; only `- ` bullets; each line max 100 chars
+- Scope optional, kebab-case: `app`, `events`, `core`, `ai`, `tooling`, `brand`, `extension-sdk`
+
+## Copy this style (recent good commits)
+
+```
+feat(app): drive host through an event cascade
+
+- Add App.Started, Plugin.Loaded, Resume.Generated, and Email.Synced
+- Own fake AI in the host; fence shell UI from importing @jobjitsu/ai
+```
+
+```
+chore(tooling): commit after each completed prompt
+
+- Add cursor rule to land Conventional Commits when a slice finishes
+```
+
+## Never generate (wrong)
+
+```
+Add initial project structure and configuration files
+This commit establishes the foundational structure...
+```
+
+```
+Update README with new architecture details.
+```
+
+```
+Implement ESLint and Prettier configurations, add commitlint...
+```
+
+No type prefix, essay paragraphs, Title Case subjects, or trailing periods on the subject.

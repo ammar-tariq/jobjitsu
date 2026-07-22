@@ -1,96 +1,70 @@
 ---
-description: Generate Conventional Commit messages
+description: Conventional Commits for AI Commit, sparkle button, and agent commits
 alwaysApply: true
 ---
 
 # Commit messages
 
-When asked to generate a Git commit message (including Cursor AI Commit), **ALWAYS** output a valid [Conventional Commits](https://www.conventionalcommits.org/) message.
+When generating a Git commit message (Cursor AI Commit / Source Control sparkle / agent commit), **output only** a Commitlint-valid [Conventional Commit](https://www.conventionalcommits.org/).
 
-This repo enforces the format via **Commitlint** (`commitlint.config.js`) on the `commit-msg` Husky hook.
+Enforced by `commitlint.config.js` on the Husky `commit-msg` hook.
 
-## Output format
-
-```
-<type>(optional-scope): <subject>
-
-<body>
-```
-
-**Output only the commit message.** No explanations, no markdown fences, no commentary.
-
-## Template (preferred)
+## Format
 
 ```
-<type>(optional-scope): <short lowercase summary>
+<type>(optional-scope): <lowercase imperative subject>
 
-- Bullet point 1
-- Bullet point 2
-- Bullet point 3
+- Bullet 1
+- Bullet 2
 ```
 
-## Types (first line MUST start with one of these)
+No explanations, markdown fences, or “This commit…” prose.
 
-- `feat`
-- `fix`
-- `chore`
-- `docs`
-- `refactor`
-- `perf`
-- `test`
-- `build`
-- `ci`
-- `style`
-- `revert`
+## Types
 
-## Subject rules
+`feat` | `fix` | `chore` | `docs` | `refactor` | `perf` | `test` | `build` | `ci` | `style` | `revert`
 
-- Lowercase (no PascalCase / UPPERCASE)
-- Imperative mood (“add”, “fix”, “introduce” — not “added” / “fixes”)
-- Must **not** end with a period
-- Prefer under **72** characters; hard max **100** (Commitlint `header-max-length`)
-- Never use a bare GitHub-style title like `Update README` or `Fix bug` without a type prefix
-- Do not start the subject with “Update”, “Refactor”, or “Add” as a substitute for the type — the type comes first: `feat(…): add …`
+## Subject
+
+- Lowercase; imperative (“add”, “fix”, “introduce”)
+- No trailing period; prefer ≤72 chars; max **100**
+- Never a bare title (`Update README`, `Fix bug`) — type prefix is required
+- Type carries the verb class: `feat(…): add …` not `Add …` alone
 
 ## Scope (optional)
 
-- **kebab-case** only (Commitlint `scope-case`)
-- Prefer package or area names, e.g. `core`, `events`, `ai`, `brand`, `backlog`, `tooling`
+kebab-case only: `app`, `events`, `core`, `ai`, `tooling`, `brand`, `extension-sdk`, `backlog`
 
-## Body rules
+## Body
 
-- Separate from the subject with **one blank line**
-- Wrap every body line at **100** characters or less
-- Use `- ` bullet points for multiple changes
-- Focus on **why** / notable deltas; keep calm and precise (JobJitsu voice)
+- One blank line after the subject
+- `- ` bullets; every line ≤ **100** chars
+- Why / notable deltas; calm JobJitsu voice
 
-## Examples
-
-```
-feat(ai): introduce local intelligence provider contracts
-
-- Add AiProvider interface
-- Add AiProviderRegistry interface
-- Export provider types
-- Update README to document the new architecture
-- Expand tests for provider contracts
-```
+## Good
 
 ```
 feat(events): add in-memory event bus
 
 - Implement createInMemoryEventBus with ordered delivery
-- Support optional durable sink for egress events
 - Cover pub/sub and unsubscribe in unit tests
 ```
 
 ```
-docs(brand): align ui copy with agent on-device terminology
-
-- Prefer Agent over LLM in user-facing chrome
-- Document branding-for-development rules
-```
-
-```
 chore(tooling): configure commitlint husky and lint-staged
+```
+
+## Bad (never)
+
+```
+Add initial project structure and configuration files for JobJitsu
+This commit establishes the foundational structure...
+```
+
+```
+Update README with architecture details.
+```
+
+```
+Implement ESLint and Prettier configurations, add commitlint for validation...
 ```
