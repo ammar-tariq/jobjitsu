@@ -78,6 +78,7 @@ See [.changeset/README.md](./.changeset/README.md).
 ```
 jobjitsu/
 ├── app/                 # Desktop shell package (@jobjitsu/app)
+├── website/             # Docs site (@jobjitsu/website, Docusaurus → /docs)
 ├── packages/            # Domain & UI libraries (@jobjitsu/*)
 ├── plugins/             # Official plugins (future workspace members)
 ├── examples/            # Fixtures / samples (future)
@@ -91,6 +92,13 @@ jobjitsu/
 ├── turbo.json
 ├── tsconfig.base.json
 └── vitest.workspace.ts
+```
+
+Filter examples:
+
+```bash
+pnpm --filter @jobjitsu/website dev
+pnpm --filter @jobjitsu/website build
 ```
 
 See [packages/README.md](./packages/README.md) and [docs/architecture/MONOREPO.md](./docs/architecture/MONOREPO.md).

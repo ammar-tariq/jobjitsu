@@ -2,6 +2,7 @@ node_modules
 .turbo
 dist
 build
+.docusaurus
 coverage
 pnpm-lock.yaml
 *.tsbuildinfo
@@ -14,5 +15,6 @@ assets
 !MONOREPO.md
 !**/packages/*/README.md
 !app/README.md
+!website/README.md
 !plugins/**/*.md
 !examples/**/*.md

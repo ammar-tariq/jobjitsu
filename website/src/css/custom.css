@@ -1,0 +1,138 @@
+/**
+ * JobJitsu Docusaurus theme — Midnight Ink + Electric Teal, Inter body.
+ * Brand tokens from docs/brand/BRAND_GUIDELINES.md and THEME_DARK.md.
+ */
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
+:root {
+  --jj-midnight-ink: #0b0a1a;
+  --jj-deep-indigo: #1e1b4b;
+  --jj-electric-teal: #2dd4bf;
+  --jj-teal-cta: #14b8a6;
+  --jj-soft-cloud: #f8fafc;
+  --jj-slate-800: #1e293b;
+  --jj-slate-500: #64748b;
+
+  --ifm-font-family-base: "Inter", system-ui, -apple-system, sans-serif;
+  --ifm-font-family-monospace: "JetBrains Mono", ui-monospace, SFMono-Regular,
+    Menlo, Monaco, Consolas, monospace;
+  --ifm-heading-font-family: "Inter", system-ui, -apple-system, sans-serif;
+
+  --ifm-color-primary: #0d9488;
+  --ifm-color-primary-dark: #0f766e;
+  --ifm-color-primary-darker: #0f766e;
+  --ifm-color-primary-darkest: #115e59;
+  --ifm-color-primary-light: #14b8a6;
+  --ifm-color-primary-lighter: #2dd4bf;
+  --ifm-color-primary-lightest: #5eead4;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+  --ifm-background-color: var(--jj-midnight-ink);
+  --ifm-background-surface-color: var(--jj-deep-indigo);
+  --ifm-navbar-background-color: var(--jj-deep-indigo);
+  --ifm-footer-background-color: #070612;
+  --ifm-color-content: #ffffff;
+  --ifm-color-content-secondary: #94a3b8;
+  --ifm-link-color: var(--jj-electric-teal);
+  --ifm-link-hover-color: #5eead4;
+  --ifm-menu-color-active: var(--jj-electric-teal);
+  --ifm-navbar-link-hover-color: var(--jj-electric-teal);
+  --ifm-breadcrumb-color-active: var(--jj-electric-teal);
+  --ifm-tabs-color-active: var(--jj-electric-teal);
+  --ifm-tabs-color-active-border: var(--jj-electric-teal);
+
+  --ifm-color-primary: var(--jj-electric-teal);
+  --ifm-color-primary-dark: var(--jj-teal-cta);
+  --ifm-color-primary-darker: #0d9488;
+  --ifm-color-primary-darkest: #0f766e;
+  --ifm-color-primary-light: #5eead4;
+  --ifm-color-primary-lighter: #99f6e4;
+  --ifm-color-primary-lightest: #ccfbf1;
+
+  --ifm-hero-background-color: var(--jj-midnight-ink);
+  --docusaurus-highlighted-code-line-bg: rgba(45, 212, 191, 0.12);
+}
+
+.navbar__title {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.hero--jj {
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      color-mix(in srgb, var(--jj-electric-teal) 18%, transparent),
+      transparent 70%
+    ),
+    var(--jj-midnight-ink);
+  color: #fff;
+  padding: 4.5rem 0 3.5rem;
+}
+
+.hero--jj .hero__title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.hero--jj .hero__subtitle {
+  color: #94a3b8;
+  max-width: 36rem;
+  margin: 1rem auto 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.hero--jj .button--primary {
+  background: var(--jj-electric-teal);
+  border-color: var(--jj-electric-teal);
+  color: var(--jj-midnight-ink);
+  font-weight: 600;
+}
+
+.hero--jj .button--primary:hover {
+  background: #5eead4;
+  border-color: #5eead4;
+  color: var(--jj-midnight-ink);
+}
+
+.hero--jj .button--outline {
+  border-color: color-mix(in srgb, white 28%, transparent);
+  color: #fff;
+}
+
+.hero--jj .button--outline:hover {
+  border-color: var(--jj-electric-teal);
+  color: var(--jj-electric-teal);
+  background: transparent;
+}
+
+.jj-promises {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  max-width: 48rem;
+  margin: 2.5rem auto 0;
+  text-align: left;
+}
+
+.jj-promises dt {
+  color: var(--jj-electric-teal);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.jj-promises dd {
+  margin: 0.25rem 0 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}

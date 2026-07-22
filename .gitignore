@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ui
 build
+.docusaurus
 coverage
 *.local
 .DS_Store

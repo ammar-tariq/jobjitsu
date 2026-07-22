@@ -59,6 +59,14 @@ pnpm --filter @jobjitsu/app dev
 
 Open http://localhost:1420 — sidebar + Coming Soon placeholders. No product features yet.
 
+### Documentation site
+
+```bash
+pnpm --filter @jobjitsu/website dev
+```
+
+Serves Docusaurus from the existing [`docs/`](./docs) tree (no duplicated markdown). Dark mode default.
+
 Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 
 ### Product

@@ -11,6 +11,8 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/build/**",
+      "**/.docusaurus/**",
       "**/coverage/**",
       "**/.turbo/**",
       "**/node_modules/**",
@@ -18,6 +20,8 @@ export default tseslint.config(
       "docs/**",
       "assets/**",
       ".changeset/**",
+      "website/.docusaurus/**",
+      "website/build/**",
     ],
   },
   eslint.configs.recommended,

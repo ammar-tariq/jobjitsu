@@ -3,8 +3,16 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tsconfig.json", "package.json"],
-      "outputs": ["dist/**", "dist-ui/**"]
+      "inputs": [
+        "src/**",
+        "static/**",
+        "docusaurus.config.ts",
+        "sidebars.ts",
+        "tsconfig.json",
+        "package.json",
+        "../docs/**"
+      ],
+      "outputs": ["dist/**", "dist-ui/**", "build/**"]
     },
     "dev": {
       "cache": false,
