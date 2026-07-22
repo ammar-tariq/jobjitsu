@@ -1,40 +1,47 @@
 import { createTheme } from "@mui/material/styles";
+import { jjDark, jjPrimitive } from "./jjColors.js";
 
 /**
- * MUI theme mapped to JobJitsu design tokens (Midnight Ink + Electric Teal).
- * Layout pattern inspired by the Material UI dashboard template; colors stay on-brand.
+ * MUI theme from JobJitsu design tokens (THEME_DARK / tokens.css).
+ * Layout from the Material dashboard template; palette is design-system only.
  * @see docs/design-system/THEME_DARK.md
- * @see https://github.com/mui/material-ui/tree/v9.2.0/docs/data/material/getting-started/templates/dashboard
+ * @see packages/ui/src/tokens.css
  */
 export const jjTheme = createTheme({
-  cssVariables: true,
   palette: {
     mode: "dark",
     primary: {
-      main: "#2dd4bf",
-      light: "#5eead4",
-      dark: "#14b8a6",
-      contrastText: "#0b0a1a",
+      main: jjDark.accent,
+      light: jjDark.accentHover,
+      dark: jjDark.accentPressed,
+      contrastText: jjDark.textOnAccent,
     },
     secondary: {
-      main: "#312e81",
-      light: "#25224f",
-      dark: "#1e1b4b",
-      contrastText: "#ffffff",
+      main: jjPrimitive.indigo800,
+      light: jjDark.bgElevated,
+      dark: jjDark.bgSurface,
+      contrastText: jjDark.textPrimary,
     },
     background: {
-      default: "#0b0a1a",
-      paper: "#1e1b4b",
+      default: jjDark.bgCanvas,
+      paper: jjDark.bgSurface,
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#64748b",
+      primary: jjDark.textPrimary,
+      secondary: jjDark.textSecondary,
+      disabled: jjDark.textTertiary,
     },
-    divider: "rgba(255, 255, 255, 0.06)",
-    success: { main: "#10b981" },
-    warning: { main: "#f59e0b" },
-    error: { main: "#f43f5e" },
-    info: { main: "#2dd4bf" },
+    divider: jjDark.borderSubtle,
+    success: { main: jjDark.success },
+    warning: { main: jjDark.caution },
+    error: { main: jjDark.danger },
+    info: { main: jjDark.accent },
+    action: {
+      hover: jjDark.bgMuted,
+      selected: jjDark.accentMuted,
+      disabled: jjDark.textTertiary,
+      focus: jjDark.accent,
+    },
   },
   typography: {
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
@@ -53,17 +60,23 @@ export const jjTheme = createTheme({
         body: {
           height: "100%",
           margin: 0,
-          backgroundColor: "#0b0a1a",
+          backgroundColor: jjDark.bgCanvas,
+          color: jjDark.textPrimary,
           WebkitFontSmoothing: "antialiased",
         },
         "#root": { height: "100%" },
+        "::selection": {
+          backgroundColor: jjDark.accentMuted,
+        },
       },
     },
     MuiDrawer: {
       styleOverrides: {
         paper: {
           backgroundImage: "none",
-          borderRight: "1px solid rgba(255, 255, 255, 0.06)",
+          backgroundColor: jjDark.bgSurface,
+          borderRight: `1px solid ${jjDark.borderSubtle}`,
+          color: jjDark.textPrimary,
         },
       },
     },
@@ -72,7 +85,15 @@ export const jjTheme = createTheme({
         root: {
           backgroundImage: "none",
           boxShadow: "none",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          backgroundColor: jjDark.bgSurface,
+          borderBottom: `1px solid ${jjDark.borderSubtle}`,
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: jjDark.borderSubtle,
         },
       },
     },
@@ -80,14 +101,19 @@ export const jjTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 6,
+          color: jjDark.textSecondary,
+          "&:hover": {
+            backgroundColor: jjDark.bgMuted,
+            color: jjDark.textPrimary,
+          },
           "&.Mui-selected": {
-            backgroundColor: "rgba(45, 212, 191, 0.15)",
-            color: "#2dd4bf",
+            backgroundColor: jjDark.accentMuted,
+            color: jjDark.accent,
             "&:hover": {
-              backgroundColor: "rgba(45, 212, 191, 0.22)",
+              backgroundColor: jjDark.accentMutedHover,
             },
             "& .MuiListItemIcon-root": {
-              color: "#2dd4bf",
+              color: jjDark.accent,
             },
           },
         },
@@ -97,7 +123,14 @@ export const jjTheme = createTheme({
       styleOverrides: {
         root: {
           minWidth: 36,
-          color: "#64748b",
+          color: jjDark.textSecondary,
+        },
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: "inherit",
         },
       },
     },

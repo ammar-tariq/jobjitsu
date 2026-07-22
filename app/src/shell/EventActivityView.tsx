@@ -39,7 +39,7 @@ export function EventActivityView(): JSX.Element {
             <Box
               component="li"
               key={name}
-              sx={{
+              sx={(theme) => ({
                 display: "grid",
                 gridTemplateColumns: "minmax(10rem, auto) 1fr",
                 gap: 1.5,
@@ -47,10 +47,10 @@ export function EventActivityView(): JSX.Element {
                 py: 1.5,
                 borderRadius: 1,
                 border: "1px solid",
-                borderColor: hit ? "primary.main" : "divider",
-                bgcolor: hit ? "rgba(45, 212, 191, 0.12)" : "rgba(255, 255, 255, 0.04)",
+                borderColor: hit ? theme.palette.primary.main : theme.palette.divider,
+                bgcolor: hit ? theme.palette.action.selected : theme.palette.action.hover,
                 opacity: hit ? 1 : 0.75,
-              }}
+              })}
             >
               <Typography
                 component="span"
