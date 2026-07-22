@@ -5,5 +5,6 @@ export type * from "./names.js";
 export type * from "./payloads.js";
 export type * from "./bus.js";
 
-export { DURABLE_EVENT_NAMES, EVENT_NAMES } from "./names.js";
+export { DURABLE_EVENT_NAMES, EVENT_NAMES, isEventName } from "./names.js";
+export { AGENT_PROGRESS_PAYLOAD_KEYS } from "./payloads.js";
 export { createInMemoryEventBus } from "./memory-bus.js";

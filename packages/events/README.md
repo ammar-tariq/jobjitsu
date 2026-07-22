@@ -1,17 +1,17 @@
 # `@jobjitsu/events`
 
-Typed domain event catalog, payloads, **EventBus** contracts, and an in-process implementation.
+Typed domain event catalog, ID-centric payloads, **EventBus** contracts, and an in-process bus.
 
 **Depends on:** `@jobjitsu/shared` (IDs, pipeline stages).
 
 ## Status
 
-| Piece                                      | State              |
-| ------------------------------------------ | ------------------ |
-| Event names / payloads                     | Done               |
-| `EventBus` / `DurableEventSink` interfaces | Done               |
-| `createInMemoryEventBus()`                 | Done (E02-F03-S01) |
-| Timeline-backed durable sink               | Not yet            |
+| Piece                                      | State                         |
+| ------------------------------------------ | ----------------------------- |
+| Event names / payloads (EVENT_SYSTEM)      | Done (PE02-S02)               |
+| `EventBus` / `DurableEventSink` interfaces | Done                          |
+| `createInMemoryEventBus()`                 | Done — local only, no network |
+| Timeline-backed durable sink               | Later (PE02-S03 / PE12)       |
 
 ## Usage
 
@@ -28,7 +28,7 @@ void bus.publish("Queue.Enqueued", { applicationId: "…" });
 ## Laws
 
 - On-device only — must not stream career payloads to the cloud
-- ID-centric payloads (no résumé bodies on progress events)
-- Durable subset includes all `Send.*` and `Privacy.EgressRecorded`
+- ID-centric payloads (no résumé bodies on `Agent.Progress` / progress events)
+- Durable subset includes all `Send.*`, `Privacy.EgressRecorded`, and `Application.Submitted`
 
 See [docs/architecture/EVENT_SYSTEM.md](../../docs/architecture/EVENT_SYSTEM.md).
