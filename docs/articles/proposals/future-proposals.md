@@ -17,6 +17,6 @@ When the Historian / AI milestone detection (or a human) proposes a real topic:
 
 | Number | Slug | Date proposed | Milestone | Status |
 |--------|------|---------------|-----------|--------|
-| 001 | initial-vision | 2026-07-23 | Docs/architecture foundation + blueprint | See [001-initial-vision.md](./001-initial-vision.md) |
+| 001 | initial-vision | 2026-07-23 | Docs/architecture foundation + blueprint | [#56](https://github.com/ammar-tariq/jobjitsu/issues/56) · [001-initial-vision.md](./001-initial-vision.md) |
 
 *(No other proposals yet.)*

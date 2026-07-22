@@ -2,6 +2,7 @@
 
 **Status:** Potential Article · awaiting human approval  
 **Series:** [SERIES_PLAN.md](../SERIES_PLAN.md) Article 01  
+**GitHub:** [#56 Write Article: Initial Vision](https://github.com/ammar-tariq/jobjitsu/issues/56) (`article-needed`)  
 **Research:** [../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md](../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md)
 
 ---
