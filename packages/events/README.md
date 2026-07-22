@@ -6,24 +6,30 @@ Typed domain event catalog, ID-centric payloads, **EventBus** contracts, and an 
 
 ## Status
 
-| Piece                                      | State                         |
-| ------------------------------------------ | ----------------------------- |
-| Event names / payloads (EVENT_SYSTEM)      | Done (PE02-S02)               |
-| `EventBus` / `DurableEventSink` interfaces | Done                          |
-| `createInMemoryEventBus()`                 | Done — local only, no network |
-| Timeline-backed durable sink               | Later (PE02-S03 / PE12)       |
+| Piece                                      | State                                      |
+| ------------------------------------------ | ------------------------------------------ |
+| Event names / payloads (EVENT_SYSTEM)      | Done (PE02-S02)                            |
+| `EventBus` / `DurableEventSink` interfaces | Done                                       |
+| `createInMemoryEventBus()`                 | Done — local only, no network              |
+| `createMemoryDurableEventSink()`           | Done (PE02-S03) — in-memory allowlist hook |
+| Timeline-backed durable sink               | Later (PE12)                               |
 
-## Usage
+## Durable hook
 
 ```ts
-import { createInMemoryEventBus } from "@jobjitsu/events";
+import { createInMemoryEventBus, createMemoryDurableEventSink } from "@jobjitsu/events";
 
-const bus = createInMemoryEventBus();
-bus.subscribe("Queue.Enqueued", (e) => {
-  console.log(e.payload.applicationId);
+const sink = createMemoryDurableEventSink();
+const bus = createInMemoryEventBus({ durableSink: sink });
+
+await bus.publish("Send.Attempted", {
+  applicationId: "…",
+  destinationClass: "mail",
 });
-void bus.publish("Queue.Enqueued", { applicationId: "…" });
+// sink.events() holds allowlisted facts only (egress / approval / pause / prefs / …)
 ```
+
+Allowlist: `DURABLE_EVENT_NAMES` (egress, approval, pause, prefs, plugins, extensions, `Application.Submitted`).
 
 ## Laws
 
