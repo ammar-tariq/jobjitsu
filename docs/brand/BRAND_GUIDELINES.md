@@ -186,10 +186,11 @@ A belt mark or **Agent · On-device** badge in the status bar at all times.
 | File | Status |
 |------|--------|
 | `assets/logo-icon.svg` | ✅ |
-| `assets/logo-full-horizontal.svg` | (generate by adding JobJitsu wordmark to the right) |
-| `assets/logo-stacked.svg` | (icon above wordmark) |
-| `assets/logo-icon-mono-dark.svg` | (single-color white version) |
-| `assets/logo-icon-mono-light.svg` | (single-color Indigo version) |
+| `assets/logo-full-horizontal.svg` | ✅ |
+| `assets/logo-stacked.svg` | ✅ |
+| `assets/logo-icon-mono-dark.svg` | ✅ |
+| `assets/logo-icon-mono-light.svg` | ✅ |
+| `assets/social-preview.svg` | ✅ |
 | `BRAND_GUIDELINES.md` | ✅ (this file) |
 
 > **Remember:** Never alter the teal envelope flap color, always maintain clear space, and keep the voice calm and confident.  
