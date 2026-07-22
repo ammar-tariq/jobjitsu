@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
+import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import {
   IPC_ALLOWLIST,
@@ -26,6 +27,8 @@ describe("IPC allowlist", () => {
       "storage.getDataRoot",
       "storage.setDataRoot",
       "storage.resetDataRoot",
+      "preferences.getApprovalBeforeSend",
+      "preferences.setApprovalBeforeSend",
     ]);
   });
 
@@ -92,6 +95,7 @@ describe("typed IPC bridge", () => {
     expect(bridge).not.toHaveProperty("complete");
     expect(Object.keys(bridge).sort()).toEqual([
       "getAiStatus",
+      "getApprovalBeforeSend",
       "getDataRoot",
       "getProfile",
       "getSelectedResume",
@@ -101,6 +105,7 @@ describe("typed IPC bridge", () => {
       "ping",
       "resetDataRoot",
       "selectResume",
+      "setApprovalBeforeSend",
       "setDataRoot",
       "setProfile",
       "setTheme",
@@ -228,5 +233,24 @@ describe("typed IPC bridge", () => {
     const reset = await bridge.resetDataRoot();
     expect(reset.ok && reset.value.dataRoot.isCustom).toBe(false);
     expect(changed).toEqual([["dataRoot"], ["dataRoot"]]);
+  });
+
+  it("defaults approval-before-send on and emits Preferences.Changed on edit", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const preferences = createPreferencesFacade(createMemorySettingsStore());
+    const bridge = createIpcBridge(createHostIpcDispatcher({ preferences, bus }));
+
+    const before = await bridge.getApprovalBeforeSend();
+    expect(before.ok && before.value.requireApprovalBeforeSend).toBe(true);
+
+    const after = await bridge.setApprovalBeforeSend(false);
+    expect(after.ok && after.value.requireApprovalBeforeSend).toBe(false);
+    expect(changed).toEqual([["requireApprovalBeforeSend"]]);
+    expect(await preferences.getApprovalBeforeSend()).toBe(false);
   });
 });

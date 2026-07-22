@@ -28,6 +28,12 @@ export type IpcBridge = {
   readonly getDataRoot: () => Promise<Result<IpcResultMap["storage.getDataRoot"]>>;
   readonly setDataRoot: (path: string) => Promise<Result<IpcResultMap["storage.setDataRoot"]>>;
   readonly resetDataRoot: () => Promise<Result<IpcResultMap["storage.resetDataRoot"]>>;
+  readonly getApprovalBeforeSend: () => Promise<
+    Result<IpcResultMap["preferences.getApprovalBeforeSend"]>
+  >;
+  readonly setApprovalBeforeSend: (
+    requireApprovalBeforeSend: boolean,
+  ) => Promise<Result<IpcResultMap["preferences.setApprovalBeforeSend"]>>;
 };
 
 /**
@@ -91,6 +97,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
       return (await dispatcher.invoke("storage.resetDataRoot")) as Result<
         IpcResultMap["storage.resetDataRoot"]
       >;
+    },
+    async getApprovalBeforeSend() {
+      return (await dispatcher.invoke("preferences.getApprovalBeforeSend")) as Result<
+        IpcResultMap["preferences.getApprovalBeforeSend"]
+      >;
+    },
+    async setApprovalBeforeSend(requireApprovalBeforeSend: boolean) {
+      return (await dispatcher.invoke("preferences.setApprovalBeforeSend", {
+        requireApprovalBeforeSend,
+      })) as Result<IpcResultMap["preferences.setApprovalBeforeSend"]>;
     },
   };
 }

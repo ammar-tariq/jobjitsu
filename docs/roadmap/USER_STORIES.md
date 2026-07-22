@@ -329,7 +329,7 @@
 
 **Testing notes:** Default policy unit test.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE04-S02 — Quiet hours and calm notifications
 

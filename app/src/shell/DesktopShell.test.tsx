@@ -191,4 +191,23 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Restored the default data folder/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).isCustom).toBe(false);
   });
+
+  it("keeps approval-before-send on by default and updates through preferences", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-approval-before-send")).toBeInTheDocument();
+
+    const toggle = screen.getByRole("switch", { name: /require approval before send/i });
+    expect(toggle).toBeChecked();
+    expect(await runtime.preferences.getApprovalBeforeSend()).toBe(true);
+
+    await user.click(toggle);
+    expect(await screen.findByText(/Approval before send is off/i)).toBeInTheDocument();
+    expect(toggle).not.toBeChecked();
+    expect(await runtime.preferences.getApprovalBeforeSend()).toBe(false);
+  });
 });
