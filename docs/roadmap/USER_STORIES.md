@@ -367,7 +367,7 @@
 
 **Testing notes:** Badge semantics UI test.
 
-**Status:** in-progress
+**Status:** in-review
 
 ### PE04-S04 — Fit, tone, and constraint preferences
 
