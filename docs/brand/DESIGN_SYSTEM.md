@@ -1,6 +1,10 @@
 # JobJitsu Design System
 
-Visual and interaction language for the desktop app. Color, type, and logo foundations live in [BRAND_GUIDELINES.md](./BRAND_GUIDELINES.md). This document covers structure, naming, motion, accessibility, icons, and illustration.
+Visual and interaction language for the desktop app. Color, type, and logo foundations live in [BRAND_GUIDELINES.md](./BRAND_GUIDELINES.md).
+
+**Production tokens, themes, and component variants:** [../design-system/README.md](../design-system/README.md)
+
+This document covers structure, naming, motion overview, accessibility overview, icons, and illustration.
 
 ---
 

@@ -60,7 +60,8 @@ Your belt will be tied. Waiting for the first throw.
 | [Brand guidelines](docs/brand/BRAND_GUIDELINES.md) | Logo, color, type, voice overview |
 | [Product philosophy](docs/brand/PRODUCT_PHILOSOPHY.md) | Beliefs and metaphor map |
 | [Voice & tone](docs/brand/VOICE_AND_TONE.md) | How JobJitsu sounds |
-| [Design system](docs/brand/DESIGN_SYSTEM.md) | UI, motion, a11y, icons |
+| [Design system (brand)](docs/brand/DESIGN_SYSTEM.md) | Naming, icons, illustration |
+| [Design system (production)](docs/design-system/README.md) | Tokens, themes, components |
 | [Copy guidelines](docs/brand/COPY_GUIDELINES.md) | Product string architecture |
 
 ### Architecture
