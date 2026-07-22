@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE04 Preferences & Privacy Chrome |
-| **Story** | PE04-S04 — Fit, tone, and constraint preferences (this slice) |
-| **Status** | PR gate — [#75](https://github.com/ammar-tariq/jobjitsu/pull/75) |
-| **Note** | Persist fit/tone/constraints via façade + IPC; Preferences.Changed |
+| **Story** | PE04-S03 — Show Agent · On-device status (this slice) |
+| **Status** | In progress |
+| **Note** | Honest Agent chrome via ai.getStatus + Ai.*; never LLM; never On-device for remote |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE04-S04 | 2026-07-23 | Fit/tone/constraints via façade + IPC; Preferences.Changed |
 | PE04-S06 | 2026-07-23 | Durable data folder; profile/resume/prefs on disk |
 | PE04-S01 | 2026-07-23 | Approval default on; façade + IPC + Preferences toggle |
 | PE04-S05 | 2026-07-23 | Data folder + native picker; Preferences.Changed dataRoot |

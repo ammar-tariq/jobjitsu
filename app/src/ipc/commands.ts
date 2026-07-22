@@ -31,8 +31,11 @@ export type ThemePreference = "dark" | "light";
 
 export type AiStatusSnapshot = {
   readonly ready: boolean;
-  /** User-facing locality chrome — never implies remote as On-device. */
-  readonly locality: "local" | "unavailable";
+  /**
+   * User-facing locality chrome.
+   * `local` may show Agent · On-device; `remote` must not; `unavailable` is calm default.
+   */
+  readonly locality: "local" | "remote" | "unavailable";
 };
 
 export type ProfileSnapshot = {

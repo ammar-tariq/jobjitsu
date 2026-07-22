@@ -40,6 +40,7 @@ import {
   type IpcBridge,
   type IpcDispatcher,
 } from "../ipc/index.js";
+import type { AiStatusSnapshot } from "../ipc/commands.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 import {
   createMemoryDataRootStore,
@@ -201,6 +202,22 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   });
 
   const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
+  let aiStatus: AiStatusSnapshot = { ready: false, locality: "unavailable" };
+
+  bus.subscribe("Ai.LocalModelLoading", async () => {
+    aiStatus = { ready: false, locality: "unavailable" };
+  });
+  bus.subscribe("Ai.LocalModelFailed", async () => {
+    aiStatus = { ready: false, locality: "unavailable" };
+  });
+  bus.subscribe("Ai.LocalModelReady", async (event) => {
+    const payload = event.payload as EventPayloadMap["Ai.LocalModelReady"];
+    aiStatus = {
+      ready: true,
+      locality: payload.locality === "remote" ? "remote" : "local",
+    };
+  });
+
   const ipc = createHostIpcDispatcher({
     appearance,
     profiles,
@@ -209,6 +226,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     preferences,
     folderPicker,
     onDataRootChanged: options.onDataRootChanged,
+    getAiStatus: () => aiStatus,
     bus,
   });
   const bridge = createIpcBridge(ipc);

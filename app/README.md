@@ -24,7 +24,7 @@ pnpm --filter @jobjitsu/app dev:tauri
 pnpm dev:desktop
 ```
 
-Opens a native window titled **JobJitsu** wrapping the React shell (Vite on `http://localhost:1420`). Status chrome shows **Agent · On-device**.
+Opens a native window titled **JobJitsu** wrapping the React shell (Vite on `http://localhost:1420`). Status chrome starts as **Agent · Unavailable**, then **Agent · On-device** when the local Agent path is ready (never “Local LLM”; remote ready is **Agent · Ready**).
 
 ## Run the UI in a browser (no Rust)
 

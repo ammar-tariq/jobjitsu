@@ -17,6 +17,7 @@ export type CreateHostIpcOptions = {
   readonly getAppearance?: () => AppearanceStore;
   readonly initialTheme?: ThemePreference;
   readonly aiStatus?: AiStatusSnapshot;
+  readonly getAiStatus?: () => AiStatusSnapshot;
   readonly profiles?: ProfileRepository;
   readonly getProfiles?: () => ProfileRepository | undefined;
   readonly resumeLibrary?: ResumeLibrary;
@@ -40,10 +41,13 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const getAppearance =
     options.getAppearance ??
     (() => options.appearance ?? createMemoryAppearanceStore(options.initialTheme ?? "dark"));
-  const aiStatus: AiStatusSnapshot = options.aiStatus ?? {
-    ready: false,
-    locality: "unavailable",
-  };
+  const getAiStatus =
+    options.getAiStatus ??
+    (() =>
+      options.aiStatus ?? {
+        ready: false,
+        locality: "unavailable" as const,
+      });
   const getProfiles = options.getProfiles ?? (() => options.profiles);
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
@@ -69,7 +73,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       const theme = await getAppearance().setTheme(payload.theme);
       return ok({ theme });
     },
-    "ai.getStatus": () => ok(aiStatus),
+    "ai.getStatus": () => ok(getAiStatus()),
     "identity.getProfile": async () => {
       const profiles = getProfiles();
       if (!profiles) {
