@@ -5,6 +5,7 @@ import "@jobjitsu/ui/JjAgentPrivacyPill.css";
 import "./shell/shell.css";
 import { App } from "./App.js";
 import { createAppHostRuntime } from "./host/durable-runtime.js";
+import { createHostRuntime } from "./host/runtime.js";
 
 document.documentElement.setAttribute("data-theme", "dark");
 
@@ -14,7 +15,13 @@ if (!rootEl) {
 }
 
 void (async () => {
-  const runtime = await createAppHostRuntime({ version: "0.0.0" });
+  let runtime;
+  try {
+    runtime = await createAppHostRuntime({ version: "0.0.0" });
+  } catch (cause) {
+    console.error("JobJitsu host failed to start; using session memory.", cause);
+    runtime = createHostRuntime({ version: "0.0.0" });
+  }
 
   createRoot(rootEl).render(
     <StrictMode>
@@ -22,5 +29,9 @@ void (async () => {
     </StrictMode>,
   );
 
-  await runtime.start();
+  try {
+    await runtime.start();
+  } catch (cause) {
+    console.error("JobJitsu startup cascade failed.", cause);
+  }
 })();

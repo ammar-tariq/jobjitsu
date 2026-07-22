@@ -23,6 +23,17 @@ async function tempRoot(prefix: string): Promise<string> {
 }
 
 describe("durable host data folder", () => {
+  it("rejects non-absolute default data paths", async () => {
+    const io = createNodeFsIo();
+    await expect(
+      createDurableHostRuntime({
+        version: "0.0.0-test",
+        io,
+        defaultDataRoot: "~/Library/Application Support/JobJitsu",
+      }),
+    ).rejects.toThrow(/absolute/i);
+  });
+
   it("persists profile and resume under the active data folder across restart", async () => {
     const defaultDataRoot = await tempRoot("jobjitsu-default-");
     const io = createNodeFsIo();
