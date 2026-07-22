@@ -1,6 +1,7 @@
 import type { Result } from "@jobjitsu/shared";
 import type {
   AiStatusSnapshot,
+  CraftPreferencesPatchInput,
   IpcResultMap,
   ProfilePatchInput,
   ResumeImportInputPayload,
@@ -35,6 +36,12 @@ export type IpcBridge = {
   readonly setApprovalBeforeSend: (
     requireApprovalBeforeSend: boolean,
   ) => Promise<Result<IpcResultMap["preferences.setApprovalBeforeSend"]>>;
+  readonly getCraftPreferences: () => Promise<
+    Result<IpcResultMap["preferences.getCraftPreferences"]>
+  >;
+  readonly setCraftPreferences: (
+    patch: CraftPreferencesPatchInput,
+  ) => Promise<Result<IpcResultMap["preferences.setCraftPreferences"]>>;
 };
 
 /**
@@ -113,6 +120,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
       return (await dispatcher.invoke("preferences.setApprovalBeforeSend", {
         requireApprovalBeforeSend,
       })) as Result<IpcResultMap["preferences.setApprovalBeforeSend"]>;
+    },
+    async getCraftPreferences() {
+      return (await dispatcher.invoke("preferences.getCraftPreferences")) as Result<
+        IpcResultMap["preferences.getCraftPreferences"]
+      >;
+    },
+    async setCraftPreferences(patch: CraftPreferencesPatchInput) {
+      return (await dispatcher.invoke("preferences.setCraftPreferences", patch)) as Result<
+        IpcResultMap["preferences.setCraftPreferences"]
+      >;
     },
   };
 }

@@ -387,7 +387,7 @@
 
 **Testing notes:** Persist + read via preferences façade.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE04-S05 — Show and change on-device data folder
 

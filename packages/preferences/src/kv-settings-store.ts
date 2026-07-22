@@ -62,6 +62,8 @@ function hydrate(settings: AppSettings): AppSettings {
     },
     agent: { ...DEFAULT_APP_SETTINGS.agent, ...settings.agent },
     fitKeywords: settings.fitKeywords ? [...settings.fitKeywords] : [],
+    tone: settings.tone ?? "",
+    constraints: settings.constraints ? [...settings.constraints] : [],
     updatedAt: settings.updatedAt ?? new Date().toISOString(),
   };
 }
@@ -74,6 +76,8 @@ function merge(base: AppSettings, patch: Partial<AppSettings>): AppSettings {
     notifications: { ...base.notifications, ...patch.notifications },
     agent: { ...base.agent, ...patch.agent },
     fitKeywords: patch.fitKeywords ?? base.fitKeywords,
+    tone: patch.tone ?? base.tone,
+    constraints: patch.constraints ?? base.constraints,
     updatedAt: new Date().toISOString(),
   });
 }

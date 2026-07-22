@@ -8,6 +8,8 @@ function deepMergeSettings(base: AppSettings, patch: Partial<AppSettings>): AppS
     notifications: { ...base.notifications, ...patch.notifications },
     agent: { ...base.agent, ...patch.agent },
     fitKeywords: patch.fitKeywords ?? base.fitKeywords,
+    tone: patch.tone ?? base.tone,
+    constraints: patch.constraints ?? base.constraints,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -16,7 +18,12 @@ function deepMergeSettings(base: AppSettings, patch: Partial<AppSettings>): AppS
 export function createMemorySettingsStore(
   initial: AppSettings = DEFAULT_APP_SETTINGS,
 ): SettingsStore {
-  let current: AppSettings = { ...initial, ai: { ...initial.ai } };
+  let current: AppSettings = {
+    ...initial,
+    ai: { ...initial.ai },
+    fitKeywords: [...initial.fitKeywords],
+    constraints: [...initial.constraints],
+  };
 
   return {
     async get() {
@@ -33,6 +40,7 @@ export function createMemorySettingsStore(
         notifications: { ...settings.notifications },
         agent: { ...settings.agent },
         fitKeywords: [...settings.fitKeywords],
+        constraints: [...settings.constraints],
         updatedAt: new Date().toISOString(),
       };
       return current;
