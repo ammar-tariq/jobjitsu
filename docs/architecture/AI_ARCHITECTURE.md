@@ -52,7 +52,7 @@ Providers must not phone home with résumé text unless the user selected a remo
 
 ## Context Builder
 
-Canonical term: **Context Builder**. Default slice order for apply-craft: Profile → Resume → Projects → Achievements → Current Job → Prompt → Model (budgeted by task). Retrieves from Knowledge Base when available. See [DATA_MODELS.md](./DATA_MODELS.md) and [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md).
+Canonical term: **Context Builder**. Default slice order for apply-craft: Profile → Resume → Projects → Achievements → Current Job → Prompt → Model (budgeted by task). Retrieves from Knowledge Base when available via a **`KnowledgeReader` port** (implemented by `identity`; `ai` must not own knowledge writes). See [DATA_MODELS.md](./DATA_MODELS.md) and [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md).
 
 | Task | Typical context |
 |------|-----------------|

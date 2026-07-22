@@ -12,7 +12,7 @@ Detail lives in sibling docs; this file is the **system map**.
 | Topic | Detail |
 |-------|--------|
 | Thesis & laws | [OVERVIEW.md](./OVERVIEW.md) |
-| Packages | [MONOREPO.md](./MONOREPO.md) · [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) |
+| Packages | [MONOREPO.md](./MONOREPO.md) · [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) (includes domain DAG + fence checklist) |
 | Events | [EVENT_SYSTEM.md](./EVENT_SYSTEM.md) |
 | Desktop / IPC | [DESKTOP_ARCHITECTURE.md](./DESKTOP_ARCHITECTURE.md) · [TAURI_TS_RUNTIME.md](./TAURI_TS_RUNTIME.md) |
 | AI | [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) |
@@ -155,7 +155,7 @@ sequenceDiagram
   Host-->>UI: Send.Succeeded or Failed or Unknown
 ```
 
-**AC:** No `Send.Attempted` without `Queue.Approved` when approval-before-send is on (Trusted Automation is Experimental and default off — [../product/FEATURES.md](../product/FEATURES.md)).
+**AC:** No `Send.Attempted` without `Queue.Approved` when approval-before-send is on (Trusted Automation exception path: [EVENT_SYSTEM.md](./EVENT_SYSTEM.md)).
 
 ---
 

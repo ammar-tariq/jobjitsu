@@ -33,11 +33,12 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Rule: [../../.cursor/rules/testing.mdc](
 These are release blockers conceptually (encode as automated tests when code exists):
 
 1. **Privacy boundary** — identity/résumé/agent context do not leave device without explicit outbound action through `send`.
-2. **Approval gates** — when require-approval is on, `send` does not execute without `Queue.Approved` (or equivalent user command).
+2. **Approval gates** — when require-approval is on, `send` does not execute without `Queue.Approved` (or Trusted Automation auto-approve audit path).
 3. **Agent pause** — pause stops preparative work; queue intact; no send.
 4. **Honest send outcomes** — `unknown` / partial never reported as success in UI state or events.
 5. **Agent · On-device truth** — status chrome shows Agent · On-device only when the provider is local; remote config cannot spoof on-device.
 6. **Capability gate** — disabled plugins do not run; missing permissions fail closed.
+7. **Package fences** — see normative checklist in [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) (agent↛send, ui↛ai, ui↛storage, discovery↛send, sdk↛ai).
 7. **Scheduler calm** — no job type exists for inactivity shaming; quiet hours defer notifications.
 
 ---

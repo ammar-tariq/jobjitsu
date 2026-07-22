@@ -91,6 +91,8 @@ Step {
 - `Agent.Paused` → Running tasks Cancelled or frozen per policy; Pending retained; review Queue intact.
 - Models unload after drain or idle timeout (`cleanup` / Unload Models).
 - UI may show: label + progress + “N tasks remaining” (calm; no urgency).
+- Default **concurrency = 1** Running AI task (avoid unbounded parallel model loads).
+- Task state via `getTaskQueueSnapshot`; bus uses coarse `Ai.Started` / `Ai.Finished` / `Workflow.*` (see [DATA_MODELS.md](./DATA_MODELS.md)).
 
 ---
 

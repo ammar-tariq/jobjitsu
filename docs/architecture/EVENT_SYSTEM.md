@@ -205,7 +205,33 @@ flowchart LR
 | Validation fail | No `Queue.Enqueued` for send from failed validation |
 | Trusted Automation | Default **off**; Timeline still records egress |
 
+### Trusted Automation exception path (Experimental)
+
+Default: **off**. When user enables Trusted Automation in Preferences:
+
+1. Host may call `send.approveAndSend` for allowlisted intents **without** a separate UI `queue.approve` click.
+2. Implementation **must still** record an internal approval fact equivalent to `Queue.Approved` (auto-approve) **or** document a single `Preferences.TrustedAutomation` policy check before Send — never a silent network call with no audit.
+3. Always emit `Send.*` and `Privacy.EgressRecorded`.
+4. User can disable anytime; in-flight Running AI tasks follow pause/cancel policy.
+5. **AC:** With TA off, missing `Queue.Approved` fails closed. With TA on, egress still appears on Timeline; UI never shows Unknown as success.
+
+### Failure emission matrix
+
+| Situation | Emit | Do not |
+|-----------|------|--------|
+| Preparative agent error | `Agent.Failed` | `Send.*` |
+| Workflow run fails | `Workflow.Failed` (+ optional `Agent.Failed`) | Enqueue for send |
+| Model load/inference infra fail | `Ai.LocalModelFailed` | Fake Agent · On-device ready |
+| Validation fail/warn | `Ai.ValidationCompleted` | `Queue.Enqueued` on fail |
+| Send path | `Send.*` + durable audit | Treat Unknown as Succeeded |
+
 ---
+
+## Local scale notes
+
+- Timeline retention: user-local; prefer compaction of ephemeral progress; durable allowlist retained until user export/delete.
+- AI Task Queue default **concurrency = 1** (configurable later); avoid unbounded parallel model loads.
+- Embeddings indexes stay on-device; rebuild/gc is local maintenance, not cloud sync.
 
 ## Anti-patterns
 

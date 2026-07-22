@@ -23,16 +23,17 @@ flowchart TB
   ai["Local Intelligence (AI)<br/>AI Provider · Context Builder<br/>no silent cloud fallback"]
   storage["Storage · Scheduler<br/>on-device persistence<br/>calm local jobs"]
   plugins["Plugins / Extensions<br/>user-enabled · inspectable<br/>capability-gated"]
-  boundary{{"OUTBOUND BOUNDARY<br/>approve → send"}}
+  sendPkg["packages/send<br/>OUTBOUND BOUNDARY"]
   external["external boards / mail<br/>user-initiated only"]
 
   shell -->|"commands / queries / subscribe"| host
   host --> domain
   host -->|"invokes providers"| ai
+  host -->|"loads capabilities"| plugins
   domain --> storage
-  domain --- plugins
-  storage --> boundary
-  boundary --> external
+  ai --> storage
+  host --> sendPkg
+  sendPkg --> external
 ```
 
 ---

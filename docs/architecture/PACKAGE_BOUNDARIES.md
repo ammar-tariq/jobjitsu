@@ -186,6 +186,67 @@ agent must not import send
 | `discovery` → `send` | Finding is not applying |
 | `plugins` → `app/host` internals | Escape hatch around capabilities |
 | Any package → streak/guilt metric stores | Non-goal |
+| `applications` → `queue` (import) | Queue owns enqueue API; apps emit facts / host orchestrates |
+| `queue` → `send` (import) | Host calls send after approve; queue only records approval |
+| `ai` → `applications` (writes) | Agent/host persists drafts; AI returns artifacts |
+| `sdk` → `ai` | Public SDK must not boot AI |
+| `followups` → `send` (import) | Host/send executes nudge egress |
+
+---
+
+## Domain dependency DAG (allowed)
+
+Direction = “may import / call” (host may compose any package).
+
+```mermaid
+flowchart TB
+  shared --> events
+  shared --> config
+  events --> core
+  config --> core
+  logger --> core
+  core --> sdk
+  storage --> identity
+  storage --> applications
+  identity --> ai
+  identity --> agent
+  preferences --> agent
+  preferences --> queue
+  discovery --> agent
+  applications --> agent
+  applications --> queue
+  applications --> send
+  applications --> followups
+  queue --> send
+  ai --> agent
+  followups --> scheduler
+```
+
+**Normative allowed domain edges (summary):**
+
+| Package | May use |
+|---------|---------|
+| `agent` | `ai`, `applications`, `queue` (enqueue), `discovery`, `preferences`, `identity` (read), `events`, `shared` |
+| `queue` | `applications` (read), `preferences`, `events`, `shared` |
+| `send` | `queue` (read approval), `applications` (read), `timeline` (write via events), channel adapters |
+| `followups` | `applications` (read), `events`, `shared` |
+| `ai` | `identity` via **KnowledgeReader** port (read), `shared`, `events` |
+| `discovery` | `shared`, `events`, extension sources |
+| `timeline` | `events` / storage only — no domain writes upstream |
+
+See also [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md).
+
+---
+
+## Orphan / deferred ownership stubs
+
+| Concern | Owner until epic |
+|---------|------------------|
+| Mail sync (`Email.Synced`) | Host + `send` channel adapter (Experimental/Future product depth) |
+| OS / in-app notifications | Desktop shell (host), calm policy from preferences |
+| Browser automation apply-assist | Experimental `send.channel` / extension — never bypass Queue→Send |
+
+No new packages required for H1 Core.
 
 ---
 
@@ -195,8 +256,33 @@ agent must not import send
 - Cross-package reactions go through **events**, not deep method chains.
 - Public package surfaces stay small; internals may be richer.
 
+### `send` channel contract (conceptual)
+
+```text
+SendChannel {
+  id: string
+  send(intent): Promise<SendResult>
+}
+SendResult { status: "success" | "failed" | "unknown"; destinationClass; attemptId }
+```
+
+---
+
+## Fence checklist (normative for tests)
+
+Encode as automated boundary tests when code exists:
+
+1. `agent` must not import `send`
+2. `ui` / renderer must not import `ai` or `storage`
+3. `discovery` must not import `send`
+4. `sdk` must not export/boot `ai`
+5. Approval-on → no `Send.Attempted` without `Queue.Approved` (see Trusted Automation exception)
+6. Validation fail → no review enqueue for send
+
 ---
 
 ## Evolution rule
 
 Merging packages for early delivery is allowed **if** the egress and agent/send separation remain enforceable (lint, tests, or module fences). Splitting later must not weaken the outbound boundary.
+
+**Horizon note:** `extension-sdk` and rich host contribution points are **H3–H4** weight; H1 may ship `plugin-sdk` (or merged sdk) only without weakening Agent≠Send.

@@ -66,32 +66,36 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
 
 ## IPC surface (normative catalog — conceptual shapes)
 
-Commands (UI → host). Request/response are typed in the host; deny anything not listed.
+**Policy:** Deny-by-default. The table is the H1-oriented allowlist. Host may omit a command until its story ships; **unlisted commands are denied**. Package surfaces may be richer for host-internal use without exposing every method to UI.
+
+Commands (UI → host). Request/response are typed in the host.
 
 | Command | Purpose | Notes |
 |---------|---------|--------|
 | `preferences.get` / `preferences.set` | Read/write policy | Emits `Preferences.Changed` |
+| `identity.getProfile` / `importResume` / `listKnowledge` | Identity / Knowledge | |
+| `applications.createDraft` / `update` / `list` / `setStage` / `findDuplicates` | Craft | |
 | `agent.startWorkflow` / `pause` / `resume` | Workflow / Task Queue | Never Send |
 | `agent.getTaskQueueSnapshot` | Progress chrome | Calm counts only |
 | `queue.list` / `enqueue` / `approve` / `reject` / `clear` | Review Queue | `approve` required before send when policy on |
 | `send.approveAndSend` | Egress | Preferred; maps to send package; honest result |
-| `applications.createDraft` / `update` / `setStage` | Craft | |
-| `identity.importResume` / `listKnowledge` | Identity / Knowledge | |
 | `discovery.syncSource` | Job Provider sync | |
 | `followups.list` / `dismiss` / `send` | Follow-ups | `send` still via send package |
+| `timeline.query` | Trust / craft history | Sanitized |
+| `ai.getStatus` | Badge / readiness | No `complete` from UI |
 | `plugins.list` / `enable` / `disable` | Agent skills | |
-| `extensions.list` / `enable` / `disable` | Host contributions | |
+| `extensions.list` / `enable` / `disable` | Host contributions | May stub until H3–H4 |
 | `logs.tail` | Sanitized diagnostics | No prompt bodies by default |
 
 Queries / subscriptions (host → UI):
 
 - Event stream (batched) from [EVENT_SYSTEM.md](./EVENT_SYSTEM.md)
 - Agent · On-device / model status for badge
-- Notification intents
+- Notification intents (shell-owned)
 
-Bridge is **deny-by-default**: no generic `eval`, no raw `fs` from UI.
+Bridge: no generic `eval`, no raw `fs` from UI.
 
-**AC:** UI cannot invoke AI Provider methods; only host handlers may.
+**AC:** UI cannot invoke AI Provider `complete`/`embed`; only host handlers may.
 
 ---
 

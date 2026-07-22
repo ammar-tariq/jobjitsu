@@ -74,6 +74,10 @@ Quiet hours: defer notification presentation; do not silently send egress.
 
 ## Persistence
 
+Jobs persist locally across restarts. Missed quiet-hour jobs wait — they do not “catch up” with a burst of notifications.
+
+**Scale:** Prefer small job fan-out; do not schedule unbounded per-application storms. AI-related warmups honor Task Queue concurrency (default 1).
+
 - Job records in local storage (id, type, not_before, payload refs, state).
 - Survive app restart.
 - User data export (future) may include schedules; sync-to-cloud is non-goal.

@@ -120,21 +120,20 @@ Modules should react to events instead of polling for changes.
 
 ## Modular Design
 
-Every module should have a clearly defined responsibility.
+Every package should have a clearly defined responsibility.
 
-Examples:
+Prefer package nouns from [docs/architecture/MONOREPO.md](docs/architecture/MONOREPO.md) / [PACKAGE_BOUNDARIES.md](docs/architecture/PACKAGE_BOUNDARIES.md):
 
-- Resume
-- Applications
-- AI
-- Browser Automation
-- Email
-- Recruiters
-- Settings
+- `identity` (profile, Resume Library, Knowledge Base)
+- `applications`
+- `queue` (review)
+- `send` (egress)
+- `ai` / `agent`
+- `discovery`
+- `preferences` / `config`
+- `timeline` / `followups` / `scheduler`
 
-Modules should remain independent.
-
-No module should become responsible for unrelated concerns.
+Modules should remain independent. No package should become responsible for unrelated concerns.
 
 ---
 
@@ -200,12 +199,12 @@ Avoid deep inheritance hierarchies.
 
 ---
 
-## Extension Points First
+## Extension Points When Variation Is Real
 
-Everything that may reasonably vary should be implemented behind extension points.
+Prefer simplicity early. Introduce extension points when variation is real or Horizon-gated — not by default for every noun.
 
-- **Plugins** — capability-gated **agent skills** ([PLUGIN_ARCHITECTURE.md](docs/architecture/PLUGIN_ARCHITECTURE.md))
-- **Extensions** — host contribution points such as Job Providers, AI Providers, send channels, templates ([EXTENSION_SYSTEM.md](docs/architecture/EXTENSION_SYSTEM.md))
+- **Plugins** — capability-gated **agent skills** ([PLUGIN_ARCHITECTURE.md](docs/architecture/PLUGIN_ARCHITECTURE.md)) — H1-friendly
+- **Extensions** — host contribution points (Job Providers, send channels, templates) ([EXTENSION_SYSTEM.md](docs/architecture/EXTENSION_SYSTEM.md)) — often **H3–H4**
 
 The platform core should remain stable while Plugins and Extensions extend functionality.
 

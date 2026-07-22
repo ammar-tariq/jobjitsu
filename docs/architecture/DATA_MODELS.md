@@ -19,7 +19,8 @@ IDs are opaque branded strings (`ProfileId`, `ResumeId`, `ApplicationId`, …) l
 | QueueItem | `queue` | send, ui |
 | FollowUp | `followups` | scheduler, send |
 | TimelineEvent | `timeline` | ui (trust) |
-| PreferenceDocument | `preferences` / `config` | agent, queue policy |
+| PreferenceDocument | `config` (SSOT store); `preferences` package is the façade API | agent, queue policy |
+
 | DiscoveryRole | `discovery` | applications, agent |
 
 Knowledge Base **must not** duplicate Timeline (audit) rows as knowledge facts.
@@ -49,6 +50,31 @@ Optional: `roleId`, `companyName`, `resumeVersionId`, `coverLetterRef`, `confirm
 ## QueueItem
 
 Required: `id`, `applicationId`, `state` (`enqueued` | `approved` | `rejected` | `cleared`), `createdAt`
+
+## EgressRecord
+
+Required: `attemptId`, `applicationId` (or followUpId), `destinationClass` (`board` | `mail` | `file_export`), `status` (`success` | `failed` | `unknown`), `startedAt`, `finishedAt`  
+Optional: `channelId`, `errorCode` (no résumé bodies)
+
+Written via `Privacy.EgressRecorded` / Send.* handlers into Timeline storage.
+
+## TimelineEvent
+
+Required: `id`, `at`, `eventName` (catalog name), `refs` (ids only)  
+Optional: `summary` (coarse, non-PII)  
+Must not store full résumé/cover letter bodies.
+
+## WorkflowRun (Experimental)
+
+Required: `id`, `workflowId`, `status` (`running` | `waiting` | `completed` | `failed` | `cancelled`), `startedAt`  
+Optional: `currentStepId`, `applicationId`
+
+## AiTask (Experimental)
+
+Required: `id`, `runId`, `state` (`Pending` | `Running` | `Waiting` | `Completed` | `Failed` | `Cancelled`), `label`  
+Optional: `progress` (0–1), `role`
+
+Task state is available via `agent.getTaskQueueSnapshot`. Bus emits coarse `Ai.Started` / `Ai.Finished` / `Workflow.*` — not per-state spam.
 
 ## Application Pipeline stages
 
