@@ -16,6 +16,7 @@
     { "path": "../packages/logger" },
     { "path": "../packages/ai" },
     { "path": "../packages/identity" },
+    { "path": "../packages/preferences" },
     { "path": "../packages/send" },
     { "path": "../packages/ui" }
   ]

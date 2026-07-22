@@ -1,5 +1,6 @@
 import { createAppError, err, ok } from "@jobjitsu/shared";
 import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
+import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
@@ -14,7 +15,7 @@ export type CreateHostIpcOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
-  readonly folderPicker?: FolderPicker;
+  readonly preferences?: PreferencesFacade;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
 };
@@ -32,7 +33,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const profiles = options.profiles;
   const resumeLibrary = options.resumeLibrary;
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
-  const folderPicker = options.folderPicker ?? createHostFolderPicker();
+  const preferences = options.preferences;
   const bus = options.bus;
 
   return {
@@ -175,29 +176,37 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
       return ok({ dataRoot: next });
     },
-    "storage.pickDataRoot": async () => {
+    "preferences.getApprovalBeforeSend": async () => {
+      if (!preferences) {
+        return ok({ requireApprovalBeforeSend: true });
+      }
+      return ok({ requireApprovalBeforeSend: await preferences.getApprovalBeforeSend() });
+    },
+    "preferences.setApprovalBeforeSend": async (payload) => {
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
       try {
-        const current = await dataRoot.get();
-        const picked = await folderPicker.pickDirectory({
-          title: "Choose JobJitsu data folder",
-          defaultPath: current.path,
-        });
-        if (picked === null) {
-          return ok({ dataRoot: null, cancelled: true });
-        }
-        const next = await dataRoot.set(picked);
+        const requireApprovalBeforeSend = await preferences.setApprovalBeforeSend(
+          payload.requireApprovalBeforeSend,
+        );
         if (bus) {
-          await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+          await bus.publish("Preferences.Changed", { keys: ["requireApprovalBeforeSend"] });
         }
-        return ok({ dataRoot: next, cancelled: false });
+        return ok({ requireApprovalBeforeSend });
       } catch (cause) {
         return err(
-          createAppError("unavailable", "Could not open folder picker", {
+          createAppError("validation", "Could not update approval setting", {
             message:
               cause instanceof Error
                 ? cause.message
-                : "Choose a folder in the desktop app, or enter a path on this device.",
-            detail: "storage:pickDataRoot",
+                : "That preference could not be saved. Try again.",
+            detail: "preferences:approval",
             cause,
           }),
         );

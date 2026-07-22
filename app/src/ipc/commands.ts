@@ -18,7 +18,8 @@ export const IPC_ALLOWLIST = [
   "storage.getDataRoot",
   "storage.setDataRoot",
   "storage.resetDataRoot",
-  "storage.pickDataRoot",
+  "preferences.getApprovalBeforeSend",
+  "preferences.setApprovalBeforeSend",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -87,7 +88,8 @@ export type IpcPayloadMap = {
   readonly "storage.getDataRoot": undefined;
   readonly "storage.setDataRoot": { readonly path: string };
   readonly "storage.resetDataRoot": undefined;
-  readonly "storage.pickDataRoot": undefined;
+  readonly "preferences.getApprovalBeforeSend": undefined;
+  readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
 };
 
 export type IpcResultMap = {
@@ -107,10 +109,8 @@ export type IpcResultMap = {
   readonly "storage.getDataRoot": { readonly dataRoot: DataRootSnapshot };
   readonly "storage.setDataRoot": { readonly dataRoot: DataRootSnapshot };
   readonly "storage.resetDataRoot": { readonly dataRoot: DataRootSnapshot };
-  readonly "storage.pickDataRoot": {
-    readonly dataRoot: DataRootSnapshot | null;
-    readonly cancelled: boolean;
-  };
+  readonly "preferences.getApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
+  readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

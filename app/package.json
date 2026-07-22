@@ -27,6 +27,7 @@
     "@jobjitsu/events": "workspace:*",
     "@jobjitsu/identity": "workspace:*",
     "@jobjitsu/logger": "workspace:*",
+    "@jobjitsu/preferences": "workspace:*",
     "@jobjitsu/send": "workspace:*",
     "@jobjitsu/shared": "workspace:*",
     "@jobjitsu/ui": "workspace:*",

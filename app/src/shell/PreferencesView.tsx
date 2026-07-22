@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -49,6 +51,10 @@ export function PreferencesView({
   const [dataStatus, setDataStatus] = useState<string | null>(null);
   const [savingDataRoot, setSavingDataRoot] = useState(false);
 
+  const [requireApproval, setRequireApproval] = useState(true);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
+  const [savingApproval, setSavingApproval] = useState(false);
+
   const refreshVersions = async (): Promise<void> => {
     const result = await bridge.listResumeVersions();
     if (result.ok) {
@@ -79,6 +85,11 @@ export function PreferencesView({
       if (!cancelled && result.ok) {
         setDataRoot(result.value.dataRoot);
         setDataPathDraft(result.value.dataRoot.path);
+      }
+    });
+    void bridge.getApprovalBeforeSend().then((result) => {
+      if (!cancelled && result.ok) {
+        setRequireApproval(result.value.requireApprovalBeforeSend);
       }
     });
     return () => {
@@ -206,6 +217,26 @@ export function PreferencesView({
     });
   };
 
+  const onApprovalChange = (_event: unknown, checked: boolean): void => {
+    setSavingApproval(true);
+    setApprovalStatus(null);
+    setRequireApproval(checked);
+    void bridge.setApprovalBeforeSend(checked).then((result) => {
+      setSavingApproval(false);
+      if (!result.ok) {
+        setRequireApproval(!checked);
+        setApprovalStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setRequireApproval(result.value.requireApprovalBeforeSend);
+      setApprovalStatus(
+        result.value.requireApprovalBeforeSend
+          ? "Approval before send is on — you stay in control of outbound actions."
+          : "Approval before send is off — you can turn it back on anytime.",
+      );
+    });
+  };
+
   return (
     <Stack spacing={3} data-testid="jj-preferences" sx={{ maxWidth: "40rem" }}>
       <Stack spacing={1}>
@@ -213,9 +244,35 @@ export function PreferencesView({
           Preferences
         </Typography>
         <Typography color="text.secondary">
-          Profile, resume library, data folder, and appearance stay on this device. Nothing is
-          uploaded to a JobJitsu cloud.
+          Profile, resume library, send approval, data folder, and appearance stay on this device.
+          Nothing is uploaded to a JobJitsu cloud.
         </Typography>
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-approval-before-send">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Send approval
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          When this is on, JobJitsu waits for your approval before any outbound send. Default is on
+          for new installs.
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={requireApproval}
+              onChange={onApprovalChange}
+              disabled={savingApproval}
+              slotProps={{ input: { "aria-label": "Require approval before send" } }}
+            />
+          }
+          label="Require approval before send"
+        />
+        {approvalStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {approvalStatus}
+          </Typography>
+        ) : null}
       </Stack>
 
       <Stack
