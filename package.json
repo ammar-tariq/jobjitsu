@@ -9,9 +9,16 @@
     "node": ">=20"
   },
   "scripts": {
-    "prepare": "husky",
-    "build": "turbo run build",
+    "bootstrap": "bash scripts/setup.sh",
+    "setup:local": "pnpm run bootstrap",
     "dev": "turbo run dev --parallel",
+    "dev:app": "bash scripts/dev-app.sh",
+    "dev:website": "bash scripts/dev-website.sh",
+    "dev:docs": "pnpm run dev:website",
+    "build": "turbo run build",
+    "build:app": "pnpm --filter @jobjitsu/app build",
+    "build:website": "pnpm --filter @jobjitsu/website build",
+    "prepare": "husky",
     "lint": "turbo run lint",
     "lint:root": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",

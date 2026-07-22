@@ -10,10 +10,25 @@ pnpm + Turborepo workspace for the AI Career Operating System.
 ## Setup
 
 ```bash
+pnpm bootstrap      # preferred — scripts/setup.sh (alias: pnpm setup:local)
+# or
 pnpm install
+pnpm --filter @jobjitsu/ui build
 ```
 
 `prepare` installs Husky git hooks automatically.
+
+## Local run
+
+| Command                              | Description                               |
+| ------------------------------------ | ----------------------------------------- |
+| `pnpm bootstrap`                     | Node check, install, build `@jobjitsu/ui` |
+| `pnpm dev:app`                       | Desktop shell → http://localhost:1420     |
+| `pnpm dev:website` / `pnpm dev:docs` | Docs site → http://localhost:3000         |
+| `pnpm build:app`                     | Build `@jobjitsu/app`                     |
+| `pnpm build:website`                 | Build `@jobjitsu/website`                 |
+
+Shell wrappers live in [`scripts/`](./scripts/).
 
 ## Workspace scripts
 

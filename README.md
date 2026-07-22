@@ -53,7 +53,7 @@ JobJitsu/
 ├── website/              # Docusaurus docs site (reads /docs in place)
 ├── docs/                 # Product, architecture, brand, backlog, ADRs
 ├── .github/              # Actions, future issue/PR templates
-├── scripts/              # Repo automation (as needed)
+├── scripts/              # setup / local run helpers (see scripts/README.md)
 ├── README.md
 └── LICENSE               # TBD — open-source intent; license not chosen yet
 ```
@@ -62,14 +62,72 @@ Today the desktop shell still lives at `app/` (not yet `apps/desktop/`). `packag
 
 ---
 
-## Development
+## Run locally
+
+### Prerequisites
+
+- **Node.js** ≥ 20
+- **pnpm** 9.x (pinned via `packageManager` in `package.json`; `corepack` can install it)
+
+### 1. Clone and set up
 
 ```bash
-pnpm install
+git clone https://github.com/ammar-tariq/jobjitsu.git
+cd jobjitsu
+pnpm bootstrap
+```
+
+`pnpm bootstrap` runs [`scripts/setup.sh`](./scripts/setup.sh): checks Node, ensures pnpm, installs dependencies, and builds `@jobjitsu/ui` (required by the desktop shell).
+
+Equivalent: `./scripts/setup.sh` · alias: `pnpm setup:local`
+
+### 2. Desktop shell (UI)
+
+```bash
+pnpm dev:app
+```
+
+- Opens Vite at **http://localhost:1420**
+- Early foundation: sidebar + Coming Soon placeholders — no full product features yet
+- Script: [`scripts/dev-app.sh`](./scripts/dev-app.sh)
+
+### 3. Documentation site
+
+```bash
+pnpm dev:website
+```
+
+- Docusaurus at **http://localhost:3000** (default)
+- Reads [`docs/`](./docs) in place — documentation-first, not a marketing funnel
+- Alias: `pnpm dev:docs` · Script: [`scripts/dev-website.sh`](./scripts/dev-website.sh)
+
+### 4. Quality gate (before a PR)
+
+```bash
 pnpm check    # format + lint + typecheck + test + build
 ```
 
 A change is complete only when it meets the [Definition of Done](./DEFINITION_OF_DONE.md): documented, tested, typed, reviewed, follows architecture, passes lint, passes build.
+
+### Useful commands
+
+| Command              | Purpose                               |
+| -------------------- | ------------------------------------- |
+| `pnpm bootstrap`     | Install + prepare local workspace     |
+| `pnpm setup:local`   | Alias for `bootstrap`                 |
+| `pnpm dev:app`       | Desktop shell (localhost:1420)        |
+| `pnpm dev:website`   | Docs site (localhost:3000)            |
+| `pnpm build:app`     | Build desktop UI bundle               |
+| `pnpm build:website` | Build static docs site                |
+| `pnpm check`         | Full DoD gate                         |
+| `pnpm test`          | Package tests                         |
+| `pnpm clean`         | Remove build artifacts / node_modules |
+
+More detail: [scripts/README.md](./scripts/README.md) · [MONOREPO.md](./MONOREPO.md)
+
+---
+
+## Development
 
 ### Docs → GitHub Pages workflow
 
@@ -94,24 +152,7 @@ GitHub Actions (.github/workflows/deploy-docs.yml)
 (Later) Build desktop releases
 ```
 
-### Desktop shell (UI only)
-
-```bash
-pnpm --filter @jobjitsu/ui build
-pnpm --filter @jobjitsu/app dev
-```
-
-Open http://localhost:1420 — sidebar + Coming Soon placeholders. No product features yet.
-
-### Documentation site
-
-```bash
-pnpm --filter @jobjitsu/website dev
-```
-
-Serves Docusaurus from [`docs/`](./docs) (no duplicated markdown). **Documentation-first:** the site exists for contributors and users who need to understand or use JobJitsu — not as a marketing funnel. Guide pages are doorways into `/docs`; they do not restate the SSOT.
-
-Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
+Published docs: https://ammar-tariq.github.io/jobjitsu/
 
 ### Product
 

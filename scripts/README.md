@@ -18,7 +18,7 @@ chmod +x scripts/*.sh   # once, if needed
 Equivalent via package.json:
 
 ```bash
-pnpm setup
+pnpm bootstrap
 pnpm dev:app
 pnpm dev:website
 ```

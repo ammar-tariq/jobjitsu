@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 if [[ ! -d node_modules ]]; then
-  echo "Dependencies missing. Run: pnpm setup   (or ./scripts/setup.sh)" >&2
+  echo "Dependencies missing. Run: pnpm bootstrap   (or ./scripts/setup.sh)" >&2
   exit 1
 fi
 
