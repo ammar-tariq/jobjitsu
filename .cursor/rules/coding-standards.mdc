@@ -1,0 +1,48 @@
+---
+description: Coding standards aligned with calm, private, craft-first JobJitsu identity
+alwaysApply: true
+---
+
+# Coding Standards
+
+## Clarity over cleverness
+
+Write code the way JobJitsu speaks: precise, calm, inspectable. Prefer boring explicitness over magic.
+
+```
+✅ GOOD: approveSend(applicationId)  // user-gated outbound
+❌ BAD:  smartAutopilot.blastAll()   // volume + hidden control
+```
+
+## Naming (user + code)
+
+Use canonical product nouns from `docs/brand/DESIGN_SYSTEM.md`:
+
+| Use | Avoid |
+|-----|--------|
+| Agent, Local LLM, Application, Queue, Follow-up, Preferences | Bot, Autopilot, Opp, Pipeline spam |
+
+Components: `Jj{Domain}{Element}` (e.g. `JjApplicationQueueRow`, `JjLocalLlmPill`).
+
+## Privacy in code
+
+- No accidental logging of résumé bodies, tokens, or full application letters to remote sinks.
+- Feature flags must not enable cloud résumé storage by default.
+- Network calls that transmit career data need an obvious call site and user-triggered path.
+
+## UI & copy in code
+
+- Sentence case; calm voice (`docs/brand/VOICE_AND_TONE.md`, `COPY_GUIDELINES.md`).
+- Errors: plain recovery language — no metaphor, no blame (`ERROR_MESSAGES.md`).
+- Success: quiet confirmation — no streak/guilt metrics (`SUCCESS_MESSAGES.md`).
+- Honor `prefers-reduced-motion`; no confetti or urgency animations.
+
+## Defaults that match philosophy
+
+- Approval-before-send on by default for high-stakes outbound.
+- Local model path as the primary intelligence path.
+- Sound off for notifications by default.
+
+## Dependencies
+
+Prefer open, auditable libraries. Do not add analytics SDKs that exfiltrate career content. If network telemetry is ever required for crash reports, strip PII and document it plainly.

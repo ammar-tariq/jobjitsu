@@ -1,0 +1,41 @@
+---
+description: Architecture rules — local-first Career OS, explicit outbound, module boundaries
+alwaysApply: true
+---
+
+# Architecture
+
+## Local-first spine
+
+Treat the machine as the dojo. Default placement for identity, résumé, preferences, queue, timeline, and model context: **on device**.
+
+```
+✅ GOOD: local store → local LLM → queue → user approves → outbound send
+❌ BAD:  auto-upload résumé → cloud LLM → auto-apply without review
+```
+
+## Outbound boundary
+
+Anything that leaves the device (apply, email, board submit) is an **explicit boundary**:
+
+- Require clear user intent (and approval when preferences say so).
+- Record what left vs what stayed in local timeline/logs.
+- Never imply success if send completion is unknown.
+
+## Module boundaries
+
+Respect core modules in `docs/product/FEATURES.md`: Identity & Resume, Preferences, Local Intelligence, Agent, Discovery, Applications, Queue & Review, Send, Follow-ups, Timeline, Privacy chrome.
+
+- Keep **Agent** preparative; keep **Send** sovereign.
+- **Local Intelligence** must not quietly fall back to cloud without an obvious, user-chosen path.
+- **Privacy & Trust Chrome** (e.g. Local LLM badge) is part of the architecture, not optional polish.
+
+## Desktop OS, not SaaS cockpit
+
+- Prefer native, light, fast desktop patterns over dashboard sprawl.
+- One job per view; surface progress calmly (queue, follow-ups) — no spaceship control panels.
+- Dark mode first (Midnight Ink + Electric Teal); see `docs/brand/BRAND_GUIDELINES.md`.
+
+## Extensibility
+
+Future skills/plugins are user-enabled and inspectable. No hidden employer-side ranking or candidate surveillance features (`docs/product/NON_GOALS.md`).

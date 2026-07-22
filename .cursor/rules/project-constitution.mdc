@@ -1,0 +1,35 @@
+---
+description: JobJitsu project constitution — philosophy, privacy, and calm engineering defaults
+alwaysApply: true
+---
+
+# Project Constitution
+
+JobJitsu is an **AI Career Operating System**: local-first, open-source, craft over volume. Engineering must feel like the brand — calm, confident, privacy-first.
+
+## Source of truth
+
+- Brand: `docs/brand/` (philosophy, voice, design system, copy)
+- Product: `docs/product/` (vision, features, non-goals, principles, roadmap)
+
+When product and convenience conflict, **privacy and user sovereignty win**.
+
+## Non-negotiables
+
+1. **Privacy is architecture** — résumé, preferences, agent state, and LLM context stay on-device by default. No silent cloud sync, telemetry of career content, or “upload to improve the model.”
+2. **Agent serves; user owns send** — prep/queue may automate; apply, follow-up send, and other outbound actions require explicit user control (approval gates by default).
+3. **Leverage over volume** — do not optimize for spray-and-pray counts, streaks, or guilt loops.
+4. **Calm confidence** — no FOMO copy, inactivity shaming, urgency theater, or confetti for routine saves.
+5. **Honest AI** — never claim guaranteed interviews/offers; describe help as draft, tailor, queue, remind.
+6. **Open trust** — prefer inspectable local behavior over opaque remote magic.
+
+## Before shipping
+
+- [ ] Data on-device by default?
+- [ ] User retains outbound control?
+- [ ] Reduces anxiety rather than manufacturing it?
+- [ ] Violates `docs/product/NON_GOALS.md`? If yes → stop.
+
+## Engineering tone
+
+Code, logs, PR descriptions, and UI strings stay precise and calm — same coach voice as branding. Metaphor is seasoning in product microcopy only; never in errors, settings, or security paths.

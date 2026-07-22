@@ -1,0 +1,42 @@
+---
+description: Testing standards — privacy boundaries, user sovereignty, calm failure paths
+alwaysApply: true
+---
+
+# Testing
+
+Tests protect the JobJitsu promise: **on-device, on-target, on your terms.**
+
+## Must-cover behaviors
+
+1. **Privacy boundary** — résumé/preferences/agent context do not leave the device without an explicit outbound action.
+2. **Approval gates** — when “require approval before send” is on, nothing sends without user approval.
+3. **Agent pause** — pause/stop leaves queue intact; agent cannot own send.
+4. **Honest send outcomes** — unknown/partial send is not reported as success.
+5. **Local LLM path** — primary intelligence path works offline/local; any remote fallback is opt-in and obvious.
+
+```
+✅ GOOD: test that queue item stays local until approveSend()
+❌ BAD:  only testing that 50 applications were “fired”
+```
+
+## What not to optimize tests for
+
+- Vanity volume metrics, streaks, or guilt nudges (non-goals).
+- Flaky timing that encodes urgency theater.
+- Snapshots of hype copy that violate brand voice.
+
+## UX / a11y regressions
+
+- Local LLM / privacy badge remains meaningful to assistive tech.
+- Errors expose recoverable next steps; live-region behavior for errors vs success.
+- Reduced-motion paths still convey state without animation-only meaning.
+
+## Tone of test names
+
+Calm and precise — describe the user guarantee, not combat metaphors.
+
+```
+✅ GOOD: keeps resume on device until user approves send
+❌ BAD:  crushes ATS and blasts apps autonomously
+```
