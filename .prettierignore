@@ -1,0 +1,12 @@
+node_modules
+.turbo
+dist
+build
+coverage
+pnpm-lock.yaml
+*.tsbuildinfo
+docs
+assets
+.git
+*.md
+!**/README.md

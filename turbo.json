@@ -11,7 +11,7 @@
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "inputs": ["src/**", "eslint.config.js", "tsconfig.json", "package.json"]
     },
     "typecheck": {
       "dependsOn": ["^build"],
