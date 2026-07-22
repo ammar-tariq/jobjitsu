@@ -106,6 +106,7 @@ Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 | [Engineering constitution](ENGINEERING_CONSTITUTION.md) | How we build (process)      |
 | [Definition of Done](DEFINITION_OF_DONE.md)             | Completion gates            |
 | [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md)   | Plan → implement → commit   |
+| [Docs prompts pipeline](docs/prompts/README.md)         | Phased docs checkpoints     |
 
 ---
 
