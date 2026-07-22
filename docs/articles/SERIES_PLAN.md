@@ -14,10 +14,10 @@ Document JobJitsu as an open-source, local-first **AI Career Operating System** 
 
 ---
 
-## Article 01 — Initial vision (planned)
+## Article 01 — Initial vision (drafting)
 
-**Status:** Research complete · Proposal: [proposals/001-initial-vision.md](./proposals/001-initial-vision.md) · Issue: [#56](https://github.com/ammar-tariq/jobjitsu/issues/56)  
-**Working title ideas:** see blueprint (e.g. “The Gentle Art of Landing the Job…”)
+**Status:** Approved · Drafting · Draft: [drafts/001-initial-vision.md](./drafts/001-initial-vision.md) · Proposal: [proposals/001-initial-vision.md](./proposals/001-initial-vision.md) · Issue: [#56](https://github.com/ammar-tariq/jobjitsu/issues/56)  
+**Title:** The Gentle Art of Landing the Job: Why We’re Building a Local-First Career OS
 
 **This article combines (documented topics only):**
 

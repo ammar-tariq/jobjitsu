@@ -1,19 +1,23 @@
 # Proposal 001 — Initial vision article
 
-**Status:** Potential Article · awaiting human approval  
+**Status:** Approved · Drafting  
 **Series:** [SERIES_PLAN.md](../SERIES_PLAN.md) Article 01  
-**GitHub:** [#56 Write Article: Initial Vision](https://github.com/ammar-tariq/jobjitsu/issues/56) (`article-needed`)  
-**Research:** [../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md](../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md)
+**GitHub:** [#56 Write Article: Initial Vision](https://github.com/ammar-tariq/jobjitsu/issues/56) (`article-approved` · `article-draft`)  
+**Research:** [../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md](../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md)  
+**Draft:** [../drafts/001-initial-vision.md](../drafts/001-initial-vision.md)
+
+**Approved:** 2026-07-23 (human)
 
 ---
 
 ## Proposed title
 
-Working options (pick at approval):
+**Selected:** The Gentle Art of Landing the Job: Why We’re Building a Local-First Career OS
 
-1. The Gentle Art of Landing the Job: Why We’re Building a Local-First Career OS  
-2. Your Résumé Isn’t Training Data: An Open-Source Case for On-Device Job Hunt AI  
-3. Agent Prepares, You Send: Privacy Architecture for the AI Job Market  
+Alternates retained for reference:
+
+1. Your Résumé Isn’t Training Data: An Open-Source Case for On-Device Job Hunt AI  
+2. Agent Prepares, You Send: Privacy Architecture for the AI Job Market  
 
 ---
 
@@ -67,7 +71,7 @@ Not tied to a shipping product wave completion yet — this is the **series open
 
 ---
 
-## Labels / project (when issue opened)
+## Labels / project
 
-- Label: `article-needed` → after approval `article-approved`  
-- Content Status: Potential Article → Approved  
+- Labels: `article-approved`, `article-draft` (remove `article-needed` when drafting)  
+- Content Status: **Drafting**
