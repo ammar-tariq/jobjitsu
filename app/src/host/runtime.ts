@@ -26,6 +26,11 @@ import {
   type ResumeLibrary,
   type ResumeStore,
 } from "@jobjitsu/identity";
+import {
+  createMemorySettingsStore,
+  createPreferencesFacade,
+  type PreferencesFacade,
+} from "@jobjitsu/preferences";
 import { createLogger, createMemoryLogSink, type Logger } from "@jobjitsu/logger";
 import { createFakeGmailChannel, type FakeGmailChannel } from "@jobjitsu/send";
 import type { ApplicationId } from "@jobjitsu/shared";
@@ -60,6 +65,8 @@ export type HostRuntime = {
   readonly resumeLibrary: ResumeLibrary;
   /** On-device data folder preference. */
   readonly dataRoot: DataRootStore;
+  /** Preferences façade (config SSOT). */
+  readonly preferences: PreferencesFacade;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -74,6 +81,7 @@ export type CreateHostRuntimeOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
+  readonly preferences?: PreferencesFacade;
 };
 
 /**
@@ -94,6 +102,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
+  const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -188,6 +197,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     profiles,
     resumeLibrary,
     dataRoot: dataRootStore,
+    preferences,
     bus,
   });
   const bridge = createIpcBridge(ipc);
@@ -202,6 +212,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     profiles,
     resumeLibrary,
     dataRoot: dataRootStore,
+    preferences,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",

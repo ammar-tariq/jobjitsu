@@ -1,6 +1,27 @@
-import { describe, expect, it } from "vitest";
-import { DEFAULT_APP_SETTINGS, PACKAGE_NAME } from "./index.js";
-import type { SettingsStore } from "./index.js";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { createFsStorageProvider } from "@jobjitsu/storage";
+import {
+  DEFAULT_APP_SETTINGS,
+  PACKAGE_NAME,
+  createMemorySettingsStore,
+  createPreferencesFacade,
+  requiresApprovalBeforeSend,
+} from "./index.js";
+import { createKvSettingsStore } from "./kv-settings-store.js";
+
+const tempRoots: string[] = [];
+
+afterEach(async () => {
+  while (tempRoots.length > 0) {
+    const root = tempRoots.pop();
+    if (root) {
+      await rm(root, { recursive: true, force: true });
+    }
+  }
+});
 
 describe("@jobjitsu/preferences", () => {
   it("exports package identity", () => {
@@ -11,10 +32,33 @@ describe("@jobjitsu/preferences", () => {
     expect(DEFAULT_APP_SETTINGS.requireApprovalBeforeSend).toBe(true);
     expect(DEFAULT_APP_SETTINGS.notifications.soundEnabled).toBe(false);
     expect(DEFAULT_APP_SETTINGS.theme).toBe("dark");
+    expect(requiresApprovalBeforeSend(DEFAULT_APP_SETTINGS)).toBe(true);
   });
 
-  it("types SettingsStore", () => {
-    const keys: Array<keyof SettingsStore> = ["get", "set", "replace"];
-    expect(keys).toHaveLength(3);
+  it("exposes a façade over the config settings store", async () => {
+    const store = createMemorySettingsStore();
+    const prefs = createPreferencesFacade(store);
+    expect(await prefs.getApprovalBeforeSend()).toBe(true);
+    expect(await prefs.setApprovalBeforeSend(false)).toBe(false);
+    expect(await prefs.getApprovalBeforeSend()).toBe(false);
+    expect((await store.get()).requireApprovalBeforeSend).toBe(false);
+  });
+
+  it("seeds approval-before-send true on a fresh KV store", async () => {
+    const dataRoot = await mkdtemp(join(tmpdir(), "jobjitsu-prefs-"));
+    tempRoots.push(dataRoot);
+    const storage = await createFsStorageProvider({ dataRoot });
+    const store = createKvSettingsStore(storage.kv);
+
+    const first = await store.get();
+    expect(first.requireApprovalBeforeSend).toBe(true);
+
+    const restarted = await createFsStorageProvider({ dataRoot });
+    const again = createKvSettingsStore(restarted.kv);
+    expect((await again.get()).requireApprovalBeforeSend).toBe(true);
+
+    await again.set({ requireApprovalBeforeSend: false });
+    const third = await createFsStorageProvider({ dataRoot });
+    expect((await createKvSettingsStore(third.kv).get()).requireApprovalBeforeSend).toBe(false);
   });
 });

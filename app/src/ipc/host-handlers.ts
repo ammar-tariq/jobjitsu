@@ -1,5 +1,6 @@
 import { createAppError, err, ok } from "@jobjitsu/shared";
 import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
+import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
@@ -13,6 +14,7 @@ export type CreateHostIpcOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
+  readonly preferences?: PreferencesFacade;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
 };
@@ -30,6 +32,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const profiles = options.profiles;
   const resumeLibrary = options.resumeLibrary;
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
+  const preferences = options.preferences;
   const bus = options.bus;
 
   return {
@@ -171,6 +174,42 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
       }
       return ok({ dataRoot: next });
+    },
+    "preferences.getApprovalBeforeSend": async () => {
+      if (!preferences) {
+        return ok({ requireApprovalBeforeSend: true });
+      }
+      return ok({ requireApprovalBeforeSend: await preferences.getApprovalBeforeSend() });
+    },
+    "preferences.setApprovalBeforeSend": async (payload) => {
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
+      try {
+        const requireApprovalBeforeSend = await preferences.setApprovalBeforeSend(
+          payload.requireApprovalBeforeSend,
+        );
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["requireApprovalBeforeSend"] });
+        }
+        return ok({ requireApprovalBeforeSend });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update approval setting", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That preference could not be saved. Try again.",
+            detail: "preferences:approval",
+            cause,
+          }),
+        );
+      }
     },
   };
 }

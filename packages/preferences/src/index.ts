@@ -10,3 +10,6 @@ export {
   isInQuietHours,
   requiresApprovalBeforeSend,
 } from "@jobjitsu/config";
+
+export { createPreferencesFacade } from "./facade.js";
+export type { PreferencesFacade } from "./facade.js";
