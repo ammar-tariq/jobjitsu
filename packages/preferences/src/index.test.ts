@@ -42,6 +42,18 @@ describe("@jobjitsu/preferences", () => {
     expect(await prefs.setApprovalBeforeSend(false)).toBe(false);
     expect(await prefs.getApprovalBeforeSend()).toBe(false);
     expect((await store.get()).requireApprovalBeforeSend).toBe(false);
+
+    const craft = await prefs.setCraftPreferences({
+      fitKeywords: [" remote ", "platform", "remote"],
+      tone: "  calm and precise  ",
+      constraints: ["no relocate", ""],
+    });
+    expect(craft).toEqual({
+      fitKeywords: ["remote", "platform"],
+      tone: "calm and precise",
+      constraints: ["no relocate"],
+    });
+    expect(await prefs.getCraftPreferences()).toEqual(craft);
   });
 
   it("seeds approval-before-send true on a fresh KV store", async () => {

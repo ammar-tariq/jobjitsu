@@ -229,4 +229,26 @@ describe("DesktopShell", () => {
     expect(toggle).not.toBeChecked();
     expect(await runtime.preferences.getApprovalBeforeSend()).toBe(false);
   });
+
+  it("saves fit tone and constraints on this device", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-craft-preferences")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Fit keywords"), "remote, platform");
+    await user.type(screen.getByLabelText("Tone"), "calm and precise");
+    await user.type(screen.getByLabelText("Constraints"), "no relocate");
+    await user.click(screen.getByRole("button", { name: "Save fit rules" }));
+
+    expect(await screen.findByText(/Fit rules saved on this device/i)).toBeInTheDocument();
+    expect(await runtime.preferences.getCraftPreferences()).toEqual({
+      fitKeywords: ["remote", "platform"],
+      tone: "calm and precise",
+      constraints: ["no relocate"],
+    });
+  });
 });

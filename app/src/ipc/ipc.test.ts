@@ -31,6 +31,8 @@ describe("IPC allowlist", () => {
       "storage.pickDataRoot",
       "preferences.getApprovalBeforeSend",
       "preferences.setApprovalBeforeSend",
+      "preferences.getCraftPreferences",
+      "preferences.setCraftPreferences",
     ]);
   });
 
@@ -98,6 +100,7 @@ describe("typed IPC bridge", () => {
     expect(Object.keys(bridge).sort()).toEqual([
       "getAiStatus",
       "getApprovalBeforeSend",
+      "getCraftPreferences",
       "getDataRoot",
       "getProfile",
       "getSelectedResume",
@@ -109,6 +112,7 @@ describe("typed IPC bridge", () => {
       "resetDataRoot",
       "selectResume",
       "setApprovalBeforeSend",
+      "setCraftPreferences",
       "setDataRoot",
       "setProfile",
       "setTheme",
@@ -289,5 +293,36 @@ describe("typed IPC bridge", () => {
     expect(after.ok && after.value.requireApprovalBeforeSend).toBe(false);
     expect(changed).toEqual([["requireApprovalBeforeSend"]]);
     expect(await preferences.getApprovalBeforeSend()).toBe(false);
+  });
+
+  it("persists fit tone and constraints through preferences APIs", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const preferences = createPreferencesFacade(createMemorySettingsStore());
+    const bridge = createIpcBridge(createHostIpcDispatcher({ preferences, bus }));
+
+    const before = await bridge.getCraftPreferences();
+    expect(before.ok && before.value.craft).toEqual({
+      fitKeywords: [],
+      tone: "",
+      constraints: [],
+    });
+
+    const saved = await bridge.setCraftPreferences({
+      fitKeywords: ["remote", "platform"],
+      tone: "calm and precise",
+      constraints: ["no relocate"],
+    });
+    expect(saved.ok && saved.value.craft.fitKeywords).toEqual(["remote", "platform"]);
+    expect(changed).toEqual([["fitKeywords", "tone", "constraints"]]);
+    expect(await preferences.getCraftPreferences()).toEqual({
+      fitKeywords: ["remote", "platform"],
+      tone: "calm and precise",
+      constraints: ["no relocate"],
+    });
   });
 });

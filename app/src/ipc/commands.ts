@@ -21,6 +21,8 @@ export const IPC_ALLOWLIST = [
   "storage.pickDataRoot",
   "preferences.getApprovalBeforeSend",
   "preferences.setApprovalBeforeSend",
+  "preferences.getCraftPreferences",
+  "preferences.setCraftPreferences",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -75,6 +77,18 @@ export type DataRootSnapshot = {
   readonly isCustom: boolean;
 };
 
+export type CraftPreferencesSnapshot = {
+  readonly fitKeywords: readonly string[];
+  readonly tone: string;
+  readonly constraints: readonly string[];
+};
+
+export type CraftPreferencesPatchInput = {
+  readonly fitKeywords?: readonly string[];
+  readonly tone?: string;
+  readonly constraints?: readonly string[];
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
@@ -92,6 +106,8 @@ export type IpcPayloadMap = {
   readonly "storage.pickDataRoot": undefined;
   readonly "preferences.getApprovalBeforeSend": undefined;
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
+  readonly "preferences.getCraftPreferences": undefined;
+  readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
 };
 
 export type IpcResultMap = {
@@ -117,6 +133,8 @@ export type IpcResultMap = {
   };
   readonly "preferences.getApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
+  readonly "preferences.getCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
+  readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

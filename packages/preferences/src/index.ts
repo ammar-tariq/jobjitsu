@@ -12,4 +12,4 @@ export {
 } from "@jobjitsu/config";
 
 export { createPreferencesFacade } from "./facade.js";
-export type { PreferencesFacade } from "./facade.js";
+export type { CraftPreferences, CraftPreferencesPatch, PreferencesFacade } from "./facade.js";

@@ -55,6 +55,12 @@ export function PreferencesView({
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [savingApproval, setSavingApproval] = useState(false);
 
+  const [fitKeywordsDraft, setFitKeywordsDraft] = useState("");
+  const [toneDraft, setToneDraft] = useState("");
+  const [constraintsDraft, setConstraintsDraft] = useState("");
+  const [craftStatus, setCraftStatus] = useState<string | null>(null);
+  const [savingCraft, setSavingCraft] = useState(false);
+
   const refreshVersions = async (): Promise<void> => {
     const result = await bridge.listResumeVersions();
     if (result.ok) {
@@ -90,6 +96,13 @@ export function PreferencesView({
     void bridge.getApprovalBeforeSend().then((result) => {
       if (!cancelled && result.ok) {
         setRequireApproval(result.value.requireApprovalBeforeSend);
+      }
+    });
+    void bridge.getCraftPreferences().then((result) => {
+      if (!cancelled && result.ok) {
+        setFitKeywordsDraft(result.value.craft.fitKeywords.join(", "));
+        setToneDraft(result.value.craft.tone);
+        setConstraintsDraft(result.value.craft.constraints.join(", "));
       }
     });
     return () => {
@@ -237,6 +250,28 @@ export function PreferencesView({
     });
   };
 
+  const onSaveCraftPreferences = (): void => {
+    setSavingCraft(true);
+    setCraftStatus(null);
+    void bridge
+      .setCraftPreferences({
+        fitKeywords: splitList(fitKeywordsDraft),
+        tone: toneDraft,
+        constraints: splitList(constraintsDraft),
+      })
+      .then((result) => {
+        setSavingCraft(false);
+        if (!result.ok) {
+          setCraftStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setFitKeywordsDraft(result.value.craft.fitKeywords.join(", "));
+        setToneDraft(result.value.craft.tone);
+        setConstraintsDraft(result.value.craft.constraints.join(", "));
+        setCraftStatus("Fit rules saved on this device.");
+      });
+  };
+
   return (
     <Stack spacing={3} data-testid="jj-preferences" sx={{ maxWidth: "40rem" }}>
       <Stack spacing={1}>
@@ -244,8 +279,8 @@ export function PreferencesView({
           Preferences
         </Typography>
         <Typography color="text.secondary">
-          Profile, resume library, send approval, data folder, and appearance stay on this device.
-          Nothing is uploaded to a JobJitsu cloud.
+          Profile, resume library, fit rules, send approval, data folder, and appearance stay on
+          this device. Nothing is uploaded to a JobJitsu cloud.
         </Typography>
       </Stack>
 
@@ -271,6 +306,48 @@ export function PreferencesView({
         {approvalStatus ? (
           <Typography role="status" color="text.secondary" variant="body2">
             {approvalStatus}
+          </Typography>
+        ) : null}
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-craft-preferences">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Fit, tone, and constraints
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          These guide curation and drafts on this device. They never pressure you to apply faster or
+          send more.
+        </Typography>
+        <TextField
+          label="Fit keywords"
+          value={fitKeywordsDraft}
+          onChange={(event) => setFitKeywordsDraft(event.target.value)}
+          size="small"
+          fullWidth
+          helperText="Comma-separated themes you care about — for example remote, platform, design systems."
+        />
+        <TextField
+          label="Tone"
+          value={toneDraft}
+          onChange={(event) => setToneDraft(event.target.value)}
+          size="small"
+          fullWidth
+          helperText="How drafts should sound — for example calm and precise."
+        />
+        <TextField
+          label="Constraints"
+          value={constraintsDraft}
+          onChange={(event) => setConstraintsDraft(event.target.value)}
+          size="small"
+          fullWidth
+          helperText="Hard limits, comma-separated — for example no relocate, no unpaid trials."
+        />
+        <Button variant="contained" onClick={onSaveCraftPreferences} disabled={savingCraft}>
+          Save fit rules
+        </Button>
+        {craftStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {craftStatus}
           </Typography>
         ) : null}
       </Stack>
@@ -498,6 +575,13 @@ function bytesToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode(bytes[i]!);
   }
   return btoa(binary);
+}
+
+function splitList(value: string): string[] {
+  return value
+    .split(/[,;\n]/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
 }
 
 async function readFileBytes(file: File): Promise<Uint8Array> {

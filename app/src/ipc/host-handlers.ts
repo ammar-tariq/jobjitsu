@@ -278,6 +278,49 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "preferences.getCraftPreferences": async () => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return ok({ craft: { fitKeywords: [], tone: "", constraints: [] } });
+      }
+      return ok({ craft: await preferences.getCraftPreferences() });
+    },
+    "preferences.setCraftPreferences": async (payload) => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
+      try {
+        const craft = await preferences.setCraftPreferences(payload);
+        if (bus) {
+          const keys = [
+            payload.fitKeywords !== undefined ? "fitKeywords" : null,
+            payload.tone !== undefined ? "tone" : null,
+            payload.constraints !== undefined ? "constraints" : null,
+          ].filter((key): key is string => key !== null);
+          await bus.publish("Preferences.Changed", {
+            keys: keys.length > 0 ? keys : ["fitKeywords", "tone", "constraints"],
+          });
+        }
+        return ok({ craft });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update craft preferences", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Those preferences could not be saved. Try again.",
+            detail: "preferences:craft",
+            cause,
+          }),
+        );
+      }
+    },
   };
 }
 

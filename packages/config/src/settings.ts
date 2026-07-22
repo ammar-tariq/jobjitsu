@@ -44,7 +44,12 @@ export interface AppSettings {
   readonly ai: AiSettings;
   readonly notifications: NotificationSettings;
   readonly agent: AgentSettings;
+  /** Keywords that steer role fit — local only. */
   readonly fitKeywords: readonly string[];
+  /** Writing voice for drafts — plain language, not model jargon. */
+  readonly tone: string;
+  /** Hard limits the user set (remote-only, no relocate, etc.). */
+  readonly constraints: readonly string[];
   readonly updatedAt?: string;
 }
 
@@ -57,6 +62,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   },
   agent: {},
   fitKeywords: [],
+  tone: "",
+  constraints: [],
 };
 
 export interface SettingsStore {
