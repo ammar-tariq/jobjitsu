@@ -11,6 +11,8 @@ export const IPC_ALLOWLIST = [
   "ai.getStatus",
   "identity.getProfile",
   "identity.setProfile",
+  "identity.listResumeVersions",
+  "identity.importResume",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -37,6 +39,26 @@ export type ProfilePatchInput = {
   readonly location?: string;
 };
 
+export type ResumeVersionSnapshot = {
+  readonly id: string;
+  readonly profileId: string;
+  readonly label: string;
+  readonly createdAt: string;
+  readonly format: "document" | "structured";
+  readonly blobId?: string;
+  readonly fileName?: string;
+  readonly contentType?: string;
+  readonly byteLength?: number;
+};
+
+export type ResumeImportInputPayload = {
+  readonly label: string;
+  readonly fileName: string;
+  /** Original file bytes as base64 — stays on-device via host identity APIs. */
+  readonly contentBase64: string;
+  readonly contentType?: string;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
@@ -44,6 +66,8 @@ export type IpcPayloadMap = {
   readonly "ai.getStatus": undefined;
   readonly "identity.getProfile": undefined;
   readonly "identity.setProfile": ProfilePatchInput;
+  readonly "identity.listResumeVersions": undefined;
+  readonly "identity.importResume": ResumeImportInputPayload;
 };
 
 export type IpcResultMap = {
@@ -53,6 +77,8 @@ export type IpcResultMap = {
   readonly "ai.getStatus": AiStatusSnapshot;
   readonly "identity.getProfile": { readonly profile: ProfileSnapshot | null };
   readonly "identity.setProfile": { readonly profile: ProfileSnapshot };
+  readonly "identity.listResumeVersions": { readonly versions: readonly ResumeVersionSnapshot[] };
+  readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

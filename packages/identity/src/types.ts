@@ -48,3 +48,36 @@ export interface ResumeStore {
   getProfile(): Promise<Profile | undefined>;
   saveProfile(profile: Profile): Promise<Profile>;
 }
+
+/** DATA_MODELS ResumeVersion — library entry with optional original blob. */
+export type ResumeFormat = "document" | "structured";
+
+export interface ResumeVersion {
+  readonly id: string;
+  readonly profileId: string;
+  readonly label: string;
+  readonly createdAt: string;
+  readonly format: ResumeFormat;
+  readonly blobId?: string;
+  readonly fileName?: string;
+  readonly contentType?: string;
+  readonly byteLength?: number;
+}
+
+export type ResumeImportInput = {
+  readonly label: string;
+  readonly fileName: string;
+  readonly bytes: Uint8Array;
+  readonly contentType?: string;
+  /** Defaults to a local placeholder when profile is not yet set. */
+  readonly profileId?: string;
+};
+
+/**
+ * Resume Library — import originals on-device; no cloud upload.
+ */
+export interface ResumeLibrary {
+  import(input: ResumeImportInput): Promise<ResumeVersion>;
+  list(): Promise<readonly ResumeVersion[]>;
+  get(id: string): Promise<ResumeVersion | undefined>;
+}

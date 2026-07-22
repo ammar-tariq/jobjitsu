@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createMemoryProfileRepository } from "@jobjitsu/identity";
+import { createInMemoryEventBus } from "@jobjitsu/events";
+import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -9,7 +10,7 @@ import {
 } from "./index.js";
 
 describe("IPC allowlist", () => {
-  it("exports ping, theme, ai status, and identity profile commands", () => {
+  it("exports ping, theme, ai status, and identity commands", () => {
     expect(IPC_ALLOWLIST).toEqual([
       "ping",
       "theme.get",
@@ -17,6 +18,8 @@ describe("IPC allowlist", () => {
       "ai.getStatus",
       "identity.getProfile",
       "identity.setProfile",
+      "identity.listResumeVersions",
+      "identity.importResume",
     ]);
   });
 
@@ -24,7 +27,7 @@ describe("IPC allowlist", () => {
     expect(isIpcCommandName("ai.complete")).toBe(false);
     expect(isIpcCommandName("ai.embed")).toBe(false);
     expect(isIpcCommandName("ping")).toBe(true);
-    expect(isIpcCommandName("identity.getProfile")).toBe(true);
+    expect(isIpcCommandName("identity.importResume")).toBe(true);
   });
 });
 
@@ -85,6 +88,8 @@ describe("typed IPC bridge", () => {
       "getAiStatus",
       "getProfile",
       "getTheme",
+      "importResume",
+      "listResumeVersions",
       "ping",
       "setProfile",
       "setTheme",
@@ -112,5 +117,48 @@ describe("typed IPC bridge", () => {
     const loaded = await bridge.getProfile();
     expect(loaded.ok && loaded.value.profile?.displayName).toBe("Sam Chen");
     expect(await profiles.get()).toEqual(saved.ok ? saved.value.profile : undefined);
+  });
+
+  it("imports a resume through identity APIs and emits Resume.Imported id only", async () => {
+    const bus = createInMemoryEventBus();
+    const imported: string[] = [];
+    bus.subscribe("Resume.Imported", async (event) => {
+      imported.push(event.payload.resumeId);
+    });
+
+    const resumeLibrary = createMemoryResumeLibrary();
+    const bridge = createIpcBridge(createHostIpcDispatcher({ resumeLibrary, bus }));
+
+    const contentBase64 = btoa("# Sam Chen\n");
+    const saved = await bridge.importResume({
+      label: "Baseline 2026",
+      fileName: "sam.md",
+      contentBase64,
+      contentType: "text/markdown",
+    });
+    expect(saved.ok).toBe(true);
+    if (saved.ok) {
+      expect(saved.value.version.label).toBe("Baseline 2026");
+      expect(saved.value.version.format).toBe("document");
+      expect(imported).toEqual([saved.value.version.id]);
+    }
+
+    const listed = await bridge.listResumeVersions();
+    expect(listed.ok && listed.value.versions).toHaveLength(1);
+    expect(listed.ok && listed.value.versions[0]?.label).toBe("Baseline 2026");
+  });
+
+  it("returns a calm error when import payload is empty", async () => {
+    const resumeLibrary = createMemoryResumeLibrary();
+    const bridge = createIpcBridge(createHostIpcDispatcher({ resumeLibrary }));
+    const result = await bridge.importResume({
+      label: "Empty",
+      fileName: "empty.txt",
+      contentBase64: btoa(""),
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toMatch(/empty/i);
+    }
   });
 });

@@ -1,12 +1,15 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { ProfileSnapshot, ThemePreference } from "../ipc/commands.js";
+import type { ProfileSnapshot, ResumeVersionSnapshot, ThemePreference } from "../ipc/commands.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -14,7 +17,7 @@ export type PreferencesViewProps = {
   readonly bridge: IpcBridge;
 };
 
-/** Preferences — profile + appearance; stored on this device. */
+/** Preferences — profile, resume library, appearance; stored on this device. */
 export function PreferencesView({
   theme,
   onThemeChange,
@@ -27,6 +30,20 @@ export function PreferencesView({
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
+  const [resumeLabel, setResumeLabel] = useState("");
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const refreshVersions = async (): Promise<void> => {
+    const result = await bridge.listResumeVersions();
+    if (result.ok) {
+      setVersions(result.value.versions);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     void bridge.getProfile().then((result) => {
@@ -38,6 +55,11 @@ export function PreferencesView({
       setDisplayName(next?.displayName ?? "");
       setEmail(next?.email ?? "");
       setLocation(next?.location ?? "");
+    });
+    void bridge.listResumeVersions().then((result) => {
+      if (!cancelled && result.ok) {
+        setVersions(result.value.versions);
+      }
     });
     return () => {
       cancelled = true;
@@ -64,6 +86,43 @@ export function PreferencesView({
       });
   };
 
+  const onImportResume = (): void => {
+    if (!resumeFile) {
+      setImportStatus("Choose a resume file to import.");
+      return;
+    }
+    const file = resumeFile;
+    setImporting(true);
+    setImportStatus(null);
+    void readFileBytes(file)
+      .then((bytes) =>
+        bridge.importResume({
+          label: resumeLabel || file.name,
+          fileName: file.name,
+          contentBase64: bytesToBase64(bytes),
+          contentType: file.type || undefined,
+        }),
+      )
+      .then(async (result) => {
+        setImporting(false);
+        if (!result.ok) {
+          setImportStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setResumeLabel("");
+        setResumeFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        setImportStatus(`Imported "${result.value.version.label}" — stored on this device.`);
+        await refreshVersions();
+      })
+      .catch(() => {
+        setImporting(false);
+        setImportStatus("Something went wrong importing that file. Try again.");
+      });
+  };
+
   return (
     <Stack spacing={3} data-testid="jj-preferences" sx={{ maxWidth: "40rem" }}>
       <Stack spacing={1}>
@@ -71,7 +130,8 @@ export function PreferencesView({
           Preferences
         </Typography>
         <Typography color="text.secondary">
-          Profile and appearance stay on this device. Nothing is uploaded to a JobJitsu cloud.
+          Profile, resume library, and appearance stay on this device. Nothing is uploaded to a
+          JobJitsu cloud.
         </Typography>
       </Stack>
 
@@ -128,6 +188,64 @@ export function PreferencesView({
         ) : null}
       </Stack>
 
+      <Stack spacing={1.5} data-testid="jj-resume-library">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Resume library
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          Import a resume file into your local library. The original stays on this device.
+        </Typography>
+        <TextField
+          label="Version label"
+          value={resumeLabel}
+          onChange={(event) => setResumeLabel(event.target.value)}
+          size="small"
+          fullWidth
+          placeholder="e.g. Baseline 2026"
+        />
+        <Button variant="outlined" component="label">
+          {resumeFile ? resumeFile.name : "Choose file"}
+          <input
+            ref={fileInputRef}
+            hidden
+            type="file"
+            accept=".pdf,.doc,.docx,.txt,.md,.html,text/plain,application/pdf"
+            data-testid="jj-resume-file-input"
+            onChange={(event) => {
+              const next = event.target.files?.[0] ?? null;
+              setResumeFile(next);
+              if (next && !resumeLabel.trim()) {
+                setResumeLabel(next.name.replace(/\.[^.]+$/, ""));
+              }
+            }}
+          />
+        </Button>
+        <Button variant="contained" onClick={onImportResume} disabled={importing || !resumeFile}>
+          Import resume
+        </Button>
+        {importStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {importStatus}
+          </Typography>
+        ) : null}
+        {versions.length > 0 ? (
+          <List dense disablePadding data-testid="jj-resume-version-list">
+            {versions.map((version) => (
+              <ListItem key={version.id} disableGutters>
+                <ListItemText
+                  primary={version.label}
+                  secondary={`${version.fileName ?? "file"} · ${new Date(version.createdAt).toLocaleString()}`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography color="text.secondary" variant="body2">
+            No resumes imported yet.
+          </Typography>
+        )}
+      </Stack>
+
       <Stack spacing={1}>
         <Typography component="h3" variant="body2" color="text.secondary">
           Appearance
@@ -157,4 +275,38 @@ export function PreferencesView({
       </Stack>
     </Stack>
   );
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  return btoa(binary);
+}
+
+async function readFileBytes(file: File): Promise<Uint8Array> {
+  if (typeof file.arrayBuffer === "function") {
+    return new Uint8Array(await file.arrayBuffer());
+  }
+  // jsdom File may lack arrayBuffer — text() is enough for fixture imports in tests.
+  if (typeof file.text === "function") {
+    return new TextEncoder().encode(await file.text());
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(new TextEncoder().encode(reader.result));
+        return;
+      }
+      if (reader.result instanceof ArrayBuffer) {
+        resolve(new Uint8Array(reader.result));
+        return;
+      }
+      reject(new Error("Could not read that file."));
+    };
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.readAsArrayBuffer(file);
+  });
 }

@@ -5,7 +5,7 @@
 
 **Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Product modules](../product/FEATURES.md) · [Epic features](./EPIC_FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
 
-**Current focus:** Follow [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md). Wave 2 trust — PE03-S01 local profile (this slice). Sprint ledger: [sprint-1.md](./sprint-1.md) · [VERTICAL_SLICES.md](./VERTICAL_SLICES.md). Waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) · [PROJECT_BOARD.md](./PROJECT_BOARD.md).
+**Current focus:** Follow [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md). Wave 2 trust — PE03-S02 resume import (this slice). Sprint ledger: [sprint-1.md](./sprint-1.md) · [VERTICAL_SLICES.md](./VERTICAL_SLICES.md). Waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) · [PROJECT_BOARD.md](./PROJECT_BOARD.md).
 
 ---
 

@@ -3,6 +3,7 @@ import type {
   AiStatusSnapshot,
   IpcResultMap,
   ProfilePatchInput,
+  ResumeImportInputPayload,
   ThemePreference,
 } from "./commands.js";
 import type { IpcDispatcher } from "./dispatcher.js";
@@ -16,6 +17,10 @@ export type IpcBridge = {
   readonly setProfile: (
     patch: ProfilePatchInput,
   ) => Promise<Result<IpcResultMap["identity.setProfile"]>>;
+  readonly listResumeVersions: () => Promise<Result<IpcResultMap["identity.listResumeVersions"]>>;
+  readonly importResume: (
+    input: ResumeImportInputPayload,
+  ) => Promise<Result<IpcResultMap["identity.importResume"]>>;
 };
 
 /**
@@ -43,6 +48,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async setProfile(patch: ProfilePatchInput) {
       return (await dispatcher.invoke("identity.setProfile", patch)) as Result<
         IpcResultMap["identity.setProfile"]
+      >;
+    },
+    async listResumeVersions() {
+      return (await dispatcher.invoke("identity.listResumeVersions")) as Result<
+        IpcResultMap["identity.listResumeVersions"]
+      >;
+    },
+    async importResume(input: ResumeImportInputPayload) {
+      return (await dispatcher.invoke("identity.importResume", input)) as Result<
+        IpcResultMap["identity.importResume"]
       >;
     },
   };
