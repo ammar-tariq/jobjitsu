@@ -160,7 +160,21 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 
 ---
 
-## 10. File Checklist
+## 10. Design Language Index
+
+| Document | Covers |
+|----------|--------|
+| [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md) | Beliefs, principles, metaphor map |
+| [VOICE_AND_TONE.md](./VOICE_AND_TONE.md) | Voice pillars, tone by context |
+| [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md) | Mechanics, vocabulary, claims |
+| [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) | UI/component naming, motion, a11y, icons, illustration |
+| [COPY_GUIDELINES.md](./COPY_GUIDELINES.md) | Copy architecture + surface index |
+| [EMPTY_STATES.md](./EMPTY_STATES.md) | Empty-state patterns |
+| [NOTIFICATIONS.md](./NOTIFICATIONS.md) | Toasts, OS alerts, severity |
+| [ERROR_MESSAGES.md](./ERROR_MESSAGES.md) | Failure copy & recovery |
+| [SUCCESS_MESSAGES.md](./SUCCESS_MESSAGES.md) | Measured win copy |
+
+### Asset Checklist
 
 | File | Status |
 |------|--------|
