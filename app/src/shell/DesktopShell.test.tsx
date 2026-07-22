@@ -1,11 +1,13 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
+import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createHostRuntime } from "../host/runtime.js";
 import { App } from "../App.js";
 
 afterEach(() => {
   cleanup();
+  document.documentElement.removeAttribute("data-theme");
 });
 
 describe("DesktopShell", () => {
@@ -19,6 +21,7 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
     expect(screen.getByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
 
     for (const label of [
       "Applications",
@@ -58,5 +61,22 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Queue" })).toBeInTheDocument();
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Queue" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("toggles appearance from Preferences and keeps it on the shared store", async () => {
+    const user = userEvent.setup();
+    const appearance = createMemoryAppearanceStore("dark");
+    const runtime = createHostRuntime({ appearance });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-preferences")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Light" }));
+
+    expect(await screen.findByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "light");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+    expect(await appearance.getTheme()).toBe("light");
   });
 });
