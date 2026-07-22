@@ -33,6 +33,7 @@
     "@jobjitsu/ui": "workspace:*",
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
+    "@tauri-apps/plugin-dialog": "^2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

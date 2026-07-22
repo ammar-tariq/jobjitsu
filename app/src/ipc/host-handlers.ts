@@ -4,6 +4,7 @@ import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
+import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
 import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 

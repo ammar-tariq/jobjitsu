@@ -42,6 +42,7 @@ import {
 } from "../ipc/index.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "./data-root-store.js";
+import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
 export type HostActivityEntry = {
   readonly name: EventName;

@@ -396,6 +396,7 @@
 **Acceptance criteria:**
   - Preferences shows the current data folder and the platform default.
   - Changing the folder goes through host storage APIs (not UI→storage).
+  - Native folder picker is available in the desktop app (`storage.pickDataRoot`); typed path remains as fallback.
   - Restore default is available.
   - Preferences.Changed emits with `dataRoot` on change.
   - Copy never implies a JobJitsu cloud.
@@ -404,9 +405,9 @@
 
 **Priority:** P0
 
-**Technical notes:** Trust surface for backup / encrypted volumes; browser-safe path preference until Tauri binds FS root.
+**Technical notes:** Trust surface for backup / encrypted volumes; Tauri dialog plugin for pick; typed path fallback in browser/dev.
 
-**Testing notes:** Default path + set/reset IPC and Preferences UI.
+**Testing notes:** Default path + set/reset/pick IPC and Preferences UI (Choose folder stub).
 
 **Status:** done (2026-07-23)
 

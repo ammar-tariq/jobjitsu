@@ -37,12 +37,12 @@ describe("PE01-S01 launch desktop host", () => {
     expect(cargo.toLowerCase()).not.toContain("electron");
   });
 
-  it("keeps host capabilities deny-by-default (no fs/shell plugins)", () => {
+  it("keeps host capabilities deny-by-default (dialog open only for data folder)", () => {
     const caps = JSON.parse(
       readFileSync(join(appRoot, "src-tauri/capabilities/default.json"), "utf8"),
     ) as { permissions: string[] };
 
-    expect(caps.permissions).toEqual(["core:default"]);
+    expect(caps.permissions).toEqual(["core:default", "dialog:allow-open"]);
     expect(caps.permissions.some((p) => p.startsWith("fs:") || p.startsWith("shell:"))).toBe(false);
   });
 

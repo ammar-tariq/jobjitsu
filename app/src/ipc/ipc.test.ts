@@ -3,6 +3,7 @@ import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
+import { createStubFolderPicker } from "../host/folder-picker.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -102,6 +103,7 @@ describe("typed IPC bridge", () => {
       "getTheme",
       "importResume",
       "listResumeVersions",
+      "pickDataRoot",
       "ping",
       "resetDataRoot",
       "selectResume",
