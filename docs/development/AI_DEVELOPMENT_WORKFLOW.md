@@ -54,13 +54,17 @@ Before writing any code:
     documented · tested · typed · reviewed · follows architecture · passes lint · passes build.
 
 16. Commit the completed work with a [Conventional Commit](../../.cursor/rules/commit-messages.mdc)
-    (see `.cursor/rules/commit-after-completion.mdc`). Do not push unless asked.  
+    (see `.cursor/rules/commit-after-completion.mdc`).  
     Set Project **Status → In Review**.
 
-17. When opening a PR (only if the user asks): link/close the issue (`Closes #N`) and set
-    **Status → Testing**. Merge to `main` sets **Done** via Actions (or manually).
+17. **PR gate (required before the next slice):** ensure an open PR exists for this
+    branch/commit (`Closes #N` when applicable). Push if needed, then create the PR.
+    Set **Status → Testing**. Do **not** start the next story until that PR exists.
+    If the user asks to “move ahead” without a PR, open the PR first.
 
-18. After a **major milestone** (issue closed, wave/CP advanced, or human request), run
+18. Merge to `main` sets **Done** via Actions (or manually).
+
+19. After a **major milestone** (issue closed, wave/CP advanced, or human request), run
     [Article Milestone Detection](#article-milestone-detection).
 
 Never skip planning.
@@ -71,6 +75,7 @@ Never call a task done without meeting the Definition of Done.
 Never leave completed work uncommitted when the change set is ready.
 Never invent article topics for trivial changes.
 Never implement feature slices directly on `main` unless the user opts in.
+Never start the next vertical slice until a relevant PR for the completed slice is open.
 
 ---
 
@@ -85,7 +90,7 @@ Implement / tests / docs / commit
       ↓
 Status: In Review
       ↓
-PR opened (+ Closes #N) → Status: Testing
+PR opened (+ Closes #N) → Status: Testing   ← gate: no next slice until PR exists
       ↓
 Merge to main → Status: Done  (workflow: project-status-on-merge)
 ```
@@ -114,7 +119,7 @@ Implementation
       ↓
 Tests + DoD + commit → In Review
       ↓
-PR → Testing
+PR → Testing   ← do not start next story until PR is open
       ↓
 Merge → Done
       ↓

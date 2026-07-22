@@ -44,8 +44,10 @@ Ensure the issue is on project **JobJitsu Development** (#2, owner `ammar-tariq`
 ## 3. After the slice
 
 1. Commit on the feature branch (Conventional Commits).
-2. Set status **In Review** when asking the user to review or when opening a PR.
-3. When opening a PR (only if the user asks): set **Testing** once the PR exists / CI is the next gate.
-4. Do not mark **Done** until merge is confirmed (workflow or user).
+2. Set status **In Review** when asking the user to review or when the slice is ready for a PR.
+3. **PR gate:** Do not start the next story/ticket until an open PR exists for this branch (see [vertical-slices.mdc](./vertical-slices.mdc) and [commit-after-completion.mdc](./commit-after-completion.mdc)).
+4. When opening a PR: push if needed, create the PR with `Closes #N` when applicable, set **Testing** once the PR exists / CI is the next gate.
+5. If the user says “move ahead” / “next ticket” and no PR exists for the completed slice, open the PR first — then ask before implementing the next story.
+6. Do not mark **Done** until merge is confirmed (workflow or user).
 
 Skip auto-branching / status updates only when the user explicitly opts out (e.g. “stay on main”, “don’t touch the board”).
