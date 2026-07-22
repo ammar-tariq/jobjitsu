@@ -63,6 +63,14 @@ Your belt will be tied. Waiting for the first throw.
 | [Design system](docs/brand/DESIGN_SYSTEM.md) | UI, motion, a11y, icons |
 | [Copy guidelines](docs/brand/COPY_GUIDELINES.md) | Product string architecture |
 
+### Architecture
+
+| Doc | Description |
+|-----|-------------|
+| [Architecture overview](docs/architecture/OVERVIEW.md) | Local-first Career OS design |
+| [Monorepo](docs/architecture/MONOREPO.md) | Repository & package map |
+| [Full index](docs/architecture/README.md) | Events, plugins, desktop, AI, tests |
+
 ---
 
 ## Principles (short)
