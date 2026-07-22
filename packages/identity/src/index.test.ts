@@ -11,7 +11,9 @@ import {
   createKvProfileRepository,
   createLocalResumeStore,
   createMemoryProfileRepository,
+  createMemoryResumeLibrary,
 } from "./index.js";
+import { createStorageResumeLibrary } from "./storage-resume-library.js";
 
 const tempRoots: string[] = [];
 
@@ -111,5 +113,59 @@ describe("@jobjitsu/identity", () => {
       }),
     );
     expect(saved.summary).toBe("Updated summary");
+  });
+
+  it("imports a resume fixture into the memory library with a label", async () => {
+    const library = createMemoryResumeLibrary();
+    const bytes = new TextEncoder().encode("# Sam Chen\nStaff engineer\n");
+    const version = await library.import({
+      label: "Baseline 2026",
+      fileName: "sam-chen.md",
+      bytes,
+      contentType: "text/markdown",
+    });
+    expect(version.label).toBe("Baseline 2026");
+    expect(version.format).toBe("document");
+    expect(version.fileName).toBe("sam-chen.md");
+    expect(version.blobId).toBeTruthy();
+    expect(await library.list()).toEqual([version]);
+  });
+
+  it("rejects empty imports with a calm recoverable message", async () => {
+    const library = createMemoryResumeLibrary();
+    await expect(
+      library.import({
+        label: "Empty",
+        fileName: "empty.txt",
+        bytes: new Uint8Array(),
+      }),
+    ).rejects.toThrow(/empty/i);
+  });
+
+  it("imports a resume fixture onto FS storage (survives restart)", async () => {
+    const dataRoot = await mkdtemp(join(tmpdir(), "jobjitsu-resume-lib-"));
+    tempRoots.push(dataRoot);
+    const bytes = new TextEncoder().encode("Jordan Lee — product engineer");
+
+    const first = await createFsStorageProvider({ dataRoot });
+    const library = createStorageResumeLibrary(first.kv, first.blobs);
+    const version = await library.import({
+      label: "Product baseline",
+      fileName: "jordan.txt",
+      bytes,
+      contentType: "text/plain",
+    });
+    expect(version.label).toBe("Product baseline");
+    expect(version.blobId).toBeTruthy();
+
+    const blob = await first.blobs.get(version.blobId as import("@jobjitsu/core").BlobId);
+    expect(blob.ok && blob.value && new TextDecoder().decode(blob.value)).toContain("Jordan Lee");
+
+    const restarted = await createFsStorageProvider({ dataRoot });
+    const again = createStorageResumeLibrary(restarted.kv, restarted.blobs);
+    const listed = await again.list();
+    expect(listed).toHaveLength(1);
+    expect(listed[0]?.id).toBe(version.id);
+    expect(listed[0]?.label).toBe("Product baseline");
   });
 });

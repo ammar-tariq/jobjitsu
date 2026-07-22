@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE03 Trust & Identity |
-| **Story** | PE03-S01 — Maintain local profile (this slice) |
+| **Story** | PE03-S02 — Import resume into Resume Library (this slice) |
 | **Status** | In progress → PR gate |
-| **Note** | Profile CRUD via identity APIs + Preferences form; no cloud wording |
+| **Note** | Import via identity APIs; Resume.Imported id-only; calm failure |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE03-S02 | 2026-07-23 | Resume library import + Preferences UI; Resume.Imported |
 | PE03-S01 | 2026-07-23 | Local profile CRUD; Preferences form via IPC |
 | PE02-S03 | 2026-07-23 | Memory durable sink; allowlist coverage tests |
 | PE02-S02 | 2026-07-23 | Full EVENT_SYSTEM catalog; Progress minimization |

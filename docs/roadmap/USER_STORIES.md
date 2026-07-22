@@ -268,7 +268,7 @@
 
 **Testing notes:** Fixture import test.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE03-S03 — Version and select resumes
 

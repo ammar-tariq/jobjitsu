@@ -102,4 +102,33 @@ describe("DesktopShell", () => {
     expect(profile?.email).toBe("sam@example.com");
     expect(profile?.location).toMatch(/device/i);
   });
+
+  it("imports a resume into the local library through the identity bridge", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    const imported: string[] = [];
+    runtime.bus.subscribe("Resume.Imported", async (event) => {
+      imported.push(event.payload.resumeId);
+    });
+
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-resume-library")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox", { name: /version label/i }), "Baseline 2026");
+    const file = new File(["# Sam Chen\nStaff engineer\n"], "sam-chen.md", {
+      type: "text/markdown",
+    });
+    await user.upload(screen.getByTestId("jj-resume-file-input"), file);
+    await user.click(screen.getByRole("button", { name: "Import resume" }));
+
+    expect(await screen.findByText(/Imported "Baseline 2026"/i)).toBeInTheDocument();
+    expect(await screen.findByTestId("jj-resume-version-list")).toHaveTextContent("Baseline 2026");
+    const versions = await runtime.resumeLibrary.list();
+    expect(versions).toHaveLength(1);
+    expect(versions[0]?.label).toBe("Baseline 2026");
+    expect(imported).toEqual([versions[0]?.id]);
+  });
 });

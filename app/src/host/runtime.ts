@@ -21,7 +21,9 @@ import {
   createDefaultFakeResume,
   createFakeResumeStore,
   createMemoryProfileRepository,
+  createMemoryResumeLibrary,
   type ProfileRepository,
+  type ResumeLibrary,
   type ResumeStore,
 } from "@jobjitsu/identity";
 import { createLogger, createMemoryLogSink, type Logger } from "@jobjitsu/logger";
@@ -53,6 +55,8 @@ export type HostRuntime = {
   readonly appearance: AppearanceStore;
   /** On-device profile repository (identity public API). */
   readonly profiles: ProfileRepository;
+  /** On-device resume library (identity public API). */
+  readonly resumeLibrary: ResumeLibrary;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -65,6 +69,7 @@ export type CreateHostRuntimeOptions = {
   /** Shared appearance store so theme survives a process-local restart. */
   readonly appearance?: AppearanceStore;
   readonly profiles?: ProfileRepository;
+  readonly resumeLibrary?: ResumeLibrary;
 };
 
 /**
@@ -83,6 +88,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const resumes: ResumeStore = createFakeResumeStore({ resume: null });
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
+  const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -172,7 +178,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   });
 
   const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
-  const ipc = createHostIpcDispatcher({ appearance, profiles });
+  const ipc = createHostIpcDispatcher({ appearance, profiles, resumeLibrary, bus });
   const bridge = createIpcBridge(ipc);
 
   return {
@@ -183,6 +189,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     bridge,
     appearance,
     profiles,
+    resumeLibrary,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",
@@ -210,6 +217,10 @@ function summarize(event: DomainEvent): string {
     case "Resume.Generated": {
       const payload = event.payload as EventPayloadMap["Resume.Generated"];
       return `Resume generated (${payload.resumeId})`;
+    }
+    case "Resume.Imported": {
+      const payload = event.payload as EventPayloadMap["Resume.Imported"];
+      return `Resume imported (${payload.resumeId})`;
     }
     case "Email.Synced": {
       const payload = event.payload as EventPayloadMap["Email.Synced"];
