@@ -29,9 +29,6 @@ Never build multiple features in parallel in the same change set.
 | E02-F03-S01 | 2026-07-22 | `createInMemoryEventBus` |
 | DF-02 | 2026-07-22 | Desktop shell layout + Coming Soon nav (Vite/React) |
 | Foundation spine | 2026-07-22 | shared, events, logger, config, core, sdk, testing |
-| DF-10 | 2026-07-22 | Extension SDK manager, lifecycle, DI, events |
-| E06-F02 + fakes | 2026-07-22 | Fake AI, Gmail, Jobs, Resume providers |
-| Event cascade | 2026-07-22 | Host runtime cascade; UI↛AI fence |
 
 ## Sprint 1 sequence
 
