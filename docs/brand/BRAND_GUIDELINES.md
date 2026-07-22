@@ -164,6 +164,7 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 
 | Document | Covers |
 |----------|--------|
+| [PRODUCT_VISION.md](./PRODUCT_VISION.md) | Vision, mission, roadmap, modules, non-goals |
 | [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md) | Beliefs, principles, metaphor map |
 | [VOICE_AND_TONE.md](./VOICE_AND_TONE.md) | Voice pillars, tone by context |
 | [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md) | Mechanics, vocabulary, claims |
