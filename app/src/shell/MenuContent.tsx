@@ -5,25 +5,21 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
-import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
-import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
+import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { SHELL_NAV_ITEMS, type ShellNavId } from "../index.js";
 
 const NAV_ICONS: Record<ShellNavId, JSX.Element> = {
-  dojo: <HomeRoundedIcon fontSize="small" />,
-  opportunities: <WorkOutlineRoundedIcon fontSize="small" />,
-  resume: <DescriptionRoundedIcon fontSize="small" />,
-  inbox: <InboxRoundedIcon fontSize="small" />,
-  recruiters: <PeopleRoundedIcon fontSize="small" />,
-  analytics: <AnalyticsRoundedIcon fontSize="small" />,
-  extensions: <ExtensionRoundedIcon fontSize="small" />,
-  settings: <SettingsRoundedIcon fontSize="small" />,
+  applications: <WorkOutlineRoundedIcon fontSize="small" />,
+  queue: <InboxRoundedIcon fontSize="small" />,
+  "follow-ups": <EventAvailableRoundedIcon fontSize="small" />,
+  agent: <SupportAgentRoundedIcon fontSize="small" />,
+  preferences: <TuneRoundedIcon fontSize="small" />,
+  timeline: <HistoryRoundedIcon fontSize="small" />,
 };
 
 export type MenuContentProps = {
@@ -50,6 +46,12 @@ export function MenuContent({ activeId, onSelect }: MenuContentProps): JSX.Eleme
                 onClick={() => {
                   onSelect(item.id);
                 }}
+                sx={(theme) => ({
+                  "&.Mui-focusVisible": {
+                    outline: `2px solid ${theme.palette.primary.main}`,
+                    outlineOffset: 2,
+                  },
+                })}
               >
                 <ListItemIcon>{NAV_ICONS[item.id]}</ListItemIcon>
                 <ListItemText primary={item.label} />

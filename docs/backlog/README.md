@@ -5,7 +5,7 @@
 
 **Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Product modules](../product/FEATURES.md) · [Epic features](./EPIC_FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
 
-**Current focus:** Follow [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) (canonical task sequence). Next: `PE01-S01-T01`. Sprint ledger: [sprint-1.md](./sprint-1.md) · [VERTICAL_SLICES.md](./VERTICAL_SLICES.md). Waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) · [PROJECT_BOARD.md](./PROJECT_BOARD.md).
+**Current focus:** Follow [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) (canonical task sequence). Next: `PE01-S04` (dark-default appearance) or Wave 1 storage. Sprint ledger: [sprint-1.md](./sprint-1.md) · [VERTICAL_SLICES.md](./VERTICAL_SLICES.md). Waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) · [PROJECT_BOARD.md](./PROJECT_BOARD.md).
 
 ---
 

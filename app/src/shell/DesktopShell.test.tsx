@@ -9,17 +9,42 @@ afterEach(() => {
 });
 
 describe("DesktopShell", () => {
-  it("renders JobJitsu chrome and listens to host events on Dojo", async () => {
+  it("renders JobJitsu chrome and primary H1 nav", async () => {
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
     await runtime.start();
 
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "Welcome" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
+    expect(screen.getByText("Coming Soon")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
+
+    for (const label of [
+      "Applications",
+      "Queue",
+      "Follow-ups",
+      "Agent",
+      "Preferences",
+      "Timeline",
+    ]) {
+      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+    }
+  });
+
+  it("shows one primary view and Agent listens to host events", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Agent" }));
+
+    expect(screen.getByRole("heading", { level: 2, name: "Agent" })).toBeInTheDocument();
     expect(screen.getByTestId("jj-event-activity")).toBeInTheDocument();
     expect(await screen.findByText("Startup cascade complete.")).toBeInTheDocument();
-    expect(screen.getByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Agent" })).toHaveAttribute("aria-current", "page");
+    expect(screen.queryByTestId("jj-coming-soon")).not.toBeInTheDocument();
   });
 
   it("switches main title when navigating", async () => {
@@ -28,10 +53,10 @@ describe("DesktopShell", () => {
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Resume" }));
+    await user.click(screen.getByRole("button", { name: "Queue" }));
 
-    expect(screen.getByRole("heading", { level: 2, name: "Resume" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Queue" })).toBeInTheDocument();
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Resume" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: "Queue" })).toHaveAttribute("aria-current", "page");
   });
 });

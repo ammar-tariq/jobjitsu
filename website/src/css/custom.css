@@ -18,8 +18,8 @@
   --jj-slate-500: #64748b;
 
   --ifm-font-family-base: "Inter", system-ui, -apple-system, sans-serif;
-  --ifm-font-family-monospace: "JetBrains Mono", ui-monospace, SFMono-Regular,
-    Menlo, Monaco, Consolas, monospace;
+  --ifm-font-family-monospace:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --ifm-heading-font-family: "Inter", system-ui, -apple-system, sans-serif;
 
   --ifm-color-primary: #0d9488;

@@ -32,4 +32,5 @@ Requires a Rust toolchain for Tauri commands ([rustup](https://rustup.rs)).
 - No AI runtime embedding in Rust.
 - No Electron.
 - No Node APIs in the renderer.
-- No allowlisted career IPC commands yet (PE01-S03).
+- No allowlisted career IPC commands yet — W0 surface is `ping` + theme / `ai.getStatus` stubs
+  (PE01-S03). Unknown commands fail closed (ADR 0013).

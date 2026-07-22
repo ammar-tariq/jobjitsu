@@ -44,7 +44,7 @@ export function DesktopShell(): JSX.Element {
             pt: 3,
           }}
         >
-          {activeId === "dojo" ? <EventActivityView /> : <ComingSoonView title={title} />}
+          {activeId === "agent" ? <EventActivityView /> : <ComingSoonView title={title} />}
         </Stack>
       </Box>
     </Box>
