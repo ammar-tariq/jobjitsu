@@ -12,7 +12,7 @@ type JjHeroProps = {
  * Full-bleed homepage hero — brand first, single composition (BRAND_GUIDELINES §7).
  */
 export function JjHero({
-  primaryTo = "/quick-start",
+  primaryTo = "/getting-started",
   secondaryTo = "/docs/product/PRODUCT_VISION",
 }: JjHeroProps): ReactNode {
   return (
@@ -30,7 +30,7 @@ export function JjHero({
         </p>
         <div className="hero--jj__actions">
           <Link className="button button--primary button--lg" to={primaryTo}>
-            Quick start
+            Getting started
           </Link>
           <Link className="button button--outline button--lg" to={secondaryTo}>
             Product vision

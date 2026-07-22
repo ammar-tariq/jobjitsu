@@ -2,6 +2,14 @@
 
 Docusaurus 3 documentation site for JobJitsu.
 
+## Documentation-first
+
+Primary audience: **contributors and users** who need to understand or use JobJitsu.
+
+- `/docs` is the source of truth; guide pages are thin doorways, not a second copy of the product.
+- Resist turning the site into a marketing funnel. A polished landing page can wait until the project has traction — keep documentation as the core.
+- Calm chrome; no urgency theater.
+
 ## Source of truth
 
 Markdown is **not** copied into this package. The site reads the monorepo [`/docs`](../docs) directory in place (`docusaurus.config.ts` → `docs.path`).
@@ -14,6 +22,26 @@ pnpm --filter @jobjitsu/website dev
 pnpm --filter @jobjitsu/website build
 pnpm --filter @jobjitsu/website serve
 ```
+
+## Link checking
+
+Production builds use `onBrokenLinks` / `onBrokenMarkdownLinks` / `onBrokenAnchors`: **`throw`**. The deploy workflow fails if any link is broken.
+
+Links that point outside `/docs` (repo-root files, packages) are rewritten at build time to GitHub blob URLs (`src/remark/rewriteRepoRootLinks.ts`).
+
+## GitHub Pages
+
+Workflow: [`.github/workflows/deploy-docs.yml`](../.github/workflows/deploy-docs.yml)
+
+```
+Update docs → commit → push main → Actions
+  ├── Build website
+  ├── Validate links (fail closed)
+  └── Publish GitHub Pages
+(Later) Desktop release builds
+```
+
+One-time repo setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
 ## Features
 
@@ -28,13 +56,30 @@ pnpm --filter @jobjitsu/website serve
 
 Canonical logos live in [`/assets`](../assets). The site copies them into `static/img/` for Docusaurus (favicon, navbar logo, social card).
 
-| Route           | Purpose                                         |
-| --------------- | ----------------------------------------------- |
-| `/`             | Homepage — “The gentle art of landing the job.” |
-| `/features`     | Features doorway                                |
-| `/installation` | Install / workspace                             |
-| `/quick-start`  | First steps                                     |
-| `/architecture` | Architecture doorway                            |
-| `/roadmap`      | Horizons doorway                                |
-| `/contributing` | Contributor doorway                             |
-| `/faq`          | Short Q&A with doc links                        |
+| Route              | Purpose                                         |
+| ------------------ | ----------------------------------------------- |
+| `/`                | Homepage — “The gentle art of landing the job.” |
+| `/getting-started` | Getting started doorway                         |
+| `/installation`    | Install / workspace                             |
+| `/features`        | Features doorway                                |
+| `/architecture`    | Architecture doorway                            |
+| `/ai-models`       | On-device Agent / providers                     |
+| `/plugins`         | Plugins & extensions doorway                    |
+| `/roadmap`         | Horizons doorway                                |
+| `/contributing`    | Contributor doorway                             |
+| `/faq`             | Short Q&A with doc links                        |
+| `/changelog`       | Pointer to GitHub Releases                      |
+
+## Phase 4 — Future enhancements
+
+Deferred until the **desktop app is usable**. Not committed work; do not schedule ahead of Core H1 delivery.
+
+| Enhancement                        | Intent                                                             |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| Download page                      | macOS, Windows, and Linux build links when artifacts exist         |
+| Interactive architecture diagrams  | Explore system maps beyond static Mermaid                          |
+| Embedded demo videos and GIFs      | Short, calm product demos (no urgency theater)                     |
+| Live roadmap from GitHub Projects  | Surface project board state without duplicating SSOT in markdown   |
+| Release notes from GitHub Releases | Generate `/changelog` from release API instead of a manual pointer |
+
+Admission rule: each item ships only when it reduces friction for real users and still respects local-first privacy and calm chrome.

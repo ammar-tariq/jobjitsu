@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
+import Heading from "@theme/Heading";
 import { GuideLayout } from "../components/GuideLayout";
 
 export default function RoadmapPage(): ReactNode {
@@ -50,6 +51,29 @@ export default function RoadmapPage(): ReactNode {
         Authoritative narrative: <Link to="/docs/product/ROADMAP">docs/product/ROADMAP</Link>.
         Promote modules only via the admission rules in Features.
       </p>
+      <section className="jj-guide__future" aria-labelledby="jj-site-future">
+        <Heading as="h2" id="jj-site-future">
+          Website — Phase 4 (deferred)
+        </Heading>
+        <p>
+          After the desktop app is usable, the docs site may grow these surfaces. They are{" "}
+          <strong>not</strong> near-term commitments and must not invent product scope.
+        </p>
+        <ul>
+          <li>Download page for macOS, Windows, and Linux builds</li>
+          <li>Interactive architecture diagrams</li>
+          <li>Embedded demo videos and GIFs</li>
+          <li>Live roadmap pulled from GitHub Projects</li>
+          <li>Release notes generated from GitHub Releases</li>
+        </ul>
+        <p>
+          Detail:{" "}
+          <Link to="https://github.com/ammar-tariq/jobjitsu/blob/main/website/README.md">
+            website README
+          </Link>
+          .
+        </p>
+      </section>
     </GuideLayout>
   );
 }

@@ -3,23 +3,29 @@ import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import rewriteRepoRootLinks from "./src/remark/rewriteRepoRootLinks";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * JobJitsu docs site — content is the existing monorepo `/docs` directory.
  * No copies; Docusaurus reads markdown in place.
+ *
+ * GitHub Pages (Actions) sets DOCUSAURUS_URL / DOCUSAURUS_BASE_URL for the
+ * project site at https://ammar-tariq.github.io/jobjitsu/.
  */
 const config: Config = {
   title: "JobJitsu",
   tagline: "The gentle art of landing the job.",
   favicon: "img/favicon.svg",
 
-  url: "https://jobjitsu.dev",
-  baseUrl: "/",
+  url: process.env.DOCUSAURUS_URL ?? "https://jobjitsu.dev",
+  baseUrl: process.env.DOCUSAURUS_BASE_URL ?? "/",
 
   organizationName: "ammar-tariq",
   projectName: "jobjitsu",
+  // Required for correct relative ../ links in /docs markdown (GitHub Pages).
+  trailingSlash: true,
 
   headTags: [
     {
@@ -51,14 +57,14 @@ const config: Config = {
     format: "detect",
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: "warn",
+      onBrokenMarkdownLinks: "throw",
     },
   },
 
   themes: ["@docusaurus/theme-mermaid"],
 
-  onBrokenLinks: "warn",
-  onBrokenAnchors: "warn",
+  onBrokenLinks: "throw",
+  onBrokenAnchors: "throw",
 
   i18n: {
     defaultLocale: "en",
@@ -75,7 +81,10 @@ const config: Config = {
           routeBasePath: "docs",
           sidebarPath: "./sidebars.ts",
           editUrl: "https://github.com/ammar-tariq/jobjitsu/tree/main/docs/",
+          // Keep 00_/0001- filename prefixes in URLs so markdown links resolve.
+          numberPrefixParser: false,
           exclude: ["**/_*.{js,jsx,ts,tsx,md,mdx}", "**/_*/**", "**/*.{csv,json}"],
+          beforeDefaultRemarkPlugins: [rewriteRepoRootLinks],
         },
         blog: false,
         theme: {
@@ -114,17 +123,26 @@ const config: Config = {
         height: 28,
       },
       items: [
-        { to: "/features", label: "Features", position: "left" },
-        { to: "/quick-start", label: "Quick Start", position: "left" },
-        { to: "/architecture", label: "Architecture", position: "left" },
-        { to: "/roadmap", label: "Roadmap", position: "left" },
+        // Logo/title is Home — no emoji in primary chrome (DESIGN_SYSTEM).
+        { to: "/getting-started", label: "Getting Started", position: "left" },
         {
           type: "docSidebar",
           sidebarId: "docs",
           position: "left",
-          label: "Docs",
+          label: "Documentation",
         },
+        { to: "/architecture", label: "Architecture", position: "left" },
+        { to: "/ai-models", label: "AI Models", position: "left" },
+        { to: "/plugins", label: "Plugins", position: "left" },
+        { to: "/roadmap", label: "Roadmap", position: "left" },
         { to: "/contributing", label: "Contributing", position: "right" },
+        { to: "/faq", label: "FAQ", position: "right" },
+        { to: "/changelog", label: "Changelog", position: "right" },
+        {
+          href: "https://github.com/ammar-tariq/jobjitsu/discussions",
+          label: "Discussions",
+          position: "right",
+        },
         {
           href: "https://github.com/ammar-tariq/jobjitsu",
           label: "GitHub",
@@ -138,25 +156,31 @@ const config: Config = {
         {
           title: "Learn",
           items: [
-            { label: "Features", to: "/features" },
+            { label: "Getting Started", to: "/getting-started" },
             { label: "Installation", to: "/installation" },
-            { label: "Quick Start", to: "/quick-start" },
+            { label: "Features", to: "/features" },
             { label: "FAQ", to: "/faq" },
           ],
         },
         {
           title: "Documentation",
           items: [
-            { label: "Product vision", to: "/docs/product/PRODUCT_VISION" },
-            { label: "Architecture", to: "/docs/architecture/OVERVIEW" },
-            { label: "Backlog", to: "/docs/backlog/" },
+            { label: "Documentation", to: "/docs/adr/" },
+            { label: "Architecture", to: "/architecture" },
+            { label: "AI Models", to: "/ai-models" },
+            { label: "Plugins", to: "/plugins" },
           ],
         },
         {
           title: "Project",
           items: [
             { label: "Roadmap", to: "/roadmap" },
+            { label: "Changelog", to: "/changelog" },
             { label: "Contributing", to: "/contributing" },
+            {
+              label: "Discussions",
+              href: "https://github.com/ammar-tariq/jobjitsu/discussions",
+            },
             {
               label: "GitHub",
               href: "https://github.com/ammar-tariq/jobjitsu",

@@ -41,6 +41,27 @@ Your belt will be tied. Waiting for the first throw.
 
 ---
 
+## Repository layout
+
+Target shape (what we aim for):
+
+```
+JobJitsu/
+├── apps/
+│   └── desktop/          # Tauri + React shell (today: app/ @jobjitsu/app)
+├── packages/             # Domain & shared libraries
+├── website/              # Docusaurus docs site (reads /docs in place)
+├── docs/                 # Product, architecture, brand, backlog, ADRs
+├── .github/              # Actions, future issue/PR templates
+├── scripts/              # Repo automation (as needed)
+├── README.md
+└── LICENSE               # TBD — open-source intent; license not chosen yet
+```
+
+Today the desktop shell still lives at `app/` (not yet `apps/desktop/`). `packages/`, `website/`, `docs/`, and `.github/workflows/` are already in place. See [MONOREPO.md](./MONOREPO.md).
+
+---
+
 ## Development
 
 ```bash
@@ -49,6 +70,29 @@ pnpm check    # format + lint + typecheck + test + build
 ```
 
 A change is complete only when it meets the [Definition of Done](./DEFINITION_OF_DONE.md): documented, tested, typed, reviewed, follows architecture, passes lint, passes build.
+
+### Docs → GitHub Pages workflow
+
+Once docs or website files land on `main`, publishing is automatic — no separate docs deploy step:
+
+```
+Update documentation
+        │
+        ▼
+Commit changes
+        │
+        ▼
+Push to GitHub (main)
+        │
+        ▼
+GitHub Actions (.github/workflows/deploy-docs.yml)
+        │
+        ├── Build @jobjitsu/website
+        ├── Validate links (fail on broken)
+        └── Publish GitHub Pages
+
+(Later) Build desktop releases
+```
 
 ### Desktop shell (UI only)
 
@@ -65,7 +109,7 @@ Open http://localhost:1420 — sidebar + Coming Soon placeholders. No product fe
 pnpm --filter @jobjitsu/website dev
 ```
 
-Serves Docusaurus from the existing [`docs/`](./docs) tree (no duplicated markdown). Dark mode default.
+Serves Docusaurus from [`docs/`](./docs) (no duplicated markdown). **Documentation-first:** the site exists for contributors and users who need to understand or use JobJitsu — not as a marketing funnel. Guide pages are doorways into `/docs`; they do not restate the SSOT.
 
 Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 

@@ -51,10 +51,16 @@ export default function ContributingPage(): ReactNode {
           <Link to="/docs/architecture/PACKAGE_BOUNDARIES">Send</Link>.
         </li>
         <li>Meet the Definition of Done before opening a PR.</li>
+        <li>
+          Doc changes on <code>main</code> publish automatically via GitHub Actions (build, link
+          check, Pages) — no separate docs release process.
+        </li>
       </ol>
       <p>
-        Discuss on <Link href="https://github.com/ammar-tariq/jobjitsu/issues">GitHub Issues</Link>.
-        Source: <Link href="https://github.com/ammar-tariq/jobjitsu">ammar-tariq/jobjitsu</Link>.
+        The website stays <strong>documentation-first</strong> (contributors and users), not a
+        marketing site. Discuss on{" "}
+        <Link href="https://github.com/ammar-tariq/jobjitsu/issues">GitHub Issues</Link>. Source:{" "}
+        <Link href="https://github.com/ammar-tariq/jobjitsu">ammar-tariq/jobjitsu</Link>.
       </p>
     </GuideLayout>
   );

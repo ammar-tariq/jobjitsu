@@ -11,14 +11,9 @@ const PIPELINE = ["search", "curate", "tailor", "queue", "approve", "send", "fol
 
 const PATHS = [
   {
-    title: "Features",
-    to: "/features",
-    blurb: "Core modules and commitment status.",
-  },
-  {
-    title: "Quick Start",
-    to: "/quick-start",
-    blurb: "Clone, install, and open the docs site.",
+    title: "Getting Started",
+    to: "/getting-started",
+    blurb: "Clone, install, and orient on the docs spine.",
   },
   {
     title: "Architecture",
@@ -26,9 +21,24 @@ const PATHS = [
     blurb: "Local-first structure and package boundaries.",
   },
   {
+    title: "AI Models",
+    to: "/ai-models",
+    blurb: "On-device Agent path and provider honesty.",
+  },
+  {
+    title: "Plugins",
+    to: "/plugins",
+    blurb: "Capability-gated agent skills.",
+  },
+  {
     title: "Roadmap",
     to: "/roadmap",
     blurb: "Horizons for the Career OS.",
+  },
+  {
+    title: "FAQ",
+    to: "/faq",
+    blurb: "Short answers with links into the docs.",
   },
 ] as const;
 

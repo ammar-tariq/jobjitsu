@@ -80,22 +80,22 @@ Append-only local timeline for approvals, egress, agent pause; sanitized logs vi
 
 Three-beat onboarding; brand empty states; copy from brand guidelines.
 
-## E15 Outcomes & Reflection (H2)
+## E15 Outcomes & Reflection (H2) {#e15-outcomes--reflection}
 
 Record outcomes; reflect without shame metrics.
 
-## E16 Timeline Depth (H2)
+## E16 Timeline Depth (H2) {#e16-timeline-depth}
 
 Notes, richer filters, export-ready history views.
 
-## E17 Career Craft Modules (H3)
+## E17 Career Craft Modules (H3) {#e17-career-craft-modules}
 
 Interview readiness, narrative studio, role-fit — admitted per module test.
 
-## E18 Plugin System (H4)
+## E18 Plugin System (H4) {#e18-plugin-system}
 
 Manifest, capabilities, enable/disable, one official sample skill.
 
-## E19 Extensions & Portability (H4)
+## E19 Extensions & Portability (H4) {#e19-extension-system--portability}
 
 Contribution points + user-triggered data export.

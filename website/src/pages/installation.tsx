@@ -45,7 +45,7 @@ pnpm install`}</CodeBlock>
       <CodeBlock language="bash">{`pnpm --filter @jobjitsu/website dev`}</CodeBlock>
       <p>
         The site reads the existing <code>/docs</code> tree in place — it does not copy markdown.
-        See also <Link to="/quick-start">Quick start</Link>.
+        See also <Link to="/getting-started">Getting started</Link>.
       </p>
       <h2>Desktop UI (scaffold)</h2>
       <CodeBlock language="bash">{`pnpm --filter @jobjitsu/ui build

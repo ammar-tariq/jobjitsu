@@ -75,14 +75,31 @@ See [.changeset/README.md](./.changeset/README.md).
 
 ## Structure
 
+**Target**
+
+```
+JobJitsu/
+├── apps/desktop/        # Desktop shell (migrate from app/ when ready)
+├── packages/            # @jobjitsu/* libraries
+├── website/             # Docs site (@jobjitsu/website → /docs)
+├── docs/                # Brand, product, architecture, backlog, ADRs
+├── .github/             # Actions (+ templates later)
+├── scripts/             # Automation as needed
+├── README.md
+└── LICENSE              # TBD
+```
+
+**Current**
+
 ```
 jobjitsu/
-├── app/                 # Desktop shell package (@jobjitsu/app)
+├── app/                 # Desktop shell (@jobjitsu/app) — rename target: apps/desktop/
 ├── website/             # Docs site (@jobjitsu/website, Docusaurus → /docs)
 ├── packages/            # Domain & UI libraries (@jobjitsu/*)
 ├── plugins/             # Official plugins (future workspace members)
 ├── examples/            # Fixtures / samples (future)
 ├── docs/                # Brand, product, architecture, backlog, ADRs
+├── .github/workflows/   # deploy-docs → GitHub Pages
 ├── .changeset/
 ├── .husky/
 ├── eslint.config.js

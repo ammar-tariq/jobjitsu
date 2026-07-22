@@ -58,8 +58,9 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: (
       <>
         <code>pnpm --filter @jobjitsu/website dev</code> — see{" "}
-        <Link to="/installation">Installation</Link> and <Link to="/quick-start">Quick start</Link>.
-        Content comes from <code>/docs</code> without duplication.
+        <Link to="/installation">Installation</Link> and{" "}
+        <Link to="/getting-started">Getting started</Link>. Content comes from <code>/docs</code>{" "}
+        without duplication.
       </>
     ),
   },
