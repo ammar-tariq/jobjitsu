@@ -28,6 +28,7 @@ describe("IPC allowlist", () => {
       "storage.getDataRoot",
       "storage.setDataRoot",
       "storage.resetDataRoot",
+      "storage.pickDataRoot",
       "preferences.getApprovalBeforeSend",
       "preferences.setApprovalBeforeSend",
     ]);
@@ -235,6 +236,40 @@ describe("typed IPC bridge", () => {
     const reset = await bridge.resetDataRoot();
     expect(reset.ok && reset.value.dataRoot.isCustom).toBe(false);
     expect(changed).toEqual([["dataRoot"], ["dataRoot"]]);
+  });
+
+  it("picks a data folder through the host folder picker", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const dataRoot = createMemoryDataRootStore({
+      defaultPath: "/Users/sam/Library/Application Support/JobJitsu",
+    });
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        dataRoot,
+        folderPicker: createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu"),
+        bus,
+      }),
+    );
+
+    const picked = await bridge.pickDataRoot();
+    expect(picked.ok && picked.value.cancelled).toBe(false);
+    expect(picked.ok && picked.value.dataRoot?.path).toBe("/Volumes/Vault/JobJitsu");
+    expect(changed).toEqual([["dataRoot"]]);
+
+    const cancelled = await createIpcBridge(
+      createHostIpcDispatcher({
+        dataRoot,
+        folderPicker: createStubFolderPicker(async () => null),
+        bus,
+      }),
+    ).pickDataRoot();
+    expect(cancelled.ok && cancelled.value.cancelled).toBe(true);
+    expect(cancelled.ok && cancelled.value.dataRoot).toBeNull();
   });
 
   it("defaults approval-before-send on and emits Preferences.Changed on edit", async () => {

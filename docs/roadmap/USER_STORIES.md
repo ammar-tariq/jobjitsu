@@ -411,6 +411,29 @@
 
 **Status:** done (2026-07-23)
 
+### PE04-S06 — Persist career data under on-device data folder
+
+**Description:** As a user, when I choose a data folder, JobJitsu saves my profile, resumes, and preferences as files there so I can inspect and back them up.
+
+**Acceptance criteria:**
+  - Desktop host opens on-device storage under the active data root (`kv/` + `blobs/`).
+  - Profile and resume import survive process restart under that folder.
+  - Preferences settings persist under the same root.
+  - Custom-folder pointer is stored under the platform default root (`config/data-root.json`), not inside the custom folder alone.
+  - Changing/picking/resetting the folder rebinds durable stores via host IPC (UI never talks to FS).
+  - Shell does not import Node FS from `@jobjitsu/storage/node`.
+  - Copy never implies a JobJitsu cloud.
+
+**Dependencies:** PE04-S05, PE02-S01, PE03-S02
+
+**Priority:** P0
+
+**Technical notes:** Injectable `LocalFsIo` (Node tests / Tauri desktop); restore `storage.pickDataRoot` if merge-lost.
+
+**Testing notes:** Temp-dir restart + custom-folder rebind tests; IPC pick/set/reset.
+
+**Status:** done (2026-07-23)
+
 ## PE05
 
 **Local Intelligence** · Status: **Core · H1** · Priority: **P0**

@@ -80,5 +80,5 @@ See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 - No career egress from the renderer; launch uses an in-memory fake mailbox only.
 - Shell must not import `@jobjitsu/ai`.
-- Webview capabilities are `core:default` plus `dialog:allow-open` for the on-device data folder picker — no ambient filesystem/shell APIs.
+- Webview capabilities stay deny-by-default: dialog open + scoped FS for the on-device data folder, plus `allow_data_directory` for custom folders — no shell/HTTP career egress.
 - Narrow IPC allowlist in `src/ipc` — unknown commands and `ai.complete` are denied ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).

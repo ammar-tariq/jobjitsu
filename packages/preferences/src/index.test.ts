@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createFsStorageProvider } from "@jobjitsu/storage";
+import { createFsStorageProvider } from "@jobjitsu/storage/node";
 import {
   DEFAULT_APP_SETTINGS,
   PACKAGE_NAME,

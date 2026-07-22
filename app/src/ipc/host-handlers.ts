@@ -3,19 +3,32 @@ import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
-import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
+import {
+  createMemoryDataRootStore,
+  type DataRootSnapshot,
+  type DataRootStore,
+} from "../host/data-root-store.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
 import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
 export type CreateHostIpcOptions = {
   readonly appearance?: AppearanceStore;
+  readonly getAppearance?: () => AppearanceStore;
   readonly initialTheme?: ThemePreference;
   readonly aiStatus?: AiStatusSnapshot;
   readonly profiles?: ProfileRepository;
+  readonly getProfiles?: () => ProfileRepository | undefined;
   readonly resumeLibrary?: ResumeLibrary;
+  readonly getResumeLibrary?: () => ResumeLibrary | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
+  readonly getPreferences?: () => PreferencesFacade | undefined;
+  readonly folderPicker?: FolderPicker;
+  /**
+   * After the data-folder preference changes — rebind durable stores under the new path.
+   */
+  readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
 };
@@ -24,27 +37,41 @@ export type CreateHostIpcOptions = {
  * Host IPC handlers — allowlisted only; no AI complete.
  */
 export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHandlerMap {
-  const appearance =
-    options.appearance ?? createMemoryAppearanceStore(options.initialTheme ?? "dark");
+  const getAppearance =
+    options.getAppearance ??
+    (() => options.appearance ?? createMemoryAppearanceStore(options.initialTheme ?? "dark"));
   const aiStatus: AiStatusSnapshot = options.aiStatus ?? {
     ready: false,
     locality: "unavailable",
   };
-  const profiles = options.profiles;
-  const resumeLibrary = options.resumeLibrary;
+  const getProfiles = options.getProfiles ?? (() => options.profiles);
+  const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
-  const preferences = options.preferences;
+  const getPreferences = options.getPreferences ?? (() => options.preferences);
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
   const bus = options.bus;
+  const onDataRootChanged = options.onDataRootChanged;
+
+  async function commitDataRoot(next: DataRootSnapshot) {
+    if (onDataRootChanged) {
+      await onDataRootChanged(next);
+    }
+    if (bus) {
+      await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+    }
+    return next;
+  }
 
   return {
     ping: () => ok({ ok: true as const, service: "jobjitsu-host" as const }),
-    "theme.get": async () => ok({ theme: await appearance.getTheme() }),
+    "theme.get": async () => ok({ theme: await getAppearance().getTheme() }),
     "theme.set": async (payload) => {
-      const theme = await appearance.setTheme(payload.theme);
+      const theme = await getAppearance().setTheme(payload.theme);
       return ok({ theme });
     },
     "ai.getStatus": () => ok(aiStatus),
     "identity.getProfile": async () => {
+      const profiles = getProfiles();
       if (!profiles) {
         return ok({ profile: null });
       }
@@ -52,6 +79,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       return ok({ profile: profile ?? null });
     },
     "identity.setProfile": async (payload) => {
+      const profiles = getProfiles();
       if (!profiles) {
         return err(
           createAppError("unavailable", "Profile not ready", {
@@ -74,6 +102,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
     },
     "identity.listResumeVersions": async () => {
+      const resumeLibrary = getResumeLibrary();
       if (!resumeLibrary) {
         return ok({ versions: [], selectedId: null });
       }
@@ -82,6 +111,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       return ok({ versions, selectedId: selected?.id ?? null });
     },
     "identity.importResume": async (payload) => {
+      const resumeLibrary = getResumeLibrary();
       if (!resumeLibrary) {
         return err(
           createAppError("unavailable", "Resume library not ready", {
@@ -117,6 +147,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
     },
     "identity.getSelectedResume": async () => {
+      const resumeLibrary = getResumeLibrary();
       if (!resumeLibrary) {
         return ok({ version: null });
       }
@@ -124,6 +155,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       return ok({ version: version ?? null });
     },
     "identity.selectResume": async (payload) => {
+      const resumeLibrary = getResumeLibrary();
       if (!resumeLibrary) {
         return err(
           createAppError("unavailable", "Resume library not ready", {
@@ -151,10 +183,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
     "storage.getDataRoot": async () => ok({ dataRoot: await dataRoot.get() }),
     "storage.setDataRoot": async (payload) => {
       try {
-        const next = await dataRoot.set(payload.path);
-        if (bus) {
-          await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
-        }
+        const next = await commitDataRoot(await dataRoot.set(payload.path));
         return ok({ dataRoot: next });
       } catch (cause) {
         return err(
@@ -170,19 +199,56 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
     },
     "storage.resetDataRoot": async () => {
-      const next = await dataRoot.reset();
-      if (bus) {
-        await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+      try {
+        const next = await commitDataRoot(await dataRoot.reset());
+        return ok({ dataRoot: next });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not restore data folder", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "The default data folder could not be restored. Try again.",
+            detail: "storage:dataRoot",
+            cause,
+          }),
+        );
       }
-      return ok({ dataRoot: next });
+    },
+    "storage.pickDataRoot": async () => {
+      try {
+        const current = await dataRoot.get();
+        const picked = await folderPicker.pickDirectory({
+          title: "Choose JobJitsu data folder",
+          defaultPath: current.path,
+        });
+        if (picked === null) {
+          return ok({ dataRoot: null, cancelled: true });
+        }
+        const next = await commitDataRoot(await dataRoot.set(picked));
+        return ok({ dataRoot: next, cancelled: false });
+      } catch (cause) {
+        return err(
+          createAppError("unavailable", "Could not open folder picker", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Choose a folder in the desktop app, or enter a path on this device.",
+            detail: "storage:pickDataRoot",
+            cause,
+          }),
+        );
+      }
     },
     "preferences.getApprovalBeforeSend": async () => {
+      const preferences = getPreferences();
       if (!preferences) {
         return ok({ requireApprovalBeforeSend: true });
       }
       return ok({ requireApprovalBeforeSend: await preferences.getApprovalBeforeSend() });
     },
     "preferences.setApprovalBeforeSend": async (payload) => {
+      const preferences = getPreferences();
       if (!preferences) {
         return err(
           createAppError("unavailable", "Preferences not ready", {

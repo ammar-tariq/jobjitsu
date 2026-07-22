@@ -41,7 +41,11 @@ import {
   type IpcDispatcher,
 } from "../ipc/index.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
-import { createMemoryDataRootStore, type DataRootStore } from "./data-root-store.js";
+import {
+  createMemoryDataRootStore,
+  type DataRootStore,
+  type DataRootSnapshot,
+} from "./data-root-store.js";
 import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
 export type HostActivityEntry = {
@@ -83,6 +87,9 @@ export type CreateHostRuntimeOptions = {
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
+  readonly folderPicker?: FolderPicker;
+  /** Rebind durable stores when the data folder changes. */
+  readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
 };
 
 /**
@@ -104,6 +111,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
   const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -199,6 +207,8 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     resumeLibrary,
     dataRoot: dataRootStore,
     preferences,
+    folderPicker,
+    onDataRootChanged: options.onDataRootChanged,
     bus,
   });
   const bridge = createIpcBridge(ipc);

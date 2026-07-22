@@ -9,7 +9,7 @@ import {
   createFsStorageProvider,
   resolveStorageLayout,
   resolveUserDataRoot,
-} from "./index.js";
+} from "./node.js";
 
 const tempRoots: string[] = [];
 

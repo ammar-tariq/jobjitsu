@@ -37,13 +37,20 @@ describe("PE01-S01 launch desktop host", () => {
     expect(cargo.toLowerCase()).not.toContain("electron");
   });
 
-  it("keeps host capabilities deny-by-default (dialog open only for data folder)", () => {
+  it("keeps host capabilities deny-by-default (dialog + scoped data-folder FS only)", () => {
     const caps = JSON.parse(
       readFileSync(join(appRoot, "src-tauri/capabilities/default.json"), "utf8"),
-    ) as { permissions: string[] };
+    ) as { permissions: Array<string | { identifier: string }> };
 
-    expect(caps.permissions).toEqual(["core:default", "dialog:allow-open"]);
-    expect(caps.permissions.some((p) => p.startsWith("fs:") || p.startsWith("shell:"))).toBe(false);
+    const names = caps.permissions.map((entry) =>
+      typeof entry === "string" ? entry : entry.identifier,
+    );
+    expect(names).toContain("core:default");
+    expect(names).toContain("dialog:allow-open");
+    expect(names).toContain("allow-data-directory");
+    expect(names).toContain("fs:scope");
+    expect(names.some((name) => name.startsWith("shell:"))).toBe(false);
+    expect(names.some((name) => name.startsWith("http:"))).toBe(false);
   });
 
   it("startup cascade uses local fake mail only — no career network egress", async () => {
