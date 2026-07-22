@@ -15,6 +15,9 @@ export const IPC_ALLOWLIST = [
   "identity.importResume",
   "identity.getSelectedResume",
   "identity.selectResume",
+  "storage.getDataRoot",
+  "storage.setDataRoot",
+  "storage.resetDataRoot",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -63,6 +66,12 @@ export type ResumeImportInputPayload = {
   readonly parentVersionId?: string;
 };
 
+export type DataRootSnapshot = {
+  readonly path: string;
+  readonly defaultPath: string;
+  readonly isCustom: boolean;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
@@ -74,6 +83,9 @@ export type IpcPayloadMap = {
   readonly "identity.importResume": ResumeImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
   readonly "identity.selectResume": { readonly resumeId: string };
+  readonly "storage.getDataRoot": undefined;
+  readonly "storage.setDataRoot": { readonly path: string };
+  readonly "storage.resetDataRoot": undefined;
 };
 
 export type IpcResultMap = {
@@ -90,6 +102,9 @@ export type IpcResultMap = {
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
   readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
   readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
+  readonly "storage.getDataRoot": { readonly dataRoot: DataRootSnapshot };
+  readonly "storage.setDataRoot": { readonly dataRoot: DataRootSnapshot };
+  readonly "storage.resetDataRoot": { readonly dataRoot: DataRootSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

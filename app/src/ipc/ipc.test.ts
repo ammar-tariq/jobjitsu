@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
+import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -22,6 +23,9 @@ describe("IPC allowlist", () => {
       "identity.importResume",
       "identity.getSelectedResume",
       "identity.selectResume",
+      "storage.getDataRoot",
+      "storage.setDataRoot",
+      "storage.resetDataRoot",
     ]);
   });
 
@@ -88,13 +92,16 @@ describe("typed IPC bridge", () => {
     expect(bridge).not.toHaveProperty("complete");
     expect(Object.keys(bridge).sort()).toEqual([
       "getAiStatus",
+      "getDataRoot",
       "getProfile",
       "getSelectedResume",
       "getTheme",
       "importResume",
       "listResumeVersions",
       "ping",
+      "resetDataRoot",
       "selectResume",
+      "setDataRoot",
       "setProfile",
       "setTheme",
     ]);
@@ -195,5 +202,31 @@ describe("typed IPC bridge", () => {
     const listed = await bridge.listResumeVersions();
     expect(listed.ok && listed.value.selectedId).toBe(second.id);
     expect(listed.ok && listed.value.versions).toHaveLength(2);
+  });
+
+  it("reads and updates the on-device data folder through storage APIs", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const dataRoot = createMemoryDataRootStore({
+      defaultPath: "/Users/sam/Library/Application Support/JobJitsu",
+    });
+    const bridge = createIpcBridge(createHostIpcDispatcher({ dataRoot, bus }));
+
+    const before = await bridge.getDataRoot();
+    expect(before.ok && before.value.dataRoot.path).toContain("JobJitsu");
+    expect(before.ok && before.value.dataRoot.isCustom).toBe(false);
+
+    const saved = await bridge.setDataRoot("/Volumes/Vault/JobJitsu");
+    expect(saved.ok && saved.value.dataRoot.path).toBe("/Volumes/Vault/JobJitsu");
+    expect(saved.ok && saved.value.dataRoot.isCustom).toBe(true);
+    expect(changed).toEqual([["dataRoot"]]);
+
+    const reset = await bridge.resetDataRoot();
+    expect(reset.ok && reset.value.dataRoot.isCustom).toBe(false);
+    expect(changed).toEqual([["dataRoot"], ["dataRoot"]]);
   });
 });

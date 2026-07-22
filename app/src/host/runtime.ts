@@ -36,6 +36,7 @@ import {
   type IpcDispatcher,
 } from "../ipc/index.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
+import { createMemoryDataRootStore, type DataRootStore } from "./data-root-store.js";
 
 export type HostActivityEntry = {
   readonly name: EventName;
@@ -57,6 +58,8 @@ export type HostRuntime = {
   readonly profiles: ProfileRepository;
   /** On-device resume library (identity public API). */
   readonly resumeLibrary: ResumeLibrary;
+  /** On-device data folder preference. */
+  readonly dataRoot: DataRootStore;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -70,6 +73,7 @@ export type CreateHostRuntimeOptions = {
   readonly appearance?: AppearanceStore;
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
+  readonly dataRoot?: DataRootStore;
 };
 
 /**
@@ -89,6 +93,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
+  const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -178,7 +183,13 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   });
 
   const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
-  const ipc = createHostIpcDispatcher({ appearance, profiles, resumeLibrary, bus });
+  const ipc = createHostIpcDispatcher({
+    appearance,
+    profiles,
+    resumeLibrary,
+    dataRoot: dataRootStore,
+    bus,
+  });
   const bridge = createIpcBridge(ipc);
 
   return {
@@ -190,6 +201,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     appearance,
     profiles,
     resumeLibrary,
+    dataRoot: dataRootStore,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",

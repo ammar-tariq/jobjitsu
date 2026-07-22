@@ -25,6 +25,9 @@ export type IpcBridge = {
   readonly selectResume: (
     resumeId: string,
   ) => Promise<Result<IpcResultMap["identity.selectResume"]>>;
+  readonly getDataRoot: () => Promise<Result<IpcResultMap["storage.getDataRoot"]>>;
+  readonly setDataRoot: (path: string) => Promise<Result<IpcResultMap["storage.setDataRoot"]>>;
+  readonly resetDataRoot: () => Promise<Result<IpcResultMap["storage.resetDataRoot"]>>;
 };
 
 /**
@@ -72,6 +75,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async selectResume(resumeId: string) {
       return (await dispatcher.invoke("identity.selectResume", { resumeId })) as Result<
         IpcResultMap["identity.selectResume"]
+      >;
+    },
+    async getDataRoot() {
+      return (await dispatcher.invoke("storage.getDataRoot")) as Result<
+        IpcResultMap["storage.getDataRoot"]
+      >;
+    },
+    async setDataRoot(path: string) {
+      return (await dispatcher.invoke("storage.setDataRoot", { path })) as Result<
+        IpcResultMap["storage.setDataRoot"]
+      >;
+    },
+    async resetDataRoot() {
+      return (await dispatcher.invoke("storage.resetDataRoot")) as Result<
+        IpcResultMap["storage.resetDataRoot"]
       >;
     },
   };

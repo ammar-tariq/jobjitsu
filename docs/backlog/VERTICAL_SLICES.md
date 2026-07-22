@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE03 Trust & Identity |
-| **Story** | PE03-S03 — Version and select resumes (this slice) |
+| **Epic** | PE04 Preferences & Privacy Chrome |
+| **Story** | PE04-S05 — Show and change on-device data folder (this slice) |
 | **Status** | In progress → PR gate |
-| **Note** | List + select via identity APIs; select ≠ send; optional parent refs |
+| **Note** | Inspectable data vault path; change/reset via host IPC |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE04-S05 | 2026-07-23 | Data folder in Preferences; Preferences.Changed dataRoot |
 | PE03-S03 | 2026-07-23 | Version list/select; parentVersionId; select ≠ send |
 | PE03-S02 | 2026-07-23 | Resume library import + Preferences UI; Resume.Imported |
 | PE03-S01 | 2026-07-23 | Local profile CRUD; Preferences form via IPC |
