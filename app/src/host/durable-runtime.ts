@@ -1,9 +1,9 @@
 import type { LocalFsIo } from "@jobjitsu/storage";
 import { allowDataDirectory } from "./allow-data-directory.js";
-import { defaultJobJitsuDataPath } from "./data-root-store.js";
 import { createDurableDataRootStore } from "./durable-data-root-store.js";
 import { openDurableHostStores, type DurableHostStores } from "./durable-stores.js";
 import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
+import { resolveDefaultDataRoot } from "./resolve-default-data-root.js";
 import { createHostRuntime, type CreateHostRuntimeOptions, type HostRuntime } from "./runtime.js";
 
 export type CreateDurableHostRuntimeOptions = CreateHostRuntimeOptions & {
@@ -22,17 +22,20 @@ export async function createDurableHostRuntime(
   options: CreateDurableHostRuntimeOptions,
 ): Promise<HostRuntime> {
   const { io, defaultDataRoot, folderPicker: folderPickerOption, ...hostOptions } = options;
-  const resolvedDefault = defaultDataRoot ?? defaultJobJitsuDataPath();
-  await io.mkdir(resolvedDefault);
+  const resolvedDefault = defaultDataRoot ?? (await resolveDefaultDataRoot());
+  assertAbsoluteDataPath(resolvedDefault);
+
   await allowDataDirectory(resolvedDefault);
+  await io.mkdir(resolvedDefault);
 
   const dataRootStore = createDurableDataRootStore({
     defaultPath: resolvedDefault,
     io,
   });
   const active = await dataRootStore.get();
-  await io.mkdir(active.path);
+  assertAbsoluteDataPath(active.path);
   await allowDataDirectory(active.path);
+  await io.mkdir(active.path);
 
   let stores: DurableHostStores = await openDurableHostStores(active.path, io);
   const folderPicker = folderPickerOption ?? createHostFolderPicker();
@@ -61,8 +64,9 @@ export async function createDurableHostRuntime(
     dataRoot: dataRootStore,
     folderPicker,
     onDataRootChanged: async (snapshot) => {
-      await io.mkdir(snapshot.path);
+      assertAbsoluteDataPath(snapshot.path);
       await allowDataDirectory(snapshot.path);
+      await io.mkdir(snapshot.path);
       stores = await openDurableHostStores(snapshot.path, io);
     },
   });
@@ -72,8 +76,21 @@ function isTauriRuntime(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
 
+function assertAbsoluteDataPath(path: string): void {
+  if (path.startsWith("~") || path.includes("://")) {
+    throw new Error(
+      "Data folder path must be an absolute path on this device (not a home shortcut).",
+    );
+  }
+  const absolute = path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path) || path.startsWith("\\\\");
+  if (!absolute) {
+    throw new Error("Data folder path must be absolute on this device.");
+  }
+}
+
 /**
  * Desktop entry helper — durable under Tauri; memory stubs in plain browser Vite.
+ * Falls back to memory if durable boot fails so the shell never stays blank.
  */
 export async function createAppHostRuntime(
   options: CreateHostRuntimeOptions = {},
@@ -81,9 +98,14 @@ export async function createAppHostRuntime(
   if (!isTauriRuntime()) {
     return createHostRuntime(options);
   }
-  const { createTauriFsIo } = await import("./tauri-fs-io.js");
-  return createDurableHostRuntime({
-    ...options,
-    io: createTauriFsIo(),
-  });
+  try {
+    const { createTauriFsIo } = await import("./tauri-fs-io.js");
+    return await createDurableHostRuntime({
+      ...options,
+      io: createTauriFsIo(),
+    });
+  } catch (cause) {
+    console.error("JobJitsu durable storage failed to open; using session memory.", cause);
+    return createHostRuntime(options);
+  }
 }
