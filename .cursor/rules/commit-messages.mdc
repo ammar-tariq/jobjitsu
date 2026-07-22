@@ -3,40 +3,70 @@ description: Generate Conventional Commit messages
 alwaysApply: true
 ---
 
-When asked to generate a Git commit message, ALWAYS follow the Conventional Commits specification.
+# Commit messages
 
-Format:
+When asked to generate a Git commit message (including Cursor AI Commit), **ALWAYS** output a valid [Conventional Commits](https://www.conventionalcommits.org/) message.
 
+This repo enforces the format via **Commitlint** (`commitlint.config.js`) on the `commit-msg` Husky hook.
+
+## Output format
+
+```
 <type>(optional-scope): <subject>
 
 <body>
+```
 
-Rules:
-- The first line MUST start with one of:
-  - feat
-  - fix
-  - chore
-  - docs
-  - refactor
-  - perf
-  - test
-  - build
-  - ci
-  - style
-  - revert
-- The subject must:
-  - be lowercase
-  - use the imperative mood
-  - not end with a period
-  - be concise (prefer under 72 characters)
-- Separate the body with one blank line.
-- Wrap every body line at 100 characters or less.
-- Use bullet points for multiple changes.
-- Never start the subject with "Update", "Refactor", or "Add" unless preceded by the commit type.
-- Never output explanations, markdown, or code fences—only the commit message.
+**Output only the commit message.** No explanations, no markdown fences, no commentary.
 
-Example:
+## Template (preferred)
 
+```
+<type>(optional-scope): <short lowercase summary>
+
+- Bullet point 1
+- Bullet point 2
+- Bullet point 3
+```
+
+## Types (first line MUST start with one of these)
+
+- `feat`
+- `fix`
+- `chore`
+- `docs`
+- `refactor`
+- `perf`
+- `test`
+- `build`
+- `ci`
+- `style`
+- `revert`
+
+## Subject rules
+
+- Lowercase (no PascalCase / UPPERCASE)
+- Imperative mood (“add”, “fix”, “introduce” — not “added” / “fixes”)
+- Must **not** end with a period
+- Prefer under **72** characters; hard max **100** (Commitlint `header-max-length`)
+- Never use a bare GitHub-style title like `Update README` or `Fix bug` without a type prefix
+- Do not start the subject with “Update”, “Refactor”, or “Add” as a substitute for the type — the type comes first: `feat(…): add …`
+
+## Scope (optional)
+
+- **kebab-case** only (Commitlint `scope-case`)
+- Prefer package or area names, e.g. `core`, `events`, `ai`, `brand`, `backlog`, `tooling`
+
+## Body rules
+
+- Separate from the subject with **one blank line**
+- Wrap every body line at **100** characters or less
+- Use `- ` bullet points for multiple changes
+- Focus on **why** / notable deltas; keep calm and precise (JobJitsu voice)
+
+## Examples
+
+```
 feat(ai): introduce local intelligence provider contracts
 
 - Add AiProvider interface
@@ -44,3 +74,23 @@ feat(ai): introduce local intelligence provider contracts
 - Export provider types
 - Update README to document the new architecture
 - Expand tests for provider contracts
+```
+
+```
+feat(events): add in-memory event bus
+
+- Implement createInMemoryEventBus with ordered delivery
+- Support optional durable sink for egress events
+- Cover pub/sub and unsubscribe in unit tests
+```
+
+```
+docs(brand): align ui copy with agent on-device terminology
+
+- Prefer Agent over LLM in user-facing chrome
+- Document branding-for-development rules
+```
+
+```
+chore(tooling): configure commitlint husky and lint-staged
+```
