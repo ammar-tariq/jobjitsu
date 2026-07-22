@@ -102,25 +102,17 @@ The platform should be event-driven.
 
 Modules should communicate through events rather than direct coupling whenever practical.
 
-Examples:
+Canonical catalog: [docs/architecture/EVENT_SYSTEM.md](docs/architecture/EVENT_SYSTEM.md).
 
-Resume Imported
+Example (catalog names only):
 
-↓
-
-Knowledge Updated
-
-↓
-
-Resume Analysis Started
-
-↓
-
-Resume Analysis Completed
-
-↓
-
-Recommendations Updated
+```mermaid
+flowchart LR
+  A[Resume.Imported] --> B[Knowledge.Updated]
+  B --> C[Ai.Started]
+  C --> D[Ai.Finished]
+  D --> E[Ai.ValidationCompleted]
+```
 
 Modules should react to events instead of polling for changes.
 
@@ -208,18 +200,14 @@ Avoid deep inheritance hierarchies.
 
 ---
 
-## Plugin First
+## Extension Points First
 
 Everything that may reasonably vary should be implemented behind extension points.
 
-Examples:
+- **Plugins** — capability-gated **agent skills** ([PLUGIN_ARCHITECTURE.md](docs/architecture/PLUGIN_ARCHITECTURE.md))
+- **Extensions** — host contribution points such as Job Providers, AI Providers, send channels, templates ([EXTENSION_SYSTEM.md](docs/architecture/EXTENSION_SYSTEM.md))
 
-- AI Providers
-- Job Providers
-- Resume Templates
-- Email Providers
-
-The platform core should remain stable while plugins extend functionality.
+The platform core should remain stable while Plugins and Extensions extend functionality.
 
 ---
 

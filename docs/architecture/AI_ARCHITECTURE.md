@@ -2,7 +2,7 @@
 
 > Local Intelligence — on-device reasoning for craft, not cloud résumé farming.
 
-Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · Product: Local Intelligence module · Terms: [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md)
+Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) · Terms: [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md)
 
 ---
 
@@ -12,13 +12,14 @@ AI in JobJitsu **helps draft, tailor, queue, and remind**. It does not guarantee
 
 ```mermaid
 flowchart TD
-  inputs["Identity + Role + Preferences + Application draft"]
-  ctx["Context assembler (local)"]
-  provider["Provider adapter (local LLM)"]
+  inputs["Identity + Knowledge + Role + Preferences + Draft"]
+  ctx["Context Builder (local)"]
+  provider["AI Provider adapter"]
   draft["Structured draft / suggestions"]
-  queue["Applications / Queue (not Send)"]
+  validate["AI Validation"]
+  queue["Applications / review Queue (not Send)"]
 
-  inputs --> ctx --> provider --> draft --> queue
+  inputs --> ctx --> provider --> draft --> validate --> queue
 ```
 
 ---
@@ -27,13 +28,15 @@ flowchart TD
 
 | Component | Role |
 |-----------|------|
-| **Provider interface** | `health`, `complete`, `embed` (optional) — swappable runtimes |
+| **AI Provider** | `health`, `complete`, `embed` (optional) — swappable runtimes |
+| **Model Manager** | Load / select / unload / monitor models for providers (lives in `packages/ai`) |
 | **Local adapters** | Bind to on-device runners (user model path / runtime) |
-| **Remote adapters** | Optional, **explicit user config only**; UI must not look “Local” when remote |
-| **Context assembler** | Builds minimal prompts from local stores |
+| **Remote adapters** | Optional, **explicit user config only**; never labeled Agent · On-device |
+| **Context Builder** | Assembles minimal prompts (alias: context assembler) |
+| **AI Validation** | Post-generate gates — see [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) |
 | **Prompt roles** | Tailor, match explain, follow-up draft, parse assist |
-| **Tool bridge** | Exposes safe tools to Agent / plugins via host |
-| **Status publisher** | Emits `Ai.LocalModel*` for trust chrome |
+| **Tool bridge** | Safe tools to Agent / Plugins via host |
+| **Status publisher** | Emits `Ai.LocalModel*` / `Ai.Started` / `Ai.Finished` for chrome |
 
 ---
 
@@ -47,9 +50,9 @@ Providers must not phone home with résumé text unless the user selected a remo
 
 ---
 
-## Context & data minimization
+## Context Builder
 
-Include only what the task needs:
+Canonical term: **Context Builder**. Default slice order for apply-craft: Profile → Resume → Projects → Achievements → Current Job → Prompt → Model (budgeted by task). Retrieves from Knowledge Base when available. See [DATA_MODELS.md](./DATA_MODELS.md) and [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md).
 
 | Task | Typical context |
 |------|-----------------|
@@ -57,59 +60,45 @@ Include only what the task needs:
 | Fit note | Skills vs requirements (short) |
 | Follow-up draft | Prior send metadata, polite tone prefs |
 
-Avoid dumping entire timeline history into every prompt. No hidden training export.
+Avoid dumping entire Timeline history into every prompt. No hidden training export.
 
 ---
 
 ## Agent ↔ AI relationship
 
-- Agent plans steps; AI executes language/embedding tasks.
-- Tools that mutate drafts go to Applications/Queue.
-- Tools that would egress are **not** exposed to AI directly — only send intents through policy.
+- Agent **Workflow Engine** plans steps; AI executes language/embedding tasks inside Running Task Queue items.
+- Tools that mutate drafts go to Applications / review Queue.
+- Tools that would egress are **not** exposed to AI — only through policy → Queue → Send.
 
 ```
-✅ GOOD: AI produces tailored draft → Queue.Enqueued
+✅ GOOD: AI produces tailored draft → validation → Queue.Enqueued
 ❌ BAD:  AI tool “submitApplication” with network socket
 ```
 
 ---
 
-## Honest AI product rules (architecture-enforced)
+## Honest AI product rules
 
-1. Status chrome shows **Agent · On-device** only when the active provider is local (technical locality remains “Local LLM” in provider/config docs).
-2. If user configures remote, chrome labels it plainly (e.g. “Remote model — user configured”).
+1. Status chrome shows **Agent · On-device** only when the active provider is local.
+2. Remote providers labeled plainly (e.g. “Remote model — user configured”).
 3. Failures use plain recovery (`Ai.LocalModelFailed` → preferences path).
 4. Outputs are suggestions; user remains author of final voice.
-5. No UI copy claiming guaranteed offers from model output.
+5. Resource failures: calm copy (“On-device model ran out of resources”).
 
 ---
 
 ## Embeddings & local retrieval (optional)
 
-- Indexes live under local storage.
-- Used for discovery curation / résumé section retrieval.
-- Rebuilt on-device; not uploaded.
+- Indexes under local storage; used for Knowledge / résumé section retrieval; not uploaded.
 
----
+## Performance
 
-## Performance & resource respect
-
-- Lazy-load model weights until first need or user warm-up.
-- Allow pause of AI work with Agent.Paused.
-- Surface resource failures calmly (“Local LLM ran out of resources”).
-
----
+- Lazy-load weights; honor `Agent.Paused`; unload after Task Queue drain / idle.
 
 ## Security
 
-- Model path is user-controlled; validate path permissions.
-- Prompt injection from job descriptions treated as untrusted input — tools remain capability-gated.
-- Logs redact prompt bodies by default in shared diagnostics.
-
----
+- User-controlled model path; JD treated as untrusted; logs redact prompt bodies by default.
 
 ## Out of scope
 
-- Fine-tuning on user data in a JobJitsu cloud.
-- Default vendor cloud LLM.
-- Autopilot send from model confidence scores.
+- Fine-tuning on user data in a JobJitsu cloud; default vendor cloud LLM; autopilot send from model confidence.

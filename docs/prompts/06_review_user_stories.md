@@ -10,7 +10,7 @@ Review [USER_STORIES.md](../backlog/USER_STORIES.md) (and related epic/feature f
 
 - [USER_STORIES.md](../backlog/USER_STORIES.md)
 - [EPICS.md](../backlog/EPICS.md)
-- [docs/backlog/FEATURES.md](../backlog/FEATURES.md)
+- [docs/backlog/EPIC_FEATURES.md](../backlog/EPIC_FEATURES.md)
 - [docs/product/FEATURES.md](../product/FEATURES.md)
 - [NON_GOALS.md](../product/NON_GOALS.md)
 - [TERMINOLOGY.md](../product/TERMINOLOGY.md)

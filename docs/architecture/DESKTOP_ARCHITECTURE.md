@@ -64,25 +64,34 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
 
 ---
 
-## IPC surface (conceptual)
+## IPC surface (normative catalog — conceptual shapes)
 
-Commands (UI → host):
+Commands (UI → host). Request/response are typed in the host; deny anything not listed.
 
-- `preferences.get/set`
-- `agent.start|pause|resume`
-- `queue.list|approve|reject`
-- `send.approveAndSend` (honors policy)
-- `followups.list|dismiss|send`
-- `plugins.list|enable|disable`
-- `logs.tail` (sanitized)
+| Command | Purpose | Notes |
+|---------|---------|--------|
+| `preferences.get` / `preferences.set` | Read/write policy | Emits `Preferences.Changed` |
+| `agent.startWorkflow` / `pause` / `resume` | Workflow / Task Queue | Never Send |
+| `agent.getTaskQueueSnapshot` | Progress chrome | Calm counts only |
+| `queue.list` / `enqueue` / `approve` / `reject` / `clear` | Review Queue | `approve` required before send when policy on |
+| `send.approveAndSend` | Egress | Preferred; maps to send package; honest result |
+| `applications.createDraft` / `update` / `setStage` | Craft | |
+| `identity.importResume` / `listKnowledge` | Identity / Knowledge | |
+| `discovery.syncSource` | Job Provider sync | |
+| `followups.list` / `dismiss` / `send` | Follow-ups | `send` still via send package |
+| `plugins.list` / `enable` / `disable` | Agent skills | |
+| `extensions.list` / `enable` / `disable` | Host contributions | |
+| `logs.tail` | Sanitized diagnostics | No prompt bodies by default |
 
 Queries / subscriptions (host → UI):
 
 - Event stream (batched) from [EVENT_SYSTEM.md](./EVENT_SYSTEM.md)
-- Model status for badge
+- Agent · On-device / model status for badge
 - Notification intents
 
 Bridge is **deny-by-default**: no generic `eval`, no raw `fs` from UI.
+
+**AC:** UI cannot invoke AI Provider methods; only host handlers may.
 
 ---
 

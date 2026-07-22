@@ -36,7 +36,7 @@ These are release blockers conceptually (encode as automated tests when code exi
 2. **Approval gates** — when require-approval is on, `send` does not execute without `Queue.Approved` (or equivalent user command).
 3. **Agent pause** — pause stops preparative work; queue intact; no send.
 4. **Honest send outcomes** — `unknown` / partial never reported as success in UI state or events.
-5. **Local LLM truth** — badge “Local” only when provider is local; remote config cannot spoof local.
+5. **Agent · On-device truth** — status chrome shows Agent · On-device only when the provider is local; remote config cannot spoof on-device.
 6. **Capability gate** — disabled plugins do not run; missing permissions fail closed.
 7. **Scheduler calm** — no job type exists for inactivity shaming; quiet hours defer notifications.
 

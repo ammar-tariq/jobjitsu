@@ -104,57 +104,75 @@ agent must not import send
 - **Must not:** sync to cloud object stores by default.
 
 ### `identity`
-- Résumé and profile read models for tailoring.
-- **Consumers:** `ai`, `applications`, `agent` (read).
-- **Must not:** upload profile remotely.
+- Profile, Resume Library, and **Knowledge Base** entries (default home until a split package exists).
+- **Public surface:** `getProfile`, `upsertProfile`, `listResumeVersions`, `importResume`, `listKnowledge`, `upsertKnowledge`.
+- **Emits:** `Resume.Imported`, `Resume.Generated`, `Knowledge.Updated`.
+- **Consumers:** `ai` (Context Builder), `applications`, `agent` (read).
+- **Must not:** upload profile remotely; must not treat Timeline rows as knowledge.
 
 ### `preferences`
 - Fit rules, approval-before-send, notification sound, quiet hours, model path.
+- Settings **UI shell** maps here + `config` document (see TERMINOLOGY).
+- **Public surface:** `getPreferences`, `updatePreferences`.
+- **Emits:** `Preferences.Changed`.
 - **Enforced by:** `queue`, `send`, `scheduler`, `agent`.
 
 ### `ai`
-- Provider interface: `complete`, `embed`, health/status for **Agent · On-device** chrome.
-- Context builder: identity + application + role — assembled locally.
-- **Must not:** default to a vendor cloud; optional remote requires explicit user config and UI honesty.
+- **AI Provider** + **Model Manager** + **Context Builder** + **AI Validation**.
+- **Public surface:** `health`, `complete`, `embed`, `buildContext`, `validateArtifact`, `loadModel` / `unloadModel`.
+- **Emits:** `Ai.Started`, `Ai.Finished`, `Ai.ValidationCompleted`, `Ai.LocalModel*`.
+- **Must not:** default to a vendor cloud; optional remote requires explicit user config and honest chrome (never Agent · On-device when remote).
 
 ### `agent`
-- Plans preparative work: discover suggestions, tailor drafts, enqueue for review.
-- Honors pause; emits progress events (batched, calm).
-- **Must not:** call `send.execute`; **must not** bypass queue when approval is required.
+- **Workflow Planner + Engine + AI Task Queue**; specialized agents are **roles/steps**, not separate packages.
+- **Public surface:** `startWorkflow`, `pause`, `resume`, `getTaskQueueSnapshot`.
+- **Emits:** `Agent.*`, `Workflow.*`.
+- Honors pause; enqueues review Queue — never Send.
+- **Must not:** call `send.execute` / `approveAndSend`; **must not** bypass review Queue when approval is required.
 
 ### `discovery`
-- `Source` interface for listings; curation/scoring toward fit (leverage, not volume caps as vanity).
+- **Job Provider** contract (alias: Discovery `Source`): `list`, `sync`, `normalizeRole`, auth/rate-limit hooks.
+- **Public surface:** `registerSource`, `syncSource`, `curate`.
+- **Emits:** `Discovery.RolesFound`, `Discovery.RolesCurated`, `Job.Imported`, `Jobs.Synced`.
 - Extensions may add sources via [EXTENSION_SYSTEM.md](./EXTENSION_SYSTEM.md).
 
 ### `applications`
-- Draft lifecycle, versions, tailor metadata.
-- Source of truth for “the throw” before/after send.
+- Draft lifecycle, versions, tailor metadata, **tracking status** (Application Pipeline).
+- **Public surface:** `createDraft`, `updateApplication`, `setStage`, `findDuplicates`.
+- **Emits:** `Application.*`.
 
 ### `queue`
-- Review ritual: items awaiting approval.
+- Review ritual (approve → send). **Not** the AI Task Queue.
+- **Public surface:** `enqueue`, `approve`, `reject`, `clear`, `list`.
+- **Emits:** `Queue.*`.
 - Transitions to send only after policy checks.
 
 ### `send`
 - **Outbound boundary.** Applies, submits, or dispatches mail.
-- Writes egress records to `timeline` (what left, when, destination class).
-- Honest completion: success | failed | unknown — never lie.
+- **Public surface:** `approveAndSend` (preferred host command) / `execute` (internal); honest `success|failed|unknown`.
+- **Emits:** `Send.*`, triggers `Privacy.EgressRecorded`, may emit `Application.Submitted`.
+- Browser automation adapters (Experimental) register as send/extension channels and **never** bypass Queue→Send.
 
 ### `followups`
-- Reminder intents linked to applications; polite nudge copy belongs in product strings, not scheduler urgency.
+- Reminder intents linked to applications.
+- **Public surface:** `schedule`, `dismiss`, `listDue`.
+- **Emits:** `FollowUp.*`.
 
 ### `timeline`
-- Append-only local history for craft continuity and privacy audit (“what left / what stayed”).
+- Append-only local history for craft continuity and privacy audit.
+- **Public surface:** `append`, `query`.
+- Consumes durable events — not a Knowledge Base.
 
 ### `scheduler`
-- See [SCHEDULER.md](./SCHEDULER.md). Triggers follow-up due, agent prep windows — local only.
+- See [SCHEDULER.md](./SCHEDULER.md). Local jobs only.
 
 ### `plugin-sdk` / `extension-sdk`
-- Manifests, capability enums, host APIs safe for guests.
+- **Plugins** = agent skills. **Extensions** = host contribution points.
 - **Must not:** expose raw filesystem or ambient network without capability.
 
 ### `ui`
-- Presentational `Jj*` components, design tokens (Midnight, teal), a11y focus rings.
-- **Must not:** contain egress or LLM provider secrets.
+- Presentational `Jj*` components, design tokens, a11y.
+- **Must not:** contain egress, call AI Providers, or hold model secrets.
 
 ---
 

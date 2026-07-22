@@ -19,7 +19,7 @@ Your resume, preferences, and agent stay on-device. You stay in control.
 ## Core Beliefs
 
 ### 1. Privacy is non-negotiable
-Your career data is intimate. JobJitsu runs a local agent and local LLM. Nothing leaves the dojo unless you explicitly send it (an application, a follow-up email). Privacy is not a settings toggle — it is the architecture.
+Your career data is intimate. JobJitsu runs a local Agent with on-device intelligence. Nothing leaves the dojo unless you explicitly send it (an application, a follow-up email). Privacy is not a settings toggle — it is the architecture.
 
 ### 2. Mastery beats volume
 Sending 200 generic applications is force. Tailoring ten with precision is technique. The product optimizes for quality of throw, not count of flails.
@@ -91,6 +91,6 @@ Martial-arts language is **earned metaphor**, not costume. Use it sparingly and 
 
 ## North Star Experience
 
-A user opens JobJitsu. Midnight Ink. A teal accent. A quiet status: local LLM ready. Their belt is tied. They set a preference, queue a few tailored applications, and get a polite follow-up reminder later. Nothing left the machine except what they chose to send.
+A user opens JobJitsu. Midnight Ink. A teal accent. A quiet status: **Agent · On-device**. Their belt is tied. They set a preference, queue a few tailored applications, and get a polite follow-up reminder later. Nothing left the machine except what they chose to send.
 
 That is the gentle art — practiced daily, owned entirely by them.

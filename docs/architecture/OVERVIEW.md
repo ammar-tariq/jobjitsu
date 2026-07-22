@@ -18,15 +18,17 @@ Status chrome for on-device intelligence is **Agent · On-device** (see [TERMINO
 ```mermaid
 flowchart TB
   shell["Desktop shell (app)<br/>UI · Privacy chrome · IPC · one calm job per view"]
-  domain["Domain packages<br/>identity · prefs · agent<br/>discovery · apps · queue<br/>send · follow-ups · memory"]
-  ai["Local Intelligence (AI)<br/>local LLM · context<br/>no silent cloud fallback"]
+  host["Host runtime<br/>commands · event handlers · DI"]
+  domain["Domain packages<br/>identity · prefs · agent<br/>discovery · apps · queue<br/>send · follow-ups · timeline"]
+  ai["Local Intelligence (AI)<br/>AI Provider · Context Builder<br/>no silent cloud fallback"]
   storage["Storage · Scheduler<br/>on-device persistence<br/>calm local jobs"]
   plugins["Plugins / Extensions<br/>user-enabled · inspectable<br/>capability-gated"]
   boundary{{"OUTBOUND BOUNDARY<br/>approve → send"}}
   external["external boards / mail<br/>user-initiated only"]
 
-  shell -->|events / commands| domain
-  shell --> ai
+  shell -->|"commands / queries / subscribe"| host
+  host --> domain
+  host -->|"invokes providers"| ai
   domain --> storage
   domain --- plugins
   storage --> boundary
@@ -45,7 +47,9 @@ flowchart TB
 | [PLUGIN_ARCHITECTURE.md](./PLUGIN_ARCHITECTURE.md) | Agent skills and plugin host |
 | [EXTENSION_SYSTEM.md](./EXTENSION_SYSTEM.md) | Broader host contributions & capabilities |
 | [DESKTOP_ARCHITECTURE.md](./DESKTOP_ARCHITECTURE.md) | Shell, IPC, UI, privacy chrome |
-| [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | Local LLM, context, honest AI |
+| [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | AI Provider, Context Builder, honest AI |
+| [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) | Workflow, Task Queue, AI Validation |
+| [DATA_MODELS.md](./DATA_MODELS.md) | Conceptual entity schemas & ownership |
 | [SCHEDULER.md](./SCHEDULER.md) | Local jobs, follow-ups, quiet automation |
 | [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) | Privacy, sovereignty, and quality bars |
 | [../adr/README.md](../adr/README.md) | Accepted ADRs (Tauri, React, bus, …) |
@@ -70,17 +74,18 @@ Violating a [non-goal](../product/NON_GOALS.md) is an architecture defect, not a
 
 | Product module | Primary packages / surfaces |
 |----------------|----------------------------|
-| Identity & Resume | `packages/identity`, local storage |
-| Preferences | `packages/preferences` |
-| Local Intelligence | `packages/ai` |
-| Agent | `packages/agent` |
-| Discovery & Curation | `packages/discovery` (+ extension adapters) |
+| Identity & Resume / Knowledge Base | `packages/identity` (+ storage); see [DATA_MODELS.md](./DATA_MODELS.md) |
+| Preferences | `packages/preferences` / `config` |
+| Local Intelligence | `packages/ai` (Provider, Model Manager, Context Builder, Validation) |
+| Agent / Workflow / Task Queue | `packages/agent` — see [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) |
+| Discovery & Curation | `packages/discovery` (+ extension Job Providers) |
 | Applications | `packages/applications` |
 | Queue & Review | `packages/queue` |
 | Send | `packages/send` (**egress**) |
 | Follow-ups | `packages/followups` + scheduler |
 | Timeline & Memory | `packages/timeline` |
 | Privacy & Trust Chrome | desktop shell UI + timeline egress records |
+| Plugins / Extensions | `plugin-sdk` / `extension-sdk` |
 
 ---
 

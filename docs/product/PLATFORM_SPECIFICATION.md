@@ -353,8 +353,9 @@ flowchart TD
   I --> J[Validate Output]
   J --> K[Prepare Review Screen]
   K --> L[Wait for User Approval]
-  L --> M[Submit Application]
-  M --> N[Record Analytics]
+  L --> M[User-owned Send]
+  M --> N[Timeline Egress Audit]
+  N --> O[Unload Models]
 ```
 
 The AI Workflow Planner & Engine is responsible for coordinating every AI Workflow.
@@ -2463,13 +2464,9 @@ The AI should not begin coding until the planning phase has been completed.
 
 ## Definition of Done
 
-A feature is considered complete only when:
+Engineering completion follows the canonical [DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md).
 
-- The implementation satisfies the requirements.
-- Automated tests have been added or updated.
-- Documentation has been updated.
-- Existing tests continue to pass.
-- No unnecessary technical debt has been introduced.
+This specification defines **what** must behave correctly; DoD defines when a change may merge.
 
 ---
 

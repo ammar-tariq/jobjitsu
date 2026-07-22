@@ -28,19 +28,17 @@ The **spine** of the Career OS. One product, one voice, one privacy model. Toget
 
 | Module | Purpose | Brand posture | Status |
 |--------|---------|---------------|--------|
-| **Identity & Resume** | On-device profile and Resume Library for tailoring | Stored locally; never “synced to JobJitsu cloud” | Core |
-| **Preferences** | Rules for fit, tone, constraints, approval gates | “Your rules, your signal” | Core |
-| **Local Intelligence** | AI Provider + Context Builder for roles and drafts | Status chrome: **Agent · On-device** | Core |
-| **Agent** | Prep work against preferences; Workflow / Task Queue | Serves; does not own send. Idle: belt tied | Core |
-| **Discovery & Curation** | Find and filter roles via Job Providers | Precision first, volume second | Core |
-| **Applications** | Draft, tailor, version, track each throw | Craft unit of the OS | Core |
-| **Queue & Review** | Holding area before anything leaves | Approval is a first-class ritual | Core |
-| **Send** | Explicit outbound apply / submit | User-initiated; quiet success | Core |
-| **Follow-ups** | Polite nudges on a calm calendar | Amber caution, never shame | Core |
-| **Timeline & Memory** | Local history of actions and outcomes | Learning without leaderboard energy | Core |
-| **Privacy & Trust Chrome** | Badge, logs, “what left / what stayed” | Architecture made visible | Core |
-| **Knowledge Base** | Grounded career knowledge for Context Builder | Distinct from Timeline | Core |
-| **AI Validation** | Post-generate gates (formatting, ATS, skills) | Never trust first model output alone | Core |
+| **Identity & Resume** | On-device profile and Resume Library for tailoring | Stored locally; never “synced to JobJitsu cloud” | Core · H1 |
+| **Preferences** | Rules for fit, tone, constraints, approval gates | “Your rules, your signal” | Core · H1 |
+| **Local Intelligence** | AI Provider + Context Builder for roles and drafts | Status chrome: **Agent · On-device** | Core · H1 |
+| **Agent** | Prep work against preferences; pause/resume | Serves; does not own send. Idle: belt tied | Core · H1 |
+| **Discovery & Curation** | Find and filter roles via Job Providers | Precision first, volume second | Core · H1 |
+| **Applications** | Draft, tailor, version, track each throw | Craft unit of the OS | Core · H1 |
+| **Queue & Review** | Holding area before anything leaves | Approval is a first-class ritual | Core · H1 |
+| **Send** | Explicit outbound apply / submit | User-initiated; quiet success | Core · H1 |
+| **Follow-ups** | Polite nudges on a calm calendar | Amber caution, never shame | Core · H1 |
+| **Timeline & Memory** | Local history of actions and outcomes | Learning without leaderboard energy | Core · H1 |
+| **Privacy & Trust Chrome** | Badge, logs, “what left / what stayed” | Architecture made visible | Core · H1 |
 
 ### Core module intents (vision-level)
 
@@ -66,22 +64,22 @@ The **spine** of the Career OS. One product, one voice, one privacy model. Toget
 
 **Privacy & Trust Chrome** — Always-on assurance that the OS is still local and inspectable.
 
-**Knowledge Base** — Grounded retrieval for Context Builder; reduces hallucination.
-
-**AI Validation** — Structured checks after generation; craft over raw model output.
-
 ---
 
 ## Experimental
 
-In-tree or specified capabilities that may change. Label clearly in UI and docs.
+In-tree or specified capabilities that may change. Label clearly in UI and docs. Architecture contracts: [WORKFLOW_ENGINE.md](../architecture/WORKFLOW_ENGINE.md), [DATA_MODELS.md](../architecture/DATA_MODELS.md).
 
 | Module / capability | Why experimental | Guardrail |
 |---------------------|------------------|-----------|
+| **Knowledge Base** | Grounded retrieval for Context Builder; backlog epic pending | Distinct from Timeline; local only |
+| **AI Validation** | Post-generate gates; backlog epic pending | Failures never enqueue Send |
+| **Workflow / Task Queue** | Declarative AI control plane; backlog epic pending | Never call Send; ≠ review Queue |
 | **Browser automation (apply assist)** | High variance across sites; approval UX still evolving | Never bypass Queue → Send; user approval required by default |
-| **User-configured remote AI Provider** | Opt-in cloud model endpoint | Honest chrome — never labeled Agent · On-device / local |
-| **Trusted Automation** | Reduced per-action approval when user enables | Default off; irreversible egress still auditable on Timeline |
+| **User-configured remote AI Provider** | Opt-in cloud model endpoint | Honest chrome — never labeled Agent · On-device |
+| **Trusted Automation** | Reduced per-action approval when user enables | Default **off**; no silent irreversible egress; Timeline always records Send.*; cannot weaken Send honesty |
 | **AI Playground** | Prompt/provider experimentation | Must not silently affect production Workflows |
+| **Email / Gmail deep sync** | Spec-heavy; no H1 epic yet | Treat PLATFORM_SPEC email chapters as Experimental/Future until epic admitted |
 
 ---
 

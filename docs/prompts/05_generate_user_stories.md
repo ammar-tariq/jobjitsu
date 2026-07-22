@@ -12,7 +12,7 @@ Ensure [docs/backlog/](../backlog/) user stories and acceptance criteria cover C
 - [PLATFORM_SPECIFICATION.md](../product/PLATFORM_SPECIFICATION.md)
 - [TERMINOLOGY.md](../product/TERMINOLOGY.md)
 - [docs/architecture/OVERVIEW.md](../architecture/OVERVIEW.md)
-- Existing [EPICS.md](../backlog/EPICS.md), [FEATURES.md](../backlog/FEATURES.md), [USER_STORIES.md](../backlog/USER_STORIES.md), [ACCEPTANCE_CRITERIA.md](../backlog/ACCEPTANCE_CRITERIA.md)
+- Existing [EPICS.md](../backlog/EPICS.md), [EPIC_FEATURES.md](../backlog/EPIC_FEATURES.md), [USER_STORIES.md](../backlog/USER_STORIES.md), [ACCEPTANCE_CRITERIA.md](../backlog/ACCEPTANCE_CRITERIA.md)
 - [VERTICAL_SLICES.md](../backlog/VERTICAL_SLICES.md)
 
 ## Rules

@@ -168,14 +168,9 @@ Critical business logic should have comprehensive unit test coverage.
 
 ## Definition of Done
 
-A task is complete only when:
+A task is complete only when it meets the canonical checklist in [DEFINITION_OF_DONE.md](DEFINITION_OF_DONE.md).
 
-- Requirements are satisfied.
-- Tests pass.
-- Documentation is updated.
-- No linting errors remain.
-- No type errors remain.
-- No known regressions have been introduced.
+Do not maintain a parallel Done list here.
 
 ---
 

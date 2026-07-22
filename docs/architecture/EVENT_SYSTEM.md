@@ -48,18 +48,24 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 |-------|---------|
 | `App.Started` | Desktop host finished boot wiring |
 | `Plugin.Loaded` | Plugin module loaded into host (may still be disabled) |
+| `Resume.Imported` | User imported a résumé (ID only) |
 | `Resume.Generated` | On-device résumé prepared (ID only on bus) |
+| `Job.Imported` | Single role ingested |
+| `Jobs.Synced` | Job Provider sync batch finished (counts) |
 | `Email.Synced` | Mailbox channel sync finished (counts only; fake or real) |
 
-### Agent
+### Agent / Workflow
 | Event | Meaning |
 |-------|---------|
 | `Agent.Started` | Run began under preferences |
-| `Agent.Paused` | User or policy paused; queue intact |
+| `Agent.Paused` | User or policy paused; review queue intact |
 | `Agent.Resumed` | Run continued |
 | `Agent.Progress` | Coarse progress (counts, stage) — batchable |
 | `Agent.Idle` | Belt tied — waiting for signal |
 | `Agent.Failed` | Preparative failure (not send) |
+| `Workflow.Started` | Workflow run began |
+| `Workflow.Completed` | Workflow run finished successfully |
+| `Workflow.Failed` | Workflow run failed |
 
 ### Discovery
 | Event | Meaning |
@@ -73,6 +79,13 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 | `Application.DraftCreated` | New draft |
 | `Application.Tailored` | Local intelligence applied |
 | `Application.Updated` | User or agent edited |
+| `Application.StageChanged` | Tracking status changed (see [DATA_MODELS.md](./DATA_MODELS.md)) |
+| `Application.Submitted` | Domain outcome after approved egress (also emit `Send.*`) |
+
+### Knowledge
+| Event | Meaning |
+|-------|---------|
+| `Knowledge.Updated` | Knowledge Base entry created/updated (ID + kind only) |
 
 ### Queue
 | Event | Meaning |
@@ -93,7 +106,7 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 ### Follow-ups
 | Event | Meaning |
 |-------|---------|
-| `FollowUp.Scheduled` | Reminder armed |
+| `FollowUp.Scheduled` | Reminder armed (“Follow-up Created”) |
 | `FollowUp.Due` | Polite nudge ready (caution, not error) |
 | `FollowUp.Sent` | Nudge egress via send channel |
 | `FollowUp.Dismissed` | User deferred/cancelled |
@@ -101,17 +114,26 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 ### AI / Privacy
 | Event | Meaning |
 |-------|---------|
+| `Ai.Started` | Inference / AI task unit began |
+| `Ai.Finished` | AI task unit finished successfully |
+| `Ai.ValidationCompleted` | Validation report summary (pass\|warn\|fail counts) |
 | `Ai.LocalModelLoading` | Warm-up |
-| `Ai.LocalModelReady` | Badge can show ready |
+| `Ai.LocalModelReady` | Agent · On-device may show ready |
 | `Ai.LocalModelFailed` | Preferences / path recovery |
 | `Privacy.EgressRecorded` | Timeline audit written |
 
-### Preferences / System
+### Extensions / Plugins / Preferences / System
 | Event | Meaning |
 |-------|---------|
 | `Preferences.Changed` | Policy inputs changed |
 | `Scheduler.JobRan` | Local job executed |
-| `Plugin.Enabled` / `Plugin.Disabled` | User toggled capability |
+| `Plugin.Enabled` / `Plugin.Disabled` | User toggled agent skill |
+| `Extension.Registered` | Extension contribution registered |
+| `Extension.Enabled` / `Extension.Disabled` | User toggled extension |
+| `Extension.Unloaded` | Extension removed from host |
+| `Extension.Failed` | Extension load/run failure |
+
+**SSOT:** `packages/events` must match this catalog when coded. Illustrative chains in [ARCHITECTURE_PRINCIPLES.md](../../ARCHITECTURE_PRINCIPLES.md) use these names only.
 
 ---
 
@@ -169,8 +191,19 @@ flowchart LR
 ## Durability
 
 - **Ephemeral bus:** UI live updates.
-- **Durable subset:** egress, approvals, preference changes, agent pause — via Timeline/storage.
-- Retention is user-local; export is an explicit future module (portability), not ambient sync.
+- **Durable allowlist (normative):** `Send.Attempted|Succeeded|Failed|Unknown`, `Privacy.EgressRecorded`, `Queue.Approved|Rejected`, `Agent.Paused`, `Preferences.Changed`, `Plugin.Enabled|Disabled`, `Extension.Enabled|Disabled`, `Application.Submitted`.
+- Optional durable: `FollowUp.Sent`, `Workflow.Failed`, `Ai.ValidationCompleted` (fail) — product may expand without removing the allowlist.
+- Retention is user-local; export is an explicit Future module (portability), not ambient sync.
+
+## Sovereignty acceptance criteria
+
+| Flow | AC |
+|------|----|
+| Approval on | No `Send.Attempted` without `Queue.Approved` (unless Trusted Automation Experimental enabled) |
+| Pause | `Agent.Paused` leaves review Queue intact; AI Task Queue cancels/freezes Running |
+| Unknown send | `Send.Unknown` never shown as success |
+| Validation fail | No `Queue.Enqueued` for send from failed validation |
+| Trusted Automation | Default **off**; Timeline still records egress |
 
 ---
 

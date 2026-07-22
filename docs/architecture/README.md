@@ -12,6 +12,8 @@ Design docs for JobJitsu — the AI Career Operating System.
 | [EXTENSION_SYSTEM.md](./EXTENSION_SYSTEM.md) | Host contributions |
 | [DESKTOP_ARCHITECTURE.md](./DESKTOP_ARCHITECTURE.md) | Shell, IPC, UI |
 | [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | Local Intelligence |
+| [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) | Workflow engine & Task Queue |
+| [DATA_MODELS.md](./DATA_MODELS.md) | Entity ownership & schemas |
 | [TAURI_TS_RUNTIME.md](./TAURI_TS_RUNTIME.md) | Tauri ↔ TypeScript shell runtime |
 | [SCHEDULER.md](./SCHEDULER.md) | Local jobs & follow-ups |
 | [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) | Privacy & quality bars |

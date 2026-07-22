@@ -3,7 +3,9 @@
 > Epics → Features → User Stories → Acceptance Criteria → Technical Tasks → Dependencies  
 > Every technical task is sized for **one working day** and is independently implementable once its listed dependencies are done.
 
-**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Features](../product/FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
+**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Product modules](../product/FEATURES.md) · [Epic features](./EPIC_FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
+
+**Current focus:** Complete Desktop Foundation slices ([sprint-1.md](./sprint-1.md)); track done work in [VERTICAL_SLICES.md](./VERTICAL_SLICES.md); next product IA alignment = E03 nav nouns. Build waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md).
 
 ---
 

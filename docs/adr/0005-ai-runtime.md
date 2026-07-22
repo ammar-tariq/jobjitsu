@@ -26,8 +26,8 @@ Alternatives considered:
 **Implement a provider-based AI runtime** in `packages/ai` with **local adapters as the primary path**.
 
 - Interface: `health`, `complete`, optional `embed`.
-- Context assembler builds **minimal** local context (identity/role/draft excerpts).
-- Trust chrome: label **Local LLM** only when the active provider is local.
+- Trust chrome: status shows **Agent · On-device** when the active provider is local; “Local LLM” only in advanced settings / technical contexts.
+- Context Builder (alias: context assembler) builds **minimal** local context (identity/role/draft excerpts + Knowledge Base).
 - Remote providers allowed only as **explicit user configuration**, labeled honestly in UI.
 - AI/tools must not perform egress; outputs flow to Applications/Queue.
 - Lazy-load models; honor Agent pause; fail with plain recovery copy.
