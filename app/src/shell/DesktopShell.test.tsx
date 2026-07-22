@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
+import { createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createHostRuntime } from "../host/runtime.js";
 import { App } from "../App.js";
@@ -130,5 +131,34 @@ describe("DesktopShell", () => {
     expect(versions).toHaveLength(1);
     expect(versions[0]?.label).toBe("Baseline 2026");
     expect(imported).toEqual([versions[0]?.id]);
+  });
+
+  it("selects a resume version without sending anything", async () => {
+    const user = userEvent.setup();
+    const resumeLibrary = createMemoryResumeLibrary();
+    const first = await resumeLibrary.import({
+      label: "Baseline",
+      fileName: "base.md",
+      bytes: new TextEncoder().encode("# Baseline"),
+    });
+    await resumeLibrary.import({
+      label: "Alternate",
+      fileName: "alt.md",
+      bytes: new TextEncoder().encode("# Alternate"),
+      parentVersionId: first.id,
+    });
+
+    const runtime = createHostRuntime({ resumeLibrary });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-resume-version-list")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Use Alternate" }));
+    expect(await screen.findByText(/Selected “Alternate” — nothing was sent/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Selected Alternate" })).toBeDisabled();
+    expect((await runtime.resumeLibrary.getSelected())?.label).toBe("Alternate");
+    expect(runtime.bridge).not.toHaveProperty("send");
   });
 });

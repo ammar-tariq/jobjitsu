@@ -21,6 +21,10 @@ export type IpcBridge = {
   readonly importResume: (
     input: ResumeImportInputPayload,
   ) => Promise<Result<IpcResultMap["identity.importResume"]>>;
+  readonly getSelectedResume: () => Promise<Result<IpcResultMap["identity.getSelectedResume"]>>;
+  readonly selectResume: (
+    resumeId: string,
+  ) => Promise<Result<IpcResultMap["identity.selectResume"]>>;
 };
 
 /**
@@ -58,6 +62,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async importResume(input: ResumeImportInputPayload) {
       return (await dispatcher.invoke("identity.importResume", input)) as Result<
         IpcResultMap["identity.importResume"]
+      >;
+    },
+    async getSelectedResume() {
+      return (await dispatcher.invoke("identity.getSelectedResume")) as Result<
+        IpcResultMap["identity.getSelectedResume"]
+      >;
+    },
+    async selectResume(resumeId: string) {
+      return (await dispatcher.invoke("identity.selectResume", { resumeId })) as Result<
+        IpcResultMap["identity.selectResume"]
       >;
     },
   };

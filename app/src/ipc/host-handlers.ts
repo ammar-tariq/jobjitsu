@@ -68,10 +68,11 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
     },
     "identity.listResumeVersions": async () => {
       if (!resumeLibrary) {
-        return ok({ versions: [] });
+        return ok({ versions: [], selectedId: null });
       }
       const versions = await resumeLibrary.list();
-      return ok({ versions });
+      const selected = await resumeLibrary.getSelected();
+      return ok({ versions, selectedId: selected?.id ?? null });
     },
     "identity.importResume": async (payload) => {
       if (!resumeLibrary) {
@@ -89,6 +90,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           fileName: payload.fileName,
           bytes,
           contentType: payload.contentType,
+          parentVersionId: payload.parentVersionId,
         });
         if (bus) {
           await bus.publish("Resume.Imported", { resumeId: version.id });
@@ -102,6 +104,38 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "Something went wrong importing that file. Try again.",
             detail: "identity:import",
+            cause,
+          }),
+        );
+      }
+    },
+    "identity.getSelectedResume": async () => {
+      if (!resumeLibrary) {
+        return ok({ version: null });
+      }
+      const version = await resumeLibrary.getSelected();
+      return ok({ version: version ?? null });
+    },
+    "identity.selectResume": async (payload) => {
+      if (!resumeLibrary) {
+        return err(
+          createAppError("unavailable", "Resume library not ready", {
+            message: "Resume storage is not available yet.",
+            detail: "identity:resume-missing",
+          }),
+        );
+      }
+      try {
+        const version = await resumeLibrary.select(payload.resumeId);
+        return ok({ version });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not select resume", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That resume version could not be selected. Try again.",
+            detail: "identity:select",
             cause,
           }),
         );

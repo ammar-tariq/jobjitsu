@@ -9,13 +9,14 @@ Profile and résumé source of truth (local).
 | `Profile` / `ProfileRepository`            | Done — KV-backed            |
 | `createKvProfileRepository`                | Done — on-device CRUD       |
 | `createMemoryProfileRepository`            | Done — browser-safe host    |
-| `ResumeVersion` / `ResumeLibrary`          | Done — import + label       |
+| `ResumeVersion` / `ResumeLibrary`          | Done — import, list, select |
 | `createMemoryResumeLibrary`                | Done — browser-safe host    |
 | `createStorageResumeLibrary`               | Done — KV + blob originals  |
+| Optional `parentVersionId`                 | Done — version graph        |
 | `ResumeStore` / `ResumeDocument` contracts | Done                        |
 | `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud** |
 | `createLocalResumeStore`                   | Done — KV profile + resume  |
-| Structured parse / version select UI       | Not yet (PE03-S03+)         |
+| Tailor draft / structured parse            | Not yet (PE03-S04+)         |
 
 ## Profile (on-device)
 
@@ -49,7 +50,8 @@ Durable path (Node/host FS — not the Vite webview):
 import { createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 ```
 
-UI: `identity.importResume` / `identity.listResumeVersions` — never talk to storage from the shell.
+UI: `identity.importResume` / `identity.listResumeVersions` / `identity.selectResume` —
+never talk to storage from the shell. **Select does not send.**
 
 ## Fake Resume
 
