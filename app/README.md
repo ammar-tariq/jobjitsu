@@ -2,7 +2,8 @@
 
 Desktop **shell** (React webview) + **Tauri host** for JobJitsu.
 
-Dojo shows the startup cascade. Other destinations stay **Coming Soon**.
+Primary nav: **Applications**, **Queue**, **Follow-ups**, **Agent**, **Preferences**, **Timeline**.
+**Agent** shows the startup cascade (listen-only). Other destinations stay **Coming Soon**.
 
 ## Prerequisites
 
@@ -47,12 +48,14 @@ Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/
 
 ```
 ┌──────────────┬─────────────────────────────┐
-│ JobJitsu     │  Welcome                    │
-│──────────────│  App.Started                │
-│ Dojo         │  Plugin.Loaded              │
-│ Opportunities│  Resume.Generated           │
-│ Resume       │  Email.Synced               │
-│ …            │                             │
+│ JobJitsu     │  Applications               │
+│──────────────│  Coming Soon                │
+│ Applications │                             │
+│ Queue        │  (Agent → cascade listen)   │
+│ Follow-ups   │                             │
+│ Agent        │                             │
+│ Preferences  │                             │
+│ Timeline     │                             │
 │ Agent · On-  │                             │
 │ device       │                             │
 └──────────────┴─────────────────────────────┘

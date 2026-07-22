@@ -6,7 +6,7 @@ import { useHostActivity } from "./HostProvider.js";
 
 const CASCADE = ["App.Started", "Plugin.Loaded", "Resume.Generated", "Email.Synced"] as const;
 
-/** Calm event feed for Dojo — proves bus-driven architecture. */
+/** Calm event feed for Agent — proves bus-driven architecture (listen only). */
 export function EventActivityView(): JSX.Element {
   const activity = useHostActivity();
   const cascadeDone = CASCADE.every((name) => activity.some((entry) => entry.name === name));
@@ -14,7 +14,7 @@ export function EventActivityView(): JSX.Element {
   return (
     <Stack spacing={2} data-testid="jj-event-activity" sx={{ maxWidth: "40rem" }}>
       <Typography component="h2" variant="h2">
-        Welcome
+        Agent
       </Typography>
       <Typography color="text.secondary">
         The host talks through events. This view only listens — it never calls the Agent runtime

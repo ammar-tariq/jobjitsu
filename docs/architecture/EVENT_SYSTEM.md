@@ -35,7 +35,7 @@ flowchart LR
   A[App.Started] --> B[Plugin.Loaded] --> C[Resume.Generated] --> D[Email.Synced]
 ```
 
-Host runtime (`app/src/host`) owns this chain with fake providers. See Dojo activity view.
+Host runtime (`app/src/host`) owns this chain with fake providers. See Agent activity view.
 
 ---
 

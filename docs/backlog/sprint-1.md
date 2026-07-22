@@ -4,7 +4,7 @@
 > Establish the runnable host: shell, composition root, events, settings, logging, errors, theme, and empty plugin/extension registries.  
 > **Still no AI.** No providers, no tailor, no model paths, no “intelligence” product surface.
 >
-> **IA migration:** DF-02 placeholder nav is complete for foundation. Follow-up story (E03): replace Dojo/Inbox/… labels with Applications / Queue / Follow-ups / Agent / Preferences per [DESKTOP_ARCHITECTURE.md](../architecture/DESKTOP_ARCHITECTURE.md). Owner: desktop shell / E03.
+> **IA migration:** PE01-S02 replaced Dojo/Inbox/… with Applications / Queue / Follow-ups / Agent / Preferences / Timeline per [DESKTOP_ARCHITECTURE.md](../architecture/DESKTOP_ARCHITECTURE.md).
 >
 > **Status vs VERTICAL_SLICES:** Sprint 1 tracks DF-* AC. Completed slices (including later fakes/cascade) are recorded in [VERTICAL_SLICES.md](./VERTICAL_SLICES.md) — that file is the slice ledger; this sprint doc remains the Desktop Foundation commitment.
 >

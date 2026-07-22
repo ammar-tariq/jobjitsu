@@ -12,27 +12,27 @@ describe("@jobjitsu/app shell navigation", () => {
     expect(APP_NAME).toBe("JobJitsu");
   });
 
-  it("lists the desktop shell destinations", () => {
+  it("lists primary H1 destinations with TERMINOLOGY nouns", () => {
     expect(SHELL_NAV_ITEMS.map((item) => item.label)).toEqual([
-      "Dojo",
-      "Opportunities",
-      "Resume",
-      "Inbox",
-      "Recruiters",
-      "Analytics",
-      "Extensions",
-      "Settings",
+      "Applications",
+      "Queue",
+      "Follow-ups",
+      "Agent",
+      "Preferences",
+      "Timeline",
     ]);
   });
 
-  it("defaults to Dojo with Welcome title", () => {
-    expect(DEFAULT_SHELL_NAV_ID).toBe("dojo");
-    expect(shellPageTitle("dojo")).toBe("Welcome");
-    expect(shellPageTitle("settings")).toBe("Settings");
+  it("defaults to Applications", () => {
+    expect(DEFAULT_SHELL_NAV_ID).toBe("applications");
+    expect(shellPageTitle("applications")).toBe("Applications");
+    expect(shellPageTitle("preferences")).toBe("Preferences");
   });
 
   it("narrows known nav ids", () => {
-    expect(isShellNavId("inbox")).toBe(true);
+    expect(isShellNavId("queue")).toBe(true);
+    expect(isShellNavId("follow-ups")).toBe(true);
+    expect(isShellNavId("dojo")).toBe(false);
     expect(isShellNavId("send")).toBe(false);
   });
 });
