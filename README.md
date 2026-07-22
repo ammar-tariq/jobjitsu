@@ -73,6 +73,13 @@ Your belt will be tied. Waiting for the first throw.
 | [ADRs](docs/adr/README.md) | Accepted decisions (Tauri, React, …) |
 | [Full index](docs/architecture/README.md) | Events, plugins, desktop, AI, tests |
 
+### Backlog
+
+| Doc | Description |
+|-----|-------------|
+| [Backlog index](docs/backlog/README.md) | Epics → tasks |
+| [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md) | Build waves & critical path |
+
 ---
 
 ## Principles (short)
