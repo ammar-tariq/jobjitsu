@@ -1,6 +1,6 @@
 /**
- * Logging interfaces — local, inspectable, PII-minimizing.
- * No implementation; host wires a concrete logger later.
+ * Logging contracts — local, inspectable, PII-minimizing.
+ * Never log résumé bodies or full career payloads.
  */
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -30,7 +30,7 @@ export interface Logger {
   child(fields: LogFields): Logger;
 }
 
-/** Optional sink for structured records (tests, timeline bridge). */
+/** Sink for structured records (console, tests, later timeline bridge). */
 export interface LogSink {
   write(record: LogRecord): void | Promise<void>;
 }

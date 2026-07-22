@@ -10,13 +10,20 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./tokens.css": "./src/tokens.css",
+    "./JjAgentPrivacyPill.css": "./src/JjAgentPrivacyPill.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/tokens.css",
+    "src/JjAgentPrivacyPill.css"
   ],
   "dependencies": {
     "@jobjitsu/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
   },
   "scripts": {
     "build": "tsc -b",
@@ -30,6 +37,12 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.2",
+    "jsdom": "^25.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

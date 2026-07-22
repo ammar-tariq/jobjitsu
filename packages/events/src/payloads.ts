@@ -5,7 +5,7 @@ import type {
   PipelineStage,
   PluginId,
   RoleId,
-} from "@jobjitsu/core";
+} from "@jobjitsu/shared";
 import type { EventName } from "./names.js";
 
 /** Coarse destination class for egress audit — never full payloads. */

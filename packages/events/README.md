@@ -2,6 +2,8 @@
 
 Typed domain event catalog, payloads, **EventBus** contracts, and an in-process implementation.
 
+**Depends on:** `@jobjitsu/shared` (IDs, pipeline stages).
+
 ## Status
 
 | Piece                                      | State              |

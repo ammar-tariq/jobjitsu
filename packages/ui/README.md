@@ -1,10 +1,14 @@
 # `@jobjitsu/ui`
 
-Shared Jj* UI primitives and design tokens
+Shared Jj* UI primitives and design tokens for the JobJitsu desktop shell.
 
-## Status
+## Exports
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+| Export                                | Purpose                                 |
+| ------------------------------------- | --------------------------------------- |
+| `@jobjitsu/ui`                        | `JjAgentPrivacyPill`, package markers   |
+| `@jobjitsu/ui/tokens.css`             | Dark-default design tokens + base reset |
+| `@jobjitsu/ui/JjAgentPrivacyPill.css` | Privacy pill styles                     |
 
 ## Scripts
 
@@ -16,4 +20,4 @@ pnpm --filter @jobjitsu/ui typecheck
 
 ## Boundaries
 
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). Presentation only — no storage, send, or AI.

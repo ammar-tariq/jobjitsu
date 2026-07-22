@@ -48,6 +48,17 @@ pnpm install
 pnpm check    # format + lint + typecheck + test + build
 ```
 
+A change is complete only when it meets the [Definition of Done](./DEFINITION_OF_DONE.md): documented, tested, typed, reviewed, follows architecture, passes lint, passes build.
+
+### Desktop shell (UI only)
+
+```bash
+pnpm --filter @jobjitsu/ui build
+pnpm --filter @jobjitsu/app dev
+```
+
+Open http://localhost:1420 — sidebar + Coming Soon placeholders. No product features yet.
+
 Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 
 ### Product

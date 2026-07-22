@@ -16,6 +16,7 @@
     "dist"
   ],
   "dependencies": {
+    "@jobjitsu/config": "workspace:*",
     "@jobjitsu/core": "workspace:*",
     "@jobjitsu/storage": "workspace:*"
   },

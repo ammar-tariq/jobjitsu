@@ -7,12 +7,5 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts", "dist", "tests"],
-  "references": [
-    {
-      "path": "../core"
-    },
-    {
-      "path": "../storage"
-    }
-  ]
+  "references": [{ "path": "../config" }, { "path": "../core" }, { "path": "../storage" }]
 }

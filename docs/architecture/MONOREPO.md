@@ -48,15 +48,27 @@ jobjitsu/
 
 ## `packages/` intended map
 
-Names are architectural; implementation may merge thin packages early, but **boundaries stay**.
+Names are architectural; **foundation spine** is implemented first.
+
+### Foundation spine
 
 | Package | Responsibility |
 |---------|----------------|
-| `core` | Shared types, result/error model, pipeline stage IDs |
-| `events` | Event contracts + local bus interfaces |
+| `shared` | Result/AppError, branded IDs, pipeline stage vocabulary |
+| `events` | Event contracts + local in-memory bus |
+| `logger` | Logger contracts + console/memory sinks (no network) |
+| `config` | App settings + memory store (approval/theme defaults) |
+| `core` | Kernel: re-exports, ErrorReporter, service registry |
+| `sdk` | Public plugin SDK barrel (**no AI runtime**) |
+| `testing` | Test helpers for the spine |
+
+### Domain & shell
+
+| Package | Responsibility |
+|---------|----------------|
 | `storage` | On-device persistence adapters (profiles, blobs, indexes) |
 | `identity` | Profile & résumé source of truth |
-| `preferences` | Fit rules, approval gates, quiet hours |
+| `preferences` | Fit rules façade (settings live in `config`) |
 | `ai` | Local LLM adapters, context assembly, prompt roles |
 | `agent` | Preparative orchestration; pause/resume; never owns send |
 | `discovery` | Role search/curation interfaces + built-in adapters |
@@ -101,15 +113,17 @@ Community plugins live outside or as git submodules later; the **host loads by m
 ## Dependency direction (monorepo law)
 
 ```
-app  →  packages/*  →  core/events/storage
-plugins  →  plugin-sdk / extension-sdk  (not into app internals)
-ui package  ←  app/ui may use; domain packages must not depend on app
+app  →  packages/*  →  shared / events / logger / config / core
+plugins  →  sdk / plugin-sdk / extension-sdk  (not into app internals)
+ui package  ←  app may use; domain packages must not depend on app
 ```
 
+- Foundation order: `shared → events → logger → config → core → sdk → testing`
 - Domain packages **do not** import `app/`.
 - `agent` **does not** import `send` directly; it emits intents / queue transitions.
 - `send` may read queue + applications; it alone performs network egress for career payloads.
 - `ai` has no network except optional **user-configured** remote model endpoints (never default).
+- `sdk` must not pull in AI runtime until an explicit later epic.
 
 ---
 

@@ -1,0 +1,15 @@
+.jj-agent-privacy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jj-space-1);
+  padding: var(--jj-space-1) var(--jj-space-3);
+  border-radius: var(--jj-radius-pill);
+  border: 1px solid var(--jj-color-privacy-pill-border);
+  background: var(--jj-color-privacy-pill-bg);
+  color: var(--jj-color-privacy-pill-fg);
+  font-size: var(--jj-text-tiny-size);
+  line-height: var(--jj-text-tiny-line);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}

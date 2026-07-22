@@ -46,8 +46,10 @@ export default tseslint.config(
   {
     files: [
       "**/*.{test,spec}.ts",
+      "**/*.{test,spec}.tsx",
       "**/vitest.config.ts",
       "vitest.*.ts",
+      "**/vitest.setup.ts",
       "*.config.js",
       "*.config.ts",
       "commitlint.config.js",

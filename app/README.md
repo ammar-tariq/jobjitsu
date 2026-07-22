@@ -1,30 +1,57 @@
 # `@jobjitsu/app`
 
-Desktop shell for JobJitsu (Tauri host + React UI).
+Desktop **shell** for JobJitsu — title bar, sidebar, main pane, status chrome.
 
-## Layout (planned)
+This is not the product application. Every destination is a calm **Coming Soon** placeholder so we can prove layout and navigation architecture first.
 
-```
-app/
-├── src/           # Shared app package entry (scaffold)
-├── host/          # Native/Tauri host (not scaffolded yet)
-├── ui/            # React renderer (not scaffolded yet)
-└── README.md
-```
-
-## Status
-
-Scaffold only — **no business logic**, no Tauri/React wiring yet.  
-See backlog [E01 Platform Foundation](../docs/backlog/EPICS.md) and [ADR 0001 Tauri](../docs/adr/0001-tauri.md) / [ADR 0002 React](../docs/adr/0002-react.md).
-
-## Scripts
+## Run the shell
 
 ```bash
-pnpm --filter @jobjitsu/app typecheck
+pnpm install
+pnpm --filter @jobjitsu/ui build
+pnpm --filter @jobjitsu/app dev
+```
+
+Open **http://localhost:1420** — window title **JobJitsu**, Midnight Ink dark theme.
+
+```bash
+pnpm --filter @jobjitsu/app build    # typecheck + Vite → dist-ui/
 pnpm --filter @jobjitsu/app test
 ```
 
+## Layout
+
+```
+┌────────────────────────────────────────────┐
+│ JobJitsu                                   │
+├──────────────┬─────────────────────────────┤
+│ Dojo         │                             │
+│ Opportunities│                             │
+│ Resume       │    Welcome / Coming Soon    │
+│ Inbox        │                             │
+│ Recruiters   │                             │
+│ Analytics    │                             │
+│ Extensions   │                             │
+│ Settings     │                             │
+├──────────────┴─────────────────────────────┤
+│                    Agent · On-device        │
+└────────────────────────────────────────────┘
+```
+
+## Architecture notes
+
+| Concern               | Choice                                                                       |
+| --------------------- | ---------------------------------------------------------------------------- |
+| UI                    | React (ADR 0002) in this package                                             |
+| Tokens / privacy pill | `@jobjitsu/ui`                                                               |
+| Desktop host          | **Tauri later** (ADR 0001) — Rust not required to develop the shell UI       |
+| TS in webview         | Vite + TypeScript; domain stays in packages; no ambient Node in the renderer |
+| AI                    | None in the shell                                                            |
+
+See [TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md) when the native host lands.
+
 ## Boundaries
 
-- UI must use narrow IPC ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
-- Career egress only via `@jobjitsu/send`.
+- No career egress from the renderer.
+- No AI providers registered.
+- Narrow IPC only when the Tauri host arrives ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).

@@ -1,0 +1,26 @@
+---
+description: Definition of Done — documented, tested, typed, reviewed, architecture, lint, build
+alwaysApply: true
+---
+
+# Definition of Done
+
+A task is **complete only if** all of the following are true:
+
+1. **Documented** — README, architecture, ADR, or story AC updated for the change
+2. **Tested** — tests added/updated; `pnpm test` passes
+3. **Typed** — `pnpm typecheck` passes; no unjustified `any`
+4. **Reviewed** — PR review or completed solo review checklist
+5. **Follows architecture** — package boundaries, local-first, ADRs, agent ≠ send
+6. **Passes lint** — ESLint / format clean (`pnpm lint`, `--max-warnings 0`)
+7. **Passes build** — `pnpm build` succeeds
+
+Prefer verifying with:
+
+```bash
+pnpm check
+```
+
+Full detail: [DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md)
+
+Never mark a slice done when documentation, tests, types, review, architecture, lint, or build are skipped without an explicit N/A justification.

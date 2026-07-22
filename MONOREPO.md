@@ -103,4 +103,4 @@ See [packages/README.md](./packages/README.md) and [docs/architecture/MONOREPO.m
 
 ## Status
 
-**Scaffold + tooling only** — no business logic. Implementation follows [docs/backlog](./docs/backlog/README.md).
+Foundation spine packages are implemented (`shared` → `testing`). Domain packages remain mostly scaffold. Desktop shell UI runs via Vite. See [docs/backlog](./docs/backlog/README.md).

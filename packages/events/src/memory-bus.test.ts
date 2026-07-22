@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createInMemoryEventBus } from "./memory-bus.js";
 import type { DurableEventSink } from "./bus.js";
-import type { ApplicationId } from "@jobjitsu/core";
+import type { ApplicationId } from "@jobjitsu/shared";
 
 describe("createInMemoryEventBus", () => {
   it("delivers matching events to subscribers in order", () => {

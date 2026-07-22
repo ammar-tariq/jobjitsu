@@ -1,0 +1,140 @@
+/**
+ * JobJitsu design tokens — dark theme default (Midnight Ink).
+ * Semantic tokens for components; primitives for theme maps.
+ * @see docs/design-system/DESIGN_TOKENS.md
+ * @see docs/design-system/THEME_DARK.md
+ */
+
+:root,
+[data-theme="dark"] {
+  /* Primitives — brand */
+  --jj-color-indigo-950: #0b0a1a;
+  --jj-color-indigo-900: #1e1b4b;
+  --jj-color-indigo-800: #312e81;
+  --jj-color-teal-400: #2dd4bf;
+  --jj-color-teal-500: #14b8a6;
+  --jj-color-teal-600: #0d9488;
+
+  /* Primitives — neutrals */
+  --jj-color-white: #ffffff;
+  --jj-color-cloud-50: #f8fafc;
+  --jj-color-slate-100: #f1f5f9;
+  --jj-color-slate-200: #e2e8f0;
+  --jj-color-slate-300: #cbd5e1;
+  --jj-color-slate-500: #64748b;
+  --jj-color-slate-600: #475569;
+  --jj-color-slate-800: #1e293b;
+  --jj-color-slate-900: #0f172a;
+
+  /* Primitives — feedback */
+  --jj-color-jade-500: #10b981;
+  --jj-color-amber-500: #f59e0b;
+  --jj-color-rose-500: #f43f5e;
+
+  /* Alpha helpers */
+  --jj-alpha-teal-15: color-mix(in srgb, var(--jj-color-teal-400) 15%, transparent);
+  --jj-alpha-teal-25: color-mix(in srgb, var(--jj-color-teal-400) 25%, transparent);
+  --jj-alpha-white-06: color-mix(in srgb, white 6%, transparent);
+
+  /* Semantic — surfaces (dark) */
+  --jj-color-bg-canvas: var(--jj-color-indigo-950);
+  --jj-color-bg-surface: var(--jj-color-indigo-900);
+  --jj-color-bg-elevated: #25224f;
+  --jj-color-bg-muted: color-mix(in srgb, white 6%, var(--jj-color-indigo-950));
+  --jj-color-bg-inverse: var(--jj-color-cloud-50);
+
+  /* Semantic — text */
+  --jj-color-text-primary: var(--jj-color-white);
+  --jj-color-text-secondary: var(--jj-color-slate-500);
+  --jj-color-text-tertiary: #94a3b8;
+  --jj-color-text-inverse: var(--jj-color-slate-800);
+  --jj-color-text-link: var(--jj-color-teal-400);
+  --jj-color-text-on-accent: var(--jj-color-indigo-950);
+
+  /* Semantic — borders & focus */
+  --jj-color-border-subtle: var(--jj-alpha-white-06);
+  --jj-color-border-default: color-mix(in srgb, white 12%, transparent);
+  --jj-color-border-strong: color-mix(in srgb, white 18%, transparent);
+  --jj-color-focus-ring: var(--jj-color-teal-400);
+
+  /* Semantic — actions */
+  --jj-color-accent: var(--jj-color-teal-400);
+  --jj-color-accent-hover: #5eead4;
+  --jj-color-accent-pressed: var(--jj-color-teal-500);
+  --jj-color-accent-muted: var(--jj-alpha-teal-15);
+  --jj-color-success: var(--jj-color-jade-500);
+  --jj-color-caution: var(--jj-color-amber-500);
+  --jj-color-danger: var(--jj-color-rose-500);
+
+  /* Privacy chrome */
+  --jj-color-privacy-pill-bg: color-mix(
+    in srgb,
+    var(--jj-color-teal-400) 12%,
+    var(--jj-color-indigo-900)
+  );
+  --jj-color-privacy-pill-fg: var(--jj-color-teal-400);
+  --jj-color-privacy-pill-border: color-mix(in srgb, var(--jj-color-teal-400) 35%, transparent);
+
+  /* Spacing (4px base) */
+  --jj-space-unit: 4px;
+  --jj-space-0: 0;
+  --jj-space-1: 4px;
+  --jj-space-2: 8px;
+  --jj-space-3: 12px;
+  --jj-space-4: 16px;
+  --jj-space-5: 20px;
+  --jj-space-6: 24px;
+  --jj-space-8: 32px;
+  --jj-space-10: 40px;
+
+  /* Radius */
+  --jj-radius-none: 0;
+  --jj-radius-sm: 4px;
+  --jj-radius-md: 6px;
+  --jj-radius-lg: 8px;
+  --jj-radius-pill: 999px;
+
+  /* Type */
+  --jj-font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --jj-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --jj-text-h1-size: 32px;
+  --jj-text-h1-line: 40px;
+  --jj-text-h2-size: 24px;
+  --jj-text-h2-line: 32px;
+  --jj-text-body-size: 16px;
+  --jj-text-body-line: 24px;
+  --jj-text-small-size: 14px;
+  --jj-text-small-line: 20px;
+  --jj-text-tiny-size: 12px;
+  --jj-text-tiny-line: 16px;
+
+  /* Elevation */
+  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--jj-font-sans);
+  font-size: var(--jj-text-body-size);
+  line-height: var(--jj-text-body-line);
+  color: var(--jj-color-text-primary);
+  background: var(--jj-color-bg-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--jj-color-focus-ring);
+  outline-offset: 2px;
+}

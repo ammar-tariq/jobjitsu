@@ -4,13 +4,19 @@ export default defineConfig({
   test: {
     name: "@jobjitsu/ui",
     globals: false,
-    environment: "node",
-    include: ["src/**/*.{test,spec}.ts", "tests/**/*.{test,spec}.ts"],
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+    include: [
+      "src/**/*.{test,spec}.ts",
+      "src/**/*.{test,spec}.tsx",
+      "tests/**/*.{test,spec}.ts",
+      "tests/**/*.{test,spec}.tsx",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],
-      include: ["src/**/*.ts"],
-      exclude: ["src/**/*.{test,spec}.ts"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.{test,spec}.{ts,tsx}"],
     },
     passWithNoTests: true,
   },

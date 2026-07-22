@@ -3,7 +3,7 @@
 > Epics → Features → User Stories → Acceptance Criteria → Technical Tasks → Dependencies  
 > Every technical task is sized for **one working day** and is independently implementable once its listed dependencies are done.
 
-**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Features](../product/FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md)
+**Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Features](../product/FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
 
 ---
 
@@ -39,6 +39,7 @@
 | [TECHNICAL_TASKS.md](./TECHNICAL_TASKS.md) | Day-sized tasks |
 | [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) | Dependency graph & waves |
 | [VERTICAL_SLICES.md](./VERTICAL_SLICES.md) | One-story-at-a-time process & status |
+| [sprint-1.md](./sprint-1.md) | Sprint 1 — Desktop Foundation (shell, DI, events, settings; **no AI**) |
 
 ---
 

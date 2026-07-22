@@ -2,25 +2,36 @@
   "name": "@jobjitsu/app",
   "version": "0.0.0",
   "private": true,
-  "description": "JobJitsu desktop shell (Tauri host + React UI) \u2014 scaffold only",
+  "description": "JobJitsu desktop shell (React UI; Tauri host later)",
   "type": "module",
   "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -b --watch",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --max-warnings 0",
-    "clean": "rm -rf dist coverage .turbo ui/dist",
+    "clean": "rm -rf dist dist-ui coverage .turbo",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@jobjitsu/core": "workspace:*",
     "@jobjitsu/ui": "workspace:*",
-    "@jobjitsu/core": "workspace:*"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
     "typescript": "^5.7.2",
+    "vite": "^6.0.6",
     "vitest": "^2.1.8"
   }
 }

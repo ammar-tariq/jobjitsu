@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "tsconfig.json", "package.json"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "dist-ui/**"]
     },
     "dev": {
       "cache": false,
@@ -19,7 +19,14 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tests/**", "**/*.test.ts", "vitest.config.ts", "tsconfig.json"]
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ]
     },
     "test:coverage": {
       "dependsOn": ["^build"],

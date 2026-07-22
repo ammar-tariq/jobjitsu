@@ -19,47 +19,83 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Layout: [MONOREPO.md](./MONOREPO.md)
 ## Allowed dependency graph (simplified)
 
 ```
+shared
+  ├── events
+  ├── config
+  └── (ids/result used widely)
+
+logger  (local sinks only)
+
+core  ←  shared + events + logger + config
+  ├── ErrorReporter
+  └── ServiceRegistry / FoundationKeys
+
+sdk  ←  core + plugin-sdk   (public surface; no ai)
+
+testing  ←  spine helpers
+
+domain packages → core / shared / events / storage …
+app → packages/*
+```
+
+Legacy shorthand:
+
+```
                     ┌──────────┐
-                    │   core   │
+                    │  shared  │
                     └────┬─────┘
                          │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-          events     storage      ui(tokens)
-              │          │
-              └────┬─────┘
-                   ▼
-        identity · preferences · timeline
-                   │
-     ┌─────────────┼─────────────┐
-     ▼             ▼             ▼
- discovery    applications      ai
-     │             │             │
-     └──────► agent ◄────────────┘
-                   │
-                   ▼
-                 queue
-                   │
-                   ▼
-                 send  ←── ONLY EGRESS FOR CAREER PAYLOADS
-                   │
-                   ▼
-              followups ←── scheduler
+         ┌───────────────┼───────────────┐
+         ▼               ▼               ▼
+      events          config          (ids)
+         │               │
+         └───────┬───────┘
+                 ▼
+          logger + core (kernel)
+                 │
+                 ▼
+                sdk
+```
+
+Domain:
+
+```
+storage / identity / preferences / … → send (only egress)
+agent must not import send
 ```
 
 ---
 
 ## Package contracts
 
-### `core`
-- Shared IDs, stage enums (`discover | curate | tailor | queue | approve | send | follow_up`).
-- Error types safe for UI (no stack traces as user titles).
-- **Depends on:** nothing domain-specific.
+### `shared`
+- Result / AppError helpers, branded IDs, pipeline stage vocabulary.
+- **Depends on:** nothing.
 
 ### `events`
 - Typed event names and payloads (see [EVENT_SYSTEM.md](./EVENT_SYSTEM.md)).
-- In-process bus interface; persistence of events optional via `timeline`.
+- In-process bus + `createInMemoryEventBus`.
+- **Depends on:** `shared`.
 - **Must not:** transmit events off-device.
+
+### `logger`
+- Logger / LogSink contracts + console/memory implementations.
+- **Must not:** network or cloud crash reporting.
+
+### `config`
+- App settings document, defaults, memory store, quiet-hours helpers.
+- **Must not:** register AI providers (reserved `ai` fields only).
+
+### `core`
+- Kernel: re-exports shared/logger contracts, `ErrorReporter`, service registry.
+- **Depends on:** `shared`, `events`, `logger`, `config`.
+
+### `sdk`
+- Public barrel for plugins (`HostContext`, safe re-exports).
+- **Must not:** export or boot `@jobjitsu/ai`.
+
+### `testing`
+- `expectOk` / `createTestFoundation` helpers for the spine.
 
 ### `storage`
 - Local repositories for documents, files, embeddings indexes.

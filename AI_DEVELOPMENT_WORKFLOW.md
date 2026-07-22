@@ -31,7 +31,11 @@ Before writing any code:
 
 13. Ensure the implementation aligns with the JobJitsu brand, product philosophy, and engineering standards.
 
+14. Satisfy the full [Definition of Done](./DEFINITION_OF_DONE.md) before starting the next task:
+    documented · tested · typed · reviewed · follows architecture · passes lint · passes build.
+
 Never skip planning.
 Never bypass tests.
 Never violate architecture.
 Never introduce unnecessary complexity.
+Never call a task done without meeting the Definition of Done.

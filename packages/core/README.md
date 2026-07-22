@@ -1,16 +1,19 @@
 # `@jobjitsu/core`
 
-Shared foundations: entity IDs, pipeline stages, `Result` / `AppError`, and **logging interfaces**.
+Platform **kernel** — sits above shared / events / logger / config.
 
-## Status
+## Responsibility
 
-Interfaces and shared constants only — **no runtime implementations** (except exported constants like `PIPELINE_STAGES`).
+- Re-exports `@jobjitsu/shared` (`Result`, IDs, pipeline stages)
+- Re-exports logger contracts for existing imports
+- `createErrorReporter` — local only
+- `createServiceRegistry` + `FoundationKeys` — composition root helpers (**no AI**)
 
-## Exports
+## Depends on
 
-- `EntityId` and branded ID aliases
-- `PIPELINE_STAGES` / `PipelineStage`
-- `Result`, `AppError`, `AppErrorCode`
-- `Logger`, `LogSink`, `LogRecord`
+`shared` → `events` → `logger` → `config` (siblings wired here)
 
-See [docs/architecture/PACKAGE_BOUNDARIES.md](../../docs/architecture/PACKAGE_BOUNDARIES.md).
+```bash
+pnpm --filter @jobjitsu/core build
+pnpm --filter @jobjitsu/core test
+```

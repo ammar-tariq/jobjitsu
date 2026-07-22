@@ -1,5 +1,12 @@
 /** Package identity marker. */
 export const PACKAGE_NAME = "@jobjitsu/preferences" as const;
 
-export type * from "./settings.js";
-export { DEFAULT_APP_SETTINGS } from "./settings.js";
+/** Settings live in `@jobjitsu/config` — re-exported for domain consumers. */
+export type * from "@jobjitsu/config";
+export {
+  DEFAULT_APP_SETTINGS,
+  createMemorySettingsStore,
+  defaultSettingsPolicy,
+  isInQuietHours,
+  requiresApprovalBeforeSend,
+} from "@jobjitsu/config";
