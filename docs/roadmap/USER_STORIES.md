@@ -287,7 +287,7 @@
 
 **Testing notes:** Version graph unit test.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE03-S04 — Tailor resume draft (no send)
 

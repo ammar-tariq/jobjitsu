@@ -20,6 +20,8 @@ describe("IPC allowlist", () => {
       "identity.setProfile",
       "identity.listResumeVersions",
       "identity.importResume",
+      "identity.getSelectedResume",
+      "identity.selectResume",
     ]);
   });
 
@@ -27,7 +29,7 @@ describe("IPC allowlist", () => {
     expect(isIpcCommandName("ai.complete")).toBe(false);
     expect(isIpcCommandName("ai.embed")).toBe(false);
     expect(isIpcCommandName("ping")).toBe(true);
-    expect(isIpcCommandName("identity.importResume")).toBe(true);
+    expect(isIpcCommandName("identity.selectResume")).toBe(true);
   });
 });
 
@@ -87,10 +89,12 @@ describe("typed IPC bridge", () => {
     expect(Object.keys(bridge).sort()).toEqual([
       "getAiStatus",
       "getProfile",
+      "getSelectedResume",
       "getTheme",
       "importResume",
       "listResumeVersions",
       "ping",
+      "selectResume",
       "setProfile",
       "setTheme",
     ]);
@@ -146,6 +150,7 @@ describe("typed IPC bridge", () => {
     const listed = await bridge.listResumeVersions();
     expect(listed.ok && listed.value.versions).toHaveLength(1);
     expect(listed.ok && listed.value.versions[0]?.label).toBe("Baseline 2026");
+    expect(listed.ok && listed.value.selectedId).toBe(saved.ok ? saved.value.version.id : null);
   });
 
   it("returns a calm error when import payload is empty", async () => {
@@ -160,5 +165,35 @@ describe("typed IPC bridge", () => {
     if (!result.ok) {
       expect(result.error.message).toMatch(/empty/i);
     }
+  });
+
+  it("selects a resume version without exposing send on the bridge", async () => {
+    const resumeLibrary = createMemoryResumeLibrary();
+    const first = await resumeLibrary.import({
+      label: "Baseline",
+      fileName: "a.md",
+      bytes: new TextEncoder().encode("a"),
+    });
+    const second = await resumeLibrary.import({
+      label: "Alt",
+      fileName: "b.md",
+      bytes: new TextEncoder().encode("b"),
+      parentVersionId: first.id,
+    });
+
+    const bridge = createIpcBridge(createHostIpcDispatcher({ resumeLibrary }));
+    expect(bridge).not.toHaveProperty("send");
+    expect(bridge).not.toHaveProperty("approveSend");
+
+    const selected = await bridge.selectResume(second.id);
+    expect(selected.ok && selected.value.version.id).toBe(second.id);
+    expect(selected.ok && selected.value.version.parentVersionId).toBe(first.id);
+
+    const current = await bridge.getSelectedResume();
+    expect(current.ok && current.value.version?.id).toBe(second.id);
+
+    const listed = await bridge.listResumeVersions();
+    expect(listed.ok && listed.value.selectedId).toBe(second.id);
+    expect(listed.ok && listed.value.versions).toHaveLength(2);
   });
 });

@@ -167,5 +167,30 @@ describe("@jobjitsu/identity", () => {
     expect(listed).toHaveLength(1);
     expect(listed[0]?.id).toBe(version.id);
     expect(listed[0]?.label).toBe("Product baseline");
+    expect((await again.getSelected())?.id).toBe(version.id);
+  });
+
+  it("lists a parent/child version graph and selects without side effects", async () => {
+    const library = createMemoryResumeLibrary();
+    const parent = await library.import({
+      label: "Baseline",
+      fileName: "base.md",
+      bytes: new TextEncoder().encode("# Baseline"),
+    });
+    const child = await library.import({
+      label: "Tailored draft",
+      fileName: "tailored.md",
+      bytes: new TextEncoder().encode("# Tailored"),
+      parentVersionId: parent.id,
+    });
+
+    expect(child.parentVersionId).toBe(parent.id);
+    expect(await library.list()).toHaveLength(2);
+    expect((await library.getSelected())?.id).toBe(parent.id);
+
+    const selected = await library.select(child.id);
+    expect(selected.id).toBe(child.id);
+    expect((await library.getSelected())?.id).toBe(child.id);
+    expect((await library.get(child.id))?.parentVersionId).toBe(parent.id);
   });
 });

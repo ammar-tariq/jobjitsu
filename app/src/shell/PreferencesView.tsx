@@ -31,16 +31,19 @@ export function PreferencesView({
   const [saving, setSaving] = useState(false);
 
   const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resumeLabel, setResumeLabel] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [selectingId, setSelectingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refreshVersions = async (): Promise<void> => {
     const result = await bridge.listResumeVersions();
     if (result.ok) {
       setVersions(result.value.versions);
+      setSelectedId(result.value.selectedId);
     }
   };
 
@@ -59,6 +62,7 @@ export function PreferencesView({
     void bridge.listResumeVersions().then((result) => {
       if (!cancelled && result.ok) {
         setVersions(result.value.versions);
+        setSelectedId(result.value.selectedId);
       }
     });
     return () => {
@@ -121,6 +125,20 @@ export function PreferencesView({
         setImporting(false);
         setImportStatus("Something went wrong importing that file. Try again.");
       });
+  };
+
+  const onSelectResume = (resumeId: string): void => {
+    setSelectingId(resumeId);
+    setImportStatus(null);
+    void bridge.selectResume(resumeId).then((result) => {
+      setSelectingId(null);
+      if (!result.ok) {
+        setImportStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setSelectedId(result.value.version.id);
+      setImportStatus(`Selected “${result.value.version.label}” — nothing was sent.`);
+    });
   };
 
   return (
@@ -193,7 +211,8 @@ export function PreferencesView({
           Resume library
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Import a resume file into your local library. The original stays on this device.
+          Import and select a resume version. Selection stays on this device and does not send
+          anything.
         </Typography>
         <TextField
           label="Version label"
@@ -230,14 +249,34 @@ export function PreferencesView({
         ) : null}
         {versions.length > 0 ? (
           <List dense disablePadding data-testid="jj-resume-version-list">
-            {versions.map((version) => (
-              <ListItem key={version.id} disableGutters>
-                <ListItemText
-                  primary={version.label}
-                  secondary={`${version.fileName ?? "file"} · ${new Date(version.createdAt).toLocaleString()}`}
-                />
-              </ListItem>
-            ))}
+            {versions.map((version) => {
+              const isSelected = version.id === selectedId;
+              return (
+                <ListItem
+                  key={version.id}
+                  disableGutters
+                  secondaryAction={
+                    <Button
+                      size="small"
+                      variant={isSelected ? "outlined" : "contained"}
+                      disabled={isSelected || selectingId === version.id}
+                      onClick={() => onSelectResume(version.id)}
+                      aria-label={isSelected ? `Selected ${version.label}` : `Use ${version.label}`}
+                    >
+                      {isSelected ? "Selected" : "Use"}
+                    </Button>
+                  }
+                  sx={{ pr: 12 }}
+                >
+                  <ListItemText
+                    primary={version.label}
+                    secondary={`${version.fileName ?? "file"}${
+                      version.parentVersionId ? " · forked" : ""
+                    } · ${new Date(version.createdAt).toLocaleString()}`}
+                  />
+                </ListItem>
+              );
+            })}
           </List>
         ) : (
           <Typography color="text.secondary" variant="body2">

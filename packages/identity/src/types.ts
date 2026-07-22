@@ -62,6 +62,8 @@ export interface ResumeVersion {
   readonly fileName?: string;
   readonly contentType?: string;
   readonly byteLength?: number;
+  /** Optional parent in the version graph (tailor / fork). */
+  readonly parentVersionId?: string;
 }
 
 export type ResumeImportInput = {
@@ -71,13 +73,21 @@ export type ResumeImportInput = {
   readonly contentType?: string;
   /** Defaults to a local placeholder when profile is not yet set. */
   readonly profileId?: string;
+  readonly parentVersionId?: string;
 };
 
 /**
- * Resume Library — import originals on-device; no cloud upload.
+ * Resume Library — import originals on-device; select without sending.
  */
 export interface ResumeLibrary {
   import(input: ResumeImportInput): Promise<ResumeVersion>;
   list(): Promise<readonly ResumeVersion[]>;
   get(id: string): Promise<ResumeVersion | undefined>;
+  /** Currently selected version for applications — local only. */
+  getSelected(): Promise<ResumeVersion | undefined>;
+  /**
+   * Pick a library version as active.
+   * Must not call Send or enqueue outbound work.
+   */
+  select(resumeId: string): Promise<ResumeVersion>;
 }

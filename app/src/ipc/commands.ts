@@ -13,6 +13,8 @@ export const IPC_ALLOWLIST = [
   "identity.setProfile",
   "identity.listResumeVersions",
   "identity.importResume",
+  "identity.getSelectedResume",
+  "identity.selectResume",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -49,6 +51,7 @@ export type ResumeVersionSnapshot = {
   readonly fileName?: string;
   readonly contentType?: string;
   readonly byteLength?: number;
+  readonly parentVersionId?: string;
 };
 
 export type ResumeImportInputPayload = {
@@ -57,6 +60,7 @@ export type ResumeImportInputPayload = {
   /** Original file bytes as base64 — stays on-device via host identity APIs. */
   readonly contentBase64: string;
   readonly contentType?: string;
+  readonly parentVersionId?: string;
 };
 
 export type IpcPayloadMap = {
@@ -68,6 +72,8 @@ export type IpcPayloadMap = {
   readonly "identity.setProfile": ProfilePatchInput;
   readonly "identity.listResumeVersions": undefined;
   readonly "identity.importResume": ResumeImportInputPayload;
+  readonly "identity.getSelectedResume": undefined;
+  readonly "identity.selectResume": { readonly resumeId: string };
 };
 
 export type IpcResultMap = {
@@ -77,8 +83,13 @@ export type IpcResultMap = {
   readonly "ai.getStatus": AiStatusSnapshot;
   readonly "identity.getProfile": { readonly profile: ProfileSnapshot | null };
   readonly "identity.setProfile": { readonly profile: ProfileSnapshot };
-  readonly "identity.listResumeVersions": { readonly versions: readonly ResumeVersionSnapshot[] };
+  readonly "identity.listResumeVersions": {
+    readonly versions: readonly ResumeVersionSnapshot[];
+    readonly selectedId: string | null;
+  };
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
+  readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
+  readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {
