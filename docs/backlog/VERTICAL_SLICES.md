@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | PE04 Preferences & Privacy Chrome |
 | **Story** | PE04-S05 — Show and change on-device data folder (this slice) |
-| **Status** | In progress → PR gate |
+| **Status** | PR gate — [#71](https://github.com/ammar-tariq/jobjitsu/pull/71) |
 | **Note** | Native folder picker (`storage.pickDataRoot`) + typed path fallback |
 
 ## Completed slices
