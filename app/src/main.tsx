@@ -6,6 +6,8 @@ import "./shell/shell.css";
 import { App } from "./App.js";
 import { createHostRuntime } from "./host/runtime.js";
 
+document.documentElement.setAttribute("data-theme", "dark");
+
 const rootEl = document.getElementById("root");
 if (!rootEl) {
   throw new Error("JobJitsu shell requires #root");
