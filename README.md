@@ -151,16 +151,17 @@ Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 
 ### Backlog & process
 
-| Doc                                                     | Description                 |
-| ------------------------------------------------------- | --------------------------- |
-| [Implementation roadmap](IMPLEMENTATION_ROADMAP.md)     | Index to backlog / horizons |
-| [Backlog index](docs/backlog/README.md)                 | Epics → tasks               |
-| [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md)    | Build waves & critical path |
-| [Engineering constitution](ENGINEERING_CONSTITUTION.md) | How we build (process)      |
-| [Definition of Done](DEFINITION_OF_DONE.md)             | Completion gates            |
-| [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md)   | Plan → implement → commit   |
-| [Docs prompts pipeline](docs/prompts/README.md)         | Phased docs checkpoints     |
-| [Roadmap user stories](docs/roadmap/USER_STORIES.md)    | Platform → PE* epics        |
+| Doc                                                                    | Description                                     |
+| ---------------------------------------------------------------------- | ----------------------------------------------- |
+| [Implementation roadmap](IMPLEMENTATION_ROADMAP.md)                    | Index to backlog / horizons                     |
+| [Backlog index](docs/backlog/README.md)                                | Epics → tasks                                   |
+| [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md)                   | Build waves & critical path                     |
+| [Engineering constitution](ENGINEERING_CONSTITUTION.md)                | How we build (process)                          |
+| [Definition of Done](DEFINITION_OF_DONE.md)                            | Completion gates                                |
+| [AI development workflow](docs/development/AI_DEVELOPMENT_WORKFLOW.md) | Plan → implement → commit (+ article detection) |
+| [Article system](docs/articles/ARTICLE_SYSTEM.md)                      | Milestone → proposal → publish                  |
+| [Docs prompts pipeline](docs/prompts/README.md)                        | Phased docs checkpoints                         |
+| [Roadmap user stories](docs/roadmap/USER_STORIES.md)                   | Platform → PE* epics                            |
 
 ---
 

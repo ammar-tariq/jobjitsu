@@ -29,4 +29,4 @@ the agent must open that file and follow it exactly.
 | [08_generate_project_board.md](./08_generate_project_board.md) | GitHub Projects shape |
 | [09_generate_implementation_order.md](./09_generate_implementation_order.md) | Build waves / [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) |
 
-**Hard rule:** Do not write product feature code until phases **01–09** are complete (or the user explicitly waives remaining phases for a narrow, already-documented slice). Day-to-day coding after the pipeline uses [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md).
+**Hard rule:** Do not write product feature code until phases **01–09** are complete (or the user explicitly waives remaining phases for a narrow, already-documented slice). Day-to-day coding after the pipeline uses [AI_DEVELOPMENT_WORKFLOW.md](../development/AI_DEVELOPMENT_WORKFLOW.md).

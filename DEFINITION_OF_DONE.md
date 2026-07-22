@@ -3,7 +3,7 @@
 A task, story, or pull request is **not complete** until every gate below passes.
 
 > Plan → implement one slice → satisfy this DoD → then move on.  
-> See [AI_DEVELOPMENT_WORKFLOW.md](./AI_DEVELOPMENT_WORKFLOW.md) · [VERTICAL_SLICES.md](./docs/backlog/VERTICAL_SLICES.md)
+> See [AI_DEVELOPMENT_WORKFLOW.md](./docs/development/AI_DEVELOPMENT_WORKFLOW.md) · [VERTICAL_SLICES.md](./docs/backlog/VERTICAL_SLICES.md)
 
 ---
 
@@ -124,7 +124,7 @@ When a gate is genuinely N/A, say so explicitly in the PR (do not silently skip)
 
 ## References
 
-- [AI_DEVELOPMENT_WORKFLOW.md](./AI_DEVELOPMENT_WORKFLOW.md)
+- [AI_DEVELOPMENT_WORKFLOW.md](./docs/development/AI_DEVELOPMENT_WORKFLOW.md)
 - [docs/backlog/VERTICAL_SLICES.md](./docs/backlog/VERTICAL_SLICES.md)
 - [docs/architecture/OVERVIEW.md](./docs/architecture/OVERVIEW.md)
 - [docs/brand/BRANDING_FOR_DEVELOPMENT.md](./docs/brand/BRANDING_FOR_DEVELOPMENT.md)

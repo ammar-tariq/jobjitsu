@@ -404,7 +404,7 @@ Examples:
 
 Create:
 
-docs/articles/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md
+docs/articles/research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md
 
 The output should contain:
 

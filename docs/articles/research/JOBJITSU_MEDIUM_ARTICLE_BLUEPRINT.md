@@ -246,7 +246,7 @@ Release (when ready)
 | Open contribution | Inspectable; docs as valuable as code; calm PR culture |
 | Testing | Privacy boundary, approval gates, Agent pause, honest send outcomes, local AI path (`TESTING_STRATEGY.md`) |
 | Vertical slices | One story; AC → tests → docs → stop |
-| AI-assisted development | Plan → implement one task → commit; no multi-feature thrash (`AI_DEVELOPMENT_WORKFLOW.md`, constitution) |
+| AI-assisted development | Plan → implement one task → commit; no multi-feature thrash (`docs/development/AI_DEVELOPMENT_WORKFLOW.md`, constitution) |
 | Definition of Done | Documented, tested, typed, reviewed, architecture, lint, build (`pnpm check`) |
 | Conventional Commits | Commitlint + Husky |
 | Docs site | Docusaurus `@jobjitsu/website` reads `/docs` in place; GitHub Actions deploy to Pages; fail on broken links |

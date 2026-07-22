@@ -8,7 +8,7 @@ Version: 1.0
 >
 > If implementation process conflicts with this document, the process should be corrected.
 
-See also: [Definition of Done](DEFINITION_OF_DONE.md) · [AI development workflow](AI_DEVELOPMENT_WORKFLOW.md) · [Architecture principles](ARCHITECTURE_PRINCIPLES.md) · [Terminology](docs/product/TERMINOLOGY.md) · [Backlog](docs/backlog/README.md)
+See also: [Definition of Done](DEFINITION_OF_DONE.md) · [AI development workflow](docs/development/AI_DEVELOPMENT_WORKFLOW.md) · [Architecture principles](ARCHITECTURE_PRINCIPLES.md) · [Terminology](docs/product/TERMINOLOGY.md) · [Backlog](docs/backlog/README.md) · [Article system](docs/articles/ARTICLE_SYSTEM.md)
 
 ---
 
