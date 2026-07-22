@@ -25,6 +25,12 @@ import {
 import { createLogger, createMemoryLogSink, type Logger } from "@jobjitsu/logger";
 import { createFakeGmailChannel, type FakeGmailChannel } from "@jobjitsu/send";
 import type { ApplicationId } from "@jobjitsu/shared";
+import {
+  createHostIpcDispatcher,
+  createIpcBridge,
+  type IpcBridge,
+  type IpcDispatcher,
+} from "../ipc/index.js";
 
 export type HostActivityEntry = {
   readonly name: EventName;
@@ -36,6 +42,10 @@ export type HostRuntime = {
   readonly bus: EventBus;
   readonly services: ServiceRegistry;
   readonly logger: Logger;
+  /** Deny-by-default IPC dispatcher (ADR 0013). */
+  readonly ipc: IpcDispatcher;
+  /** Typed UI bridge — allowlisted methods only. */
+  readonly bridge: IpcBridge;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -150,10 +160,15 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     }
   });
 
+  const ipc = createHostIpcDispatcher();
+  const bridge = createIpcBridge(ipc);
+
   return {
     bus,
     services,
     logger,
+    ipc,
+    bridge,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",

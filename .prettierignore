@@ -1,6 +1,7 @@
 node_modules
 .turbo
 dist
+dist-ui
 build
 .docusaurus
 coverage
@@ -10,6 +11,7 @@ docs
 assets
 .git
 .changeset/**
+app/src-tauri/gen
 *.md
 !README.md
 !MONOREPO.md
