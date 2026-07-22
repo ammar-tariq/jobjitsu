@@ -87,14 +87,15 @@ Monorepo & tooling: [MONOREPO.md](./MONOREPO.md)
 
 ### Architecture
 
-| Doc                                                    | Description                          |
-| ------------------------------------------------------ | ------------------------------------ |
-| [System architecture](SYSTEM_ARCHITECTURE.md)          | Index to architecture docs           |
-| [Architecture overview](docs/architecture/OVERVIEW.md) | Local-first Career OS design         |
-| [Architecture principles](ARCHITECTURE_PRINCIPLES.md)  | Non-negotiable architectural rules   |
-| [Monorepo](docs/architecture/MONOREPO.md)              | Repository & package map             |
-| [ADRs](docs/adr/README.md)                             | Accepted decisions (Tauri, React, …) |
-| [Full index](docs/architecture/README.md)              | Events, plugins, desktop, AI, tests  |
+| Doc                                                                    | Description                          |
+| ---------------------------------------------------------------------- | ------------------------------------ |
+| [System architecture](SYSTEM_ARCHITECTURE.md)                          | Index → system map                   |
+| [System architecture (full)](docs/architecture/SYSTEM_ARCHITECTURE.md) | C4 map, layers, runtime paths        |
+| [Architecture overview](docs/architecture/OVERVIEW.md)                 | Local-first Career OS design         |
+| [Architecture principles](ARCHITECTURE_PRINCIPLES.md)                  | Non-negotiable architectural rules   |
+| [Monorepo](docs/architecture/MONOREPO.md)                              | Repository & package map             |
+| [ADRs](docs/adr/README.md)                                             | Accepted decisions (Tauri, React, …) |
+| [Full index](docs/architecture/README.md)                              | Events, plugins, desktop, AI, tests  |
 
 ### Backlog & process
 
