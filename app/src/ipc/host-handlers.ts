@@ -3,6 +3,7 @@ import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
+import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
 import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
@@ -13,6 +14,7 @@ export type CreateHostIpcOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
+  readonly folderPicker?: FolderPicker;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
 };
@@ -30,6 +32,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const profiles = options.profiles;
   const resumeLibrary = options.resumeLibrary;
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
   const bus = options.bus;
 
   return {
@@ -171,6 +174,34 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
       }
       return ok({ dataRoot: next });
+    },
+    "storage.pickDataRoot": async () => {
+      try {
+        const current = await dataRoot.get();
+        const picked = await folderPicker.pickDirectory({
+          title: "Choose JobJitsu data folder",
+          defaultPath: current.path,
+        });
+        if (picked === null) {
+          return ok({ dataRoot: null, cancelled: true });
+        }
+        const next = await dataRoot.set(picked);
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+        }
+        return ok({ dataRoot: next, cancelled: false });
+      } catch (cause) {
+        return err(
+          createAppError("unavailable", "Could not open folder picker", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Choose a folder in the desktop app, or enter a path on this device.",
+            detail: "storage:pickDataRoot",
+            cause,
+          }),
+        );
+      }
     },
   };
 }

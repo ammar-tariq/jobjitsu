@@ -15,13 +15,13 @@ Never build multiple features in parallel in the same change set.
 | **Epic** | PE04 Preferences & Privacy Chrome |
 | **Story** | PE04-S05 — Show and change on-device data folder (this slice) |
 | **Status** | In progress → PR gate |
-| **Note** | Inspectable data vault path; change/reset via host IPC |
+| **Note** | Native folder picker (`storage.pickDataRoot`) + typed path fallback |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
-| PE04-S05 | 2026-07-23 | Data folder in Preferences; Preferences.Changed dataRoot |
+| PE04-S05 | 2026-07-23 | Data folder + native picker; Preferences.Changed dataRoot |
 | PE03-S03 | 2026-07-23 | Version list/select; parentVersionId; select ≠ send |
 | PE03-S02 | 2026-07-23 | Resume library import + Preferences UI; Resume.Imported |
 | PE03-S01 | 2026-07-23 | Local profile CRUD; Preferences form via IPC |

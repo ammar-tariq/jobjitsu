@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
+import { createStubFolderPicker } from "../host/folder-picker.js";
 import { createHostRuntime } from "../host/runtime.js";
 import { App } from "../App.js";
 
@@ -178,10 +179,10 @@ describe("DesktopShell", () => {
       "/Users/sam/Library/Application Support/JobJitsu",
     );
 
-    const pathField = screen.getByRole("textbox", { name: /folder path/i });
+    const pathField = screen.getByRole("textbox", { name: "Current folder" });
     await user.clear(pathField);
     await user.type(pathField, "/Volumes/Vault/JobJitsu");
-    await user.click(screen.getByRole("button", { name: "Save location" }));
+    await user.click(screen.getByRole("button", { name: "Save path" }));
 
     expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
@@ -190,5 +191,24 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Use default" }));
     expect(await screen.findByText(/Restored the default data folder/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).isCustom).toBe(false);
+  });
+
+  it("lets the user choose a data folder with the system picker", async () => {
+    const user = userEvent.setup();
+    const dataRoot = createMemoryDataRootStore({
+      defaultPath: "/Users/sam/Library/Application Support/JobJitsu",
+    });
+    const folderPicker = createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu");
+    const runtime = createHostRuntime({ dataRoot, folderPicker });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    await user.click(screen.getByRole("button", { name: "Choose folder" }));
+
+    expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
+    expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
+    expect((await runtime.dataRoot.get()).isCustom).toBe(true);
+    expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
   });
 });

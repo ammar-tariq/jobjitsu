@@ -37,6 +37,7 @@ import {
 } from "../ipc/index.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 import { createMemoryDataRootStore, type DataRootStore } from "./data-root-store.js";
+import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
 export type HostActivityEntry = {
   readonly name: EventName;
@@ -74,6 +75,7 @@ export type CreateHostRuntimeOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly dataRoot?: DataRootStore;
+  readonly folderPicker?: FolderPicker;
 };
 
 /**
@@ -94,6 +96,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -188,6 +191,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     profiles,
     resumeLibrary,
     dataRoot: dataRootStore,
+    folderPicker,
     bus,
   });
   const bridge = createIpcBridge(ipc);

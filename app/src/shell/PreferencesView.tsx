@@ -172,6 +172,25 @@ export function PreferencesView({
     });
   };
 
+  const onPickDataRoot = (): void => {
+    setSavingDataRoot(true);
+    setDataStatus(null);
+    void bridge.pickDataRoot().then((result) => {
+      setSavingDataRoot(false);
+      if (!result.ok) {
+        setDataStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      if (result.value.cancelled || !result.value.dataRoot) {
+        setDataStatus("No folder selected.");
+        return;
+      }
+      setDataRoot(result.value.dataRoot);
+      setDataPathDraft(result.value.dataRoot.path);
+      setDataStatus("Data folder updated — still on this device.");
+    });
+  };
+
   const onResetDataRoot = (): void => {
     setSavingDataRoot(true);
     setDataStatus(null);
@@ -336,8 +355,8 @@ export function PreferencesView({
           Data folder
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Profile, resumes, and library files are stored here. Change it for an encrypted volume or
-          backup location you control.
+          Profile, resumes, and library files are stored here. Choose a folder on this device — for
+          example an encrypted volume or backup location you control.
         </Typography>
         {dataRoot ? (
           <Typography color="text.secondary" variant="body2" data-testid="jj-data-folder-default">
@@ -345,21 +364,30 @@ export function PreferencesView({
           </Typography>
         ) : null}
         <TextField
-          label="Folder path"
+          label="Current folder"
           value={dataPathDraft}
           onChange={(event) => setDataPathDraft(event.target.value)}
           size="small"
           fullWidth
           spellCheck={false}
           autoComplete="off"
+          helperText="Use Choose folder for a native picker, or type a path if you prefer."
         />
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Button
             variant="contained"
+            onClick={onPickDataRoot}
+            disabled={savingDataRoot}
+            data-testid="jj-choose-data-folder"
+          >
+            Choose folder
+          </Button>
+          <Button
+            variant="outlined"
             onClick={onSaveDataRoot}
             disabled={savingDataRoot || dataPathDraft.trim().length === 0}
           >
-            Save location
+            Save path
           </Button>
           <Button
             variant="outlined"

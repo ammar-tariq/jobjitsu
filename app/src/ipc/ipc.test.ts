@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
+import { createStubFolderPicker } from "../host/folder-picker.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -26,6 +27,7 @@ describe("IPC allowlist", () => {
       "storage.getDataRoot",
       "storage.setDataRoot",
       "storage.resetDataRoot",
+      "storage.pickDataRoot",
     ]);
   });
 
@@ -98,6 +100,7 @@ describe("typed IPC bridge", () => {
       "getTheme",
       "importResume",
       "listResumeVersions",
+      "pickDataRoot",
       "ping",
       "resetDataRoot",
       "selectResume",
@@ -228,5 +231,35 @@ describe("typed IPC bridge", () => {
     const reset = await bridge.resetDataRoot();
     expect(reset.ok && reset.value.dataRoot.isCustom).toBe(false);
     expect(changed).toEqual([["dataRoot"], ["dataRoot"]]);
+  });
+
+  it("picks a data folder through the host folder picker", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const dataRoot = createMemoryDataRootStore({
+      defaultPath: "/Users/sam/Library/Application Support/JobJitsu",
+    });
+    const folderPicker = createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu");
+    const bridge = createIpcBridge(createHostIpcDispatcher({ dataRoot, folderPicker, bus }));
+
+    const picked = await bridge.pickDataRoot();
+    expect(picked.ok && picked.value.cancelled).toBe(false);
+    expect(picked.ok && picked.value.dataRoot?.path).toBe("/Volumes/Vault/JobJitsu");
+    expect(changed).toEqual([["dataRoot"]]);
+
+    const cancelBridge = createIpcBridge(
+      createHostIpcDispatcher({
+        dataRoot,
+        folderPicker: createStubFolderPicker(async () => null),
+        bus,
+      }),
+    );
+    const cancelledPick = await cancelBridge.pickDataRoot();
+    expect(cancelledPick.ok && cancelledPick.value.cancelled).toBe(true);
+    expect(cancelledPick.ok && cancelledPick.value.dataRoot).toBeNull();
   });
 });
