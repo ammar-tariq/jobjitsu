@@ -12,19 +12,18 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE02 Storage & Event Spine |
-| **Story** | Next: PE02-S02 — Typed local event bus (or PE04 prefs) |
-| **Status** | PE02-S01 complete (this slice) |
-| **Note** | Local FS KV + blobs under user-data; no cloud |
+| **Epic** | PE01 Desktop UI → PE02 Storage |
+| **Story** | Next: PE02-S01 — Persist documents on-device (or PE04-S03 Agent chrome) |
+| **Status** | PE01-S04 complete (this slice) |
+| **Note** | Dark default + light tokens; appearance store stub; AA primary-text smoke |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
-| PE02-S01 | 2026-07-23 | FS storage provider; temp-dir KV/blob restart tests |
-| PE01-S04 | 2026-07-23 | Dark default + light toggle (land via #61 if needed) |
-| PE01-S03 | 2026-07-23 | IPC allowlist, fail-closed dispatcher, typed bridge |
-| PE01-S02 | 2026-07-23 | Primary H1 nav: Applications → Timeline |
+| PE01-S04 | 2026-07-23 | Midnight Ink default; light map; Preferences toggle; contrast smoke |
+| PE01-S03 | 2026-07-23 | IPC allowlist, fail-closed dispatcher, typed bridge, contract tests |
+| PE01-S02 | 2026-07-23 | Primary H1 nav: Applications → Timeline; one view at a time |
 | PE01-S01 / DF-01 | 2026-07-23 | Tauri host `app/src-tauri`; `pnpm dev:desktop` |
 | E02-F02-S01 | 2026-07-22 | Event catalog + typed payloads |
 | E02-F03-S01 | 2026-07-22 | `createInMemoryEventBus` |

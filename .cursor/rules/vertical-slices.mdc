@@ -14,7 +14,9 @@ From here, **always** work in thin vertical slices. Never build multiple feature
 3. **Implement one feature** that completes that story’s acceptance criteria.
 4. **Add tests** that lock the AC.
 5. **Update docs** (package README / backlog checklist / architecture note if contracts changed).
-6. **Stop** — move to the next story only after the slice is done.
+6. **Commit** the slice (Conventional Commits).
+7. **Open (or confirm) a relevant PR** for that branch/commit before anything else.
+8. **Stop** — do **not** start the next story until that PR exists.
 
 ## Constraints
 
@@ -23,3 +25,4 @@ From here, **always** work in thin vertical slices. Never build multiple feature
 - No speculative packages, UI, or “while we’re here” features.
 - Keep agent ≠ send and privacy laws intact.
 - If a story is too large for one day, split tasks — still ship one story’s vertical path, not horizontal layers across stories.
+- **PR gate:** “move ahead” / next ticket is blocked until the completed slice has an open PR. If the user asks to continue and no PR exists, create it first (push + `gh pr create`), then proceed only if they still want the next slice.

@@ -112,6 +112,40 @@
   --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
+[data-theme="light"] {
+  --jj-color-bg-canvas: var(--jj-color-cloud-50);
+  --jj-color-bg-surface: var(--jj-color-white);
+  --jj-color-bg-elevated: var(--jj-color-white);
+  --jj-color-bg-muted: var(--jj-color-slate-100);
+  --jj-color-bg-inverse: var(--jj-color-indigo-900);
+
+  --jj-color-text-primary: var(--jj-color-slate-800);
+  --jj-color-text-secondary: var(--jj-color-slate-500);
+  --jj-color-text-tertiary: #94a3b8;
+  --jj-color-text-inverse: var(--jj-color-white);
+  --jj-color-text-link: var(--jj-color-teal-600);
+  --jj-color-text-on-accent: var(--jj-color-indigo-950);
+
+  --jj-color-border-subtle: color-mix(in srgb, #0f172a 6%, transparent);
+  --jj-color-border-default: var(--jj-color-slate-200);
+  --jj-color-border-strong: var(--jj-color-slate-300);
+  --jj-color-focus-ring: var(--jj-color-teal-500);
+
+  --jj-color-accent: var(--jj-color-teal-500);
+  --jj-color-accent-hover: var(--jj-color-teal-400);
+  --jj-color-accent-pressed: var(--jj-color-teal-600);
+  --jj-color-accent-muted: color-mix(in srgb, #14b8a6 12%, white);
+  --jj-color-success: #059669;
+  --jj-color-caution: #d97706;
+  --jj-color-danger: #e11d48;
+
+  --jj-color-privacy-pill-bg: color-mix(in srgb, #14b8a6 10%, white);
+  --jj-color-privacy-pill-fg: var(--jj-color-indigo-900);
+  --jj-color-privacy-pill-border: color-mix(in srgb, #14b8a6 40%, transparent);
+
+  --jj-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
 *,
 *::before,
 *::after {

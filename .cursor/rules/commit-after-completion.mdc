@@ -10,7 +10,16 @@ When a user prompt’s requested work is **finished** (code/docs land and DoD ga
 1. Create a git commit using [commit-messages.mdc](./commit-messages.mdc) (Conventional Commits + Commitlint).
 2. Follow the repo git safety protocol (status/diff/log → stage → HEREDOC message → verify).
 3. Prefer **one commit per prompt** focused on that prompt’s outcome; split only if unrelated concerns are clearly separable.
-4. Do **not** push unless the user explicitly asks.
+4. Do **not** push unless the user explicitly asks **or** a PR is required to clear the [PR gate](./vertical-slices.mdc) (see below).
 5. Skip commit only if there are truly no changes, or the user said not to commit.
+
+## PR gate (do not skip)
+
+After the commit for a story/slice lands:
+
+1. **Stop** — do not start the next story, ticket, or “move ahead” work yet.
+2. Ensure a **relevant open PR** exists for that commit’s branch (covers the slice; links the issue when applicable).
+3. If no such PR exists: push the branch (if needed) and open the PR, **or** ask the user to open one — then wait.
+4. Only after the PR URL exists may you pick up the next slice (when the user asks to continue).
 
 Never use `--no-verify`. Never amend unless the amend rules in the user git protocol are fully satisfied.
