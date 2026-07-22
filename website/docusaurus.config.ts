@@ -12,7 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  */
 const config: Config = {
   title: "JobJitsu",
-  tagline: "The gentle art of landing the job. On-device. On-target. On your terms.",
+  tagline: "The gentle art of landing the job.",
   favicon: "img/favicon.svg",
 
   url: "https://jobjitsu.dev",
@@ -75,12 +75,17 @@ const config: Config = {
         srcDark: "img/logo.svg",
       },
       items: [
+        { to: "/features", label: "Features", position: "left" },
+        { to: "/quick-start", label: "Quick Start", position: "left" },
+        { to: "/architecture", label: "Architecture", position: "left" },
+        { to: "/roadmap", label: "Roadmap", position: "left" },
         {
           type: "docSidebar",
           sidebarId: "docs",
           position: "left",
           label: "Docs",
         },
+        { to: "/contributing", label: "Contributing", position: "right" },
         {
           href: "https://github.com/ammar-tariq/jobjitsu",
           label: "GitHub",
@@ -92,9 +97,18 @@ const config: Config = {
       style: "dark",
       links: [
         {
+          title: "Learn",
+          items: [
+            { label: "Features", to: "/features" },
+            { label: "Installation", to: "/installation" },
+            { label: "Quick Start", to: "/quick-start" },
+            { label: "FAQ", to: "/faq" },
+          ],
+        },
+        {
           title: "Documentation",
           items: [
-            { label: "Product", to: "/docs/product/PRODUCT_VISION" },
+            { label: "Product vision", to: "/docs/product/PRODUCT_VISION" },
             { label: "Architecture", to: "/docs/architecture/OVERVIEW" },
             { label: "Backlog", to: "/docs/backlog/" },
           ],
@@ -102,6 +116,8 @@ const config: Config = {
         {
           title: "Project",
           items: [
+            { label: "Roadmap", to: "/roadmap" },
+            { label: "Contributing", to: "/contributing" },
             {
               label: "GitHub",
               href: "https://github.com/ammar-tariq/jobjitsu",
@@ -109,7 +125,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `JobJitsu — on-device, on-target, on your terms.`,
+      copyright: `JobJitsu — the gentle art of landing the job.`,
     },
     prism: {
       theme: prismThemes.github,
