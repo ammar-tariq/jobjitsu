@@ -16,18 +16,20 @@ When product and convenience conflict, **privacy and user sovereignty win**.
 
 ## Non-negotiables
 
-1. **Privacy is architecture** — résumé, preferences, agent state, and LLM context stay on-device by default. No silent cloud sync, telemetry of career content, or “upload to improve the model.”
-2. **Agent serves; user owns send** — prep/queue may automate; apply, follow-up send, and other outbound actions require explicit user control (approval gates by default).
+1. **Privacy is architecture** — résumé, preferences, agent state, and on-device intelligence context stay local by default. No silent cloud sync, telemetry of career content, or “upload to improve the model.”
+2. **Agent serves; user owns send** — prep/queue may automate; apply, follow-up send, and other outbound actions require **human approval** by default.
 3. **Leverage over volume** — do not optimize for spray-and-pray counts, streaks, or guilt loops.
 4. **Calm confidence** — no FOMO copy, inactivity shaming, urgency theater, or confetti for routine saves.
-5. **Honest AI** — never claim guaranteed interviews/offers; describe help as draft, tailor, queue, remind.
+5. **Honest help** — never claim guaranteed interviews/offers; describe help as draft, tailor, queue, remind.
 6. **Open trust** — prefer inspectable local behavior over opaque remote magic.
+7. **Brand in the UI** — say **Agent** (not LLM) in user-facing chrome; reinforce on-device privacy; keep surfaces clean. See `branding-development` rule.
 
 ## Before shipping
 
 - [ ] Data on-device by default?
-- [ ] User retains outbound control?
+- [ ] User retains outbound control (human approval)?
 - [ ] Reduces anxiety rather than manufacturing it?
+- [ ] UI avoids raw AI jargon unless useful?
 - [ ] Violates `docs/product/NON_GOALS.md`? If yes → stop.
 
 ## Engineering tone

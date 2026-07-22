@@ -94,7 +94,10 @@ A continuous martial-arts belt flows into a stylised **"J"**. Its tail folds int
 - Optional future mascot: an origami fox with a small indigo belt.
 
 ### Privacy Badge
-A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures users everything stays on-device.
+A small **Agent · On-device** pill (indigo/teal) in the status bar assures users the agent runs locally. Do **not** label this “Local LLM” in the UI.
+
+### Privacy Indicators
+A belt mark or **Agent · On-device** badge in the status bar at all times.
 
 ---
 
@@ -103,7 +106,7 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 1. **Native Feel, Local Power** — The interface should feel light and fast, like a native desktop tool. Use system chrome, crisp animations.
 2. **Dark Mode First** — Default theme is Midnight Ink with teal highlights. Light mode is a deliberate switch.
 3. **Invisible Agent** — Surface progress (queued applications, follow-up calendar) calmly. Not a spaceship cockpit.
-4. **Privacy Indicators** — A small belt icon or "Local LLM" badge in the status bar at all times.
+4. **Privacy Indicators** — A small belt icon or **Agent · On-device** badge in the status bar at all times.
 5. **Zero-Friction Onboarding** — First-run uses the Leverage Belt icon as a progress indicator: "1. Connect resume → 2. Set preferences → 3. Agent activates."
 
 ---
@@ -127,7 +130,7 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 - **Idle agent:** *“Your belt is tied. Waiting for your signal.”*
 - **Application sent:** *“One more throw. That’s 3 this week.”*
 - **Follow-up due:** *“Time to gently nudge — a polite reminder is ready.”*
-- **Local LLM loading:** *“Warming up on-device. No data leaves this dojo.”*
+- **Agent warming up:** *“Warming up on-device. No data leaves this dojo.”*
 
 ---
 
@@ -137,7 +140,7 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 |-------|---------------|
 | Calm & confident | “We’ve got this.” not “Hurry up!” |
 | Respectful | Never aggressive about automation; it’s your agent, your rules. |
-| Precise | Uses correct terms (LLM, agent) but explains when helpful. |
+| Precise | Uses correct terms when useful; prefers Agent over LLM in the UI |
 | Inspiring | Positions job hunting as a craft you can master, not a chore. |
 
 ---
@@ -170,6 +173,7 @@ A small "Local LLM" badge (indigo/teal pill shape) in the status bar assures use
 | [VOICE_AND_TONE.md](./VOICE_AND_TONE.md) | Voice pillars, tone by context |
 | [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md) | Mechanics, vocabulary, claims |
 | [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) | UI/component naming, motion, a11y, icons, illustration |
+| [BRANDING_FOR_DEVELOPMENT.md](./BRANDING_FOR_DEVELOPMENT.md) | Brand rules that drive engineering/UI |
 | [../design-system/README.md](../design-system/README.md) | Production tokens, themes, variants |
 | [COPY_GUIDELINES.md](./COPY_GUIDELINES.md) | Copy architecture + surface index |
 | [EMPTY_STATES.md](./EMPTY_STATES.md) | Empty-state patterns |

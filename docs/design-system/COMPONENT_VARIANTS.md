@@ -61,19 +61,20 @@ Size `md` default (height 32). Radius `sm`. Label: `label.field` above, gap `spa
 | `sm` | tiny |
 | `md` | small |
 
-Privacy: use `JjLocalLlmPill` (not generic badge) for Local LLM status.
+Privacy: use `JjAgentPrivacyPill` (not generic badge) for on-device agent status.
 
 ---
 
-## Local LLM pill — `JjLocalLlmPill`
+## Agent privacy pill — `JjAgentPrivacyPill`
 
 - Radius: pill  
 - Colors: privacy-pill-* tokens  
-- Text: “Local LLM” / “Ready” / “Unavailable” (honest)  
+- Text: **“Agent · On-device”** / “Agent ready” / “Agent unavailable” (honest)  
 - Optional status pulse when ready  
-- Always meaningful to AT (`aria-label`)
+- Always meaningful to AT (`aria-label`)  
+- Do **not** default label to “LLM”
 
-Remote user-configured model: different label — never spoof “Local”.
+Remote user-configured runtime: different honest label — never spoof on-device.
 
 ---
 

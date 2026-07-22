@@ -18,29 +18,33 @@ Write code the way JobJitsu speaks: precise, calm, inspectable. Prefer boring ex
 
 Use canonical product nouns from `docs/brand/DESIGN_SYSTEM.md`:
 
-| Use | Avoid |
-|-----|--------|
-| Agent, Local LLM, Application, Queue, Follow-up, Preferences | Bot, Autopilot, Opp, Pipeline spam |
+| Use in UI | Avoid in UI |
+|-----------|-------------|
+| Agent, Application, Queue, Follow-up, Preferences, On-device | LLM, Bot, Autopilot, Opp, “AI magic” |
 
-Components: `Jj{Domain}{Element}` (e.g. `JjApplicationQueueRow`, `JjLocalLlmPill`).
+Internal/code may use `AiProvider`, `locality`, etc. User-visible strings follow the **branding-development** rule (Agent, not LLM).
+
+Components: `Jj{Domain}{Element}` (e.g. `JjApplicationQueueRow`, `JjAgentPrivacyPill`).
 
 ## Privacy in code
 
 - No accidental logging of résumé bodies, tokens, or full application letters to remote sinks.
 - Feature flags must not enable cloud résumé storage by default.
-- Network calls that transmit career data need an obvious call site and user-triggered path.
+- Network calls that transmit career data need an obvious call site and **human-approved** path.
 
 ## UI & copy in code
 
-- Sentence case; calm voice (`docs/brand/VOICE_AND_TONE.md`, `COPY_GUIDELINES.md`).
+- Sentence case; calm, encouraging voice (`docs/brand/VOICE_AND_TONE.md`, `COPY_GUIDELINES.md`).
+- Never pressure (no FOMO, guilt, streaks).
 - Errors: plain recovery language — no metaphor, no blame (`ERROR_MESSAGES.md`).
 - Success: quiet confirmation — no streak/guilt metrics (`SUCCESS_MESSAGES.md`).
+- One job per view; uncluttered layout.
 - Honor `prefers-reduced-motion`; no confetti or urgency animations.
 
 ## Defaults that match philosophy
 
 - Approval-before-send on by default for high-stakes outbound.
-- Local model path as the primary intelligence path.
+- On-device intelligence path as primary.
 - Sound off for notifications by default.
 
 ## Dependencies

@@ -106,9 +106,9 @@ Themes assign these. Prefer these in `Jj*` components.
 
 | Token | Purpose |
 |-------|---------|
-| `--jj-color-privacy-pill-bg` | Local LLM pill background |
-| `--jj-color-privacy-pill-fg` | Local LLM pill text |
-| `--jj-color-privacy-pill-border` | Local LLM pill border |
+| `--jj-color-privacy-pill-bg` | Agent on-device pill background |
+| `--jj-color-privacy-pill-fg` | Agent on-device pill text |
+| `--jj-color-privacy-pill-border` | Agent on-device pill border |
 
 ---
 

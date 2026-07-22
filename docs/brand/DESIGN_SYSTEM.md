@@ -13,7 +13,7 @@ This document covers structure, naming, motion overview, accessibility overview,
 1. **Native feel, local power** — Light chrome, crisp motion, keyboard-first where it counts.
 2. **Dark mode first** — Default: Midnight Ink (`#0B0A1A`) with Electric Teal (`#2DD4BF`) accents. Light mode is intentional, not an afterthought.
 3. **Invisible agent** — Surface queue, calendar, and status calmly — never a spaceship cockpit.
-4. **Privacy always visible** — Status bar: belt mark or “Local LLM” badge.
+4. **Privacy always visible** — Status bar: belt mark or **Agent · On-device** badge.
 5. **One job per view** — Each screen has a primary purpose; secondary actions stay quiet.
 
 ---
@@ -50,15 +50,15 @@ Names in the interface should match how users think about the job hunt and the a
 
 | Concept | UI name | Avoid |
 |---------|---------|-------|
-| Main automation | Agent | Bot, Autopilot, Worker |
-| On-device model | Local LLM | Cloud AI, ChatGPT (unless integration) |
+| Main automation | Agent | Bot, Autopilot, Worker, LLM |
+| On-device intelligence | Agent / On-device | Local LLM, Cloud AI, ChatGPT (unless choosing a runtime in advanced settings) |
 | Job application unit | Application | Opp, Req, Ticket |
 | Pre-send holding | Queue | Pipeline (unless visualizing stages) |
 | Post-send check-in | Follow-up | Chase, Ping storm |
 | User rules | Preferences | Config dump, Profile hacks |
 | Résumé file | Resume | CV only if locale requires |
 | Approval gate | Review / Approve send | Confirm nuke |
-| Privacy indicator | Local LLM (badge) | Secure sauce |
+| Privacy indicator | Agent · On-device | Local LLM, Secure sauce |
 
 ### Screen & Section Titles
 - Prefer nouns: “Applications”, “Follow-ups”, “Preferences”, “Agent”.
@@ -78,7 +78,7 @@ For design specs, Storybook, and code — consistent, boring, discoverable.
 ```
 Jj{Domain}{Element}[{Variant}]
 ```
-Examples: `JjAgentStatusBadge`, `JjApplicationQueueRow`, `JjFollowUpCard`, `JjLocalLlmPill`.
+Examples: `JjAgentStatusBadge`, `JjApplicationQueueRow`, `JjFollowUpCard`, `JjAgentPrivacyPill`.
 
 ### Domain Prefixes
 
@@ -88,7 +88,7 @@ Examples: `JjAgentStatusBadge`, `JjApplicationQueueRow`, `JjFollowUpCard`, `JjLo
 | `JjApplication` | Application list, draft, send |
 | `JjFollowUp` | Reminders and nudges |
 | `JjPreferences` | Settings forms |
-| `JjPrivacy` | Local LLM badge, indicators |
+| `JjPrivacy` | Agent on-device badge, indicators |
 | `JjOnboarding` | First-run steps |
 | `JjLog` | Agent / terminal output |
 
@@ -126,7 +126,7 @@ Motion expresses **presence and hierarchy**, not celebration spam.
 Avoid bounce and elastic springs on productive surfaces. Soft ease only.
 
 ### Approved Motions (ship 2–3 intentional patterns app-wide)
-1. **Status pulse (subtle):** Local LLM / agent ready — slow opacity or soft teal breath on the badge (very low amplitude).
+1. **Status pulse (subtle):** Agent ready — slow opacity or soft teal breath on the badge (very low amplitude).
 2. **Row settle:** New queue item eases in from 4–8 px above with fade — no slide from off-screen across the window.
 3. **Toast rise:** Success/error toasts rise slightly and fade; auto-dismiss without drama.
 
@@ -161,7 +161,7 @@ JobJitsu’s calm UI must remain usable under WCAG **AA** (AAA where brand contr
 
 ### Semantics
 - Real buttons/links — not clickable `div`s.
-- Status badges expose text alternatives (“Local LLM ready”).
+- Status badges expose text alternatives (“Agent ready”, “On-device”).
 - Toasts and errors use live regions (`assertive` for errors, `polite` for success).
 
 ### Motion & Vestibular
@@ -193,7 +193,7 @@ JobJitsu’s calm UI must remain usable under WCAG **AA** (AAA where brand contr
 | Send / apply | `send` |
 | Follow-up | `bell` or `mail` |
 | Agent | `bot` sparingly — prefer custom belt mark for brand moments |
-| Local / privacy | belt mark or `shield` — prefer brand “Local LLM” pill |
+| Local / privacy | belt mark or `shield` — prefer brand **Agent · On-device** pill |
 | Settings | `settings` |
 | Success | `check` / `check-circle` |
 | Caution | `clock` or `alert-triangle` (amber) |
@@ -206,7 +206,8 @@ JobJitsu’s calm UI must remain usable under WCAG **AA** (AAA where brand contr
 - The **teal envelope flap** on the logo is sacred — do not recolor Lucide icons to invent a second “envelope brand”.
 
 ### Privacy Badge
-Indigo/teal pill in the status bar: text **“Local LLM”** (or short equivalent). Always present while the local model is the active path.
+Indigo/teal pill in the status bar: text **“Agent · On-device”** (or “Agent ready” / “Agent unavailable”). Always present while the on-device agent path is active. Never default this label to “LLM”.
+
 
 ---
 

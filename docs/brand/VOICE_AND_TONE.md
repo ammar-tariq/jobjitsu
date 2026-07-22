@@ -83,12 +83,21 @@ Celebrate technique and consistency. Treat setbacks as information.
 | Prefer | Avoid |
 |--------|-------|
 | local / on-device | “in the cloud” (unless contrasting) |
-| agent | bot, autopilot (unless explaining) |
+| agent | LLM, bot, autopilot (unless advanced settings / engineering docs) |
 | application / throw (rare) | blast, spray, spam |
 | follow-up / nudge | chase, hunt them down |
 | review / approve | “let AI decide” |
 | preferences | “hack your funnel” |
 | queued | pending forever / stuck |
+
+## UI terminology (development)
+
+- **Agent**, not LLM, in chrome and primary UI.
+- Reinforce **on-device** privacy in status and confirmations.
+- Never pressure; never skip human approval before egress.
+- Keep layouts clean — one job per view.
+
+See also `.cursor/rules/branding-development.mdc`.
 
 ---
 

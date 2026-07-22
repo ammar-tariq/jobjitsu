@@ -1,0 +1,25 @@
+---
+description: Work in thin vertical slices — one user story at a time
+alwaysApply: true
+---
+
+# Vertical slices
+
+From here, **always** work in thin vertical slices. Never build multiple features at once.
+
+## Loop
+
+1. **Pick one user story** from `docs/backlog/USER_STORIES.md` (respect `DEPENDENCY_GRAPH.md` waves).
+2. **Produce an implementation plan** (short) before coding.
+3. **Implement one feature** that completes that story’s acceptance criteria.
+4. **Add tests** that lock the AC.
+5. **Update docs** (package README / backlog checklist / architecture note if contracts changed).
+6. **Stop** — move to the next story only after the slice is done.
+
+## Constraints
+
+- One story per session of work unless the user names another.
+- Prefer the smallest change that satisfies AC.
+- No speculative packages, UI, or “while we’re here” features.
+- Keep agent ≠ send and privacy laws intact.
+- If a story is too large for one day, split tasks — still ship one story’s vertical path, not horizontal layers across stories.

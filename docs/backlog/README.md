@@ -38,6 +38,7 @@
 | [ACCEPTANCE_CRITERIA.md](./ACCEPTANCE_CRITERIA.md) | AC checklist index |
 | [TECHNICAL_TASKS.md](./TECHNICAL_TASKS.md) | Day-sized tasks |
 | [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) | Dependency graph & waves |
+| [VERTICAL_SLICES.md](./VERTICAL_SLICES.md) | One-story-at-a-time process & status |
 
 ---
 

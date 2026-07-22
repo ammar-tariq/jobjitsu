@@ -1,10 +1,27 @@
 # `@jobjitsu/events`
 
-Typed domain event catalog, payloads, and **EventBus** / **DurableEventSink** interfaces.
+Typed domain event catalog, payloads, **EventBus** contracts, and an in-process implementation.
 
 ## Status
 
-Contracts only — **no bus implementation**.
+| Piece                                      | State              |
+| ------------------------------------------ | ------------------ |
+| Event names / payloads                     | Done               |
+| `EventBus` / `DurableEventSink` interfaces | Done               |
+| `createInMemoryEventBus()`                 | Done (E02-F03-S01) |
+| Timeline-backed durable sink               | Not yet            |
+
+## Usage
+
+```ts
+import { createInMemoryEventBus } from "@jobjitsu/events";
+
+const bus = createInMemoryEventBus();
+bus.subscribe("Queue.Enqueued", (e) => {
+  console.log(e.payload.applicationId);
+});
+void bus.publish("Queue.Enqueued", { applicationId: "…" });
+```
 
 ## Laws
 

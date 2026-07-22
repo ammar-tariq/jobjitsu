@@ -25,8 +25,8 @@ This file is a checklist index for tracking — mark stories done only when all 
 
 ### E02
 - [ ] E02-F01-S01
-- [ ] E02-F02-S01
-- [ ] E02-F03-S01
+- [x] E02-F02-S01
+- [x] E02-F03-S01
 - [ ] E02-F04-S01
 
 ### E03

@@ -6,3 +6,4 @@ export type * from "./payloads.js";
 export type * from "./bus.js";
 
 export { DURABLE_EVENT_NAMES, EVENT_NAMES } from "./names.js";
+export { createInMemoryEventBus } from "./memory-bus.js";

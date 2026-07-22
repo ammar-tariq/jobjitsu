@@ -12,7 +12,7 @@ This folder is the **production-ready** visual and interaction system for `packa
 1. **Native feel, local power** — Tight desktop density; soft elevation; no neon SaaS glow.
 2. **Dark mode first** — Default theme is Midnight; light is a deliberate switch.
 3. **One job per view** — Hierarchy via type and space, not card stacks everywhere.
-4. **Privacy visible** — Local LLM pill and status chrome are first-class components.
+4. **Privacy visible** — **Agent · On-device** pill and status chrome are first-class components.
 5. **Calm motion** — Presence and hierarchy only; honor reduced motion.
 6. **WCAG AA minimum** — AAA where brand contrast already allows.
 

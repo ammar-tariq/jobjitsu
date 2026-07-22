@@ -51,6 +51,9 @@ Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md]
 - Subscriber receives matching events in order for a single publisher test.
 - Bus does not perform network I/O.
 
+**Status:** Done (`createInMemoryEventBus` in `@jobjitsu/events`)
+
+
 ### E02-F04-S01 — As timeline (later), I can hook durable persistence for a subset
 **AC**
 - Interface/callback exists for “durable events.”

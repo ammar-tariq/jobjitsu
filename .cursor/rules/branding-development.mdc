@@ -1,0 +1,47 @@
+---
+description: Branding rules that drive all product and UI development
+alwaysApply: true
+---
+
+# Branding → Development
+
+These principles apply to **UI copy, empty states, notifications, settings labels, docs meant for users, and feature design**. Follow them everywhere.
+
+## Principles
+
+1. **Never expose raw AI terminology unless useful.**  
+   Prefer plain language: agent, on-device, draft, review.  
+   Reserve `LLM`, `model`, `embedding`, `prompt`, `token` for advanced/settings contexts where the user is configuring a runtime — or for engineering docs/code.
+
+2. **Say "Agent" instead of "LLM" in the UI.**  
+   Navigation, status chrome, toasts, and buttons use **Agent**.  
+   Privacy chrome example: “Agent · On-device” / “Agent ready” — not “Local LLM”.  
+   Code may use `AiProvider` / `locality: "local"` internally; user-visible strings must not say LLM by default.
+
+3. **Always reinforce local-first privacy.**  
+   Make on-device clear in status, onboarding, and send confirmations.  
+   Example: “No data leaves this device” / “Stored on this device.”  
+   Never imply a JobJitsu cloud holds résumés.
+
+4. **Use calm, encouraging language.**  
+   Coach voice: precise, respectful, quietly strong.  
+   See `docs/brand/VOICE_AND_TONE.md`.
+
+5. **Never pressure the user.**  
+   No FOMO, streaks, guilt, inactivity shaming, countdown urgency, or “you’re falling behind.”
+
+6. **Human approval is required before external actions.**  
+   Apply, follow-up send, and any career-data egress require explicit user approval (default on).  
+   Agent prepares; it does not own Send.
+
+7. **Keep interfaces clean and uncluttered.**  
+   One job per view. No cockpit dashboards, pill clusters, or competing CTAs.  
+   Dark mode first; soft hierarchy; calm motion only.
+
+## Quick checks before shipping UI
+
+- [ ] User-facing strings avoid LLM/model jargon unless in advanced settings?
+- [ ] Status/privacy chrome says Agent + on-device?
+- [ ] Outbound path requires human approval?
+- [ ] Copy is calm (no pressure)?
+- [ ] Screen has one primary purpose?

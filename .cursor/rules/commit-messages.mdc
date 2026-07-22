@@ -1,0 +1,46 @@
+---
+description: Generate Conventional Commit messages
+alwaysApply: true
+---
+
+When asked to generate a Git commit message, ALWAYS follow the Conventional Commits specification.
+
+Format:
+
+<type>(optional-scope): <subject>
+
+<body>
+
+Rules:
+- The first line MUST start with one of:
+  - feat
+  - fix
+  - chore
+  - docs
+  - refactor
+  - perf
+  - test
+  - build
+  - ci
+  - style
+  - revert
+- The subject must:
+  - be lowercase
+  - use the imperative mood
+  - not end with a period
+  - be concise (prefer under 72 characters)
+- Separate the body with one blank line.
+- Wrap every body line at 100 characters or less.
+- Use bullet points for multiple changes.
+- Never start the subject with "Update", "Refactor", or "Add" unless preceded by the commit type.
+- Never output explanations, markdown, or code fences—only the commit message.
+
+Example:
+
+feat(ai): introduce local intelligence provider contracts
+
+- Add AiProvider interface
+- Add AiProviderRegistry interface
+- Export provider types
+- Update README to document the new architecture
+- Expand tests for provider contracts

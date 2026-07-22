@@ -57,16 +57,18 @@ Reuse these when the moment matches — do not paraphrase into hype.
 | Idle agent | “Your belt is tied. Waiting for your signal.” |
 | Application sent | “One more throw. That’s {n} this week.” |
 | Follow-up due | “Time to gently nudge — a polite reminder is ready.” |
-| Local LLM loading | “Warming up on-device. No data leaves this dojo.” |
+| Agent warming up | “Warming up on-device. No data leaves this dojo.” |
 
 ---
 
 ## Checklist for New Copy
 
 - [ ] Sentence case
-- [ ] Calm (no FOMO / guilt)
-- [ ] User remains in control
-- [ ] Privacy wording accurate for local agent/LLM
+- [ ] Calm and encouraging (no FOMO / guilt / pressure)
+- [ ] User remains in control; human approval before egress
+- [ ] Prefers **Agent** / **on-device** over LLM jargon in UI
+- [ ] Privacy wording accurate for local agent
 - [ ] Paired with icon + color role if status
 - [ ] Works with reduced motion (meaning not motion-only)
+- [ ] Screen stays uncluttered — one primary action
 - [ ] Reviewed against [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md)
