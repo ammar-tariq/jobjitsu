@@ -44,7 +44,7 @@ pnpm --filter @jobjitsu/app test
 
 ## Layout
 
-Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/docs/data/material/getting-started/templates/dashboard) pattern (permanent side drawer + main), themed with JobJitsu Midnight Ink / Electric Teal. No charts or SaaS cockpit chrome.
+Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/docs/data/material/getting-started/templates/dashboard) pattern (permanent side drawer + main), themed with JobJitsu **Midnight Ink** (dark default) and Soft Cloud light. Toggle appearance under **Preferences** — stored on this device. No charts or SaaS cockpit chrome.
 
 ```
 ┌──────────────┬─────────────────────────────┐
