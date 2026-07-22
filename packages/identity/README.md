@@ -6,9 +6,26 @@ Profile and résumé source of truth (local).
 
 | Piece                                      | State                       |
 | ------------------------------------------ | --------------------------- |
+| `Profile` / `ProfileRepository`            | Done — KV-backed            |
+| `createKvProfileRepository`                | Done — on-device CRUD       |
+| `createMemoryProfileRepository`            | Done — browser-safe host    |
 | `ResumeStore` / `ResumeDocument` contracts | Done                        |
 | `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud** |
-| Real import / filesystem persistence       | Not yet                     |
+| `createLocalResumeStore`                   | Done — KV profile + resume  |
+| Real import / filesystem résumé files      | Not yet (PE03-S02)          |
+
+## Profile (on-device)
+
+```ts
+import { createMemoryProfileRepository } from "@jobjitsu/identity";
+
+const profiles = createMemoryProfileRepository();
+await profiles.upsert({ displayName: "Sam Chen", location: "On this device" });
+```
+
+Durable KV path: `createKvProfileRepository(kv)` with `@jobjitsu/storage` (Node/host FS — not the Vite webview).
+
+UI must call host identity APIs (`identity.getProfile` / `identity.setProfile`), never storage directly.
 
 ## Fake Resume
 

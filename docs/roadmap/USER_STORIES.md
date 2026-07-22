@@ -249,7 +249,7 @@
 
 **Testing notes:** CRUD unit tests.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE03-S02 — Import resume into Resume Library
 

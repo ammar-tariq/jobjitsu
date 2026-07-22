@@ -40,7 +40,7 @@ export function App({ runtime }: AppProps): JSX.Element {
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <HostProvider runtime={runtime}>
-        <DesktopShell theme={theme} onThemeChange={onThemeChange} />
+        <DesktopShell theme={theme} onThemeChange={onThemeChange} bridge={runtime.bridge} />
       </HostProvider>
     </ThemeProvider>
   );

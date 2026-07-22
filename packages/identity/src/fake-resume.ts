@@ -45,9 +45,11 @@ export function createFakeResumeStore(options: FakeResumeStoreOptions = {}): Res
     options.profile ??
     (resume
       ? {
+          id: createEntityId("profile"),
           displayName: resume.fullName,
           email: resume.email,
           location: "On this device",
+          updatedAt: resume.updatedAt,
         }
       : undefined);
 
@@ -68,7 +70,11 @@ export function createFakeResumeStore(options: FakeResumeStoreOptions = {}): Res
       return profile;
     },
     async saveProfile(next) {
-      profile = { ...next };
+      profile = {
+        ...next,
+        id: next.id || createEntityId("profile"),
+        updatedAt: new Date().toISOString(),
+      };
       return profile;
     },
   };

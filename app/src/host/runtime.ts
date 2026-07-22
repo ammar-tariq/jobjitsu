@@ -20,6 +20,8 @@ import {
 import {
   createDefaultFakeResume,
   createFakeResumeStore,
+  createMemoryProfileRepository,
+  type ProfileRepository,
   type ResumeStore,
 } from "@jobjitsu/identity";
 import { createLogger, createMemoryLogSink, type Logger } from "@jobjitsu/logger";
@@ -49,6 +51,8 @@ export type HostRuntime = {
   readonly bridge: IpcBridge;
   /** Appearance persistence stub (shared across restarts when injected). */
   readonly appearance: AppearanceStore;
+  /** On-device profile repository (identity public API). */
+  readonly profiles: ProfileRepository;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -60,6 +64,7 @@ export type CreateHostRuntimeOptions = {
   readonly ai?: AiProvider;
   /** Shared appearance store so theme survives a process-local restart. */
   readonly appearance?: AppearanceStore;
+  readonly profiles?: ProfileRepository;
 };
 
 /**
@@ -77,6 +82,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const assembler = createFakeContextAssembler();
   const resumes: ResumeStore = createFakeResumeStore({ resume: null });
   const gmail: FakeGmailChannel = createFakeGmailChannel();
+  const profiles = options.profiles ?? createMemoryProfileRepository();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -166,7 +172,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   });
 
   const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
-  const ipc = createHostIpcDispatcher({ appearance });
+  const ipc = createHostIpcDispatcher({ appearance, profiles });
   const bridge = createIpcBridge(ipc);
 
   return {
@@ -176,6 +182,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     ipc,
     bridge,
     appearance,
+    profiles,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",

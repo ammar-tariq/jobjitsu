@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE02 Storage & Event Spine |
-| **Story** | Next: PE04 prefs / PE03 identity (Wave 2) or PE02 leftovers |
-| **Status** | PE02-S03 complete (this slice) |
-| **Note** | Memory durable sink + allowlist for egress/approval/pause/prefs |
+| **Epic** | PE03 Trust & Identity |
+| **Story** | PE03-S01 — Maintain local profile (this slice) |
+| **Status** | In progress → PR gate |
+| **Note** | Profile CRUD via identity APIs + Preferences form; no cloud wording |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE03-S01 | 2026-07-23 | Local profile CRUD; Preferences form via IPC |
 | PE02-S03 | 2026-07-23 | Memory durable sink; allowlist coverage tests |
 | PE02-S02 | 2026-07-23 | Full EVENT_SYSTEM catalog; Progress minimization |
 | PE02-S01 | 2026-07-23 | FS storage provider; temp-dir KV/blob restart tests |

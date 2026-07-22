@@ -2,6 +2,7 @@ import { useEffect, useState, type JSX } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { DEFAULT_SHELL_NAV_ID, shellPageTitle, type ShellNavId } from "../index.js";
+import type { IpcBridge } from "../ipc/bridge.js";
 import type { ThemePreference } from "../ipc/commands.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { ComingSoonView } from "./ComingSoonView.js";
@@ -12,13 +13,14 @@ import { SideMenu } from "./SideMenu.js";
 export type DesktopShellProps = {
   readonly theme: ThemePreference;
   readonly onThemeChange: (theme: ThemePreference) => void;
+  readonly bridge: IpcBridge;
 };
 
 /**
  * Desktop shell — Material dashboard layout (side menu + main), JobJitsu content.
  * Subscribes to host activity only; must never import `@jobjitsu/ai`.
  */
-export function DesktopShell({ theme, onThemeChange }: DesktopShellProps): JSX.Element {
+export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps): JSX.Element {
   const [activeId, setActiveId] = useState<ShellNavId>(DEFAULT_SHELL_NAV_ID);
   const title = shellPageTitle(activeId);
 
@@ -58,7 +60,7 @@ export function DesktopShell({ theme, onThemeChange }: DesktopShellProps): JSX.E
           {activeId === "agent" ? (
             <EventActivityView />
           ) : activeId === "preferences" ? (
-            <PreferencesView theme={theme} onThemeChange={onThemeChange} />
+            <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
           ) : (
             <ComingSoonView title={title} />
           )}
