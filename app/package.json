@@ -2,12 +2,15 @@
   "name": "@jobjitsu/app",
   "version": "0.0.0",
   "private": true,
-  "description": "JobJitsu desktop shell (React UI; Tauri host later)",
+  "description": "JobJitsu desktop shell (Tauri host + React webview)",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tauri": "tauri dev",
     "build": "tsc -b && vite build",
+    "build:tauri": "tauri build",
     "preview": "vite preview",
+    "tauri": "tauri",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -29,6 +32,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",

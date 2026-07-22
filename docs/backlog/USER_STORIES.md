@@ -19,6 +19,8 @@ Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md]
 - Window title is `JobJitsu`.
 - No Electron dependency introduced.
 
+**Status:** Done (`app/src-tauri` + `pnpm dev:desktop`)
+
 ### E01-F03-S01 — As a developer, I see a React root inside the shell
 **AC**
 - Webview renders a React “JobJitsu” placeholder using Inter if available.

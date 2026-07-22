@@ -81,15 +81,16 @@ pnpm bootstrap
 
 Equivalent: `./scripts/setup.sh` · alias: `pnpm setup:local`
 
-### 2. Desktop shell (UI)
+### 2. Desktop shell
 
 ```bash
-pnpm dev:app
+pnpm dev:desktop
 ```
 
-- Opens Vite at **http://localhost:1420**
-- Early foundation: sidebar + Coming Soon placeholders — no full product features yet
-- Script: [`scripts/dev-app.sh`](./scripts/dev-app.sh)
+- Opens a native window titled **JobJitsu** (Tauri + React; needs [Rust](https://rustup.rs))
+- Status chrome: **Agent · On-device**; Coming Soon placeholders for most nav
+- Script: [`scripts/dev-desktop.sh`](./scripts/dev-desktop.sh)
+- Vite-only (no Rust): `pnpm dev:app` → http://localhost:1420
 
 ### 3. Documentation site
 
@@ -111,18 +112,19 @@ A change is complete only when it meets the [Definition of Done](./DEFINITION_OF
 
 ### Useful commands
 
-| Command                                    | Purpose                               |
-| ------------------------------------------ | ------------------------------------- |
-| `pnpm bootstrap`                           | Install + prepare local workspace     |
-| `pnpm setup:local`                         | Alias for `bootstrap`                 |
-| `pnpm dev:app`                             | Desktop shell (localhost:1420)        |
-| `pnpm dev:website`                         | Docs site (localhost:3000)            |
-| `pnpm build:app`                           | Build desktop UI bundle               |
-| `pnpm build:website`                       | Build static docs site                |
-| `pnpm check`                               | Full DoD gate                         |
-| `pnpm test`                                | Package tests                         |
-| `pnpm clean`                               | Remove build artifacts / node_modules |
-| `pnpm project:status -- <n> "In Progress"` | Set issue Status on the project board |
+| Command                                    | Purpose                                    |
+| ------------------------------------------ | ------------------------------------------ |
+| `pnpm bootstrap`                           | Install + prepare local workspace          |
+| `pnpm setup:local`                         | Alias for `bootstrap`                      |
+| `pnpm dev:desktop`                         | Native JobJitsu window (Tauri; needs Rust) |
+| `pnpm dev:app`                             | Vite shell only (localhost:1420)           |
+| `pnpm dev:website`                         | Docs site (localhost:3000)                 |
+| `pnpm build:app`                           | Build desktop UI bundle                    |
+| `pnpm build:website`                       | Build static docs site                     |
+| `pnpm check`                               | Full DoD gate                              |
+| `pnpm test`                                | Package tests                              |
+| `pnpm clean`                               | Remove build artifacts / node_modules      |
+| `pnpm project:status -- <n> "In Progress"` | Set issue Status on the project board      |
 
 More detail: [scripts/README.md](./scripts/README.md) · [MONOREPO.md](./MONOREPO.md) · [AI development workflow](./docs/development/AI_DEVELOPMENT_WORKFLOW.md#branching--board-status)
 

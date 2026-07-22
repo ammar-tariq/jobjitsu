@@ -1,18 +1,40 @@
 # `@jobjitsu/app`
 
-Desktop **shell** + event-driven **host runtime** for JobJitsu.
+Desktop **shell** (React webview) + **Tauri host** for JobJitsu.
 
 Dojo shows the startup cascade. Other destinations stay **Coming Soon**.
 
-## Run the shell
+## Prerequisites
+
+| Layer         | Need                                                     |
+| ------------- | -------------------------------------------------------- |
+| UI / Vite     | Node 20+, pnpm (see root `pnpm bootstrap`)               |
+| Native window | [Rust via rustup](https://rustup.rs) (stable) — ADR 0001 |
+
+macOS also needs Xcode Command Line Tools (`xcode-select --install`).
+
+## Run the native desktop window
 
 ```bash
 pnpm install
 pnpm --filter @jobjitsu/ui build
-pnpm --filter @jobjitsu/app dev
+pnpm --filter @jobjitsu/app dev:tauri
+# or from repo root:
+pnpm dev:desktop
 ```
 
-Open **http://localhost:1420** — window title **JobJitsu**, Midnight Ink dark theme.
+Opens a native window titled **JobJitsu** wrapping the React shell (Vite on `http://localhost:1420`). Status chrome shows **Agent · On-device**.
+
+## Run the UI in a browser (no Rust)
+
+Useful for layout work when the Rust toolchain is unavailable:
+
+```bash
+pnpm --filter @jobjitsu/app dev
+# or: pnpm dev:app
+```
+
+Open **http://localhost:1420**.
 
 ```bash
 pnpm --filter @jobjitsu/app build
@@ -37,19 +59,22 @@ pnpm --filter @jobjitsu/app test
 
 ## Architecture notes
 
-| Concern      | Choice                                                          |
-| ------------ | --------------------------------------------------------------- |
-| UI           | React (ADR 0002) — subscribes only                              |
-| Host         | `src/host` owns AI / resume / mail fakes                        |
-| Bus          | `@jobjitsu/events` — awaited async handlers                     |
-| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced` |
-| UI → AI      | **Forbidden** (`ui-ai-fence` test)                              |
-| Desktop host | Tauri later (ADR 0001)                                          |
+| Concern      | Choice                                                                                                          |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                               |
+| UI           | React in webview (ADR 0002) — subscribes only                                                                   |
+| TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md)) |
+| Host runtime | `src/host` owns AI / resume / mail fakes (process-local)                                                        |
+| Bus          | `@jobjitsu/events` — awaited async handlers                                                                     |
+| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced`                                                 |
+| UI → AI      | **Forbidden** (`ui-ai-fence` test)                                                                              |
+| IPC          | Deny-by-default; no career commands yet ([ADR 0013](../docs/adr/0013-ipc-bridge.md))                            |
 
 See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 ## Boundaries
 
-- No career egress from the renderer.
+- No career egress from the renderer; launch uses an in-memory fake mailbox only.
 - Shell must not import `@jobjitsu/ai`.
-- Narrow IPC only when the Tauri host arrives ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
+- Webview capabilities are `core:default` only — no ambient filesystem/shell APIs.
+- Narrow IPC when product commands arrive ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).

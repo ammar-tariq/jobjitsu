@@ -1,22 +1,35 @@
-# Tauri ↔ TypeScript runtime (Sprint 1 note)
+# Tauri ↔ TypeScript runtime
 
-> Stub for Desktop Foundation. Full RFC can expand this when the native host lands.
+> Desktop Foundation note for PE01-S01 / DF-01. Expand when IPC and host services deepen.
 
-## Decision for shell UI work
+## Decision
 
-| Layer | Approach now |
-|-------|----------------|
-| **Shell UI** | Vite + React in `@jobjitsu/app` (`pnpm --filter @jobjitsu/app dev`) |
-| **Native host** | Tauri (ADR 0001) — wrap the Vite `dist-ui` webview when Rust toolchain is available |
-| **Domain** | TypeScript packages (`@jobjitsu/*`); host calls packages via a thin bridge later |
-| **Renderer** | No ambient filesystem/network for career data |
+| Layer | Approach |
+|-------|----------|
+| **Native host** | Tauri 2 under `app/src-tauri` (ADR 0001). Window title **JobJitsu**. |
+| **Shell UI** | Vite + React in `@jobjitsu/app` — same entry Tauri loads in the webview |
+| **Domain** | TypeScript packages (`@jobjitsu/*`); host calls them via a thin bridge later |
+| **Renderer** | No ambient filesystem/network for career data; capabilities = `core:default` only |
 
-## Why Vite first
+## Commands
 
-Proves shell layout, tokens, and navigation without blocking on Rust/Tauri install. The webview entry (`index.html` + `src/main.tsx`) is what Tauri will load.
+| Goal | Command |
+|------|---------|
+| Native window | `pnpm dev:desktop` or `pnpm --filter @jobjitsu/app dev:tauri` |
+| Browser-only UI | `pnpm dev:app` (Vite on `:1420`) |
+| Production UI bundle | `pnpm --filter @jobjitsu/app build` → `dist-ui/` |
+
+Requires a Rust toolchain for Tauri commands ([rustup](https://rustup.rs)).
+
+## Why this shape
+
+- **Domain stays TypeScript** for testability (ADR 0011).
+- **Privileged boundary** is the Rust host + deny-by-default IPC (ADR 0013) — not Node-in-renderer.
+- Vite-first UI keeps shell work unblocked when Rust is unavailable; Tauri wraps the same `index.html` + `src/main.tsx`.
 
 ## Non-goals (this note)
 
-- No AI runtime embedding.
+- No AI runtime embedding in Rust.
 - No Electron.
 - No Node APIs in the renderer.
+- No allowlisted career IPC commands yet (PE01-S03).

@@ -35,8 +35,9 @@ pnpm --filter @jobjitsu/ui build
 
 echo ""
 echo "Setup complete. Next:"
-echo "  pnpm dev:app       # desktop shell → http://localhost:1420"
+echo "  pnpm dev:desktop   # native JobJitsu window (needs Rust / rustup)"
+echo "  pnpm dev:app       # Vite shell only → http://localhost:1420"
 echo "  pnpm dev:website   # docs site    → http://localhost:3000"
 echo "  pnpm check         # format + lint + typecheck + test + build"
 echo ""
-echo "Or: ./scripts/dev-app.sh  |  ./scripts/dev-website.sh"
+echo "Or: ./scripts/dev-desktop.sh  |  ./scripts/dev-app.sh  |  ./scripts/dev-website.sh"

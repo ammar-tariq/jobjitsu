@@ -14,6 +14,7 @@
     "project:status": "bash scripts/set-project-status.sh",
     "dev": "turbo run dev --parallel",
     "dev:app": "bash scripts/dev-app.sh",
+    "dev:desktop": "bash scripts/dev-desktop.sh",
     "dev:website": "bash scripts/dev-website.sh",
     "dev:docs": "pnpm run dev:website",
     "build": "turbo run build",

@@ -121,11 +121,11 @@ Logging/error reporting may start before DI as pure modules, then get registered
 
 **Acceptance criteria**
 
-- [ ] Documented command opens a window titled **JobJitsu**.
-- [ ] Uses Tauri (ADR 0001); **no Electron**.
-- [ ] Webview does not get ambient filesystem/network APIs.
-- [ ] `app/README.md` documents run steps (macOS minimum).
-- [ ] Short note on chosen TS host approach (link or inline) — no AI runtime.
+- [x] Documented command opens a window titled **JobJitsu**.
+- [x] Uses Tauri (ADR 0001); **no Electron**.
+- [x] Webview does not get ambient filesystem/network APIs.
+- [x] `app/README.md` documents run steps (macOS minimum).
+- [x] Short note on chosen TS host approach (link or inline) — no AI runtime.
 
 **Tasks** (dependency order)
 
@@ -136,7 +136,9 @@ Logging/error reporting may start before DI as pure modules, then get registered
 | DF-01-T3 | Wire workspace scripts to launch window | 1–2h | T2 |
 | DF-01-T4 | Verify title + README run instructions | 30–60m | T3 |
 
-**Risks:** R1.
+**Status:** Done — `pnpm dev:desktop` / `app/src-tauri` (2026-07-23).
+
+**Risks:** R1 (mitigated — Vite webview + thin Tauri host; see TAURI_TS_RUNTIME.md).
 
 ---
 

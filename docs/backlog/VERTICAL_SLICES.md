@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | Event-driven host |
-| **Story** | Startup cascade on the bus; UI never calls AI |
-| **Status** | Host runtime + Dojo activity view |
-| **Note** | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced` |
+| **Epic** | PE01 Desktop UI / Desktop Foundation |
+| **Story** | Next: PE01-S02 / PE01-S03 (nav labels + deny-by-default IPC) |
+| **Status** | PE01-S01 / DF-01 complete |
+| **Note** | Native JobJitsu window via Tauri; React webview; launch smoke green |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE01-S01 / DF-01 | 2026-07-23 | Tauri host `app/src-tauri`; `pnpm dev:desktop` |
 | E02-F02-S01 | 2026-07-22 | Event catalog + typed payloads |
 | E02-F03-S01 | 2026-07-22 | `createInMemoryEventBus` |
 | DF-02 | 2026-07-22 | Desktop shell layout + Coming Soon nav (Vite/React) |
