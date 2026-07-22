@@ -46,6 +46,7 @@ describe("PE01-S01 launch desktop host", () => {
       typeof entry === "string" ? entry : entry.identifier,
     );
     expect(names).toContain("core:default");
+    expect(names).toContain("core:path:default");
     expect(names).toContain("dialog:allow-open");
     expect(names).toContain("allow-data-directory");
     expect(names).toContain("fs:scope");
