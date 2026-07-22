@@ -1,0 +1,58 @@
+name: Project status on merge
+
+# When a PR merges to main, set linked issues' Project Status → Done.
+# Recommended secret: PROJECTS_TOKEN (PAT with access to Projects write).
+# Falls back to GITHUB_TOKEN (may lack project permissions on user/org projects).
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  mark-done:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Mark linked issues Done on project board
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN != '' && secrets.PROJECTS_TOKEN || github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          OWNER: ammar-tariq
+          PROJECT_NUMBER: "2"
+          PROJECT_OWNER: ammar-tariq
+          PROJECT_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          ISSUES="$(gh pr view "$PR_NUMBER" --repo "$PROJECT_REPO" --json closingIssuesReferences \
+            --jq '[.closingIssuesReferences[].number] | unique' 2>/dev/null || echo '[]')"
+
+          # Fallback: closing keywords in PR body
+          if [[ "$(echo "$ISSUES" | jq 'length')" -eq 0 ]]; then
+            BODY="$(gh pr view "$PR_NUMBER" --repo "$PROJECT_REPO" --json body --jq .body)"
+            ISSUES="$(echo "$BODY" | grep -oiE '(closes|fixes|resolves)[[:space:]]+#[[:digit:]]+' \
+              | grep -oE '[[:digit:]]+' | jq -R 'tonumber' | jq -s 'unique' || echo '[]')"
+          fi
+
+          COUNT="$(echo "$ISSUES" | jq 'length')"
+          if [[ "$COUNT" -eq 0 ]]; then
+            echo "No linked issues on PR #$PR_NUMBER — skipping."
+            exit 0
+          fi
+
+          echo "Linked issues: $ISSUES"
+          chmod +x scripts/set-project-status.sh
+
+          echo "$ISSUES" | jq -r '.[]' | while read -r num; do
+            ./scripts/set-project-status.sh "$num" "Done" \
+              || echo "Warning: could not set Done for #$num (check PROJECTS_TOKEN permissions)"
+          done

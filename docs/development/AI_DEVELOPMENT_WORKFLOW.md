@@ -4,6 +4,8 @@ Canonical path for day-to-day AI-assisted implementation.
 
 Root pointer: [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md) (redirects here).
 
+Cursor rule: [`.cursor/rules/git-branching.mdc`](../../.cursor/rules/git-branching.mdc) (auto-branch + Project Status).
+
 Before writing any code:
 
 0. If documentation itself is incomplete or you are bootstrapping the project,
@@ -33,23 +35,32 @@ Before writing any code:
 
 8. Wait until the plan is complete.
 
-9. Implement only one task.
+9. **Create a feature branch** from `origin/main` (do not build on `main` unless asked).  
+   Set the related GitHub issue Project **Status → In Progress**:
+   `pnpm project:status -- <issue> "In Progress"`  
+   (see [Branching & board status](#branching--board-status)).
 
-10. Add or update tests.
+10. Implement only one task.
 
-11. Verify all tests pass.
+11. Add or update tests.
 
-12. Update documentation.
+12. Verify all tests pass.
 
-13. Ensure the implementation aligns with the JobJitsu brand, product philosophy, and engineering standards.
+13. Update documentation.
 
-14. Satisfy the full [Definition of Done](../../DEFINITION_OF_DONE.md) before starting the next task:
+14. Ensure the implementation aligns with the JobJitsu brand, product philosophy, and engineering standards.
+
+15. Satisfy the full [Definition of Done](../../DEFINITION_OF_DONE.md) before starting the next task:
     documented · tested · typed · reviewed · follows architecture · passes lint · passes build.
 
-15. Commit the completed work with a [Conventional Commit](../../.cursor/rules/commit-messages.mdc)
-    (see `.cursor/rules/commit-after-completion.mdc`). Do not push unless asked.
+16. Commit the completed work with a [Conventional Commit](../../.cursor/rules/commit-messages.mdc)
+    (see `.cursor/rules/commit-after-completion.mdc`). Do not push unless asked.  
+    Set Project **Status → In Review**.
 
-16. After a **major milestone** (issue closed, wave/CP advanced, or human request), run
+17. When opening a PR (only if the user asks): link/close the issue (`Closes #N`) and set
+    **Status → Testing**. Merge to `main` sets **Done** via Actions (or manually).
+
+18. After a **major milestone** (issue closed, wave/CP advanced, or human request), run
     [Article Milestone Detection](#article-milestone-detection).
 
 Never skip planning.
@@ -59,21 +70,53 @@ Never introduce unnecessary complexity.
 Never call a task done without meeting the Definition of Done.
 Never leave completed work uncommitted when the change set is ready.
 Never invent article topics for trivial changes.
+Never implement feature slices directly on `main` unless the user opts in.
+
+---
+
+## Branching & board status
+
+```
+Issue (Todo)
+      ↓
+Create branch + Status: In Progress
+      ↓
+Implement / tests / docs / commit
+      ↓
+Status: In Review
+      ↓
+PR opened (+ Closes #N) → Status: Testing
+      ↓
+Merge to main → Status: Done  (workflow: project-status-on-merge)
+```
+
+| Command | Effect |
+| ------- | ------ |
+| `pnpm project:status -- 14 "In Progress"` | Board status for issue #14 |
+| `./scripts/set-project-status.sh 14 "Done"` | Same |
+
+Valid statuses: `Todo` · `In Progress` · `In Review` · `Testing` · `Done`  
+Project: **JobJitsu Development** (#2, owner `ammar-tariq`).
+
+For merge automation, add repo secret **`PROJECTS_TOKEN`** (PAT with Projects write).  
+Workflow: [`.github/workflows/project-status-on-merge.yml`](../../.github/workflows/project-status-on-merge.yml).
 
 ---
 
 ## Normal development cycle (with content)
 
 ```
-Issue Created
+Issue Created (Todo)
+      ↓
+Feature branch + In Progress
       ↓
 Implementation
       ↓
-Tests
+Tests + DoD + commit → In Review
       ↓
-PR
+PR → Testing
       ↓
-Merge
+Merge → Done
       ↓
 Issue Closed
       ↓

@@ -111,19 +111,22 @@ A change is complete only when it meets the [Definition of Done](./DEFINITION_OF
 
 ### Useful commands
 
-| Command              | Purpose                               |
-| -------------------- | ------------------------------------- |
-| `pnpm bootstrap`     | Install + prepare local workspace     |
-| `pnpm setup:local`   | Alias for `bootstrap`                 |
-| `pnpm dev:app`       | Desktop shell (localhost:1420)        |
-| `pnpm dev:website`   | Docs site (localhost:3000)            |
-| `pnpm build:app`     | Build desktop UI bundle               |
-| `pnpm build:website` | Build static docs site                |
-| `pnpm check`         | Full DoD gate                         |
-| `pnpm test`          | Package tests                         |
-| `pnpm clean`         | Remove build artifacts / node_modules |
+| Command                                    | Purpose                               |
+| ------------------------------------------ | ------------------------------------- |
+| `pnpm bootstrap`                           | Install + prepare local workspace     |
+| `pnpm setup:local`                         | Alias for `bootstrap`                 |
+| `pnpm dev:app`                             | Desktop shell (localhost:1420)        |
+| `pnpm dev:website`                         | Docs site (localhost:3000)            |
+| `pnpm build:app`                           | Build desktop UI bundle               |
+| `pnpm build:website`                       | Build static docs site                |
+| `pnpm check`                               | Full DoD gate                         |
+| `pnpm test`                                | Package tests                         |
+| `pnpm clean`                               | Remove build artifacts / node_modules |
+| `pnpm project:status -- <n> "In Progress"` | Set issue Status on the project board |
 
-More detail: [scripts/README.md](./scripts/README.md) · [MONOREPO.md](./MONOREPO.md)
+More detail: [scripts/README.md](./scripts/README.md) · [MONOREPO.md](./MONOREPO.md) · [AI development workflow](./docs/development/AI_DEVELOPMENT_WORKFLOW.md#branching--board-status)
+
+When an agent (or you) **starts building** a story: create a feature branch from `main`, set Status **In Progress**, then after DoD **In Review**, on PR **Testing**, on merge **Done**.
 
 ---
 

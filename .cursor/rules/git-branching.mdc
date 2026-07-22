@@ -1,0 +1,51 @@
+---
+description: Auto-create feature branches and sync GitHub Project Status through the delivery lifecycle
+alwaysApply: true
+---
+
+# Feature branching & Project Status
+
+When the user asks to **implement / build / start** a story, task, issue, or vertical slice:
+
+## 1. Branch before code
+
+1. If the current branch is `main` or `master` (or the user did not name a branch), create a feature branch from latest `origin/main`.
+2. Naming (kebab-case):
+   - Prefer work ids: `feat/pe01-s01-launch-desktop`, `feat/14-launch-desktop-host`
+   - Types: `feat/`, `fix/`, `chore/`, `docs/`, `test/` matching Conventional Commit intent
+3. `git fetch origin` then create from `origin/main` when possible.
+4. Do **not** implement feature work directly on `main` unless the user explicitly says to.
+5. If already on a clearly related feature branch for this work, keep it — do not create a duplicate.
+6. Do **not** push unless the user asks.
+
+## 2. Project Status lifecycle (JobJitsu Development · project #2)
+
+Update the **story/issue** being built (not the parent epic unless asked).
+
+| When | Status |
+|------|--------|
+| Branch created / implementation starts | **In Progress** |
+| Slice meets DoD and is ready for human/PR review | **In Review** |
+| PR opened and/or CI verification in flight (or user asks for testing) | **Testing** |
+| PR merged into `main` | **Done** (prefer Actions; agent may set if it merges or user confirms merge) |
+
+Use:
+
+```bash
+pnpm project:status -- <issue-number> "<Status Name>"
+# or
+./scripts/set-project-status.sh <issue-number> "In Progress"
+```
+
+Valid names: `Todo` | `In Progress` | `In Review` | `Testing` | `Done`
+
+Ensure the issue is on project **JobJitsu Development** (#2, owner `ammar-tariq`) before setting status.
+
+## 3. After the slice
+
+1. Commit on the feature branch (Conventional Commits).
+2. Set status **In Review** when asking the user to review or when opening a PR.
+3. When opening a PR (only if the user asks): set **Testing** once the PR exists / CI is the next gate.
+4. Do not mark **Done** until merge is confirmed (workflow or user).
+
+Skip auto-branching / status updates only when the user explicitly opts out (e.g. “stay on main”, “don’t touch the board”).

@@ -11,6 +11,7 @@
   "scripts": {
     "bootstrap": "bash scripts/setup.sh",
     "setup:local": "pnpm run bootstrap",
+    "project:status": "bash scripts/set-project-status.sh",
     "dev": "turbo run dev --parallel",
     "dev:app": "bash scripts/dev-app.sh",
     "dev:website": "bash scripts/dev-website.sh",
