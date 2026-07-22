@@ -26,12 +26,12 @@ Drive documentation phases **in order**, with an **approval checkpoint** after e
 | 3 | [03_generate_architecture.md](./03_generate_architecture.md) | **Stop. Wait for approval.** |
 | 4 | [04_review_architecture.md](./04_review_architecture.md) | **Stop. Wait for approval.** |
 | 5 | [05_generate_user_stories.md](./05_generate_user_stories.md) | **Stop. Wait for approval.** |
-| 6 | [06_review_user_stories.md](./06_review_user_stories.md) | **Stop. Wait for approval.** |
+| 6 | [06_review_user_stories.md](./06_review_user_stories.md) | Stop for approval **or** regenerate until ready if user asks |
 | 7 | [07_generate_roadmap.md](./07_generate_roadmap.md) | **Stop. Wait for approval.** |
 | 8 | [08_generate_project_board.md](./08_generate_project_board.md) | **Stop. Wait for approval.** |
-| 9 | [09_generate_implementation_order.md](./09_generate_implementation_order.md) | **Stop. Wait for approval.** |
+| 9 | [09_generate_implementation_order.md](./09_generate_implementation_order.md) | Produce/refresh [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md); then pipeline complete |
 
-Then report: **Documentation pipeline complete.** Implementation may follow [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md) and [DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md).
+Then report: **Documentation pipeline complete.** Implementation follows [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md), [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md), and [DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md).
 
 ## How to run a step
 

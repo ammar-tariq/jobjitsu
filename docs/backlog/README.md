@@ -5,7 +5,7 @@
 
 **Anchors:** [Product vision](../product/PRODUCT_VISION.md) · [Product modules](../product/FEATURES.md) · [Epic features](./EPIC_FEATURES.md) · [Architecture](../architecture/OVERVIEW.md) · [Brand philosophy](../brand/PRODUCT_PHILOSOPHY.md) · [Definition of Done](../../DEFINITION_OF_DONE.md)
 
-**Current focus:** Complete Desktop Foundation slices ([sprint-1.md](./sprint-1.md)); track done work in [VERTICAL_SLICES.md](./VERTICAL_SLICES.md); next product IA alignment = E03 nav nouns. Build waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md).
+**Current focus:** Follow [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) (canonical task sequence). Next: `PE01-S01-T01`. Sprint ledger: [sprint-1.md](./sprint-1.md) · [VERTICAL_SLICES.md](./VERTICAL_SLICES.md). Waves: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) · [PROJECT_BOARD.md](./PROJECT_BOARD.md).
 
 ---
 
@@ -40,6 +40,10 @@
 | [ACCEPTANCE_CRITERIA.md](./ACCEPTANCE_CRITERIA.md) | AC checklist index |
 | [TECHNICAL_TASKS.md](./TECHNICAL_TASKS.md) | Day-sized tasks |
 | [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) | Dependency graph & waves |
+| [PROJECT_BOARD.md](./PROJECT_BOARD.md) | GitHub Projects columns / Roadmap views |
+| [GITHUB_PROJECT_IMPORT.md](./GITHUB_PROJECT_IMPORT.md) | Milestones → Epics → Stories → Tasks (import) |
+| [../../IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) | Canonical task order (deps, ‖, CP) |
+| [import/](./import/) | CSV + import README |
 | [VERTICAL_SLICES.md](./VERTICAL_SLICES.md) | One-story-at-a-time process & status |
 | [sprint-1.md](./sprint-1.md) | Sprint 1 — Desktop Foundation (shell, DI, events, settings; **no AI**) |
 

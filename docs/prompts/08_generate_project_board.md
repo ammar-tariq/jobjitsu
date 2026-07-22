@@ -4,30 +4,30 @@ You are shaping a **GitHub Projects–ready** board from the JobJitsu backlog.
 
 ## Goal
 
-Produce a board specification (markdown) that maps epics/stories to columns and fields — suitable to create or sync a GitHub Project. Prefer documenting in `docs/backlog/` (e.g. `PROJECT_BOARD.md`) rather than inventing product scope.
+Produce a board specification (markdown) that maps epics/stories to columns and fields — suitable to create or sync a GitHub Project. Living files:
+
+- [docs/backlog/PROJECT_BOARD.md](../backlog/PROJECT_BOARD.md)
+- Ordered waves: [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md)
+
+Prefer documenting in `docs/backlog/` rather than inventing product scope.
 
 ## Required reading
 
 - [docs/backlog/README.md](../backlog/README.md)
+- [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md)
+- [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md)
 - [EPICS.md](../backlog/EPICS.md)
 - [USER_STORIES.md](../backlog/USER_STORIES.md)
 - [DEPENDENCY_GRAPH.md](../backlog/DEPENDENCY_GRAPH.md)
 - [sprint-1.md](../backlog/sprint-1.md)
 - [FEATURES.md](../product/FEATURES.md) status
 
-## Proposed board shape (adapt, don’t invent epics)
-
-**Columns (example):** Backlog → Ready → In progress → In review → Done
-
-**Fields (example):** Epic ID, Horizon, Feature Status (Core/Experimental/Future), Package(s), Blocked by
-
-**Views (example):** Current sprint; H1 only; hide Future
-
 ## Process
 
-1. Draft `docs/backlog/PROJECT_BOARD.md` outline (columns, views, mapping rules). **Wait for approval.**
-2. After approval: write the file; link it from backlog README and IMPLEMENTATION_ROADMAP index.
-3. If the user asks to create the GitHub Project via `gh`, do that only after the markdown board exists and is approved — still no product feature code.
+1. Draft/update `docs/backlog/PROJECT_BOARD.md` (columns, views, mapping rules) aligned with IMPLEMENTATION_ROADMAP waves.
+2. Link from backlog README and IMPLEMENTATION_ROADMAP.
+3. If the user asks to create the GitHub Project via `gh`, do that only after the markdown board exists — still no product feature code.
+4. **Stop and wait for approval** before phase 09 (unless the user asked to continue).
 
 ## Constraints
 

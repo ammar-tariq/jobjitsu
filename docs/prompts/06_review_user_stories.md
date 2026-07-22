@@ -4,10 +4,17 @@ You are reviewing the JobJitsu backlog for quality and scope discipline.
 
 ## Goal
 
-Review [USER_STORIES.md](../backlog/USER_STORIES.md) (and related epic/feature files). Do not invent new product modules.
+Review **both** story surfaces and keep them aligned:
+
+1. Platform decomposition: [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md) (`PE*`)
+2. Delivery backlog: [USER_STORIES.md](../backlog/USER_STORIES.md) (`E*`)
+
+Do not invent new product modules. Write findings to [../roadmap/STORIES_REVIEW.md](../roadmap/STORIES_REVIEW.md). Regenerate until implementation-ready when the user asks to continue.
 
 ## Required reading
 
+- [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md)
+- [../roadmap/STORIES_REVIEW.md](../roadmap/STORIES_REVIEW.md) (prior review, if any)
 - [USER_STORIES.md](../backlog/USER_STORIES.md)
 - [EPICS.md](../backlog/EPICS.md)
 - [docs/backlog/EPIC_FEATURES.md](../backlog/EPIC_FEATURES.md)
@@ -27,15 +34,18 @@ Review [USER_STORIES.md](../backlog/USER_STORIES.md) (and related epic/feature f
 | Size | Story cannot be one vertical slice |
 | Brand | Urgency/guilt/streak framing |
 | Terms | Local LLM as status chrome; Queue/Task Queue confused |
-| Dupes | Overlapping stories without cross-link |
+| Dupes | Overlapping stories without cross-link or PE↔E map |
+| Deps | Cycles, Experimental blocking Core, Workflow requiring Send |
 
 ## Output
 
+1. Update or create [../roadmap/STORIES_REVIEW.md](../roadmap/STORIES_REVIEW.md) with score + findings table.
+2. If the user asked to regenerate until ready: apply fixes to [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md) (and backlog only when delivery IDs must move).
+3. Otherwise ask: **Approve fixes?** Then stop.
+
 | Severity | Story ID | Issue | Recommendation |
 |----------|----------|-------|----------------|
-| P0/P1/P2 | Exx-… | … | … |
-
-Ask: **Approve fixes?** Then stop.
+| P0/P1/P2 | PExx-… / Exx-… | … | … |
 
 ## Forbidden
 

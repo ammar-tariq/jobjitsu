@@ -18,10 +18,9 @@ Keep [docs/product/ROADMAP.md](../product/ROADMAP.md) (horizons) and [docs/backl
 
 ## Deliverables
 
-1. Plan: what to update in product ROADMAP vs backlog README/epics. **Wait for approval.**
-2. Ensure horizons map to epic sets without promising Future modules as H1.
-3. Ensure IMPLEMENTATION_ROADMAP.md stays a **pointer** to backlog + product ROADMAP.
-4. Optional: short “current focus” blurb in backlog README pointing at active sprint.
+1. Ensure [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) orders `PE*` stories into waves (GitHub Roadmap–ready) and stays linked from backlog + product ROADMAP.
+2. Keep [docs/product/ROADMAP.md](../product/ROADMAP.md) horizons coherent with Core vs Experimental vs Future — do not promise Future as H1.
+3. Optional: short “current focus” blurb in backlog README pointing at active sprint + next PE slice.
 
 ## Constraints
 

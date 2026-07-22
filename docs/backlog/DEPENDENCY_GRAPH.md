@@ -192,6 +192,28 @@ flowchart LR
 
 ---
 
+## PE* wave alignment
+
+Platform decomposition waves in [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) map to the `E*` waves above:
+
+| PE wave | Backlog wave | Notes |
+|---------|--------------|-------|
+| W0 Shell | 0–1 | E01 + E03 |
+| W1 Data & events | 1 | E02 |
+| W2 Trust & identity | 2 | E04 + E05 (+ empty states) |
+| W3 Local intelligence | 3 | E06 |
+| W4 Craft objects | 3 | E07 + E08 |
+| W5 Sovereignty | 4 | E09 + E10 + E13 |
+| W6 Agent & nudges | 5 | E12 + E11 |
+| W7 First-run polish | 6 | E14 + QA |
+| W8 Experimental | — | Admit via FEATURES |
+| W9 Future | 7–9 | E15–E19 + PE Future stubs |
+
+GitHub hierarchy (Milestone → Epic → Story → Task): [GITHUB_PROJECT_IMPORT.md](./GITHUB_PROJECT_IMPORT.md).  
+**Canonical task order:** [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md).
+
+---
+
 ## Mapping to ADRs
 
 | Wave | ADRs exercised |

@@ -4,13 +4,15 @@ You are defining the **build order** for JobJitsu so contributors minimize risk 
 
 ## Goal
 
-Update [DEPENDENCY_GRAPH.md](../backlog/DEPENDENCY_GRAPH.md) and related backlog guidance so implementation order is explicit. Optionally refresh [TECHNICAL_TASKS.md](../backlog/TECHNICAL_TASKS.md) for near-term waves only.
+Publish [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md) as the **canonical task sequence**: every Core task in dependency order, grouped by milestone, with parallel batches and critical path marked. Align [DEPENDENCY_GRAPH.md](../backlog/DEPENDENCY_GRAPH.md) if needed.
 
 ## Required reading
 
+- [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md)
 - [DEPENDENCY_GRAPH.md](../backlog/DEPENDENCY_GRAPH.md)
 - [EPICS.md](../backlog/EPICS.md)
 - [USER_STORIES.md](../backlog/USER_STORIES.md)
+- [../roadmap/USER_STORIES.md](../roadmap/USER_STORIES.md)
 - [TECHNICAL_TASKS.md](../backlog/TECHNICAL_TASKS.md)
 - [VERTICAL_SLICES.md](../backlog/VERTICAL_SLICES.md)
 - [docs/architecture/PACKAGE_BOUNDARIES.md](../architecture/PACKAGE_BOUNDARIES.md)
@@ -29,25 +31,17 @@ Update [DEPENDENCY_GRAPH.md](../backlog/DEPENDENCY_GRAPH.md) and related backlog
 
 ## Process
 
-1. Publish proposed waves (Mermaid + ordered list) with rationale. **Wait for approval.**
-2. After approval: update DEPENDENCY_GRAPH / backlog README “waves” section; align TECHNICAL_TASKS deps for the next wave only.
-3. Point [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) at the updated graph.
-
-## Output example
-
-```text
-Wave 0 — … 
-Wave 1 — …
-Critical path: E0x → E0y → …
-Next slice recommendation: E0x-F0y-S0z
-```
+1. Confirm [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) `PE*` waves and [GITHUB_PROJECT_IMPORT.md](../backlog/GITHUB_PROJECT_IMPORT.md) hierarchy are coherent with this graph.
+2. Update this file’s PE↔E wave table if waves change.
+3. Optionally refresh [TECHNICAL_TASKS.md](../backlog/TECHNICAL_TASKS.md) for the next wave only (prefer PE task IDs / twins).
+4. Report: **Documentation pipeline phase 09 complete.**
 
 ## Done when
 
-- Order is documented and linked
-- Next recommended slice is clear
-- Conventional Commit
-- Report: **Documentation pipeline phase 09 complete.** If this was run via [00_PROJECT_WORKFLOW.md](./00_PROJECT_WORKFLOW.md), state that the full pipeline may finish after user approval.
+- Order is documented and linked (PE roadmap + E graph + GitHub import)
+- Next recommended slice/task is clear (`PE01-S01-T01`)
+- Conventional Commit (if user wants a commit)
+- **Stop and wait for approval** before product feature implementation (unless user waives)
 
 ## Forbidden
 
