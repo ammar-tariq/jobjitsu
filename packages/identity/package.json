@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@jobjitsu/core": "workspace:*",
+    "@jobjitsu/shared": "workspace:*",
     "@jobjitsu/storage": "workspace:*"
   },
   "scripts": {

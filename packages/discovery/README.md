@@ -1,19 +1,24 @@
 # `@jobjitsu/discovery`
 
-Role discovery source interfaces and curation contracts
+Role discovery sources and curation contracts.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+| Piece                             | State                               |
+| --------------------------------- | ----------------------------------- |
+| `DiscoverySource` / `RoleListing` | Done                                |
+| `createFakeJobsSource`            | Done — **no Playwright / scrapers** |
+| Real board adapters               | Not yet                             |
 
-## Scripts
+## Fake Jobs
 
-```bash
-pnpm --filter @jobjitsu/discovery build
-pnpm --filter @jobjitsu/discovery test
-pnpm --filter @jobjitsu/discovery typecheck
+```ts
+import { createFakeJobsSource } from "@jobjitsu/discovery";
+
+const source = createFakeJobsSource();
+const roles = await source.list();
 ```
 
-## Boundaries
+In-memory fixture listings for demos and tests.
 
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/EXTENSION_SYSTEM.md](../../docs/architecture/EXTENSION_SYSTEM.md).

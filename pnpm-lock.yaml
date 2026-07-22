@@ -203,6 +203,9 @@ importers:
       '@jobjitsu/core':
         specifier: workspace:*
         version: link:../core
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.7.2
@@ -267,6 +270,9 @@ importers:
       '@jobjitsu/core':
         specifier: workspace:*
         version: link:../core
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@jobjitsu/storage':
         specifier: workspace:*
         version: link:../storage
@@ -399,6 +405,9 @@ importers:
       '@jobjitsu/queue':
         specifier: workspace:*
         version: link:../queue
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.7.2

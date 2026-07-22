@@ -16,7 +16,8 @@
     "dist"
   ],
   "dependencies": {
-    "@jobjitsu/core": "workspace:*"
+    "@jobjitsu/core": "workspace:*",
+    "@jobjitsu/shared": "workspace:*"
   },
   "scripts": {
     "build": "tsc -b",

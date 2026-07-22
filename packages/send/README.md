@@ -1,19 +1,31 @@
 # `@jobjitsu/send`
 
-Outbound boundary — sole career-data egress
+Outbound boundary — sole career-data egress.
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+| Piece                       | State                       |
+| --------------------------- | --------------------------- |
+| `SendChannel` contract      | Done                        |
+| `createFakeGmailChannel`    | Done — **no Google / SMTP** |
+| Real Gmail / board adapters | Not yet                     |
 
-## Scripts
+## Fake Gmail
 
-```bash
-pnpm --filter @jobjitsu/send build
-pnpm --filter @jobjitsu/send test
-pnpm --filter @jobjitsu/send typecheck
+```ts
+import { createFakeGmailChannel } from "@jobjitsu/send";
+
+const gmail = createFakeGmailChannel();
+await gmail.send({/* … */});
+gmail.outbox; // local only
 ```
 
-## Boundaries
+Messages land in an in-memory outbox with an honest “not delivered” detail.
 
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+## Laws
+
+- Agent must never call send channels directly
+- Approval policy is enforced by the host/orchestrator, not skipped by fakes
+- Never claim real-world delivery for fake channels
+
+See [docs/architecture/PACKAGE_BOUNDARIES.md](../../docs/architecture/PACKAGE_BOUNDARIES.md).

@@ -16,10 +16,11 @@
     "dist"
   ],
   "dependencies": {
+    "@jobjitsu/applications": "workspace:*",
     "@jobjitsu/core": "workspace:*",
     "@jobjitsu/events": "workspace:*",
-    "@jobjitsu/applications": "workspace:*",
-    "@jobjitsu/queue": "workspace:*"
+    "@jobjitsu/queue": "workspace:*",
+    "@jobjitsu/shared": "workspace:*"
   },
   "scripts": {
     "build": "tsc -b",

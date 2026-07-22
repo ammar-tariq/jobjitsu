@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | Desktop Foundation ([sprint-1.md](./sprint-1.md)) |
-| **Story** | DF-10 Extension SDK complete; next host wiring / DF-09 plugin host |
-| **Status** | Extension SDK implemented (empty manager) |
-| **Note** | No product extensions bundled — **still no AI** |
+| **Epic** | Desktop Foundation + fake providers |
+| **Story** | Fake AI / Gmail / Jobs / Resume available for local demos |
+| **Status** | Fake providers landed (no real integrations) |
+| **Note** | Still no Ollama, Gmail API, or Playwright |
 
 ## Completed slices
 
@@ -26,6 +26,7 @@ Never build multiple features in parallel in the same change set.
 | DF-02 | 2026-07-22 | Desktop shell layout + Coming Soon nav (Vite/React) |
 | Foundation spine | 2026-07-22 | shared, events, logger, config, core, sdk, testing |
 | DF-10 | 2026-07-22 | Extension SDK manager, lifecycle, DI, events |
+| E06-F02 + fakes | 2026-07-22 | Fake AI, Gmail, Jobs, Resume providers |
 
 ## Sprint 1 sequence
 

@@ -1,15 +1,19 @@
-# Examples
+# Fake providers
 
-Fixtures and sample projects for JobJitsu contributors.
+Development and test doubles for JobJitsu. **No real integrations.**
 
-## Rules
+| Fake   | Package               | Factory                  | Does not connect    |
+| ------ | --------------------- | ------------------------ | ------------------- |
+| AI     | `@jobjitsu/ai`        | `createFakeAiProvider`   | Ollama / cloud LLMs |
+| Gmail  | `@jobjitsu/send`      | `createFakeGmailChannel` | Google / SMTP       |
+| Jobs   | `@jobjitsu/discovery` | `createFakeJobsSource`   | Playwright / boards |
+| Resume | `@jobjitsu/identity`  | `createFakeResumeStore`  | Cloud OCR / uploads |
 
-- **No real user career data** in git
-- Synthetic résumés / CSV roles only
-- No production credentials
+```ts
+import { createFakeAiProvider } from "@jobjitsu/ai";
+import { createFakeGmailChannel } from "@jobjitsu/send";
+import { createFakeJobsSource } from "@jobjitsu/discovery";
+import { createFakeResumeStore } from "@jobjitsu/identity";
+```
 
-## Layout
-
-Add example packages under `examples/<name>` when needed (listed in `pnpm-workspace.yaml`).
-
-Nothing implemented yet — scaffold only.
+Use these to prove architecture and UI flows before wiring real adapters.

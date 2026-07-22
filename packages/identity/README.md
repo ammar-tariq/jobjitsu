@@ -1,19 +1,24 @@
 # `@jobjitsu/identity`
 
-Profile and résumé source of truth (local)
+Profile and résumé source of truth (local).
 
 ## Status
 
-Scaffold only — **no business logic** yet. See [docs/architecture](../../docs/architecture/OVERVIEW.md) and [docs/backlog](../../docs/backlog/README.md).
+| Piece                                      | State                       |
+| ------------------------------------------ | --------------------------- |
+| `ResumeStore` / `ResumeDocument` contracts | Done                        |
+| `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud** |
+| Real import / filesystem persistence       | Not yet                     |
 
-## Scripts
+## Fake Resume
 
-```bash
-pnpm --filter @jobjitsu/identity build
-pnpm --filter @jobjitsu/identity test
-pnpm --filter @jobjitsu/identity typecheck
+```ts
+import { createFakeResumeStore } from "@jobjitsu/identity";
+
+const store = createFakeResumeStore();
+const resume = await store.getResume();
 ```
 
-## Boundaries
+Seeded fixture identity for demos and tests. Stays on-device in process memory.
 
-Follow [package boundaries](../../docs/architecture/PACKAGE_BOUNDARIES.md). `agent` must never depend on `send`.
+See [docs/architecture/PACKAGE_BOUNDARIES.md](../../docs/architecture/PACKAGE_BOUNDARIES.md).
