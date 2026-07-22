@@ -69,6 +69,7 @@ Your belt will be tied. Waiting for the first throw.
 |-----|-------------|
 | [Architecture overview](docs/architecture/OVERVIEW.md) | Local-first Career OS design |
 | [Monorepo](docs/architecture/MONOREPO.md) | Repository & package map |
+| [ADRs](docs/adr/README.md) | Accepted decisions (Tauri, React, …) |
 | [Full index](docs/architecture/README.md) | Events, plugins, desktop, AI, tests |
 
 ---
