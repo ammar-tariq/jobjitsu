@@ -77,6 +77,15 @@ export interface EventPayloadMap {
   };
   "Plugin.Enabled": { readonly pluginId: PluginId };
   "Plugin.Disabled": { readonly pluginId: PluginId };
+  "Extension.Registered": { readonly extensionId: string };
+  "Extension.Enabled": { readonly extensionId: string };
+  "Extension.Disabled": { readonly extensionId: string };
+  "Extension.Unloaded": { readonly extensionId: string };
+  "Extension.Failed": {
+    readonly extensionId: string;
+    readonly code?: string;
+    readonly message?: string;
+  };
 }
 
 export type DomainEvent<N extends EventName = EventName> = {

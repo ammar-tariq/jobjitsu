@@ -14,6 +14,20 @@ Extensions deepen the Career OS **without** forking into unrelated products or c
 
 ---
 
+## SDK surface
+
+Implementation: [`packages/extension-sdk`](../../packages/extension-sdk/README.md).
+
+```ts
+import { createExtensionManager, defineExtension } from "@jobjitsu/extension-sdk";
+```
+
+- Type-safe contribution map · lifecycle hooks · scoped DI · optional `Extension.*` events
+- Manager starts **empty** — no official extensions are bundled
+- Depends on `shared` / `logger` / `events` / `core` only (no cycle with `sdk` or `plugin-sdk`)
+
+---
+
 ## Contribution points
 
 | Point | Examples | Guardrail |

@@ -49,3 +49,17 @@ export type {
   PluginSkillContext,
 } from "@jobjitsu/plugin-sdk";
 export { FORBIDDEN_IMPLICIT_EGRESS_CAPS, PLUGIN_CAPABILITIES } from "@jobjitsu/plugin-sdk";
+
+/** Extension SDK (host contributions — no product extensions bundled) */
+export type {
+  ContributionPoint,
+  ExtensionDefinition,
+  ExtensionManager,
+  ExtensionManifest,
+} from "@jobjitsu/extension-sdk";
+export {
+  CONTRIBUTION_POINTS,
+  ExtensionServiceKeys,
+  createExtensionManager,
+  defineExtension,
+} from "@jobjitsu/extension-sdk";

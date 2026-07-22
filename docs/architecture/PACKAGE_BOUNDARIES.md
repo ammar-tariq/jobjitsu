@@ -91,8 +91,9 @@ agent must not import send
 - **Depends on:** `shared`, `events`, `logger`, `config`.
 
 ### `sdk`
-- Public barrel for plugins (`HostContext`, safe re-exports).
+- Public barrel for plugins (`HostContext`, safe re-exports) plus extension manager APIs.
 - **Must not:** export or boot `@jobjitsu/ai`.
+- May re-export `@jobjitsu/extension-sdk` without creating cycles (`sdk` → `extension-sdk` → `core`).
 
 ### `testing`
 - `expectOk` / `createTestFoundation` helpers for the spine.

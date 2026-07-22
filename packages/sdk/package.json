@@ -19,6 +19,7 @@
     "@jobjitsu/config": "workspace:*",
     "@jobjitsu/core": "workspace:*",
     "@jobjitsu/events": "workspace:*",
+    "@jobjitsu/extension-sdk": "workspace:*",
     "@jobjitsu/logger": "workspace:*",
     "@jobjitsu/plugin-sdk": "workspace:*",
     "@jobjitsu/shared": "workspace:*"

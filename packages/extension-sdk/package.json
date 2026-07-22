@@ -2,7 +2,7 @@
   "name": "@jobjitsu/extension-sdk",
   "version": "0.0.0",
   "private": true,
-  "description": "Host extension contribution contracts",
+  "description": "Type-safe host extension SDK — registration, lifecycle, DI, events",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,9 @@
   ],
   "dependencies": {
     "@jobjitsu/core": "workspace:*",
-    "@jobjitsu/plugin-sdk": "workspace:*"
+    "@jobjitsu/events": "workspace:*",
+    "@jobjitsu/logger": "workspace:*",
+    "@jobjitsu/shared": "workspace:*"
   },
   "scripts": {
     "build": "tsc -b",

@@ -35,7 +35,7 @@ shared → events → logger → config → core → sdk → testing
 | [scheduler](./scheduler)         | `@jobjitsu/scheduler`     | Local jobs                                       |
 | [agent](./agent)                 | `@jobjitsu/agent`         | Preparative agent (≠ send)                       |
 | [plugin-sdk](./plugin-sdk)       | `@jobjitsu/plugin-sdk`    | Plugin contracts                                 |
-| [extension-sdk](./extension-sdk) | `@jobjitsu/extension-sdk` | Extension contracts                              |
+| [extension-sdk](./extension-sdk) | `@jobjitsu/extension-sdk` | Host extension manager + contribution SDK        |
 | [ui](./ui)                       | `@jobjitsu/ui`            | Design tokens & Jj* primitives                   |
 
 See [architecture](../docs/architecture/PACKAGE_BOUNDARIES.md).

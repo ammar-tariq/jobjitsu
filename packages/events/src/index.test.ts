@@ -13,6 +13,11 @@ describe("@jobjitsu/events", () => {
     expect(DURABLE_EVENT_NAMES).toContain("Send.Unknown");
   });
 
+  it("includes extension lifecycle in the catalog", () => {
+    expect(EVENT_NAMES).toContain("Extension.Enabled");
+    expect(DURABLE_EVENT_NAMES).toContain("Extension.Disabled");
+  });
+
   it("types EventBus without providing an implementation", () => {
     const keys: Array<keyof EventBus> = ["publish", "subscribe", "subscribeAll"];
     expect(keys).toHaveLength(3);

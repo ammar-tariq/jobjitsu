@@ -34,6 +34,11 @@ export const EVENT_NAMES = [
   "Scheduler.JobRan",
   "Plugin.Enabled",
   "Plugin.Disabled",
+  "Extension.Registered",
+  "Extension.Enabled",
+  "Extension.Disabled",
+  "Extension.Unloaded",
+  "Extension.Failed",
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];
@@ -51,6 +56,8 @@ export const DURABLE_EVENT_NAMES = [
   "Preferences.Changed",
   "Plugin.Enabled",
   "Plugin.Disabled",
+  "Extension.Enabled",
+  "Extension.Disabled",
 ] as const satisfies readonly EventName[];
 
 export type DurableEventName = (typeof DURABLE_EVENT_NAMES)[number];

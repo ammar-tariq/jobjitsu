@@ -229,9 +229,15 @@ importers:
       '@jobjitsu/core':
         specifier: workspace:*
         version: link:../core
-      '@jobjitsu/plugin-sdk':
+      '@jobjitsu/events':
         specifier: workspace:*
-        version: link:../plugin-sdk
+        version: link:../events
+      '@jobjitsu/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.7.2
@@ -359,6 +365,9 @@ importers:
       '@jobjitsu/events':
         specifier: workspace:*
         version: link:../events
+      '@jobjitsu/extension-sdk':
+        specifier: workspace:*
+        version: link:../extension-sdk
       '@jobjitsu/logger':
         specifier: workspace:*
         version: link:../logger

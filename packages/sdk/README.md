@@ -16,6 +16,9 @@ Public SDK surface for first-party and future third-party plugins.
 - `@jobjitsu/ai` — do not import AI runtime from the public SDK yet
 - Send execute — plugins may only request via granted caps later
 
+Also re-exports `@jobjitsu/extension-sdk` (`createExtensionManager`, `defineExtension`).
+No product extensions are bundled.
+
 ```bash
 pnpm --filter @jobjitsu/sdk build
 pnpm --filter @jobjitsu/sdk test
