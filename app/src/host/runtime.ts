@@ -31,6 +31,7 @@ import {
   type IpcBridge,
   type IpcDispatcher,
 } from "../ipc/index.js";
+import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 
 export type HostActivityEntry = {
   readonly name: EventName;
@@ -46,6 +47,8 @@ export type HostRuntime = {
   readonly ipc: IpcDispatcher;
   /** Typed UI bridge — allowlisted methods only. */
   readonly bridge: IpcBridge;
+  /** Appearance persistence stub (shared across restarts when injected). */
+  readonly appearance: AppearanceStore;
   /** Start the demo cascade: App.Started → … → Email.Synced */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
@@ -55,6 +58,8 @@ export type HostRuntime = {
 export type CreateHostRuntimeOptions = {
   readonly version?: string;
   readonly ai?: AiProvider;
+  /** Shared appearance store so theme survives a process-local restart. */
+  readonly appearance?: AppearanceStore;
 };
 
 /**
@@ -160,7 +165,8 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     }
   });
 
-  const ipc = createHostIpcDispatcher();
+  const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
+  const ipc = createHostIpcDispatcher({ appearance });
   const bridge = createIpcBridge(ipc);
 
   return {
@@ -169,6 +175,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     logger,
     ipc,
     bridge,
+    appearance,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",

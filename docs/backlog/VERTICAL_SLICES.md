@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE01 Desktop UI / Desktop Foundation |
-| **Story** | Next: PE01-S04 — Dark-default appearance (or PE02 storage) |
-| **Status** | PE01-S03 complete (this slice) |
-| **Note** | Deny-by-default IPC allowlist + typed bridge; `ai.complete` closed |
+| **Epic** | PE01 Desktop UI → PE02 Storage |
+| **Story** | Next: PE02-S01 — Persist documents on-device (or PE04-S03 Agent chrome) |
+| **Status** | PE01-S04 complete (this slice) |
+| **Note** | Dark default + light tokens; appearance store stub; AA primary-text smoke |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE01-S04 | 2026-07-23 | Midnight Ink default; light map; Preferences toggle; contrast smoke |
 | PE01-S03 | 2026-07-23 | IPC allowlist, fail-closed dispatcher, typed bridge, contract tests |
 | PE01-S02 | 2026-07-23 | Primary H1 nav: Applications → Timeline; one view at a time |
 | PE01-S01 / DF-01 | 2026-07-23 | Tauri host `app/src-tauri`; `pnpm dev:desktop` |
