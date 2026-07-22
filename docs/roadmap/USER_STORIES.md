@@ -389,6 +389,27 @@
 
 **Status:** proposed
 
+### PE04-S05 — Show and change on-device data folder
+
+**Description:** As a user, I can see where JobJitsu stores my data and choose a different folder on this device.
+
+**Acceptance criteria:**
+  - Preferences shows the current data folder and the platform default.
+  - Changing the folder goes through host storage APIs (not UI→storage).
+  - Restore default is available.
+  - Preferences.Changed emits with `dataRoot` on change.
+  - Copy never implies a JobJitsu cloud.
+
+**Dependencies:** PE02-S01
+
+**Priority:** P0
+
+**Technical notes:** Trust surface for backup / encrypted volumes; browser-safe path preference until Tauri binds FS root.
+
+**Testing notes:** Default path + set/reset IPC and Preferences UI.
+
+**Status:** done (2026-07-23)
+
 ## PE05
 
 **Local Intelligence** · Status: **Core · H1** · Priority: **P0**

@@ -2,6 +2,7 @@ import { createAppError, err, ok } from "@jobjitsu/shared";
 import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
+import { createMemoryDataRootStore, type DataRootStore } from "../host/data-root-store.js";
 import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
@@ -11,6 +12,7 @@ export type CreateHostIpcOptions = {
   readonly aiStatus?: AiStatusSnapshot;
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
+  readonly dataRoot?: DataRootStore;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
 };
@@ -27,6 +29,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   };
   const profiles = options.profiles;
   const resumeLibrary = options.resumeLibrary;
+  const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const bus = options.bus;
 
   return {
@@ -140,6 +143,34 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           }),
         );
       }
+    },
+    "storage.getDataRoot": async () => ok({ dataRoot: await dataRoot.get() }),
+    "storage.setDataRoot": async (payload) => {
+      try {
+        const next = await dataRoot.set(payload.path);
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+        }
+        return ok({ dataRoot: next });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update data folder", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That folder path could not be saved. Try again.",
+            detail: "storage:dataRoot",
+            cause,
+          }),
+        );
+      }
+    },
+    "storage.resetDataRoot": async () => {
+      const next = await dataRoot.reset();
+      if (bus) {
+        await bus.publish("Preferences.Changed", { keys: ["dataRoot"] });
+      }
+      return ok({ dataRoot: next });
     },
   };
 }

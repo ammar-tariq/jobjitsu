@@ -9,7 +9,12 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { ProfileSnapshot, ResumeVersionSnapshot, ThemePreference } from "../ipc/commands.js";
+import type {
+  DataRootSnapshot,
+  ProfileSnapshot,
+  ResumeVersionSnapshot,
+  ThemePreference,
+} from "../ipc/commands.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -17,7 +22,7 @@ export type PreferencesViewProps = {
   readonly bridge: IpcBridge;
 };
 
-/** Preferences — profile, resume library, appearance; stored on this device. */
+/** Preferences — profile, resume library, data folder, appearance; on this device. */
 export function PreferencesView({
   theme,
   onThemeChange,
@@ -38,6 +43,11 @@ export function PreferencesView({
   const [importing, setImporting] = useState(false);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [dataRoot, setDataRoot] = useState<DataRootSnapshot | null>(null);
+  const [dataPathDraft, setDataPathDraft] = useState("");
+  const [dataStatus, setDataStatus] = useState<string | null>(null);
+  const [savingDataRoot, setSavingDataRoot] = useState(false);
 
   const refreshVersions = async (): Promise<void> => {
     const result = await bridge.listResumeVersions();
@@ -63,6 +73,12 @@ export function PreferencesView({
       if (!cancelled && result.ok) {
         setVersions(result.value.versions);
         setSelectedId(result.value.selectedId);
+      }
+    });
+    void bridge.getDataRoot().then((result) => {
+      if (!cancelled && result.ok) {
+        setDataRoot(result.value.dataRoot);
+        setDataPathDraft(result.value.dataRoot.path);
       }
     });
     return () => {
@@ -141,6 +157,36 @@ export function PreferencesView({
     });
   };
 
+  const onSaveDataRoot = (): void => {
+    setSavingDataRoot(true);
+    setDataStatus(null);
+    void bridge.setDataRoot(dataPathDraft).then((result) => {
+      setSavingDataRoot(false);
+      if (!result.ok) {
+        setDataStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setDataRoot(result.value.dataRoot);
+      setDataPathDraft(result.value.dataRoot.path);
+      setDataStatus("Data folder updated — still on this device.");
+    });
+  };
+
+  const onResetDataRoot = (): void => {
+    setSavingDataRoot(true);
+    setDataStatus(null);
+    void bridge.resetDataRoot().then((result) => {
+      setSavingDataRoot(false);
+      if (!result.ok) {
+        setDataStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setDataRoot(result.value.dataRoot);
+      setDataPathDraft(result.value.dataRoot.path);
+      setDataStatus("Restored the default data folder on this device.");
+    });
+  };
+
   return (
     <Stack spacing={3} data-testid="jj-preferences" sx={{ maxWidth: "40rem" }}>
       <Stack spacing={1}>
@@ -148,8 +194,8 @@ export function PreferencesView({
           Preferences
         </Typography>
         <Typography color="text.secondary">
-          Profile, resume library, and appearance stay on this device. Nothing is uploaded to a
-          JobJitsu cloud.
+          Profile, resume library, data folder, and appearance stay on this device. Nothing is
+          uploaded to a JobJitsu cloud.
         </Typography>
       </Stack>
 
@@ -283,6 +329,51 @@ export function PreferencesView({
             No resumes imported yet.
           </Typography>
         )}
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-data-folder">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Data folder
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          Profile, resumes, and library files are stored here. Change it for an encrypted volume or
+          backup location you control.
+        </Typography>
+        {dataRoot ? (
+          <Typography color="text.secondary" variant="body2" data-testid="jj-data-folder-default">
+            Default: {dataRoot.defaultPath}
+          </Typography>
+        ) : null}
+        <TextField
+          label="Folder path"
+          value={dataPathDraft}
+          onChange={(event) => setDataPathDraft(event.target.value)}
+          size="small"
+          fullWidth
+          spellCheck={false}
+          autoComplete="off"
+        />
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            onClick={onSaveDataRoot}
+            disabled={savingDataRoot || dataPathDraft.trim().length === 0}
+          >
+            Save location
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={onResetDataRoot}
+            disabled={savingDataRoot || !dataRoot?.isCustom}
+          >
+            Use default
+          </Button>
+        </Stack>
+        {dataStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {dataStatus}
+          </Typography>
+        ) : null}
       </Stack>
 
       <Stack spacing={1}>
