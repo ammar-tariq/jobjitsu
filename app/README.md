@@ -63,16 +63,16 @@ Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/
 
 ## Architecture notes
 
-| Concern      | Choice                                                                                                          |
-| ------------ | --------------------------------------------------------------------------------------------------------------- |
-| Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                               |
-| UI           | React + MUI (dashboard shell) in webview (ADR 0002) — subscribes only                                           |
-| TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md)) |
-| Host runtime | `src/host` owns AI / resume / mail fakes (process-local)                                                        |
-| Bus          | `@jobjitsu/events` — awaited async handlers                                                                     |
-| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced`                                                 |
-| UI → AI      | **Forbidden** (`ui-ai-fence` test)                                                                              |
-| IPC          | Deny-by-default; no career commands yet ([ADR 0013](../docs/adr/0013-ipc-bridge.md))                            |
+| Concern      | Choice                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                                             |
+| UI           | React + MUI (dashboard shell) in webview (ADR 0002) — subscribes only                                                         |
+| TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md))               |
+| Host runtime | `src/host` owns AI / resume / mail fakes (process-local)                                                                      |
+| Bus          | `@jobjitsu/events` — awaited async handlers                                                                                   |
+| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced`                                                               |
+| UI → AI      | **Forbidden** (`ui-ai-fence` test)                                                                                            |
+| IPC          | Deny-by-default allowlist (`app/src/ipc`); `ping` + theme / `ai.getStatus` stubs ([ADR 0013](../docs/adr/0013-ipc-bridge.md)) |
 
 See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
@@ -81,4 +81,4 @@ See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 - No career egress from the renderer; launch uses an in-memory fake mailbox only.
 - Shell must not import `@jobjitsu/ai`.
 - Webview capabilities are `core:default` only — no ambient filesystem/shell APIs.
-- Narrow IPC when product commands arrive ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
+- Narrow IPC allowlist in `src/ipc` — unknown commands and `ai.complete` are denied ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
