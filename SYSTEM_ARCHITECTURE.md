@@ -2,9 +2,11 @@
 
 > **How** JobJitsu is structured — not product vision, not the build backlog.
 
-This file is an **index**. The living architecture lives under [`docs/architecture/`](docs/architecture/).
+## Primary document
 
-## Start here
+**[docs/architecture/SYSTEM_ARCHITECTURE.md](docs/architecture/SYSTEM_ARCHITECTURE.md)** — system map (C4 context/containers, layers, runtime paths, AI control plane, data, events, extensibility).
+
+## Detail index
 
 | Doc | Responsibility |
 |-----|----------------|
@@ -14,6 +16,7 @@ This file is an **index**. The living architecture lives under [`docs/architectu
 | [ADRs](docs/adr/README.md) | Accepted technical decisions |
 | [Monorepo (ops)](MONOREPO.md) | Tooling, scripts, workspace commands |
 | [Monorepo (design)](docs/architecture/MONOREPO.md) | Package map and dependency direction |
+| [Readiness report](ARCHITECTURE_READINESS_REPORT.md) | Docs readiness score |
 
 ## Related (not architecture)
 

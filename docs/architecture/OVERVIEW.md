@@ -41,6 +41,7 @@ flowchart TB
 
 | Document | Covers |
 |----------|--------|
+| [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) | System map (C4, runtime paths, control plane) |
 | [MONOREPO.md](./MONOREPO.md) | Repository layout and workspace roles |
 | [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) | Package ownership and dependency rules |
 | [EVENT_SYSTEM.md](./EVENT_SYSTEM.md) | Local domain events and audit |

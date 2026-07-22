@@ -4,6 +4,7 @@ Design docs for JobJitsu — the AI Career Operating System.
 
 | Doc | Topic |
 |-----|--------|
+| [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md) | System map (C4, layers, runtime paths) |
 | [OVERVIEW.md](./OVERVIEW.md) | Thesis, laws, module mapping |
 | [MONOREPO.md](./MONOREPO.md) | Repository structure |
 | [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) | Package ownership & dependency rules |
