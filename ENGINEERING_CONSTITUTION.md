@@ -72,6 +72,11 @@ Only after planning is complete should implementation begin.
 
 Documentation is part of the product.
 
+For large documentation initiatives, use the Cursor prompt pipeline:
+
+- [docs/prompts/00_PROJECT_WORKFLOW.md](docs/prompts/00_PROJECT_WORKFLOW.md)
+- Index: [docs/prompts/README.md](docs/prompts/README.md)
+
 Whenever behavior changes:
 
 - Documentation must be updated.

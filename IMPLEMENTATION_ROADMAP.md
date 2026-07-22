@@ -29,3 +29,4 @@ This file is an **index**. The living implementation plan lives under [`docs/bac
 - Prioritize architecture and reusable infrastructure before business features.
 - Prefer independently mergeable vertical slices ([VERTICAL_SLICES.md](docs/backlog/VERTICAL_SLICES.md)).
 - Do not treat horizon aspirational modules as Horizon 1 commitments — see [FEATURES.md](docs/product/FEATURES.md) status labels.
+- To regenerate or extend docs via Cursor, use [docs/prompts/](docs/prompts/README.md) (start with [00_PROJECT_WORKFLOW.md](docs/prompts/00_PROJECT_WORKFLOW.md)).

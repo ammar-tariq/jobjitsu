@@ -1,11 +1,17 @@
 Before writing any code:
 
+0. If documentation itself is incomplete or you are bootstrapping the project,
+   prefer the documentation pipeline: [docs/prompts/00_PROJECT_WORKFLOW.md](./docs/prompts/00_PROJECT_WORKFLOW.md)
+   (execute phases with approval checkpoints). Day-to-day feature work resumes below
+   after docs phases are done (or the user waives remaining phases for a narrow slice).
+
 1. Read:
    - docs/brand/
    - docs/product/
    - docs/architecture/
    - docs/adr/
    - .cursor/rules/
+   - docs/product/TERMINOLOGY.md
 
 2. Understand the request.
 
