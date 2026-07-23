@@ -33,8 +33,22 @@ export function createIoKvStore(layout: StorageLayout, io: LocalFsIo): KvStore {
         return path;
       }
       try {
+        // Prefer exists() — Tauri missing-file errors are not always Node-shaped ENOENT.
+        if (!(await io.exists(path.value))) {
+          return ok(undefined);
+        }
         const raw = await io.readText(path.value);
-        return ok(JSON.parse(raw) as T);
+        try {
+          return ok(JSON.parse(raw) as T);
+        } catch (cause) {
+          return err(
+            createAppError("unavailable", "Could not read document", {
+              message: "The on-device store file could not be parsed.",
+              detail: "kv:get:parse",
+              cause,
+            }),
+          );
+        }
       } catch (cause) {
         if (isNotFoundError(cause)) {
           return ok(undefined);

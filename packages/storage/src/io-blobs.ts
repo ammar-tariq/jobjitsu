@@ -60,8 +60,12 @@ export function createIoBlobStore(layout: StorageLayout, io: LocalFsIo): BlobSto
       if (!dirResult.ok) {
         return dirResult;
       }
+      const dataPath = joinStoragePath(dirResult.value, "data");
       try {
-        return ok(await io.readBytes(joinStoragePath(dirResult.value, "data")));
+        if (!(await io.exists(dataPath))) {
+          return ok(undefined);
+        }
+        return ok(await io.readBytes(dataPath));
       } catch (cause) {
         if (isNotFoundError(cause)) {
           return ok(undefined);
@@ -81,8 +85,12 @@ export function createIoBlobStore(layout: StorageLayout, io: LocalFsIo): BlobSto
       if (!dirResult.ok) {
         return dirResult;
       }
+      const metaPath = joinStoragePath(dirResult.value, "meta.json");
       try {
-        const raw = await io.readText(joinStoragePath(dirResult.value, "meta.json"));
+        if (!(await io.exists(metaPath))) {
+          return ok(undefined);
+        }
+        const raw = await io.readText(metaPath);
         return ok(JSON.parse(raw) as BlobMeta);
       } catch (cause) {
         if (isNotFoundError(cause)) {
