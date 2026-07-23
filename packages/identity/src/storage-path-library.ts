@@ -32,12 +32,14 @@ export function createStoragePathLibrary(kv: KvStore): PathLibrary {
   return {
     async list(options: PathListOptions = {}) {
       const includeArchived = options.includeArchived === true;
+      const profileId = options.profileId?.trim();
       const listed = await docs.list();
       if (!listed.ok) {
         throw new Error(listed.error.message ?? listed.error.title);
       }
       return [...listed.value]
         .filter((path) => includeArchived || !path.archived)
+        .filter((path) => !profileId || path.profileId === profileId)
         .sort((a, b) => a.name.localeCompare(b.name));
     },
 

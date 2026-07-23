@@ -13,7 +13,7 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE03 Identity & Resume Library |
-| **Story** | Profile tree: Create profile → Paths → resumes under each Path |
+| **Story** | Multi-profile tree: Create profile(s) → Paths → resumes (PE27-S01 slice) |
 | **Status** | PR gate — [#86](https://github.com/ammar-tariq/jobjitsu/pull/86) |
 | **Note** | Resume import under each Path; approval/craft prefs deferred from Preferences UI |
 

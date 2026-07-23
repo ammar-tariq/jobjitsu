@@ -59,7 +59,7 @@ describe("durable host data folder", () => {
     expect(active.path).toBe(defaultDataRoot);
 
     const profileOnDisk = await readFile(
-      join(active.path, "kv", "identity", "profile.json"),
+      join(active.path, "kv", "identity", "profiles.json"),
       "utf8",
     );
     expect(profileOnDisk).toContain("Sam");
@@ -122,7 +122,7 @@ describe("durable host data folder", () => {
     });
 
     const profileOnDisk = await readFile(
-      join(customRoot, "kv", "identity", "profile.json"),
+      join(customRoot, "kv", "identity", "profiles.json"),
       "utf8",
     );
     expect(profileOnDisk).toContain("Vault User");

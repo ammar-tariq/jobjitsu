@@ -1514,17 +1514,17 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
   - Identities local-only.
   - Switch does not sync to JobJitsu cloud.
   - Does not replace PE03-S05 Paths for Fullstack vs Mobile under one identity.
-  - Deferred stub until FEATURES admits deep multi-identity.
+  - Create / list / select multiple profiles on-device; Paths nest under each profile.
 
 **Dependencies:** PE03-S01, PE03-S05
 
 **Priority:** P3
 
-**Technical notes:** FEATURES Future — Multi-profile / multi-path.
+**Technical notes:** Profile repository stores a local list + selectedId; legacy single profile migrates on read.
 
-**Testing notes:** Deferred.
+**Testing notes:** Creating a second profile leaves the first intact; select ≠ send.
 
-**Status:** deferred · Future
+**Status:** in progress
 
 ## PE28
 

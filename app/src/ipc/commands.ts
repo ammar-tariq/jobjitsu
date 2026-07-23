@@ -11,6 +11,8 @@ export const IPC_ALLOWLIST = [
   "ai.getStatus",
   "identity.getProfile",
   "identity.setProfile",
+  "identity.listProfiles",
+  "identity.selectProfile",
   "identity.listResumeVersions",
   "identity.importResume",
   "identity.getSelectedResume",
@@ -51,9 +53,12 @@ export type ProfileSnapshot = {
 };
 
 export type ProfilePatchInput = {
+  readonly id?: string;
   readonly displayName: string;
   readonly email?: string;
   readonly location?: string;
+  /** Always create a new local identity. */
+  readonly createNew?: boolean;
 };
 
 export type ResumeVersionSnapshot = {
@@ -94,6 +99,7 @@ export type PathPatchInput = {
   readonly id?: string;
   readonly name: string;
   readonly notes?: string;
+  readonly profileId?: string;
   readonly selectedResumeVersionId?: string | null;
 };
 
@@ -122,6 +128,8 @@ export type IpcPayloadMap = {
   readonly "ai.getStatus": undefined;
   readonly "identity.getProfile": undefined;
   readonly "identity.setProfile": ProfilePatchInput;
+  readonly "identity.listProfiles": undefined;
+  readonly "identity.selectProfile": { readonly profileId: string };
   readonly "identity.listResumeVersions": undefined;
   readonly "identity.importResume": ResumeImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
@@ -147,6 +155,11 @@ export type IpcResultMap = {
   readonly "ai.getStatus": AiStatusSnapshot;
   readonly "identity.getProfile": { readonly profile: ProfileSnapshot | null };
   readonly "identity.setProfile": { readonly profile: ProfileSnapshot };
+  readonly "identity.listProfiles": {
+    readonly profiles: readonly ProfileSnapshot[];
+    readonly selectedId: string | null;
+  };
+  readonly "identity.selectProfile": { readonly profile: ProfileSnapshot };
   readonly "identity.listResumeVersions": {
     readonly versions: readonly ResumeVersionSnapshot[];
     readonly selectedId: string | null;

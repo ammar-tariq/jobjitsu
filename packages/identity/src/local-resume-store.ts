@@ -41,6 +41,7 @@ export function createLocalResumeStore(kv: KvStore): ResumeStore {
 
     async saveProfile(profile: Profile) {
       return profiles.upsert({
+        id: profile.id,
         displayName: profile.displayName,
         email: profile.email,
         location: profile.location,

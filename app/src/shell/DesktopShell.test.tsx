@@ -114,26 +114,59 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
-    expect(screen.getByTestId("jj-profile-form")).toBeInTheDocument();
     expect(screen.getByTestId("jj-profile-tree")).toBeInTheDocument();
-    expect(screen.getByTestId("jj-tree-profile")).toBeInTheDocument();
-    expect(screen.getByText(/Create a profile|on this device/i)).toBeInTheDocument();
-    expect(screen.getByTestId("jj-profile-paths-locked")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-tree-create-profile")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-profile-create-form")).toBeInTheDocument();
+    expect(screen.getByText(/Create one or more profiles/i)).toBeInTheDocument();
     expect(screen.queryByTestId("jj-path-library")).not.toBeInTheDocument();
     expect(screen.queryByText(/cloud sync/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("jj-preferences")).not.toBeInTheDocument();
 
-    await user.type(screen.getByRole("textbox", { name: /display name/i }), "Sam Chen");
-    await user.type(screen.getByRole("textbox", { name: /^email$/i }), "sam@example.com");
-    await user.type(screen.getByRole("textbox", { name: /location/i }), "On this device");
-    await user.click(screen.getByRole("button", { name: "Create profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.type(
+      within(createForm).getByRole("textbox", { name: /^email$/i }),
+      "sam@example.com",
+    );
+    await user.type(
+      within(createForm).getByRole("textbox", { name: /location/i }),
+      "On this device",
+    );
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
 
     expect(await screen.findByText(/Profile created\. Stored on this device/i)).toBeInTheDocument();
     expect(screen.getByTestId("jj-path-library")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-profile-form")).toBeInTheDocument();
     const profile = await runtime.profiles.get();
     expect(profile?.displayName).toBe("Sam Chen");
     expect(profile?.email).toBe("sam@example.com");
     expect(profile?.location).toMatch(/device/i);
+  });
+
+  it("creates a second profile without replacing the first", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    expect(await screen.findByText(/Profile created/i)).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("jj-tree-create-profile"));
+    const secondForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(
+      within(secondForm).getByRole("textbox", { name: /display name/i }),
+      "Contractor Face",
+    );
+    await user.click(within(secondForm).getByRole("button", { name: "Create profile" }));
+    expect(await screen.findByText(/Profile created/i)).toBeInTheDocument();
+
+    expect(await runtime.profiles.list()).toHaveLength(2);
+    expect(screen.getByText(/Contractor Face/)).toBeInTheDocument();
+    expect(screen.getByText(/Sam Chen/)).toBeInTheDocument();
   });
 
   it("creates and selects a Path under identity without sending", async () => {
@@ -143,8 +176,9 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
-    await user.type(screen.getByRole("textbox", { name: /display name/i }), "Sam Chen");
-    await user.click(screen.getByRole("button", { name: "Create profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
     expect(await screen.findByTestId("jj-path-library")).toBeInTheDocument();
     expect(screen.getByText(/^Paths$/)).toBeInTheDocument();
     expect(screen.queryByText(/sub-profile/i)).not.toBeInTheDocument();
@@ -183,8 +217,9 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
-    await user.type(screen.getByRole("textbox", { name: /display name/i }), "Sam Chen");
-    await user.click(screen.getByRole("button", { name: "Create profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
     expect(await screen.findByTestId("jj-path-library")).toBeInTheDocument();
     await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
     await user.click(screen.getByRole("button", { name: "Add path" }));
@@ -212,8 +247,11 @@ describe("DesktopShell", () => {
   it("selects a resume version for a Path without sending", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
-    await runtime.profiles.upsert({ displayName: "Sam Chen" });
-    const path = await runtime.pathLibrary.upsert({ name: "Fullstack Developer" });
+    const profile = await runtime.profiles.upsert({ displayName: "Sam Chen" });
+    const path = await runtime.pathLibrary.upsert({
+      name: "Fullstack Developer",
+      profileId: profile.id,
+    });
     const baseline = await runtime.resumeLibrary.import({
       label: "Baseline",
       fileName: "base.md",

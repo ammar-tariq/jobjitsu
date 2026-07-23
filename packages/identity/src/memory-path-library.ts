@@ -30,8 +30,10 @@ export function createMemoryPathLibrary(): PathLibrary {
   return {
     async list(options: PathListOptions = {}) {
       const includeArchived = options.includeArchived === true;
+      const profileId = options.profileId?.trim();
       return [...paths.values()]
         .filter((path) => includeArchived || !path.archived)
+        .filter((path) => !profileId || path.profileId === profileId)
         .sort((a, b) => a.name.localeCompare(b.name));
     },
 

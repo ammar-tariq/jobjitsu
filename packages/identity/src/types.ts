@@ -31,13 +31,25 @@ export interface Profile {
 }
 
 export type ProfilePatch = {
+  /** When set, update that profile. */
+  readonly id?: string;
   readonly displayName?: string;
   readonly email?: string;
   readonly location?: string;
+  /**
+   * When true, always create a new local identity (PE27).
+   * Without this flag, upsert updates the selected profile (or creates the first).
+   */
+  readonly createNew?: boolean;
 };
 
 export interface ProfileRepository {
+  /** All local identities (sorted by display name). */
+  list(): Promise<readonly Profile[]>;
+  getById(id: string): Promise<Profile | undefined>;
+  /** Currently selected identity — local only; switch ≠ send. */
   get(): Promise<Profile | undefined>;
+  select(profileId: string): Promise<Profile>;
   /** Create or update; always refreshes `updatedAt`. */
   upsert(patch: ProfilePatch): Promise<Profile>;
 }
@@ -123,6 +135,8 @@ export type PathPatch = {
 
 export type PathListOptions = {
   readonly includeArchived?: boolean;
+  /** When set, only paths under that profile. */
+  readonly profileId?: string;
 };
 
 /**
