@@ -60,8 +60,14 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   const [addPathForProfileId, setAddPathForProfileId] = useState<string | null>(null);
 
   const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
-  const [resumeLabel, setResumeLabel] = useState("");
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [importDraft, setImportDraft] = useState<{
+    readonly pathId: string;
+    readonly file: File;
+    readonly label: string;
+    readonly contactName: string;
+    readonly contactEmail: string;
+    readonly notes: string;
+  } | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [selectingResumeId, setSelectingResumeId] = useState<string | null>(null);
@@ -196,22 +202,35 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
       });
   };
 
-  const onImportResume = (pathId: string): void => {
-    if (!resumeFile) {
-      setImportStatus("Choose a resume file to import.");
+  const clearImportDraft = (): void => {
+    setImportDraft(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const onConfirmImport = (): void => {
+    if (!importDraft) {
       return;
     }
-    const file = resumeFile;
+    if (importDraft.label.trim().length === 0) {
+      setImportStatus("Add a short label before saving.");
+      return;
+    }
+    const draft = importDraft;
     setImporting(true);
     setImportStatus(null);
-    void readFileBytes(file)
+    void readFileBytes(draft.file)
       .then((bytes) =>
         bridge.importResume({
-          label: resumeLabel || file.name,
-          fileName: file.name,
+          label: draft.label.trim(),
+          fileName: draft.file.name,
           contentBase64: bytesToBase64(bytes),
-          contentType: file.type || undefined,
-          pathId,
+          contentType: draft.file.type || undefined,
+          pathId: draft.pathId,
+          contactName: draft.contactName.trim() || undefined,
+          contactEmail: draft.contactEmail.trim() || undefined,
+          notes: draft.notes.trim() || undefined,
         }),
       )
       .then(async (result) => {
@@ -220,12 +239,8 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
           setImportStatus(result.error.message ?? result.error.title);
           return;
         }
-        setImportStatus("Resume imported for this path. Stored on this device.");
-        setResumeLabel("");
-        setResumeFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+        setImportStatus("Resume reviewed and saved on this device. Nothing was attached or sent.");
+        clearImportDraft();
         await refreshVersions();
         await refreshPaths();
       })
@@ -418,37 +433,112 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                           No resumes for this Path yet.
                         </Typography>
                       ) : null}
-                      <TextField
-                        label="Version label"
-                        value={resumeLabel}
-                        onChange={(event) => setResumeLabel(event.target.value)}
-                        size="small"
-                        fullWidth
-                        placeholder="e.g. Baseline 2026"
-                      />
-                      <Button variant="outlined" component="label">
-                        {resumeFile ? resumeFile.name : "Choose file"}
-                        <input
-                          ref={fileInputRef}
-                          hidden
-                          type="file"
-                          data-testid={`jj-path-resume-file-${path.id}`}
-                          onChange={(event) => {
-                            const next = event.target.files?.[0] ?? null;
-                            setResumeFile(next);
-                            if (next && !resumeLabel.trim()) {
-                              setResumeLabel(next.name.replace(/\.[^.]+$/, ""));
-                            }
+                      {importDraft?.pathId === path.id ? (
+                        <Stack
+                          spacing={1.5}
+                          data-testid={`jj-import-review-${path.id}`}
+                          sx={{
+                            p: 1.5,
+                            border: "1px solid",
+                            borderColor: "divider",
+                            borderRadius: 1,
                           }}
-                        />
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={() => onImportResume(path.id)}
-                        disabled={importing || !resumeFile}
-                      >
-                        Import resume
-                      </Button>
+                        >
+                          <Typography variant="subtitle2">Review import</Typography>
+                          <Typography color="text.secondary" variant="body2">
+                            Edit what you can before saving. Empty fields stay empty — nothing is
+                            invented. Cancel discards this draft; the library stays unchanged.
+                          </Typography>
+                          <Typography variant="body2">File: {importDraft.file.name}</Typography>
+                          <TextField
+                            label="Version label"
+                            value={importDraft.label}
+                            onChange={(event) =>
+                              setImportDraft({ ...importDraft, label: event.target.value })
+                            }
+                            size="small"
+                            required
+                            fullWidth
+                            placeholder="e.g. Baseline 2026"
+                          />
+                          <TextField
+                            label="Display name"
+                            value={importDraft.contactName}
+                            onChange={(event) =>
+                              setImportDraft({ ...importDraft, contactName: event.target.value })
+                            }
+                            size="small"
+                            fullWidth
+                            placeholder="Optional — as on the resume"
+                          />
+                          <TextField
+                            label="Contact email"
+                            value={importDraft.contactEmail}
+                            onChange={(event) =>
+                              setImportDraft({ ...importDraft, contactEmail: event.target.value })
+                            }
+                            size="small"
+                            fullWidth
+                            placeholder="Optional"
+                          />
+                          <TextField
+                            label="Notes"
+                            value={importDraft.notes}
+                            onChange={(event) =>
+                              setImportDraft({ ...importDraft, notes: event.target.value })
+                            }
+                            size="small"
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            placeholder="Optional free-text notes from the file"
+                          />
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              variant="contained"
+                              onClick={onConfirmImport}
+                              disabled={importing || importDraft.label.trim().length === 0}
+                            >
+                              Save to library
+                            </Button>
+                            <Button
+                              variant="text"
+                              onClick={() => {
+                                clearImportDraft();
+                                setImportStatus("Import cancelled. Nothing was saved.");
+                              }}
+                              disabled={importing}
+                            >
+                              Cancel
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      ) : (
+                        <Button variant="outlined" component="label">
+                          Import resume
+                          <input
+                            ref={fileInputRef}
+                            hidden
+                            type="file"
+                            data-testid={`jj-path-resume-file-${path.id}`}
+                            onChange={(event) => {
+                              const next = event.target.files?.[0] ?? null;
+                              if (!next) {
+                                return;
+                              }
+                              setImportStatus(null);
+                              setImportDraft({
+                                pathId: path.id,
+                                file: next,
+                                label: next.name.replace(/\.[^.]+$/, "") || next.name,
+                                contactName: "",
+                                contactEmail: "",
+                                notes: "",
+                              });
+                            }}
+                          />
+                        </Button>
+                      )}
                       {importStatus && openPathId === path.id ? (
                         <Typography role="status" color="text.secondary" variant="body2">
                           {importStatus}

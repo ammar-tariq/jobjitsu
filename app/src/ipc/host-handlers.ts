@@ -184,15 +184,11 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           parentVersionId: payload.parentVersionId,
           pathId: payload.pathId,
           profileId: path?.profileId,
+          contactName: payload.contactName,
+          contactEmail: payload.contactEmail,
+          notes: payload.notes,
         });
-        if (payload.pathId && pathLibrary && path) {
-          await pathLibrary.upsert({
-            id: path.id,
-            name: path.name,
-            notes: path.notes,
-            selectedResumeVersionId: version.id,
-          });
-        }
+        // PE03-S06: import stores the version only. Path/identity attach is PE03-S07.
         if (bus) {
           await bus.publish("Resume.Imported", { resumeId: version.id });
         }

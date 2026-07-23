@@ -78,6 +78,10 @@ export interface ResumeVersion {
   readonly parentVersionId?: string;
   /** Career path this version belongs to (UI: Path). */
   readonly pathId?: string;
+  /** Manual review fields (PE03-S06) — no AI required. */
+  readonly contactName?: string;
+  readonly contactEmail?: string;
+  readonly notes?: string;
 }
 
 export type ResumeImportInput = {
@@ -90,6 +94,9 @@ export type ResumeImportInput = {
   readonly parentVersionId?: string;
   /** When set, version is scoped to that Path. */
   readonly pathId?: string;
+  readonly contactName?: string;
+  readonly contactEmail?: string;
+  readonly notes?: string;
 };
 
 /**

@@ -11,7 +11,18 @@ export type NormalizedResumeImport = {
   readonly profileId: string;
   readonly parentVersionId?: string;
   readonly pathId?: string;
+  readonly contactName?: string;
+  readonly contactEmail?: string;
+  readonly notes?: string;
 };
+
+function normalizeOptionalText(value: string | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
 
 /** Validate import fields — calm, recoverable messages for the UI. */
 export function normalizeResumeImport(input: ResumeImportInput): NormalizedResumeImport {
@@ -36,6 +47,9 @@ export function normalizeResumeImport(input: ResumeImportInput): NormalizedResum
     profileId: (input.profileId ?? DEFAULT_PROFILE_ID).trim() || DEFAULT_PROFILE_ID,
     parentVersionId,
     pathId,
+    contactName: normalizeOptionalText(input.contactName),
+    contactEmail: normalizeOptionalText(input.contactEmail),
+    notes: normalizeOptionalText(input.notes),
   };
 }
 
@@ -68,6 +82,9 @@ export function createMemoryResumeLibrary(): ResumeLibrary {
         byteLength: normalized.bytes.byteLength,
         parentVersionId: normalized.parentVersionId,
         pathId: normalized.pathId,
+        contactName: normalized.contactName,
+        contactEmail: normalized.contactEmail,
+        notes: normalized.notes,
       };
       versions.set(version.id, version);
       if (!selectedId) {

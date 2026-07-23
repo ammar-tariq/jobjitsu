@@ -73,6 +73,9 @@ export type ResumeVersionSnapshot = {
   readonly byteLength?: number;
   readonly parentVersionId?: string;
   readonly pathId?: string;
+  readonly contactName?: string;
+  readonly contactEmail?: string;
+  readonly notes?: string;
 };
 
 export type ResumeImportInputPayload = {
@@ -83,6 +86,9 @@ export type ResumeImportInputPayload = {
   readonly contentType?: string;
   readonly parentVersionId?: string;
   readonly pathId?: string;
+  readonly contactName?: string;
+  readonly contactEmail?: string;
+  readonly notes?: string;
 };
 
 export type PathSnapshot = {
