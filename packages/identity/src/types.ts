@@ -91,3 +91,45 @@ export interface ResumeLibrary {
    */
   select(resumeId: string): Promise<ResumeVersion>;
 }
+
+/**
+ * Career Path under one Profile (UI: “Path”) — Fullstack, Mobile, etc.
+ * Not a second identity (that is PE27).
+ */
+export interface Path {
+  readonly id: string;
+  readonly profileId: string;
+  readonly name: string;
+  readonly notes?: string;
+  readonly archived: boolean;
+  readonly updatedAt: string;
+  /** Reserved for PE03-S07 attach — optional until wired. */
+  readonly selectedResumeVersionId?: string;
+}
+
+export type PathPatch = {
+  /** When set, update that path; otherwise create. */
+  readonly id?: string;
+  readonly name: string;
+  readonly notes?: string;
+  readonly archived?: boolean;
+  readonly profileId?: string;
+  readonly selectedResumeVersionId?: string | null;
+};
+
+export type PathListOptions = {
+  readonly includeArchived?: boolean;
+};
+
+/**
+ * Path library — create / rename / archive / select active path.
+ * Selection is local only — never Send.
+ */
+export interface PathLibrary {
+  list(options?: PathListOptions): Promise<readonly Path[]>;
+  get(id: string): Promise<Path | undefined>;
+  upsert(patch: PathPatch): Promise<Path>;
+  archive(pathId: string): Promise<Path>;
+  getSelected(): Promise<Path | undefined>;
+  select(pathId: string): Promise<Path>;
+}

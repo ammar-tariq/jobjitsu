@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createInMemoryEventBus } from "@jobjitsu/events";
-import { createMemoryProfileRepository, createMemoryResumeLibrary } from "@jobjitsu/identity";
+import {
+  createMemoryPathLibrary,
+  createMemoryProfileRepository,
+  createMemoryResumeLibrary,
+} from "@jobjitsu/identity";
 import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
@@ -25,6 +29,10 @@ describe("IPC allowlist", () => {
       "identity.importResume",
       "identity.getSelectedResume",
       "identity.selectResume",
+      "identity.listPaths",
+      "identity.upsertPath",
+      "identity.archivePath",
+      "identity.selectPath",
       "storage.getDataRoot",
       "storage.setDataRoot",
       "storage.resetDataRoot",
@@ -98,6 +106,7 @@ describe("typed IPC bridge", () => {
 
     expect(bridge).not.toHaveProperty("complete");
     expect(Object.keys(bridge).sort()).toEqual([
+      "archivePath",
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
@@ -106,16 +115,19 @@ describe("typed IPC bridge", () => {
       "getSelectedResume",
       "getTheme",
       "importResume",
+      "listPaths",
       "listResumeVersions",
       "pickDataRoot",
       "ping",
       "resetDataRoot",
+      "selectPath",
       "selectResume",
       "setApprovalBeforeSend",
       "setCraftPreferences",
       "setDataRoot",
       "setProfile",
       "setTheme",
+      "upsertPath",
     ]);
   });
 
@@ -214,6 +226,36 @@ describe("typed IPC bridge", () => {
     const listed = await bridge.listResumeVersions();
     expect(listed.ok && listed.value.selectedId).toBe(second.id);
     expect(listed.ok && listed.value.versions).toHaveLength(2);
+  });
+
+  it("creates and selects career paths without send", async () => {
+    const pathLibrary = createMemoryPathLibrary();
+    const bridge = createIpcBridge(createHostIpcDispatcher({ pathLibrary }));
+
+    expect(bridge).not.toHaveProperty("send");
+
+    const created = await bridge.upsertPath({ name: "Fullstack Developer" });
+    expect(created.ok && created.value.path.name).toBe("Fullstack Developer");
+
+    const mobile = await bridge.upsertPath({ name: "Mobile App", notes: "React Native" });
+    expect(mobile.ok).toBe(true);
+
+    const listed = await bridge.listPaths();
+    expect(listed.ok && listed.value.paths).toHaveLength(2);
+    expect(listed.ok && listed.value.selectedId).toBe(created.ok ? created.value.path.id : null);
+
+    if (!mobile.ok) {
+      return;
+    }
+    const selected = await bridge.selectPath(mobile.value.path.id);
+    expect(selected.ok && selected.value.path.name).toBe("Mobile App");
+
+    const archived = await bridge.archivePath(mobile.value.path.id);
+    expect(archived.ok && archived.value.path.archived).toBe(true);
+
+    const after = await bridge.listPaths();
+    expect(after.ok && after.value.paths).toHaveLength(1);
+    expect(after.ok && after.value.selectedId).toBeNull();
   });
 
   it("reads and updates the on-device data folder through storage APIs", async () => {

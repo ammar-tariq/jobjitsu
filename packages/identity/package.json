@@ -12,8 +12,8 @@
       "import": "./dist/index.js"
     },
     "./storage": {
-      "types": "./dist/storage-resume-library.d.ts",
-      "import": "./dist/storage-resume-library.js"
+      "types": "./dist/storage.d.ts",
+      "import": "./dist/storage.js"
     }
   },
   "files": [

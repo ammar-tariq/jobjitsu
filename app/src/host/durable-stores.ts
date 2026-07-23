@@ -1,9 +1,9 @@
 import { createKvProfileRepository } from "@jobjitsu/identity";
-import { createStorageResumeLibrary } from "@jobjitsu/identity/storage";
+import { createStoragePathLibrary, createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 import { createPreferencesFacade } from "@jobjitsu/preferences";
 import { createKvSettingsStore } from "@jobjitsu/preferences/storage";
 import { createIoStorageProvider, type LocalFsIo, type StorageProvider } from "@jobjitsu/storage";
-import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
+import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { AppearanceStore } from "./appearance-store.js";
 import type { ThemePreference } from "../ipc/commands.js";
@@ -13,6 +13,7 @@ export type DurableHostStores = {
   readonly provider: StorageProvider;
   readonly profiles: ProfileRepository;
   readonly resumeLibrary: ResumeLibrary;
+  readonly pathLibrary: PathLibrary;
   readonly preferences: PreferencesFacade;
   readonly appearance: AppearanceStore;
   readonly settings: SettingsStore;
@@ -33,6 +34,7 @@ export async function openDurableHostStores(
     provider,
     profiles: createKvProfileRepository(provider.kv),
     resumeLibrary: createStorageResumeLibrary(provider.kv, provider.blobs),
+    pathLibrary: createStoragePathLibrary(provider.kv),
     preferences,
     appearance,
     settings,

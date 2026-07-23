@@ -4,19 +4,23 @@ Profile and résumé source of truth (local).
 
 ## Status
 
-| Piece                                      | State                       |
-| ------------------------------------------ | --------------------------- |
-| `Profile` / `ProfileRepository`            | Done — KV-backed            |
-| `createKvProfileRepository`                | Done — on-device CRUD       |
-| `createMemoryProfileRepository`            | Done — browser-safe host    |
-| `ResumeVersion` / `ResumeLibrary`          | Done — import, list, select |
-| `createMemoryResumeLibrary`                | Done — browser-safe host    |
-| `createStorageResumeLibrary`               | Done — KV + blob originals  |
-| Optional `parentVersionId`                 | Done — version graph        |
-| `ResumeStore` / `ResumeDocument` contracts | Done                        |
-| `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud** |
-| `createLocalResumeStore`                   | Done — KV profile + resume  |
-| Tailor draft / structured parse            | Not yet (PE03-S04+)         |
+| Piece                                      | State                                     |
+| ------------------------------------------ | ----------------------------------------- |
+| `Profile` / `ProfileRepository`            | Done — KV-backed                          |
+| `createKvProfileRepository`                | Done — on-device CRUD                     |
+| `createMemoryProfileRepository`            | Done — browser-safe host                  |
+| `ResumeVersion` / `ResumeLibrary`          | Done — import, list, select               |
+| `Path` / `PathLibrary`                     | Done — create, archive, select (UI: Path) |
+| `createMemoryResumeLibrary`                | Done — browser-safe host                  |
+| `createMemoryPathLibrary`                  | Done — browser-safe host                  |
+| `createStorageResumeLibrary`               | Done — KV + blob originals                |
+| `createStoragePathLibrary`                 | Done — KV paths                           |
+| Optional `parentVersionId`                 | Done — version graph                      |
+| `ResumeStore` / `ResumeDocument` contracts | Done                                      |
+| `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud**               |
+| `createLocalResumeStore`                   | Done — KV profile + resume                |
+| Tailor draft / structured parse            | Not yet (PE03-S04+)                       |
+| Attach import to path                      | Not yet (PE03-S07)                        |
 
 ## Profile (on-device)
 
@@ -52,6 +56,23 @@ import { createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 
 UI: `identity.importResume` / `identity.listResumeVersions` / `identity.selectResume` —
 never talk to storage from the shell. **Select does not send.**
+
+## Paths (on-device)
+
+Career faces under one Profile (e.g. Fullstack Developer, Mobile App). UI says **Path**, not sub-profile.
+
+```ts
+import { createMemoryPathLibrary } from "@jobjitsu/identity";
+
+const paths = createMemoryPathLibrary();
+await paths.upsert({ name: "Fullstack Developer" });
+await paths.upsert({ name: "Mobile App", notes: "React Native" });
+```
+
+Durable: `createStoragePathLibrary(kv)` from `@jobjitsu/identity/storage`.
+
+UI: `identity.listPaths` / `identity.upsertPath` / `identity.archivePath` / `identity.selectPath` —
+**Select does not send.**
 
 ## Fake Resume
 

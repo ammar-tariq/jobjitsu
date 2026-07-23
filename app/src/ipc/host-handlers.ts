@@ -1,5 +1,5 @@
 import { createAppError, err, ok } from "@jobjitsu/shared";
-import type { ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
+import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
 import type { EventBus } from "@jobjitsu/events";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
@@ -22,6 +22,8 @@ export type CreateHostIpcOptions = {
   readonly getProfiles?: () => ProfileRepository | undefined;
   readonly resumeLibrary?: ResumeLibrary;
   readonly getResumeLibrary?: () => ResumeLibrary | undefined;
+  readonly pathLibrary?: PathLibrary;
+  readonly getPathLibrary?: () => PathLibrary | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly getPreferences?: () => PreferencesFacade | undefined;
@@ -50,6 +52,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       });
   const getProfiles = options.getProfiles ?? (() => options.profiles);
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
+  const getPathLibrary = options.getPathLibrary ?? (() => options.pathLibrary);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const getPreferences = options.getPreferences ?? (() => options.preferences);
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
@@ -179,6 +182,90 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "That resume version could not be selected. Try again.",
             detail: "identity:select",
+            cause,
+          }),
+        );
+      }
+    },
+    "identity.listPaths": async () => {
+      const pathLibrary = getPathLibrary();
+      if (!pathLibrary) {
+        return ok({ paths: [], selectedId: null });
+      }
+      const paths = await pathLibrary.list();
+      const selected = await pathLibrary.getSelected();
+      return ok({ paths, selectedId: selected?.id ?? null });
+    },
+    "identity.upsertPath": async (payload) => {
+      const pathLibrary = getPathLibrary();
+      if (!pathLibrary) {
+        return err(
+          createAppError("unavailable", "Paths not ready", {
+            message: "Path storage is not available yet.",
+            detail: "identity:path-missing",
+          }),
+        );
+      }
+      try {
+        const path = await pathLibrary.upsert(payload);
+        return ok({ path });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not save path", {
+            message: cause instanceof Error ? cause.message : "Check the path name and try again.",
+            detail: "identity:path-upsert",
+            cause,
+          }),
+        );
+      }
+    },
+    "identity.archivePath": async (payload) => {
+      const pathLibrary = getPathLibrary();
+      if (!pathLibrary) {
+        return err(
+          createAppError("unavailable", "Paths not ready", {
+            message: "Path storage is not available yet.",
+            detail: "identity:path-missing",
+          }),
+        );
+      }
+      try {
+        const path = await pathLibrary.archive(payload.pathId);
+        return ok({ path });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not archive path", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That path could not be archived. Try again.",
+            detail: "identity:path-archive",
+            cause,
+          }),
+        );
+      }
+    },
+    "identity.selectPath": async (payload) => {
+      const pathLibrary = getPathLibrary();
+      if (!pathLibrary) {
+        return err(
+          createAppError("unavailable", "Paths not ready", {
+            message: "Path storage is not available yet.",
+            detail: "identity:path-missing",
+          }),
+        );
+      }
+      try {
+        const path = await pathLibrary.select(payload.pathId);
+        return ok({ path });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not select path", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That path could not be selected. Try again.",
+            detail: "identity:path-select",
             cause,
           }),
         );

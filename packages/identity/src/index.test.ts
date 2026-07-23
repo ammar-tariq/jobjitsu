@@ -12,8 +12,10 @@ import {
   createLocalResumeStore,
   createMemoryProfileRepository,
   createMemoryResumeLibrary,
+  createMemoryPathLibrary,
 } from "./index.js";
 import { createStorageResumeLibrary } from "./storage-resume-library.js";
+import { createStoragePathLibrary } from "./storage-path-library.js";
 
 const tempRoots: string[] = [];
 
@@ -192,5 +194,45 @@ describe("@jobjitsu/identity", () => {
     expect(selected.id).toBe(child.id);
     expect((await library.getSelected())?.id).toBe(child.id);
     expect((await library.get(child.id))?.parentVersionId).toBe(parent.id);
+  });
+
+  it("creates and selects career paths without sending", async () => {
+    const paths = createMemoryPathLibrary();
+    const fullstack = await paths.upsert({ name: "Fullstack Developer" });
+    const mobile = await paths.upsert({ name: "Mobile App", notes: "React Native" });
+
+    expect(fullstack.archived).toBe(false);
+    expect((await paths.getSelected())?.id).toBe(fullstack.id);
+    expect((await paths.list()).map((row) => row.name)).toEqual([
+      "Fullstack Developer",
+      "Mobile App",
+    ]);
+
+    await paths.select(mobile.id);
+    expect((await paths.getSelected())?.name).toBe("Mobile App");
+
+    const archived = await paths.archive(mobile.id);
+    expect(archived.archived).toBe(true);
+    expect(await paths.getSelected()).toBeUndefined();
+    expect(await paths.list()).toHaveLength(1);
+    expect(await paths.list({ includeArchived: true })).toHaveLength(2);
+  });
+
+  it("persists paths on KV across restart", async () => {
+    const dataRoot = await mkdtemp(join(tmpdir(), "jobjitsu-path-lib-"));
+    tempRoots.push(dataRoot);
+
+    const first = await createFsStorageProvider({ dataRoot });
+    const library = createStoragePathLibrary(first.kv);
+    const created = await library.upsert({ name: "Fullstack Developer" });
+    expect((await library.getSelected())?.id).toBe(created.id);
+
+    const restarted = await createFsStorageProvider({ dataRoot });
+    const again = createStoragePathLibrary(restarted.kv);
+    expect((await again.list())[0]?.name).toBe("Fullstack Developer");
+    expect((await again.getSelected())?.id).toBe(created.id);
+
+    await again.archive(created.id);
+    expect(await again.getSelected()).toBeUndefined();
   });
 });

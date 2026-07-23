@@ -74,6 +74,31 @@ describe("durable host data folder", () => {
     expect((await second.resumeLibrary.list()).map((row) => row.label)).toEqual(["Primary"]);
   });
 
+  it("persists career paths under the data folder across restart", async () => {
+    const defaultDataRoot = await tempRoot("jobjitsu-paths-");
+    const io = createNodeFsIo();
+
+    const first = await createDurableHostRuntime({
+      version: "0.0.0-test",
+      io,
+      defaultDataRoot,
+    });
+    await first.pathLibrary.upsert({ name: "Fullstack Developer", notes: "Web" });
+    await first.pathLibrary.upsert({ name: "Mobile App" });
+    expect((await first.pathLibrary.getSelected())?.name).toBe("Fullstack Developer");
+
+    const second = await createDurableHostRuntime({
+      version: "0.0.0-test",
+      io,
+      defaultDataRoot,
+    });
+    expect((await second.pathLibrary.list()).map((row) => row.name)).toEqual([
+      "Fullstack Developer",
+      "Mobile App",
+    ]);
+    expect((await second.pathLibrary.getSelected())?.name).toBe("Fullstack Developer");
+  });
+
   it("writes career data into a custom folder after setDataRoot", async () => {
     const defaultDataRoot = await tempRoot("jobjitsu-default-");
     const customRoot = await tempRoot("jobjitsu-custom-");
