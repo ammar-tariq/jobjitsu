@@ -374,6 +374,40 @@ describe("DesktopShell", () => {
     expect(versions[0]?.fileName).toBe("sam-linkedin.pdf");
   });
 
+  it("creates a Path from an existing résumé version without sending", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    const profile = await runtime.profiles.upsert({ displayName: "Sam Chen" });
+    const version = await runtime.resumeLibrary.import({
+      label: "Baseline",
+      fileName: "base.md",
+      bytes: new TextEncoder().encode("# Baseline"),
+      profileId: profile.id,
+    });
+
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    await user.click(screen.getByTestId(`jj-path-from-resume-open-${profile.id}`));
+    const form = await screen.findByTestId(`jj-path-from-resume-${profile.id}`);
+    expect(within(form).getByText(/Pick an existing résumé/i)).toBeInTheDocument();
+    expect(within(form).queryByText(/sub-profile/i)).not.toBeInTheDocument();
+
+    await user.type(screen.getByTestId(`jj-path-from-resume-name-${profile.id}`), "Mobile App");
+    await user.type(within(form).getByRole("textbox", { name: /notes/i }), "From baseline résumé");
+    await user.click(within(form).getByRole("button", { name: "Create path" }));
+
+    expect(await screen.findByText(/Path created from résumé/i)).toBeInTheDocument();
+    const paths = await runtime.pathLibrary.list();
+    expect(paths).toHaveLength(1);
+    expect(paths[0]?.name).toBe("Mobile App");
+    expect(paths[0]?.selectedResumeVersionId).toBe(version.id);
+    expect((await runtime.pathLibrary.getSelected())?.id).toBe(paths[0]?.id);
+    expect((await runtime.resumeLibrary.getSelected())?.id).toBe(version.id);
+    expect(runtime.bridge).not.toHaveProperty("send");
+  });
+
   it("selects a resume version for a Path without sending", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
