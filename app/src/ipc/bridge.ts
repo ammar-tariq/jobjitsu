@@ -19,6 +19,10 @@ export type IpcBridge = {
   readonly setProfile: (
     patch: ProfilePatchInput,
   ) => Promise<Result<IpcResultMap["identity.setProfile"]>>;
+  readonly listProfiles: () => Promise<Result<IpcResultMap["identity.listProfiles"]>>;
+  readonly selectProfile: (
+    profileId: string,
+  ) => Promise<Result<IpcResultMap["identity.selectProfile"]>>;
   readonly listResumeVersions: () => Promise<Result<IpcResultMap["identity.listResumeVersions"]>>;
   readonly importResume: (
     input: ResumeImportInputPayload,
@@ -76,6 +80,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async setProfile(patch: ProfilePatchInput) {
       return (await dispatcher.invoke("identity.setProfile", patch)) as Result<
         IpcResultMap["identity.setProfile"]
+      >;
+    },
+    async listProfiles() {
+      return (await dispatcher.invoke("identity.listProfiles")) as Result<
+        IpcResultMap["identity.listProfiles"]
+      >;
+    },
+    async selectProfile(profileId: string) {
+      return (await dispatcher.invoke("identity.selectProfile", { profileId })) as Result<
+        IpcResultMap["identity.selectProfile"]
       >;
     },
     async listResumeVersions() {

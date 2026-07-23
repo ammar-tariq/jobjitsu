@@ -85,6 +85,41 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       const profile = await profiles.get();
       return ok({ profile: profile ?? null });
     },
+    "identity.listProfiles": async () => {
+      const profiles = getProfiles();
+      if (!profiles) {
+        return ok({ profiles: [], selectedId: null });
+      }
+      const listed = await profiles.list();
+      const selected = await profiles.get();
+      return ok({ profiles: listed, selectedId: selected?.id ?? null });
+    },
+    "identity.selectProfile": async (payload) => {
+      const profiles = getProfiles();
+      if (!profiles) {
+        return err(
+          createAppError("unavailable", "Profile not ready", {
+            message: "Identity storage is not available yet.",
+            detail: "identity:missing",
+          }),
+        );
+      }
+      try {
+        const profile = await profiles.select(payload.profileId);
+        return ok({ profile });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not select profile", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That profile could not be selected. Try again.",
+            detail: "identity:select-profile",
+            cause,
+          }),
+        );
+      }
+    },
     "identity.setProfile": async (payload) => {
       const profiles = getProfiles();
       if (!profiles) {
@@ -96,7 +131,16 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
       try {
-        const profile = await profiles.upsert(payload);
+        const profile = await profiles.upsert({
+          id: payload.id,
+          displayName: payload.displayName,
+          email: payload.email,
+          location: payload.location,
+          createNew: payload.createNew,
+        });
+        if (payload.createNew === true || payload.id) {
+          await profiles.select(profile.id);
+        }
         return ok({ profile });
       } catch (cause) {
         return err(
@@ -129,6 +173,9 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
       try {
         const bytes = decodeBase64(payload.contentBase64);
+        const pathLibrary = getPathLibrary();
+        const path =
+          payload.pathId && pathLibrary ? await pathLibrary.get(payload.pathId) : undefined;
         const version = await resumeLibrary.import({
           label: payload.label,
           fileName: payload.fileName,
@@ -136,20 +183,15 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           contentType: payload.contentType,
           parentVersionId: payload.parentVersionId,
           pathId: payload.pathId,
+          profileId: path?.profileId,
         });
-        if (payload.pathId) {
-          const pathLibrary = getPathLibrary();
-          if (pathLibrary) {
-            const path = await pathLibrary.get(payload.pathId);
-            if (path) {
-              await pathLibrary.upsert({
-                id: path.id,
-                name: path.name,
-                notes: path.notes,
-                selectedResumeVersionId: version.id,
-              });
-            }
-          }
+        if (payload.pathId && pathLibrary && path) {
+          await pathLibrary.upsert({
+            id: path.id,
+            name: path.name,
+            notes: path.notes,
+            selectedResumeVersionId: version.id,
+          });
         }
         if (bus) {
           await bus.publish("Resume.Imported", { resumeId: version.id });
@@ -222,10 +264,13 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
       try {
+        const profiles = getProfiles();
+        const selectedProfile = profiles ? await profiles.get() : undefined;
         const path = await pathLibrary.upsert({
           id: payload.id,
           name: payload.name,
           notes: payload.notes,
+          profileId: payload.profileId ?? selectedProfile?.id,
           selectedResumeVersionId: payload.selectedResumeVersionId,
         });
         return ok({ path });

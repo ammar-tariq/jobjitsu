@@ -79,14 +79,50 @@ describe("@jobjitsu/identity", () => {
     expect(updated.id).toBe(created.id);
   });
 
-  it("keeps a browser-safe memory profile on-device", async () => {
+  it("keeps multiple local profiles and selects without sending", async () => {
     const profiles = createMemoryProfileRepository();
-    const saved = await profiles.upsert({
+    const first = await profiles.upsert({
       displayName: "Sam Chen",
       location: "On this device",
     });
-    expect(saved.displayName).toBe("Sam Chen");
-    expect(await profiles.get()).toEqual(saved);
+    const second = await profiles.upsert({
+      displayName: "Contractor Face",
+      createNew: true,
+    });
+    expect(first.id).not.toBe(second.id);
+    expect(await profiles.list()).toHaveLength(2);
+    expect((await profiles.get())?.id).toBe(first.id);
+
+    await profiles.select(second.id);
+    expect((await profiles.get())?.displayName).toBe("Contractor Face");
+
+    const updated = await profiles.upsert({
+      id: first.id,
+      displayName: "Sam C.",
+    });
+    expect(updated.id).toBe(first.id);
+    expect((await profiles.getById(first.id))?.displayName).toBe("Sam C.");
+  });
+
+  it("migrates legacy single profile into the multi-profile document", async () => {
+    const dataRoot = await mkdtemp(join(tmpdir(), "jobjitsu-identity-"));
+    tempRoots.push(dataRoot);
+    const first = await createFsStorageProvider({ dataRoot });
+    const legacy = {
+      id: "profile_legacy",
+      displayName: "Legacy User",
+      updatedAt: new Date().toISOString(),
+    };
+    const written = await first.kv.set({ namespace: "identity", id: "profile" }, legacy);
+    expect(written.ok).toBe(true);
+
+    const repo = createKvProfileRepository(first.kv);
+    expect(await repo.list()).toEqual([legacy]);
+    expect(await repo.get()).toEqual(legacy);
+
+    const created = await repo.upsert({ displayName: "Second Identity", createNew: true });
+    expect(await repo.list()).toHaveLength(2);
+    expect(created.displayName).toBe("Second Identity");
   });
 
   it("exposes local resume store profile APIs without cloud wording", async () => {

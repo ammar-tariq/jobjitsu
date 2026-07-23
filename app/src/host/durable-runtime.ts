@@ -47,7 +47,10 @@ export async function createDurableHostRuntime(
       setTheme: (theme) => stores.appearance.setTheme(theme),
     },
     profiles: {
+      list: () => stores.profiles.list(),
+      getById: (id) => stores.profiles.getById(id),
       get: () => stores.profiles.get(),
+      select: (id) => stores.profiles.select(id),
       upsert: (patch) => stores.profiles.upsert(patch),
     },
     resumeLibrary: {
