@@ -64,6 +64,9 @@ export interface ResumeStore {
 /** DATA_MODELS ResumeVersion — library entry with optional original blob. */
 export type ResumeFormat = "document" | "structured";
 
+/** Where the original file came from — local only, never scraping. */
+export type ResumeSource = "resume" | "linkedin-pdf";
+
 export interface ResumeVersion {
   readonly id: string;
   readonly profileId: string;
@@ -82,6 +85,8 @@ export interface ResumeVersion {
   readonly contactName?: string;
   readonly contactEmail?: string;
   readonly notes?: string;
+  /** Import origin — defaults to resume. */
+  readonly source?: ResumeSource;
 }
 
 export type ResumeImportInput = {
@@ -97,6 +102,7 @@ export type ResumeImportInput = {
   readonly contactName?: string;
   readonly contactEmail?: string;
   readonly notes?: string;
+  readonly source?: ResumeSource;
 };
 
 /**

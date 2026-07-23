@@ -187,6 +187,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           contactName: payload.contactName,
           contactEmail: payload.contactEmail,
           notes: payload.notes,
+          source: payload.source,
         });
         // PE03-S06: import stores the version only. Path/identity attach is PE03-S07.
         if (bus) {

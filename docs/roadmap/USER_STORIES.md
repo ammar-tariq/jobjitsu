@@ -374,7 +374,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Attach to path only leaves identity unchanged; both updates both.
 
-**Status:** in progress
+**Status:** done
 
 ### PE03-S08 — Import LinkedIn via exported PDF
 
@@ -394,7 +394,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Guidance visible; import path reuses library APIs.
 
-**Status:** proposed
+**Status:** in progress
 
 ### PE03-S09 — Create a path from an existing résumé version
 

@@ -165,8 +165,21 @@ describe("@jobjitsu/identity", () => {
     expect(version.label).toBe("Baseline 2026");
     expect(version.format).toBe("document");
     expect(version.fileName).toBe("sam-chen.md");
+    expect(version.source).toBe("resume");
     expect(version.blobId).toBeTruthy();
     expect(await library.list()).toEqual([version]);
+  });
+
+  it("stores linkedin-pdf source without implying network scrape", async () => {
+    const library = createMemoryResumeLibrary();
+    const version = await library.import({
+      label: "LinkedIn export",
+      fileName: "profile.pdf",
+      bytes: new TextEncoder().encode("%PDF-1.4"),
+      contentType: "application/pdf",
+      source: "linkedin-pdf",
+    });
+    expect(version.source).toBe("linkedin-pdf");
   });
 
   it("rejects empty imports with a calm recoverable message", async () => {
