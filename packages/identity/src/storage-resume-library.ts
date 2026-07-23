@@ -51,6 +51,7 @@ export function createStorageResumeLibrary(kv: KvStore, blobs: BlobStore): Resum
         contactName: normalized.contactName,
         contactEmail: normalized.contactEmail,
         notes: normalized.notes,
+        source: normalized.source,
       };
 
       const written = await docs.put(stored);

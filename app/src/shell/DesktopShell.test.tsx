@@ -340,6 +340,40 @@ describe("DesktopShell", () => {
     expect(screen.queryByTestId(`jj-import-review-${path.id}`)).not.toBeInTheDocument();
   });
 
+  it("imports a LinkedIn PDF with guidance and linkedin-pdf source", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
+
+    const path = (await runtime.pathLibrary.list())[0]!;
+    expect(screen.getByTestId(`jj-linkedin-guidance-${path.id}`)).toBeInTheDocument();
+    expect(screen.getByText(/does not log into LinkedIn or scrape/i)).toBeInTheDocument();
+
+    const file = new File(["%PDF-1.4 linkedin export"], "sam-linkedin.pdf", {
+      type: "application/pdf",
+    });
+    await user.upload(screen.getByTestId(`jj-path-linkedin-file-${path.id}`), file);
+
+    const review = await screen.findByTestId(`jj-import-review-${path.id}`);
+    expect(within(review).getByText(/Review LinkedIn PDF/i)).toBeInTheDocument();
+    await user.click(within(review).getByRole("button", { name: "Save to library" }));
+
+    expect(await screen.findByTestId(`jj-import-attach-${path.id}`)).toBeInTheDocument();
+    const versions = await runtime.resumeLibrary.list();
+    expect(versions).toHaveLength(1);
+    expect(versions[0]?.source).toBe("linkedin-pdf");
+    expect(versions[0]?.fileName).toBe("sam-linkedin.pdf");
+  });
+
   it("selects a resume version for a Path without sending", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

@@ -67,6 +67,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
     readonly contactName: string;
     readonly contactEmail: string;
     readonly notes: string;
+    readonly source: "resume" | "linkedin-pdf";
   } | null>(null);
   const [attachPending, setAttachPending] = useState<{
     readonly resumeId: string;
@@ -238,6 +239,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
           contactName: draft.contactName.trim() || undefined,
           contactEmail: draft.contactEmail.trim() || undefined,
           notes: draft.notes.trim() || undefined,
+          source: draft.source,
         }),
       )
       .then(async (result) => {
@@ -450,7 +452,14 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             <ListItemIcon sx={{ minWidth: 32 }}>
                               <DescriptionOutlinedIcon fontSize="small" />
                             </ListItemIcon>
-                            <ListItemText primary={version.label} secondary={version.fileName} />
+                            <ListItemText
+                              primary={version.label}
+                              secondary={
+                                version.source === "linkedin-pdf"
+                                  ? `${version.fileName ?? "PDF"} · LinkedIn PDF`
+                                  : version.fileName
+                              }
+                            />
                             <Button
                               size="small"
                               variant={isResumeSelected ? "contained" : "outlined"}
@@ -505,12 +514,19 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             borderRadius: 1,
                           }}
                         >
-                          <Typography variant="subtitle2">Review import</Typography>
+                          <Typography variant="subtitle2">
+                            {importDraft.source === "linkedin-pdf"
+                              ? "Review LinkedIn PDF"
+                              : "Review import"}
+                          </Typography>
                           <Typography color="text.secondary" variant="body2">
                             Edit what you can before saving. Empty fields stay empty — nothing is
                             invented. Cancel discards this draft; the library stays unchanged.
                           </Typography>
-                          <Typography variant="body2">File: {importDraft.file.name}</Typography>
+                          <Typography variant="body2">
+                            File: {importDraft.file.name}
+                            {importDraft.source === "linkedin-pdf" ? " · LinkedIn PDF" : ""}
+                          </Typography>
                           <TextField
                             label="Version label"
                             value={importDraft.label}
@@ -634,31 +650,82 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                           </Stack>
                         </Stack>
                       ) : (
-                        <Button variant="outlined" component="label">
-                          Import resume
-                          <input
-                            ref={fileInputRef}
-                            hidden
-                            type="file"
-                            data-testid={`jj-path-resume-file-${path.id}`}
-                            onChange={(event) => {
-                              const next = event.target.files?.[0] ?? null;
-                              if (!next) {
-                                return;
-                              }
-                              setImportStatus(null);
-                              setAttachPending(null);
-                              setImportDraft({
-                                pathId: path.id,
-                                file: next,
-                                label: next.name.replace(/\.[^.]+$/, "") || next.name,
-                                contactName: "",
-                                contactEmail: "",
-                                notes: "",
-                              });
-                            }}
-                          />
-                        </Button>
+                        <Stack spacing={1.5} data-testid={`jj-import-sources-${path.id}`}>
+                          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                            <Button variant="outlined" component="label">
+                              Import resume
+                              <input
+                                ref={fileInputRef}
+                                hidden
+                                type="file"
+                                data-testid={`jj-path-resume-file-${path.id}`}
+                                onChange={(event) => {
+                                  const next = event.target.files?.[0] ?? null;
+                                  if (!next) {
+                                    return;
+                                  }
+                                  setImportStatus(null);
+                                  setAttachPending(null);
+                                  setImportDraft({
+                                    pathId: path.id,
+                                    file: next,
+                                    label: next.name.replace(/\.[^.]+$/, "") || next.name,
+                                    contactName: "",
+                                    contactEmail: "",
+                                    notes: "",
+                                    source: "resume",
+                                  });
+                                }}
+                              />
+                            </Button>
+                            <Button variant="outlined" component="label">
+                              Import LinkedIn PDF
+                              <input
+                                hidden
+                                type="file"
+                                accept="application/pdf,.pdf"
+                                data-testid={`jj-path-linkedin-file-${path.id}`}
+                                onChange={(event) => {
+                                  const next = event.target.files?.[0] ?? null;
+                                  if (!next) {
+                                    return;
+                                  }
+                                  setImportStatus(null);
+                                  setAttachPending(null);
+                                  setImportDraft({
+                                    pathId: path.id,
+                                    file: next,
+                                    label: next.name.replace(/\.[^.]+$/, "") || "LinkedIn profile",
+                                    contactName: "",
+                                    contactEmail: "",
+                                    notes: "",
+                                    source: "linkedin-pdf",
+                                  });
+                                }}
+                              />
+                            </Button>
+                          </Stack>
+                          <Stack
+                            spacing={0.75}
+                            data-testid={`jj-linkedin-guidance-${path.id}`}
+                            sx={{ pl: 0.5 }}
+                          >
+                            <Typography color="text.secondary" variant="body2">
+                              LinkedIn: export your profile as a PDF on LinkedIn, then choose that
+                              file here. JobJitsu does not log into LinkedIn or scrape the site.
+                            </Typography>
+                            <Typography color="text.secondary" variant="body2">
+                              1. Open your LinkedIn profile in a browser.
+                            </Typography>
+                            <Typography color="text.secondary" variant="body2">
+                              2. Use More / Resources → Save to PDF (wording varies by LinkedIn).
+                            </Typography>
+                            <Typography color="text.secondary" variant="body2">
+                              3. Choose that PDF with Import LinkedIn PDF — review stays on this
+                              device.
+                            </Typography>
+                          </Stack>
+                        </Stack>
                       )}
                       {importStatus && openPathId === path.id ? (
                         <Typography role="status" color="text.secondary" variant="body2">

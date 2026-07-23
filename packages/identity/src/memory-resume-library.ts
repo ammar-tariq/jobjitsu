@@ -1,5 +1,5 @@
 import { createEntityId } from "@jobjitsu/shared";
-import type { ResumeImportInput, ResumeLibrary, ResumeVersion } from "./types.js";
+import type { ResumeImportInput, ResumeLibrary, ResumeSource, ResumeVersion } from "./types.js";
 
 const DEFAULT_PROFILE_ID = "profile_local";
 
@@ -14,6 +14,7 @@ export type NormalizedResumeImport = {
   readonly contactName?: string;
   readonly contactEmail?: string;
   readonly notes?: string;
+  readonly source: ResumeSource;
 };
 
 function normalizeOptionalText(value: string | undefined): string | undefined {
@@ -22,6 +23,10 @@ function normalizeOptionalText(value: string | undefined): string | undefined {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function normalizeSource(value: ResumeSource | undefined): ResumeSource {
+  return value === "linkedin-pdf" ? "linkedin-pdf" : "resume";
 }
 
 /** Validate import fields — calm, recoverable messages for the UI. */
@@ -50,6 +55,7 @@ export function normalizeResumeImport(input: ResumeImportInput): NormalizedResum
     contactName: normalizeOptionalText(input.contactName),
     contactEmail: normalizeOptionalText(input.contactEmail),
     notes: normalizeOptionalText(input.notes),
+    source: normalizeSource(input.source),
   };
 }
 
@@ -85,6 +91,7 @@ export function createMemoryResumeLibrary(): ResumeLibrary {
         contactName: normalized.contactName,
         contactEmail: normalized.contactEmail,
         notes: normalized.notes,
+        source: normalized.source,
       };
       versions.set(version.id, version);
       if (!selectedId) {

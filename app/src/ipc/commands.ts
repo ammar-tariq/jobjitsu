@@ -77,6 +77,7 @@ export type ResumeVersionSnapshot = {
   readonly contactName?: string;
   readonly contactEmail?: string;
   readonly notes?: string;
+  readonly source?: "resume" | "linkedin-pdf";
 };
 
 export type ResumeImportInputPayload = {
@@ -90,6 +91,7 @@ export type ResumeImportInputPayload = {
   readonly contactName?: string;
   readonly contactEmail?: string;
   readonly notes?: string;
+  readonly source?: "resume" | "linkedin-pdf";
 };
 
 export type ResumeAttachInputPayload = {
