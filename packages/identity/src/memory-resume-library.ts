@@ -10,6 +10,7 @@ export type NormalizedResumeImport = {
   readonly contentType?: string;
   readonly profileId: string;
   readonly parentVersionId?: string;
+  readonly pathId?: string;
 };
 
 /** Validate import fields — calm, recoverable messages for the UI. */
@@ -26,6 +27,7 @@ export function normalizeResumeImport(input: ResumeImportInput): NormalizedResum
     throw new Error("That file looks empty. Pick another resume and try again.");
   }
   const parentVersionId = input.parentVersionId?.trim() || undefined;
+  const pathId = input.pathId?.trim() || undefined;
   return {
     label,
     fileName,
@@ -33,6 +35,7 @@ export function normalizeResumeImport(input: ResumeImportInput): NormalizedResum
     contentType: input.contentType?.trim() || undefined,
     profileId: (input.profileId ?? DEFAULT_PROFILE_ID).trim() || DEFAULT_PROFILE_ID,
     parentVersionId,
+    pathId,
   };
 }
 
@@ -64,6 +67,7 @@ export function createMemoryResumeLibrary(): ResumeLibrary {
         contentType: normalized.contentType,
         byteLength: normalized.bytes.byteLength,
         parentVersionId: normalized.parentVersionId,
+        pathId: normalized.pathId,
       };
       versions.set(version.id, version);
       if (!selectedId) {

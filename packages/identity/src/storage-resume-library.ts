@@ -47,6 +47,7 @@ export function createStorageResumeLibrary(kv: KvStore, blobs: BlobStore): Resum
         contentType: put.value.contentType ?? normalized.contentType,
         byteLength: put.value.byteLength,
         parentVersionId: normalized.parentVersionId,
+        pathId: normalized.pathId,
       };
 
       const written = await docs.put(stored);

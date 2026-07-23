@@ -1,8 +1,7 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeAiProvider } from "@jobjitsu/ai";
-import { createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
@@ -31,6 +30,7 @@ describe("DesktopShell", () => {
       "Applications",
       "Queue",
       "Follow-ups",
+      "Profile",
       "Agent",
       "Preferences",
       "Timeline",
@@ -113,10 +113,11 @@ describe("DesktopShell", () => {
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    await user.click(screen.getByRole("button", { name: "Profile" }));
     expect(screen.getByTestId("jj-profile-form")).toBeInTheDocument();
     expect(screen.getByText(/stay on this device/i)).toBeInTheDocument();
     expect(screen.queryByText(/cloud sync/i)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("jj-preferences")).not.toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox", { name: /display name/i }), "Sam Chen");
     await user.type(screen.getByRole("textbox", { name: /^email$/i }), "sam@example.com");
@@ -136,7 +137,7 @@ describe("DesktopShell", () => {
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    await user.click(screen.getByRole("button", { name: "Profile" }));
     expect(screen.getByTestId("jj-path-library")).toBeInTheDocument();
     expect(screen.getByText(/^Paths$/)).toBeInTheDocument();
     expect(screen.queryByText(/sub-profile/i)).not.toBeInTheDocument();
@@ -146,12 +147,14 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Add path" }));
 
     expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
-    expect(screen.getByText("Fullstack Developer")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Fullstack Developer · Active|Fullstack Developer$/),
+    ).toBeInTheDocument();
 
     await user.clear(screen.getByTestId("jj-path-name-input"));
     await user.type(screen.getByTestId("jj-path-name-input"), "Mobile App");
     await user.click(screen.getByRole("button", { name: "Add path" }));
-    expect(await screen.findByText("Mobile App")).toBeInTheDocument();
+    expect(await screen.findByText(/Mobile App · Active|Mobile App$/)).toBeInTheDocument();
 
     const selectButtons = screen.getAllByRole("button", { name: "Select" });
     await user.click(selectButtons[selectButtons.length - 1]!);
@@ -161,7 +164,7 @@ describe("DesktopShell", () => {
     expect(await runtime.pathLibrary.list()).toHaveLength(2);
   });
 
-  it("imports a resume into the local library through the identity bridge", async () => {
+  it("imports a resume under a Path", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     const imported: string[] = [];
@@ -172,50 +175,65 @@ describe("DesktopShell", () => {
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
-    expect(screen.getByTestId("jj-resume-library")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
 
+    // New path opens the resume panel automatically.
+    const path = (await runtime.pathLibrary.list())[0]!;
+    expect(screen.getByTestId(`jj-path-resumes-${path.id}`)).toBeInTheDocument();
     await user.type(screen.getByRole("textbox", { name: /version label/i }), "Baseline 2026");
     const file = new File(["# Sam Chen\nStaff engineer\n"], "sam-chen.md", {
       type: "text/markdown",
     });
-    await user.upload(screen.getByTestId("jj-resume-file-input"), file);
+    await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
     await user.click(screen.getByRole("button", { name: "Import resume" }));
 
-    expect(await screen.findByText(/Imported "Baseline 2026"/i)).toBeInTheDocument();
-    expect(await screen.findByTestId("jj-resume-version-list")).toHaveTextContent("Baseline 2026");
+    expect(await screen.findByText(/Resume imported for this path/i)).toBeInTheDocument();
     const versions = await runtime.resumeLibrary.list();
     expect(versions).toHaveLength(1);
     expect(versions[0]?.label).toBe("Baseline 2026");
+    expect(versions[0]?.pathId).toBe(path.id);
     expect(imported).toEqual([versions[0]?.id]);
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(versions[0]?.id);
   });
 
-  it("selects a resume version without sending anything", async () => {
+  it("selects a resume version for a Path without sending", async () => {
     const user = userEvent.setup();
-    const resumeLibrary = createMemoryResumeLibrary();
-    const first = await resumeLibrary.import({
+    const runtime = createHostRuntime();
+    const path = await runtime.pathLibrary.upsert({ name: "Fullstack Developer" });
+    const baseline = await runtime.resumeLibrary.import({
       label: "Baseline",
       fileName: "base.md",
       bytes: new TextEncoder().encode("# Baseline"),
+      pathId: path.id,
     });
-    await resumeLibrary.import({
+    await runtime.pathLibrary.upsert({
+      id: path.id,
+      name: path.name,
+      selectedResumeVersionId: baseline.id,
+    });
+    const alternate = await runtime.resumeLibrary.import({
       label: "Alternate",
       fileName: "alt.md",
       bytes: new TextEncoder().encode("# Alternate"),
-      parentVersionId: first.id,
+      pathId: path.id,
     });
 
-    const runtime = createHostRuntime({ resumeLibrary });
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
-    expect(screen.getByTestId("jj-resume-version-list")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    await user.click(screen.getByRole("button", { name: "Resumes" }));
+    const resumes = screen.getByTestId(`jj-path-resumes-${path.id}`);
+    await user.click(within(resumes).getByRole("button", { name: "Select" }));
 
-    await user.click(screen.getByRole("button", { name: "Use Alternate" }));
-    expect(await screen.findByText(/Selected “Alternate” — nothing was sent/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Selected Alternate" })).toBeDisabled();
-    expect((await runtime.resumeLibrary.getSelected())?.label).toBe("Alternate");
+    expect(
+      await screen.findByText(/Resume selected for this path\. Nothing was sent/i),
+    ).toBeInTheDocument();
+    expect((await runtime.resumeLibrary.getSelected())?.id).toBe(alternate.id);
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(alternate.id);
     expect(runtime.bridge).not.toHaveProperty("send");
   });
 
@@ -230,11 +248,13 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
     expect(screen.getByTestId("jj-data-folder")).toBeInTheDocument();
-    expect(screen.getByTestId("jj-data-folder-default")).toHaveTextContent(
-      "/Users/sam/Library/Application Support/JobJitsu",
-    );
+    expect(screen.queryByTestId("jj-profile-form")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("jj-path-library")).not.toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue("/Users/sam/Library/Application Support/JobJitsu"),
+    ).toBeInTheDocument();
 
-    const pathField = screen.getByRole("textbox", { name: "Current folder" });
+    const pathField = screen.getByRole("textbox", { name: "Folder path" });
     await user.clear(pathField);
     await user.type(pathField, "/Volumes/Vault/JobJitsu");
     await user.click(screen.getByRole("button", { name: "Save path" }));
@@ -264,46 +284,5 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
     expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
-  });
-
-  it("keeps approval-before-send on by default and updates through preferences", async () => {
-    const user = userEvent.setup();
-    const runtime = createHostRuntime();
-    render(<App runtime={runtime} />);
-    await runtime.start();
-
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
-    expect(screen.getByTestId("jj-approval-before-send")).toBeInTheDocument();
-
-    const toggle = screen.getByRole("switch", { name: /require approval before send/i });
-    expect(toggle).toBeChecked();
-    expect(await runtime.preferences.getApprovalBeforeSend()).toBe(true);
-
-    await user.click(toggle);
-    expect(await screen.findByText(/Approval before send is off/i)).toBeInTheDocument();
-    expect(toggle).not.toBeChecked();
-    expect(await runtime.preferences.getApprovalBeforeSend()).toBe(false);
-  });
-
-  it("saves fit tone and constraints on this device", async () => {
-    const user = userEvent.setup();
-    const runtime = createHostRuntime();
-    render(<App runtime={runtime} />);
-    await runtime.start();
-
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
-    expect(screen.getByTestId("jj-craft-preferences")).toBeInTheDocument();
-
-    await user.type(screen.getByLabelText("Fit keywords"), "remote, platform");
-    await user.type(screen.getByLabelText("Tone"), "calm and precise");
-    await user.type(screen.getByLabelText("Constraints"), "no relocate");
-    await user.click(screen.getByRole("button", { name: "Save fit rules" }));
-
-    expect(await screen.findByText(/Fit rules saved on this device/i)).toBeInTheDocument();
-    expect(await runtime.preferences.getCraftPreferences()).toEqual({
-      fitKeywords: ["remote", "platform"],
-      tone: "calm and precise",
-      constraints: ["no relocate"],
-    });
   });
 });

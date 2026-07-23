@@ -9,6 +9,7 @@ import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { SHELL_NAV_ITEMS, type ShellNavId } from "../index.js";
@@ -17,6 +18,7 @@ const NAV_ICONS: Record<ShellNavId, JSX.Element> = {
   applications: <WorkOutlineRoundedIcon fontSize="small" />,
   queue: <InboxRoundedIcon fontSize="small" />,
   "follow-ups": <EventAvailableRoundedIcon fontSize="small" />,
+  profile: <PersonOutlineRoundedIcon fontSize="small" />,
   agent: <SupportAgentRoundedIcon fontSize="small" />,
   preferences: <TuneRoundedIcon fontSize="small" />,
   timeline: <HistoryRoundedIcon fontSize="small" />,
