@@ -5,7 +5,7 @@ import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { JjAgentPrivacyPill } from "@jobjitsu/ui";
+import { JjAgentPrivacyPill, type AgentPrivacyState } from "@jobjitsu/ui";
 import { APP_NAME, type ShellNavId } from "../index.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { MenuContent } from "./MenuContent.js";
@@ -23,13 +23,19 @@ const Drawer = styled(MuiDrawer)({
 export type SideMenuProps = {
   readonly activeId: ShellNavId;
   readonly onSelect: (id: ShellNavId) => void;
+  /** Honest Agent chrome — unavailable until local ready. */
+  readonly agentPrivacy?: AgentPrivacyState;
 };
 
 /**
  * Permanent side drawer — adapted from the Material UI dashboard SideMenu.
  * Brand + nav + privacy chrome only; no fake user card or promo alert.
  */
-export function SideMenu({ activeId, onSelect }: SideMenuProps): JSX.Element {
+export function SideMenu({
+  activeId,
+  onSelect,
+  agentPrivacy = "unavailable",
+}: SideMenuProps): JSX.Element {
   return (
     <Drawer
       variant="permanent"
@@ -71,7 +77,7 @@ export function SideMenu({ activeId, onSelect }: SideMenuProps): JSX.Element {
           borderColor: "divider",
         }}
       >
-        <JjAgentPrivacyPill />
+        <JjAgentPrivacyPill state={agentPrivacy} />
       </Stack>
     </Drawer>
   );

@@ -15,6 +15,8 @@ export type FakeAiProviderOptions = {
   /** Override complete text; default is deterministic from role + prompt length. */
   readonly completeText?: string | ((request: AiCompleteRequest) => string);
   readonly healthStatus?: AiHealth["status"];
+  /** Default local — remote is for honesty tests only. */
+  readonly locality?: AiHealth["locality"];
   readonly embedDimensions?: number;
 };
 
@@ -25,16 +27,20 @@ export type FakeAiProviderOptions = {
 export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiProvider {
   const id = options.id ?? "fake-ai";
   const dimensions = options.embedDimensions ?? 8;
+  const locality = options.locality ?? "local";
 
   return {
     id,
-    locality: "local",
+    locality,
     async health(): Promise<AiHealth> {
       return {
         status: options.healthStatus ?? "ready",
-        locality: "local",
+        locality,
         providerId: id,
-        message: "Fake on-device provider (not a real model)",
+        message:
+          locality === "local"
+            ? "Fake on-device provider (not a real model)"
+            : "Fake remote provider (honesty tests)",
       };
     },
     async complete(request: AiCompleteRequest): Promise<AiCompleteResult> {

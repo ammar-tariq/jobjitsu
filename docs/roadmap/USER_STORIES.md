@@ -363,11 +363,11 @@
 
 **Priority:** P0
 
-**Technical notes:** TERMINOLOGY; subscribe Ai.* when PE05-S01 exists.
+**Technical notes:** TERMINOLOGY; shell maps `ai.getStatus` + `Ai.LocalModel*` (no UI→AI imports).
 
 **Testing notes:** Badge semantics UI test.
 
-**Status:** proposed
+**Status:** in-review
 
 ### PE04-S04 — Fit, tone, and constraint preferences
 

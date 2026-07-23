@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
+import { createFakeAiProvider } from "@jobjitsu/ai";
 import { createMemoryResumeLibrary } from "@jobjitsu/identity";
 import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
@@ -23,8 +24,8 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
-    expect(screen.getByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
+    expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
     for (const label of [
       "Applications",
@@ -36,6 +37,29 @@ describe("DesktopShell", () => {
     ]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
+  });
+
+  it("keeps Agent chrome unavailable until the local runtime is ready", async () => {
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+
+    expect(screen.getByRole("status", { name: "Agent · Unavailable" })).toBeInTheDocument();
+
+    await runtime.start();
+
+    expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-agent-privacy-pill").textContent).not.toMatch(/llm/i);
+  });
+
+  it("never shows Agent · On-device for a remote-ready provider", async () => {
+    const runtime = createHostRuntime({
+      ai: createFakeAiProvider({ id: "fake-remote", locality: "remote" }),
+    });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    expect(await screen.findByRole("status", { name: "Agent · Ready" })).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Agent · On-device" })).not.toBeInTheDocument();
   });
 
   it("shows one primary view and Agent listens to host events", async () => {
