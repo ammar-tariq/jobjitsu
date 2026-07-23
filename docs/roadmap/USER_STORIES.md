@@ -354,7 +354,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Import → edit → cancel does not attach; UI never imports `@jobjitsu/ai`.
 
-**Status:** proposed
+**Status:** in progress
 
 ### PE03-S07 — Attach reviewed import to identity and/or path
 

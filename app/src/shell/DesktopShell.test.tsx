@@ -205,7 +205,7 @@ describe("DesktopShell", () => {
     expect(await runtime.pathLibrary.list()).toHaveLength(2);
   });
 
-  it("imports a resume under a Path", async () => {
+  it("reviews a resume import before saving and does not auto-attach", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     const imported: string[] = [];
@@ -225,23 +225,68 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Add path" }));
     expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
 
-    // New path opens the resume panel automatically.
     const path = (await runtime.pathLibrary.list())[0]!;
     expect(screen.getByTestId(`jj-path-resumes-${path.id}`)).toBeInTheDocument();
-    await user.type(screen.getByRole("textbox", { name: /version label/i }), "Baseline 2026");
     const file = new File(["# Sam Chen\nStaff engineer\n"], "sam-chen.md", {
       type: "text/markdown",
     });
     await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
-    await user.click(screen.getByRole("button", { name: "Import resume" }));
 
-    expect(await screen.findByText(/Resume imported for this path/i)).toBeInTheDocument();
+    const review = await screen.findByTestId(`jj-import-review-${path.id}`);
+    expect(within(review).getByText(/Review import/i)).toBeInTheDocument();
+    expect(await runtime.resumeLibrary.list()).toHaveLength(0);
+
+    const labelField = within(review).getByRole("textbox", { name: /version label/i });
+    await user.clear(labelField);
+    await user.type(labelField, "Baseline 2026");
+    await user.type(within(review).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.type(
+      within(review).getByRole("textbox", { name: /contact email/i }),
+      "sam@example.com",
+    );
+    await user.type(
+      within(review).getByRole("textbox", { name: /^notes$/i }),
+      "Staff engineer notes",
+    );
+    await user.click(within(review).getByRole("button", { name: "Save to library" }));
+
+    expect(
+      await screen.findByText(/Resume reviewed and saved on this device/i),
+    ).toBeInTheDocument();
     const versions = await runtime.resumeLibrary.list();
     expect(versions).toHaveLength(1);
     expect(versions[0]?.label).toBe("Baseline 2026");
     expect(versions[0]?.pathId).toBe(path.id);
+    expect(versions[0]?.contactName).toBe("Sam Chen");
+    expect(versions[0]?.contactEmail).toBe("sam@example.com");
+    expect(versions[0]?.notes).toBe("Staff engineer notes");
     expect(imported).toEqual([versions[0]?.id]);
-    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(versions[0]?.id);
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBeUndefined();
+  });
+
+  it("cancels import review without writing to the library", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
+
+    const path = (await runtime.pathLibrary.list())[0]!;
+    const file = new File(["# Draft\n"], "draft.md", { type: "text/markdown" });
+    await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
+    const review = await screen.findByTestId(`jj-import-review-${path.id}`);
+    await user.click(within(review).getByRole("button", { name: "Cancel" }));
+
+    expect(await screen.findByText(/Import cancelled\. Nothing was saved/i)).toBeInTheDocument();
+    expect(await runtime.resumeLibrary.list()).toHaveLength(0);
+    expect(screen.queryByTestId(`jj-import-review-${path.id}`)).not.toBeInTheDocument();
   });
 
   it("selects a resume version for a Path without sending", async () => {
