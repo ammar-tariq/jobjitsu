@@ -2,7 +2,8 @@
 
 Desktop **shell** (React webview) + **Tauri host** for JobJitsu.
 
-Primary nav: **Applications**, **Queue**, **Follow-ups**, **Agent**, **Preferences**, **Timeline**.
+Primary nav: **Applications**, **Queue**, **Follow-ups**, **Profile**, **Agent**, **Preferences**, **Timeline**.
+**Profile** holds identity and career Paths (with per-path resume import). **Preferences** is the on-device data folder (and appearance).
 **Agent** shows the startup cascade (listen-only). Other destinations stay **Coming Soon**.
 
 ## Prerequisites
@@ -54,6 +55,8 @@ Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/
 │ Queue        │  (Agent → cascade listen)   │
 │ Follow-ups   │                             │
 │ Agent        │                             │
+│ Profile      │                             │
+│ Agent        │        Main content         │
 │ Preferences  │                             │
 │ Timeline     │                             │
 │ Agent · On-  │                             │

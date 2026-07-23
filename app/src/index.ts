@@ -9,6 +9,7 @@ export const SHELL_NAV_ITEMS = [
   { id: "applications", label: "Applications" },
   { id: "queue", label: "Queue" },
   { id: "follow-ups", label: "Follow-ups" },
+  { id: "profile", label: "Profile" },
   { id: "agent", label: "Agent" },
   { id: "preferences", label: "Preferences" },
   { id: "timeline", label: "Timeline" },

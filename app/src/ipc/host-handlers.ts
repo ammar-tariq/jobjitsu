@@ -135,7 +135,22 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           bytes,
           contentType: payload.contentType,
           parentVersionId: payload.parentVersionId,
+          pathId: payload.pathId,
         });
+        if (payload.pathId) {
+          const pathLibrary = getPathLibrary();
+          if (pathLibrary) {
+            const path = await pathLibrary.get(payload.pathId);
+            if (path) {
+              await pathLibrary.upsert({
+                id: path.id,
+                name: path.name,
+                notes: path.notes,
+                selectedResumeVersionId: version.id,
+              });
+            }
+          }
+        }
         if (bus) {
           await bus.publish("Resume.Imported", { resumeId: version.id });
         }
@@ -207,7 +222,12 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
       try {
-        const path = await pathLibrary.upsert(payload);
+        const path = await pathLibrary.upsert({
+          id: payload.id,
+          name: payload.name,
+          notes: payload.notes,
+          selectedResumeVersionId: payload.selectedResumeVersionId,
+        });
         return ok({ path });
       } catch (cause) {
         return err(

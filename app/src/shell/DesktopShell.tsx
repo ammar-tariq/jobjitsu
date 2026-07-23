@@ -11,6 +11,7 @@ import { ComingSoonView } from "./ComingSoonView.js";
 import { EventActivityView } from "./EventActivityView.js";
 import { useHostActivity } from "./HostProvider.js";
 import { PreferencesView } from "./PreferencesView.js";
+import { ProfileView } from "./ProfileView.js";
 import { SideMenu } from "./SideMenu.js";
 
 export type DesktopShellProps = {
@@ -77,6 +78,8 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
         >
           {activeId === "agent" ? (
             <EventActivityView />
+          ) : activeId === "profile" ? (
+            <ProfileView bridge={bridge} />
           ) : activeId === "preferences" ? (
             <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
           ) : (

@@ -67,6 +67,7 @@ export type ResumeVersionSnapshot = {
   readonly contentType?: string;
   readonly byteLength?: number;
   readonly parentVersionId?: string;
+  readonly pathId?: string;
 };
 
 export type ResumeImportInputPayload = {
@@ -76,6 +77,7 @@ export type ResumeImportInputPayload = {
   readonly contentBase64: string;
   readonly contentType?: string;
   readonly parentVersionId?: string;
+  readonly pathId?: string;
 };
 
 export type PathSnapshot = {
@@ -92,6 +94,7 @@ export type PathPatchInput = {
   readonly id?: string;
   readonly name: string;
   readonly notes?: string;
+  readonly selectedResumeVersionId?: string | null;
 };
 
 export type DataRootSnapshot = {

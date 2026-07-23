@@ -17,6 +17,7 @@ describe("@jobjitsu/app shell navigation", () => {
       "Applications",
       "Queue",
       "Follow-ups",
+      "Profile",
       "Agent",
       "Preferences",
       "Timeline",
@@ -26,6 +27,7 @@ describe("@jobjitsu/app shell navigation", () => {
   it("defaults to Applications", () => {
     expect(DEFAULT_SHELL_NAV_ID).toBe("applications");
     expect(shellPageTitle("applications")).toBe("Applications");
+    expect(shellPageTitle("profile")).toBe("Profile");
     expect(shellPageTitle("preferences")).toBe("Preferences");
   });
 

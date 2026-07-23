@@ -64,6 +64,8 @@ export interface ResumeVersion {
   readonly byteLength?: number;
   /** Optional parent in the version graph (tailor / fork). */
   readonly parentVersionId?: string;
+  /** Career path this version belongs to (UI: Path). */
+  readonly pathId?: string;
 }
 
 export type ResumeImportInput = {
@@ -74,6 +76,8 @@ export type ResumeImportInput = {
   /** Defaults to a local placeholder when profile is not yet set. */
   readonly profileId?: string;
   readonly parentVersionId?: string;
+  /** When set, version is scoped to that Path. */
+  readonly pathId?: string;
 };
 
 /**
