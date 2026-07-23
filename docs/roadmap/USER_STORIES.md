@@ -413,7 +413,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** New path points at chosen version id.
 
-**Status:** in progress
+**Status:** done
 
 ### PE03-S10 — AI parse import into structured fields
 
@@ -584,9 +584,9 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Technical notes:** AI_ARCHITECTURE; packages/ai. UI never calls provider.
 
-**Testing notes:** Fake provider contract tests.
+**Testing notes:** Fake provider contract tests; host emits Ai.LocalModel*; no silent remote fallback.
 
-**Status:** proposed
+**Status:** in progress
 
 ### PE05-S02 — Configure local model path
 
