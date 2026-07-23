@@ -68,6 +68,19 @@ describe("@jobjitsu/storage", () => {
     expect(assertSafeStorageSegment("prefs", "namespace").ok).toBe(true);
   });
 
+  it("treats missing KV keys as empty (not a hard read failure)", async () => {
+    const dataRoot = await tempDataRoot();
+    const store = await createFsStorageProvider({ dataRoot });
+    const missing = await store.kv.get({ namespace: "identity", id: "path_selected" });
+    expect(missing.ok).toBe(true);
+    expect(missing.ok && missing.value).toBeUndefined();
+
+    const written = await store.kv.set({ namespace: "identity", id: "path_selected" }, "path_1");
+    expect(written.ok).toBe(true);
+    const loaded = await store.kv.get<string>({ namespace: "identity", id: "path_selected" });
+    expect(loaded.ok && loaded.value).toBe("path_1");
+  });
+
   it("roundtrips KV documents in a temp directory", async () => {
     const dataRoot = await tempDataRoot();
     const store = await createFsStorageProvider({ dataRoot });
