@@ -58,6 +58,11 @@ export interface AiProviderRegistry {
   list(): readonly AiProvider[];
   /** Register a provider — host owns lifecycle. */
   register(provider: AiProvider): void;
+  /**
+   * Explicitly choose the active provider.
+   * Never auto-promotes a remote provider over local.
+   */
+  setActive(id: string): void;
 }
 
 /**

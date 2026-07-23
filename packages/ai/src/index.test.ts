@@ -41,6 +41,26 @@ describe("@jobjitsu/ai fake provider", () => {
     expect(registry.list()).toHaveLength(1);
   });
 
+  it("does not silently activate a remote provider over local", () => {
+    const local = createFakeAiProvider({ id: "local-ai", locality: "local" });
+    const remote = createFakeAiProvider({ id: "remote-ai", locality: "remote" });
+    const registry = createAiProviderRegistry([local]);
+    registry.register(remote);
+    expect(registry.getActive()?.id).toBe("local-ai");
+    expect(registry.getActive()?.locality).toBe("local");
+
+    registry.setActive("remote-ai");
+    expect(registry.getActive()?.id).toBe("remote-ai");
+    expect(registry.getActive()?.locality).toBe("remote");
+  });
+
+  it("refuses complete when health is not ready (no cloud fallback)", async () => {
+    const provider = createFakeAiProvider({ healthStatus: "unavailable", locality: "local" });
+    await expect(
+      provider.complete({ role: "generic", prompt: "should not reach a cloud" }),
+    ).rejects.toThrow(/not ready/i);
+  });
+
   it("assembles allowlisted context only", () => {
     const assembler = createFakeContextAssembler();
     const prompt = assembler.assemble({

@@ -44,6 +44,10 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
       };
     },
     async complete(request: AiCompleteRequest): Promise<AiCompleteResult> {
+      const status = options.healthStatus ?? "ready";
+      if (status !== "ready") {
+        throw new Error("Agent is not ready on this device. Check Preferences and try again.");
+      }
       const text =
         typeof options.completeText === "function"
           ? options.completeText(request)
@@ -85,6 +89,12 @@ export function createAiProviderRegistry(initial: readonly AiProvider[] = []): A
     register(provider) {
       map.set(provider.id, provider);
       activeId ??= provider.id;
+    },
+    setActive(id) {
+      if (!map.has(id)) {
+        throw new Error("That Agent provider is not registered. Pick another and try again.");
+      }
+      activeId = id;
     },
   };
 }
