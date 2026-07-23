@@ -98,15 +98,47 @@ Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md]
 - File stored on-device; UI confirms “Stored on this device.”
 - No upload toast or cloud wording.
 
+### E04-F01-S02 — As a user, I review and edit after every import (twin: PE03-S06)
+**AC**
+- Import never auto-commits to identity or path without review.
+- Manual fields editable without AI parse.
+- Cancel does not attach.
+
+### E04-F01-S03 — As a user, I attach a reviewed import to identity and/or path (twin: PE03-S07)
+**AC**
+- Choices: update identity, save to path (pick/create), or both.
+- Attach is local-only; select ≠ send.
+
+### E04-F01-S04 — As a user, I can import LinkedIn via exported PDF (twin: PE03-S08)
+**AC**
+- Calm export-as-PDF guidance; no scraping or LinkedIn login.
+- Same review → attach pipeline as résumé import.
+
 ### E04-F02-S01 — As a user, I can edit basic profile fields
 **AC**
 - Name and contact fields save locally.
 - Reload shows saved values.
 
+### E04-F02-S02 — As a user, I maintain career paths under my identity (twin: PE03-S05)
+**AC**
+- Create / rename / archive Path (e.g. Fullstack, Mobile) under one Profile.
+- Chrome says Path, not sub-profile; switch ≠ send.
+
+### E04-F02-S03 — As a user, I can create a path from an existing résumé (twin: PE03-S09)
+**AC**
+- Pick library version → name path → set selected résumé.
+- No AI; no send.
+
 ### E04-F03-S01 — As AI/applications packages, I can read identity safely
 **AC**
 - Read API returns structured data.
 - No method on identity package performs egress.
+
+### E04-F04-S01 — As a user, AI may pre-fill import review after Agent is ready (twin: PE03-S10)
+**AC**
+- Host-only AI; edit still mandatory before attach.
+- Unavailable Agent → manual review; no guilt.
+- Deferred until E06 / PE05.
 
 ---
 

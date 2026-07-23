@@ -142,9 +142,16 @@ Aligns with backlog waves 0–6 ≈ PE waves 0–7; backlog 7–9 ≈ PE 8–9.
 | 4 | [PE04-S04](docs/roadmap/USER_STORIES.md#pe04-s04--fit-tone-and-constraint-preferences) Fit / tone / constraints | P0 | PE04-S01 |
 | 5 | [PE04-S02](docs/roadmap/USER_STORIES.md#pe04-s02--quiet-hours-and-calm-notifications) Quiet hours fields | P1 | PE04-S01 |
 | 6 | [PE03-S03](docs/roadmap/USER_STORIES.md#pe03-s03--version-and-select-resumes) Version and select resumes | P1 | PE03-S02 |
-| 7 | [PE13-S02](docs/roadmap/USER_STORIES.md#pe13-s02--calm-empty-states-for-primary-lists) Calm empty states | P1 | PE01-S02 |
+| 7 | [PE03-S05](docs/roadmap/USER_STORIES.md#pe03-s05--maintain-career-paths-under-identity) Career paths under identity | P0 | PE03-S01 |
+| 8 | [PE03-S06](docs/roadmap/USER_STORIES.md#pe03-s06--review-and-edit-after-every-import) Review & edit after import | P0 | PE03-S02 |
+| 9 | [PE03-S07](docs/roadmap/USER_STORIES.md#pe03-s07--attach-reviewed-import-to-identity-andor-path) Attach import to identity/path | P0 | PE03-S05, PE03-S06, PE03-S03 |
+| 10 | [PE03-S08](docs/roadmap/USER_STORIES.md#pe03-s08--import-linkedin-via-exported-pdf) LinkedIn PDF import + guidance | P1 | PE03-S06 |
+| 11 | [PE03-S09](docs/roadmap/USER_STORIES.md#pe03-s09--create-a-path-from-an-existing-résumé-version) Path from existing résumé | P1 | PE03-S05, PE03-S03 |
+| 12 | [PE13-S02](docs/roadmap/USER_STORIES.md#pe13-s02--calm-empty-states-for-primary-lists) Calm empty states | P1 | PE01-S02 |
 
-**Exit:** Import works; approval default on; fit prefs persist; empty lists are calm.
+**Exit:** Import → review → attach to identity/path; approval default on; fit prefs persist; empty lists are calm.
+
+**Out of wave (after Wave 3 AI):** PE03-S10 AI parse; PE03-S04 tailor draft.
 
 **Parallel:** PE03-* ‖ PE04-* after Wave 1.
 
@@ -162,8 +169,9 @@ Aligns with backlog waves 0–6 ≈ PE waves 0–7; backlog 7–9 ≈ PE 8–9.
 | 2 | [PE05-S03](docs/roadmap/USER_STORIES.md#pe05-s03--context-builder-minimizes-prompt-context) Context Builder | P0 | PE05-S01, PE03-S01 |
 | 3 | [PE05-S05](docs/roadmap/USER_STORIES.md#pe05-s05--offline--local-primary-path) Offline / local-primary | P0 | PE05-S01 |
 | 4 | [PE05-S02](docs/roadmap/USER_STORIES.md#pe05-s02--configure-local-model-path) Configure local model path | P0 | PE05-S01, PE04-S01 |
+| 5 | [PE03-S10](docs/roadmap/USER_STORIES.md#pe03-s10--ai-parse-import-into-structured-fields) AI parse import (pre-fill review) | P0 | PE03-S06, PE05-S01, PE05-S03 |
 
-**Exit:** Fake provider contract tests green; no silent cloud fallback; KnowledgeReader may be no-op.
+**Exit:** Fake provider contract tests green; no silent cloud fallback; KnowledgeReader may be no-op; import review can pre-fill when Agent ready.
 
 ---
 
@@ -235,7 +243,7 @@ Aligns with backlog waves 0–6 ≈ PE waves 0–7; backlog 7–9 ≈ PE 8–9.
 
 | Order | Story | Priority | Depends |
 |------:|-------|----------|---------|
-| 1 | [PE13-S01](docs/roadmap/USER_STORIES.md#pe13-s01--complete-calm-first-run-onboarding) Calm first-run onboarding | P1 | PE04-S01, PE03-S02, PE04-S03 |
+| 1 | [PE13-S01](docs/roadmap/USER_STORIES.md#pe13-s01--complete-calm-first-run-onboarding) Calm first-run onboarding | P1 | PE04-S01, PE03-S07, PE04-S03 |
 
 **Exit:** Three-beat (or equivalent) onboarding without forced model wall; privacy must-pass tests green.
 
@@ -270,7 +278,7 @@ Aligns with backlog waves 0–6 ≈ PE waves 0–7; backlog 7–9 ≈ PE 8–9.
 | PE24-S01 | Recruiter & network nudges |
 | PE25-S01 | Plugins (Agent Skills) |
 | PE26-S01 / PE26-S02 | Export + Host Extensions |
-| PE27-S01 | Multi-profile |
+| PE27-S01 | Hard multi-identity (paths = PE03-S05) |
 | PE28-S01 | Role-fit compass |
 | PE29-S01 | Offer & decision journal |
 | PE30-S01 | Skills & learning map |

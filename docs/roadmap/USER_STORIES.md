@@ -19,6 +19,9 @@
 
 | Concern | Owner story | Not owner |
 |---------|-------------|-----------|
+| Career paths under identity | PE03-S05 | PE27-S01 (hard multi-identity only) |
+| Post-import review & attach | PE03-S06 / PE03-S07 | Silent auto-commit to identity |
+| AI parse after import | PE03-S10 (after PE05) | PE03-S06 manual review |
 | Resume draft / tailor (no send) | PE03-S04 | PE06-S02 (orchestration only) |
 | Cover letter draft | PE08-S02 | PE03-S04 |
 | Enqueue into review Queue | PE06-S02 / PE09-S01 | AI Task Queue (PE16) |
@@ -56,7 +59,7 @@
 |------|------|----------------|----------|-----------------|
 | [PE01](#pe01) | Desktop Shell & Foundation | Core · H1 | P0 | Shell, IA, Appearance, IPC |
 | [PE02](#pe02) | Storage & Event Spine | Core · H1 | P0 | Local Storage, Event bus, Logging hook |
-| [PE03](#pe03) | Identity & Resume Library | Core · H1 | P0 | Profile, Resume Library / Import / Versioning / Tailoring |
+| [PE03](#pe03) | Identity & Resume Library | Core · H1 | P0 | Profile, Paths, Resume Library / Import / Versioning / Tailoring |
 | [PE04](#pe04) | Preferences & Privacy Chrome | Core · H1 | P0 | Preferences, Approval, Quiet hours, Agent chrome |
 | [PE05](#pe05) | Local Intelligence | Core · H1 | P0 | AI Provider, Context Builder, Model Manager, Offline |
 | [PE06](#pe06) | Agent (preparative) | Core · H1 | P0 | Agent lifecycle → Queue (not Send) |
@@ -232,6 +235,9 @@
 
 **Identity & Resume Library** · Status: **Core · H1** · Priority: **P0**
 
+One **identity** (e.g. Ammar Tariq) with optional **paths** (Fullstack Developer, Mobile App).
+Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelligence).
+
 ### PE03-S01 — Maintain local profile
 
 **Description:** As a user, I can create and edit my on-device profile.
@@ -297,16 +303,138 @@
   - Uses Context Builder + AI Provider.
   - Output is a draft/version; user remains author.
   - Does not call Send; does not enqueue (enqueue is PE06-S02 / PE09).
+  - May create or update a path résumé only after user review (same authorship rule as PE03-S06).
 
 **Dependencies:** PE03-S02, PE05-S01, PE05-S03
 
 **Priority:** P0
 
-**Technical notes:** Resume Tailoring; ownership: draft only.
+**Technical notes:** Resume Tailoring; ownership: draft only; wave after PE05 (not before paths attach).
 
 **Testing notes:** Fence test agent/AI ↛ send.
 
+**Status:** proposed · after PE05
+
+### PE03-S05 — Maintain career paths under identity
+
+**Description:** As a user, I can create local **paths** under my profile (e.g. Fullstack Developer, Mobile App) without creating separate accounts.
+
+**Acceptance criteria:**
+  - Identity remains one person; paths are children (name + optional notes).
+  - Create / rename / archive path; all local-only; UI never implies cloud sync.
+  - Active path is selectable; switching path does not send anything.
+  - Chrome uses **Path** (not “sub-profile”).
+
+**Dependencies:** PE03-S01
+
+**Priority:** P0
+
+**Technical notes:** Extend identity DATA_MODELS; façade + IPC; Preferences or Identity view.
+
+**Testing notes:** Paths stay on device; select ≠ send.
+
 **Status:** proposed
+
+### PE03-S06 — Review and edit after every import
+
+**Description:** As a user, after I import a résumé (or LinkedIn PDF), I always land on a calm **review & edit** step before anything is attached.
+
+**Acceptance criteria:**
+  - Import never auto-commits to identity or a path without this step.
+  - User can edit label + structured fields available without AI (at minimum: display name, contact, free-text body / notes; raw file kept).
+  - Partial/empty fields are honest; no fake completeness.
+  - Cancel leaves library unchanged (or only a discarded draft — one rule, documented).
+  - No LLM/parse required; file stored as version source.
+
+**Dependencies:** PE03-S02
+
+**Priority:** P0
+
+**Technical notes:** Post-import UI; host owns storage; UI via IPC only.
+
+**Testing notes:** Import → edit → cancel does not attach; UI never imports `@jobjitsu/ai`.
+
+**Status:** proposed
+
+### PE03-S07 — Attach reviewed import to identity and/or path
+
+**Description:** As a user, after editing an import I can attach it to my profile, a path, or both.
+
+**Acceptance criteria:**
+  - Choices: **Update identity** · **Save to path** (pick or create) · **Both**.
+  - First-run default may suggest identity + create first path; later imports default to path (do not silently overwrite identity).
+  - Attach emits clear local events (ids only); never outbound.
+  - Selecting the new path résumé does not send.
+
+**Dependencies:** PE03-S05, PE03-S06, PE03-S03
+
+**Priority:** P0
+
+**Technical notes:** Wire Resume Library versions to `pathId`; identity patch from allowlisted fields only.
+
+**Testing notes:** Attach to path only leaves identity unchanged; both updates both.
+
+**Status:** proposed
+
+### PE03-S08 — Import LinkedIn via exported PDF
+
+**Description:** As a user, I can import a LinkedIn profile by exporting it as PDF and choosing that file — with clear in-app guidance.
+
+**Acceptance criteria:**
+  - Same import → review → attach pipeline as résumé files.
+  - UI shows calm steps to export LinkedIn as PDF (no scraping, no LinkedIn login, no API).
+  - Failure/cancel copy is recoverable; never pressure.
+  - Source label distinguishes `linkedin-pdf` vs résumé when stored.
+
+**Dependencies:** PE03-S06
+
+**Priority:** P1
+
+**Technical notes:** Brand EMPTY_STATES / onboarding copy; ToS-safe.
+
+**Testing notes:** Guidance visible; import path reuses library APIs.
+
+**Status:** proposed
+
+### PE03-S09 — Create a path from an existing résumé version
+
+**Description:** As a user, I can create a new path (e.g. Mobile App) by attaching an existing library version — without generating text.
+
+**Acceptance criteria:**
+  - Pick existing version → create/name path → set as that path’s selected résumé.
+  - Does not call AI; does not send.
+  - User can still edit metadata before confirm.
+
+**Dependencies:** PE03-S05, PE03-S03
+
+**Priority:** P1
+
+**Technical notes:** Thin UI over PE03-S05 / PE03-S07.
+
+**Testing notes:** New path points at chosen version id.
+
+**Status:** proposed
+
+### PE03-S10 — AI parse import into structured fields
+
+**Description:** As a user, after Agent/runtime is available, import review can be **pre-filled** by on-device parse — still editable before attach.
+
+**Acceptance criteria:**
+  - Parse runs only via host AI; UI never imports `@jobjitsu/ai`.
+  - Pre-fill is a draft; PE03-S06 edit remains mandatory before attach.
+  - Unavailable Agent → calm fallback to manual edit (PE03-S06); no guilt.
+  - Chrome stays honest (Agent · On-device only when local).
+  - Does not send; does not auto-attach.
+
+**Dependencies:** PE03-S06, PE05-S01, PE05-S03
+
+**Priority:** P0
+
+**Technical notes:** Block until Local Intelligence; fence UI↛AI.
+
+**Testing notes:** With AI stub: fields pre-filled; without: manual path works.
+
+**Status:** deferred · after PE05
 
 ## PE04
 
@@ -367,7 +495,7 @@
 
 **Testing notes:** Badge semantics UI test.
 
-**Status:** in-review
+**Status:** done (2026-07-23)
 
 ### PE04-S04 — Fit, tone, and constraint preferences
 
@@ -957,12 +1085,12 @@
 **Description:** As a new user, I can complete first-run onboarding without pressure.
 
 **Acceptance criteria:**
-  - Steps cover: local profile/resume import path and approval-before-send explanation.
+  - Steps cover: create identity → import résumé **or** LinkedIn PDF → review/edit → create first path → approval-before-send explanation.
   - Agent · On-device chrome visible during onboarding.
-  - No forced model download wall; model config can wait.
+  - No forced model download wall; model config and AI parse can wait (PE03-S10).
   - Skippable where safe; no guilt copy.
 
-**Dependencies:** PE04-S01, PE03-S02, PE04-S03
+**Dependencies:** PE04-S01, PE03-S07, PE04-S03
 
 **Priority:** P1
 
@@ -1375,20 +1503,24 @@
 
 **Multi-profile / Career Path** · Status: **Future** · Priority: **P3**
 
-### PE27-S01 — Maintain multiple local profiles
+> Day-to-day Fullstack / Mobile faces live under **PE03-S05 Paths**.
+> PE27 is for **hard multi-identity** (separate identities), not path variants.
 
-**Description:** As a user, I can maintain multiple local profiles for different paths.
+### PE27-S01 — Maintain multiple local identities
+
+**Description:** As a user, I can maintain multiple local **identities** for hard career pivots (not path variants under one person).
 
 **Acceptance criteria:**
-  - Profiles local-only.
+  - Identities local-only.
   - Switch does not sync to JobJitsu cloud.
-  - Deferred stub.
+  - Does not replace PE03-S05 Paths for Fullstack vs Mobile under one identity.
+  - Deferred stub until FEATURES admits deep multi-identity.
 
-**Dependencies:** PE03-S01
+**Dependencies:** PE03-S01, PE03-S05
 
 **Priority:** P3
 
-**Technical notes:** FEATURES Future.
+**Technical notes:** FEATURES Future — Multi-profile / multi-path.
 
 **Testing notes:** Deferred.
 

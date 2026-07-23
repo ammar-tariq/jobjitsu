@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE04 Preferences & Privacy Chrome |
-| **Story** | PE04-S03 — Show Agent · On-device status (this slice) |
-| **Status** | PR gate — [#76](https://github.com/ammar-tariq/jobjitsu/pull/76) |
-| **Note** | Honest Agent chrome via ai.getStatus + Ai.*; never LLM; never On-device for remote |
+| **Epic** | PE03 Identity & Resume Library |
+| **Story** | PE03-S05 — Maintain career paths under identity ([#77](https://github.com/ammar-tariq/jobjitsu/issues/77)) |
+| **Status** | Ready — implement S05 → S06 → S07 first (manual only) |
+| **Note** | Issues #77–#81 Wave 2; #82 (S10 AI parse) after PE05 |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE04-S03 | 2026-07-23 | Honest Agent privacy chrome; PR #76 |
 | PE04-S04 | 2026-07-23 | Fit/tone/constraints via façade + IPC; Preferences.Changed |
 | PE04-S06 | 2026-07-23 | Durable data folder; profile/resume/prefs on disk |
 | PE04-S01 | 2026-07-23 | Approval default on; façade + IPC + Preferences toggle |

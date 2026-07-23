@@ -53,8 +53,15 @@
 | Dual ID system | PE* vs E* requires map discipline — documented; do not delete either file |
 | Search Profiles / Match Score | Documented out of H1; admit Experimental stories when product prioritizes |
 
+## Addendum (2026-07-23) — Career paths & import attach
+
+- Added **PE03-S05…S09** (paths, review, attach, LinkedIn PDF, path-from-existing) — manual first.
+- **PE03-S10** AI parse deferred until after PE05; PE03-S04 remains after PE05.
+- **PE27** clarified as hard multi-identity; day-to-day faces = **Path** (PE03-S05).
+- PE13-S01 deps → PE03-S07; terminology: Profile vs Path.
+
 ---
 
 ## Approve for Step 8?
 
-**Yes — Step 8 done:** [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) + [PROJECT_BOARD.md](../backlog/PROJECT_BOARD.md). Next: pipeline [09](../prompts/09_generate_implementation_order.md) (align DEPENDENCY_GRAPH) or start **PE01-S01**.
+**Yes — Step 8 done:** [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) + [PROJECT_BOARD.md](../backlog/PROJECT_BOARD.md). Next: pipeline [09](../prompts/09_generate_implementation_order.md) (align DEPENDENCY_GRAPH) or start **PE03-S05**.

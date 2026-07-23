@@ -132,9 +132,10 @@ flowchart LR
 **Exit:** Storage roundtrip; event bus test; nav + IPC ping; JjButton.
 
 ### Wave 2 — User trust surface
-**Goal:** Résumé local; prefs; honest **Agent · On-device** chrome.  
+**Goal:** Résumé local; prefs; honest **Agent · On-device** chrome; **paths** under identity.  
 **Epics:** E04, E05  
-**Exit:** Import resume; approval default on; **Agent · On-device** chrome mounted.
+**Exit:** Import → review → attach to identity/path; approval default on; **Agent · On-device** chrome mounted.
+**Next (manual first):** E04 path stories (PE03-S05…S09); AI parse after Wave 3 (PE03-S10).
 
 ### Wave 3 — Intelligence & craft objects
 **Goal:** Tailor drafts from local roles.  
