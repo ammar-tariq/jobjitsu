@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
+import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -58,6 +62,11 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   const [pathsOpenByProfile, setPathsOpenByProfile] = useState<Record<string, boolean>>({});
   const [openPathId, setOpenPathId] = useState<string | null>(null);
   const [addPathForProfileId, setAddPathForProfileId] = useState<string | null>(null);
+  const [fromResumeForProfileId, setFromResumeForProfileId] = useState<string | null>(null);
+  const [fromResumeVersionId, setFromResumeVersionId] = useState("");
+  const [fromResumePathName, setFromResumePathName] = useState("");
+  const [fromResumePathNotes, setFromResumePathNotes] = useState("");
+  const [creatingFromResume, setCreatingFromResume] = useState(false);
 
   const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
   const [importDraft, setImportDraft] = useState<{
@@ -317,6 +326,8 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
     const profilePaths = paths.filter((path) => path.profileId === profileId);
     const pathsOpen = pathsOpenByProfile[profileId] !== false;
     const showAddForm = addPathForProfileId === profileId || editingPathId !== null;
+    const showFromResume = fromResumeForProfileId === profileId;
+    const profileVersions = versions.filter((version) => version.profileId === profileId);
 
     return (
       <List dense disablePadding>
@@ -348,7 +359,10 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
             {profilePaths.map((path) => {
               const isSelected = path.id === selectedPathId;
               const isOpen = path.id === openPathId;
-              const pathVersions = versions.filter((version) => version.pathId === path.id);
+              const pathVersions = versions.filter(
+                (version) =>
+                  version.pathId === path.id || path.selectedResumeVersionId === version.id,
+              );
               return (
                 <Stack key={path.id} data-testid={`jj-path-card-${path.id}`}>
                   <TreeRow
@@ -739,21 +753,44 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
             })}
 
             <Stack spacing={1.5} sx={{ px: 2, py: 1.5, pl: 7 }}>
-              {!showAddForm ? (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    setAddPathForProfileId(profileId);
-                    setEditingPathId(null);
-                    setPathName("");
-                    setPathNotes("");
-                    setPathStatus(null);
-                  }}
-                >
-                  Add path
-                </Button>
-              ) : (
+              {!showAddForm && !showFromResume ? (
+                <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      setAddPathForProfileId(profileId);
+                      setFromResumeForProfileId(null);
+                      setEditingPathId(null);
+                      setPathName("");
+                      setPathNotes("");
+                      setPathStatus(null);
+                    }}
+                  >
+                    Add path
+                  </Button>
+                  {profileVersions.length > 0 ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      data-testid={`jj-path-from-resume-open-${profileId}`}
+                      onClick={() => {
+                        setFromResumeForProfileId(profileId);
+                        setAddPathForProfileId(null);
+                        setEditingPathId(null);
+                        setFromResumeVersionId(profileVersions[0]?.id ?? "");
+                        setFromResumePathName("");
+                        setFromResumePathNotes("");
+                        setPathStatus(null);
+                      }}
+                    >
+                      Create path from résumé
+                    </Button>
+                  ) : null}
+                </Stack>
+              ) : null}
+
+              {showAddForm ? (
                 <>
                   <Typography color="text.secondary" variant="body2">
                     {profilePaths.length === 0
@@ -826,8 +863,121 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                     </Button>
                   </Stack>
                 </>
-              )}
-              {pathStatus && addPathForProfileId === profileId ? (
+              ) : null}
+
+              {showFromResume ? (
+                <Stack spacing={1.5} data-testid={`jj-path-from-resume-${profileId}`}>
+                  <Typography color="text.secondary" variant="body2">
+                    Pick an existing résumé version, name the Path, then confirm. Nothing is
+                    generated or sent.
+                  </Typography>
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id={`jj-from-resume-label-${profileId}`}>Résumé version</InputLabel>
+                    <Select
+                      labelId={`jj-from-resume-label-${profileId}`}
+                      label="Résumé version"
+                      value={fromResumeVersionId}
+                      data-testid={`jj-path-from-resume-select-${profileId}`}
+                      onChange={(event) => setFromResumeVersionId(String(event.target.value))}
+                    >
+                      {profileVersions.map((version) => (
+                        <MenuItem key={version.id} value={version.id}>
+                          {version.label}
+                          {version.fileName ? ` · ${version.fileName}` : ""}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    label="Path name"
+                    value={fromResumePathName}
+                    onChange={(event) => setFromResumePathName(event.target.value)}
+                    size="small"
+                    fullWidth
+                    required
+                    placeholder="e.g. Mobile App"
+                    slotProps={{
+                      htmlInput: { "data-testid": `jj-path-from-resume-name-${profileId}` },
+                    }}
+                  />
+                  <TextField
+                    label="Notes (optional)"
+                    value={fromResumePathNotes}
+                    onChange={(event) => setFromResumePathNotes(event.target.value)}
+                    size="small"
+                    fullWidth
+                    placeholder="e.g. React Native focus"
+                  />
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant="contained"
+                      disabled={
+                        creatingFromResume ||
+                        fromResumePathName.trim().length === 0 ||
+                        fromResumeVersionId.length === 0
+                      }
+                      onClick={() => {
+                        setCreatingFromResume(true);
+                        setPathStatus(null);
+                        void bridge
+                          .upsertPath({
+                            name: fromResumePathName.trim(),
+                            notes: fromResumePathNotes.trim() || undefined,
+                            profileId,
+                            selectedResumeVersionId: fromResumeVersionId,
+                          })
+                          .then(async (created) => {
+                            if (!created.ok) {
+                              setCreatingFromResume(false);
+                              setPathStatus(created.error.message ?? created.error.title);
+                              return;
+                            }
+                            const selectedPath = await bridge.selectPath(created.value.path.id);
+                            if (!selectedPath.ok) {
+                              setCreatingFromResume(false);
+                              setPathStatus(selectedPath.error.message ?? selectedPath.error.title);
+                              return;
+                            }
+                            const selectedResume = await bridge.selectResume(fromResumeVersionId);
+                            setCreatingFromResume(false);
+                            if (!selectedResume.ok) {
+                              setPathStatus(
+                                selectedResume.error.message ?? selectedResume.error.title,
+                              );
+                              return;
+                            }
+                            setPathStatus(
+                              "Path created from résumé. Stored on this device. Nothing was sent.",
+                            );
+                            setFromResumeForProfileId(null);
+                            setFromResumeVersionId("");
+                            setFromResumePathName("");
+                            setFromResumePathNotes("");
+                            setOpenPathId(created.value.path.id);
+                            await refreshPaths();
+                            await refreshVersions();
+                          });
+                      }}
+                    >
+                      Create path
+                    </Button>
+                    <Button
+                      variant="text"
+                      disabled={creatingFromResume}
+                      onClick={() => {
+                        setFromResumeForProfileId(null);
+                        setFromResumeVersionId("");
+                        setFromResumePathName("");
+                        setFromResumePathNotes("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </Stack>
+                </Stack>
+              ) : null}
+
+              {pathStatus && openProfileId === profileId ? (
                 <Typography role="status" color="text.secondary" variant="body2">
                   {pathStatus}
                 </Typography>

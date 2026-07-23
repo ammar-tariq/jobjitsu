@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE03 Identity & Resume Library |
-| **Story** | PE03-S08 — Import LinkedIn via exported PDF |
+| **Story** | PE03-S09 — Create a path from an existing résumé version |
 | **Status** | In progress |
-| **Note** | Calm export-as-PDF guidance; source `linkedin-pdf`; same review → attach |
+| **Note** | Pick library version → name Path → selected résumé; no AI / no send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |
 | PE03-S07 | 2026-07-23 | Attach identity/path/both after review; PR #90 |
 | PE03-S06 | 2026-07-23 | Review import before library write; PR #89 |
 | PE27-S01 (multi-profile) | 2026-07-23 | Multiple local profiles; Paths/resumes nested; PR #88 |
