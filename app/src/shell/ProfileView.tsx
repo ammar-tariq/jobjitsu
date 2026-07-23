@@ -1,11 +1,19 @@
 import { useEffect, useRef, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
+import Collapse from "@mui/material/Collapse";
+import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { PathSnapshot, ProfileSnapshot, ResumeVersionSnapshot } from "../ipc/commands.js";
 
@@ -14,7 +22,7 @@ export type ProfileViewProps = {
 };
 
 /**
- * Profile — identity + career Paths. Resume import lives on each Path.
+ * Profile — nested tree: identity → Paths → resumes (menu-style expand/collapse).
  */
 export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   const [profile, setProfile] = useState<ProfileSnapshot | null>(null);
@@ -32,6 +40,9 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   const [pathStatus, setPathStatus] = useState<string | null>(null);
   const [savingPath, setSavingPath] = useState(false);
   const [selectingPathId, setSelectingPathId] = useState<string | null>(null);
+
+  const [identityOpen, setIdentityOpen] = useState(true);
+  const [pathsOpen, setPathsOpen] = useState(true);
   const [openPathId, setOpenPathId] = useState<string | null>(null);
 
   const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
@@ -144,256 +155,252 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
       });
   };
 
+  const identityLabel = displayName.trim() || profile?.displayName || "Your profile";
+
   return (
-    <Stack spacing={3} data-testid="jj-profile" sx={{ maxWidth: "40rem" }}>
+    <Stack spacing={3} data-testid="jj-profile" sx={{ maxWidth: "44rem" }}>
       <Stack spacing={1}>
         <Typography component="h2" variant="h2">
           Profile
         </Typography>
         <Typography color="text.secondary">
-          Your identity and career Paths stay on this device. Import a resume under each Path you
-          create.
+          Browse your identity and Paths like a menu tree. Everything stays on this device.
         </Typography>
       </Stack>
 
-      <Stack
-        spacing={1.5}
-        component="form"
-        data-testid="jj-profile-form"
-        onSubmit={(e) => e.preventDefault()}
+      <List
+        dense
+        disablePadding
+        data-testid="jj-profile-tree"
+        aria-label="Profile tree"
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1,
+          overflow: "hidden",
+        }}
       >
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Identity
-        </Typography>
-        <TextField
-          label="Display name"
-          value={displayName}
-          onChange={(event) => setDisplayName(event.target.value)}
-          size="small"
-          required
-          fullWidth
-          autoComplete="name"
+        <TreeRow
+          depth={0}
+          open={identityOpen}
+          onToggle={() => setIdentityOpen((value) => !value)}
+          icon={<PersonOutlineRoundedIcon fontSize="small" />}
+          primary={identityLabel}
+          secondary="Identity"
+          testId="jj-tree-identity"
         />
-        <TextField
-          label="Email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          size="small"
-          fullWidth
-          autoComplete="email"
-        />
-        <TextField
-          label="Location"
-          value={location}
-          onChange={(event) => setLocation(event.target.value)}
-          size="small"
-          fullWidth
-          autoComplete="address-level2"
-        />
-        <Button
-          variant="contained"
-          onClick={onSaveProfile}
-          disabled={saving || displayName.trim().length === 0}
-        >
-          Save profile
-        </Button>
-        {status ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {status}
-          </Typography>
-        ) : null}
-        {profile ? (
-          <Typography color="text.secondary" variant="body2">
-            Last updated {new Date(profile.updatedAt).toLocaleString()}
-          </Typography>
-        ) : null}
-      </Stack>
-
-      <Stack spacing={1.5} data-testid="jj-path-library">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Paths
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Career faces under this profile (for example Fullstack Developer or Mobile App). Each Path
-          can hold its own resume. Selecting a path does not send anything.
-        </Typography>
-        <TextField
-          label="Path name"
-          value={pathName}
-          onChange={(event) => setPathName(event.target.value)}
-          size="small"
-          fullWidth
-          placeholder="e.g. Fullstack Developer"
-          slotProps={{ htmlInput: { "data-testid": "jj-path-name-input" } }}
-        />
-        <TextField
-          label="Notes (optional)"
-          value={pathNotes}
-          onChange={(event) => setPathNotes(event.target.value)}
-          size="small"
-          fullWidth
-          placeholder="e.g. React Native focus"
-        />
-        <Stack direction="row" spacing={1}>
-          <Button
-            variant="contained"
-            disabled={savingPath || pathName.trim().length === 0}
-            onClick={() => {
-              setSavingPath(true);
-              setPathStatus(null);
-              void bridge
-                .upsertPath({
-                  id: editingPathId ?? undefined,
-                  name: pathName,
-                  notes: pathNotes || undefined,
-                })
-                .then(async (result) => {
-                  setSavingPath(false);
-                  if (!result.ok) {
-                    setPathStatus(result.error.message ?? result.error.title);
-                    return;
-                  }
-                  setPathStatus(
-                    editingPathId
-                      ? "Path updated. Stored on this device."
-                      : "Path saved. Stored on this device.",
-                  );
-                  setPathName("");
-                  setPathNotes("");
-                  setEditingPathId(null);
-                  setOpenPathId(result.value.path.id);
-                  await refreshPaths();
-                });
-            }}
+        <Collapse in={identityOpen} timeout="auto" unmountOnExit>
+          <Stack
+            spacing={1.5}
+            component="form"
+            data-testid="jj-profile-form"
+            onSubmit={(e) => e.preventDefault()}
+            sx={{ px: 2, py: 1.5, pl: 5, bgcolor: "action.hover" }}
           >
-            {editingPathId ? "Update path" : "Add path"}
-          </Button>
-          {editingPathId ? (
+            <TextField
+              label="Display name"
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              size="small"
+              required
+              fullWidth
+              autoComplete="name"
+            />
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              size="small"
+              fullWidth
+              autoComplete="email"
+            />
+            <TextField
+              label="Location"
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+              size="small"
+              fullWidth
+              autoComplete="address-level2"
+            />
             <Button
-              variant="text"
-              onClick={() => {
-                setEditingPathId(null);
-                setPathName("");
-                setPathNotes("");
-              }}
+              variant="contained"
+              onClick={onSaveProfile}
+              disabled={saving || displayName.trim().length === 0}
             >
-              Cancel edit
+              Save profile
             </Button>
-          ) : null}
-        </Stack>
-        {pathStatus ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {pathStatus}
-          </Typography>
-        ) : null}
+            {status ? (
+              <Typography role="status" color="text.secondary" variant="body2">
+                {status}
+              </Typography>
+            ) : null}
+          </Stack>
+        </Collapse>
 
-        {paths.length > 0 ? (
-          <Stack spacing={2}>
+        <TreeRow
+          depth={0}
+          open={pathsOpen}
+          onToggle={() => setPathsOpen((value) => !value)}
+          icon={<WorkOutlineRoundedIcon fontSize="small" />}
+          primary="Paths"
+          secondary={
+            paths.length === 0
+              ? "No career paths yet"
+              : `${paths.length} path${paths.length === 1 ? "" : "s"}`
+          }
+          testId="jj-tree-paths"
+        />
+        <Collapse in={pathsOpen} timeout="auto" unmountOnExit>
+          <List dense disablePadding data-testid="jj-path-library" sx={{ bgcolor: "action.hover" }}>
             {paths.map((path) => {
               const isSelected = path.id === selectedPathId;
               const isOpen = path.id === openPathId;
               const pathVersions = versions.filter((version) => version.pathId === path.id);
               return (
-                <Stack
-                  key={path.id}
-                  spacing={1.5}
-                  data-testid={`jj-path-card-${path.id}`}
-                  sx={{
-                    borderTop: "1px solid",
-                    borderColor: "divider",
-                    pt: 2,
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{ alignItems: "center", flexWrap: "wrap" }}
-                  >
-                    <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-                      {path.name}
-                      {isSelected ? " · Active" : ""}
-                    </Typography>
-                    <Button
-                      size="small"
-                      variant={isOpen ? "contained" : "outlined"}
-                      onClick={() => {
-                        setOpenPathId(isOpen ? null : path.id);
-                        setImportStatus(null);
-                      }}
+                <Stack key={path.id} data-testid={`jj-path-card-${path.id}`}>
+                  <TreeRow
+                    depth={1}
+                    open={isOpen}
+                    onToggle={() => {
+                      setOpenPathId(isOpen ? null : path.id);
+                      setImportStatus(null);
+                    }}
+                    icon={<WorkOutlineRoundedIcon fontSize="small" />}
+                    primary={`${path.name}${isSelected ? " · Active" : ""}`}
+                    secondary={path.notes}
+                    testId={`jj-tree-path-${path.id}`}
+                    actions={
+                      <>
+                        <Button
+                          size="small"
+                          variant={isSelected ? "contained" : "text"}
+                          disabled={selectingPathId === path.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSelectingPathId(path.id);
+                            setPathStatus(null);
+                            void bridge.selectPath(path.id).then(async (result) => {
+                              setSelectingPathId(null);
+                              if (!result.ok) {
+                                setPathStatus(result.error.message ?? result.error.title);
+                                return;
+                              }
+                              setPathStatus("Path selected. Nothing was sent.");
+                              await refreshPaths();
+                            });
+                          }}
+                        >
+                          {isSelected ? "Selected" : "Select"}
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="text"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setEditingPathId(path.id);
+                            setPathName(path.name);
+                            setPathNotes(path.notes ?? "");
+                            setPathStatus(null);
+                            setPathsOpen(true);
+                          }}
+                        >
+                          Rename
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="text"
+                          color="inherit"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setPathStatus(null);
+                            void bridge.archivePath(path.id).then(async (result) => {
+                              if (!result.ok) {
+                                setPathStatus(result.error.message ?? result.error.title);
+                                return;
+                              }
+                              if (editingPathId === path.id) {
+                                setEditingPathId(null);
+                                setPathName("");
+                                setPathNotes("");
+                              }
+                              if (openPathId === path.id) {
+                                setOpenPathId(null);
+                              }
+                              setPathStatus("Path archived. Stored on this device.");
+                              await refreshPaths();
+                            });
+                          }}
+                        >
+                          Archive
+                        </Button>
+                      </>
+                    }
+                  />
+                  <Collapse in={isOpen} timeout="auto" unmountOnExit>
+                    <Stack
+                      spacing={1.5}
+                      data-testid={`jj-path-resumes-${path.id}`}
+                      sx={{ px: 2, py: 1.5, pl: 7 }}
                     >
-                      {isOpen ? "Hide resumes" : "Resumes"}
-                    </Button>
-                    <Button
-                      size="small"
-                      variant={isSelected ? "contained" : "outlined"}
-                      disabled={selectingPathId === path.id}
-                      onClick={() => {
-                        setSelectingPathId(path.id);
-                        setPathStatus(null);
-                        void bridge.selectPath(path.id).then(async (result) => {
-                          setSelectingPathId(null);
-                          if (!result.ok) {
-                            setPathStatus(result.error.message ?? result.error.title);
-                            return;
-                          }
-                          setPathStatus("Path selected. Nothing was sent.");
-                          await refreshPaths();
-                        });
-                      }}
-                    >
-                      {isSelected ? "Selected" : "Select"}
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={() => {
-                        setEditingPathId(path.id);
-                        setPathName(path.name);
-                        setPathNotes(path.notes ?? "");
-                        setPathStatus(null);
-                      }}
-                    >
-                      Rename
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="text"
-                      color="inherit"
-                      onClick={() => {
-                        setPathStatus(null);
-                        void bridge.archivePath(path.id).then(async (result) => {
-                          if (!result.ok) {
-                            setPathStatus(result.error.message ?? result.error.title);
-                            return;
-                          }
-                          if (editingPathId === path.id) {
-                            setEditingPathId(null);
-                            setPathName("");
-                            setPathNotes("");
-                          }
-                          if (openPathId === path.id) {
-                            setOpenPathId(null);
-                          }
-                          setPathStatus("Path archived. Stored on this device.");
-                          await refreshPaths();
-                        });
-                      }}
-                    >
-                      Archive
-                    </Button>
-                  </Stack>
-                  {path.notes ? (
-                    <Typography color="text.secondary" variant="body2">
-                      {path.notes}
-                    </Typography>
-                  ) : null}
-
-                  {isOpen ? (
-                    <Stack spacing={1.5} data-testid={`jj-path-resumes-${path.id}`}>
                       <Typography color="text.secondary" variant="body2">
-                        Import a resume for this Path. Selection stays on this device and does not
-                        send anything.
+                        Resumes for this Path. Selection stays on this device and does not send
+                        anything.
                       </Typography>
+                      {pathVersions.map((version) => {
+                        const isResumeSelected = version.id === path.selectedResumeVersionId;
+                        return (
+                          <ListItemButton
+                            key={version.id}
+                            dense
+                            selected={isResumeSelected}
+                            sx={{ borderRadius: 1, gap: 1 }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 32 }}>
+                              <DescriptionOutlinedIcon fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText primary={version.label} secondary={version.fileName} />
+                            <Button
+                              size="small"
+                              variant={isResumeSelected ? "contained" : "outlined"}
+                              disabled={selectingResumeId === version.id}
+                              onClick={() => {
+                                setSelectingResumeId(version.id);
+                                setImportStatus(null);
+                                void bridge.selectResume(version.id).then(async (selected) => {
+                                  if (!selected.ok) {
+                                    setSelectingResumeId(null);
+                                    setImportStatus(selected.error.message ?? selected.error.title);
+                                    return;
+                                  }
+                                  const linked = await bridge.upsertPath({
+                                    id: path.id,
+                                    name: path.name,
+                                    notes: path.notes,
+                                    selectedResumeVersionId: version.id,
+                                  });
+                                  setSelectingResumeId(null);
+                                  if (!linked.ok) {
+                                    setImportStatus(linked.error.message ?? linked.error.title);
+                                    return;
+                                  }
+                                  setImportStatus(
+                                    "Resume selected for this path. Nothing was sent.",
+                                  );
+                                  await refreshVersions();
+                                  await refreshPaths();
+                                });
+                              }}
+                            >
+                              {isResumeSelected ? "Selected" : "Select"}
+                            </Button>
+                          </ListItemButton>
+                        );
+                      })}
+                      {pathVersions.length === 0 ? (
+                        <Typography color="text.secondary" variant="body2">
+                          No resumes for this Path yet.
+                        </Typography>
+                      ) : null}
                       <TextField
                         label="Version label"
                         value={resumeLabel}
@@ -425,87 +432,171 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                       >
                         Import resume
                       </Button>
-                      {importStatus ? (
+                      {importStatus && openPathId === path.id ? (
                         <Typography role="status" color="text.secondary" variant="body2">
                           {importStatus}
                         </Typography>
                       ) : null}
-                      {pathVersions.length > 0 ? (
-                        <List dense disablePadding>
-                          {pathVersions.map((version) => {
-                            const isResumeSelected = version.id === path.selectedResumeVersionId;
-                            return (
-                              <ListItem
-                                key={version.id}
-                                secondaryAction={
-                                  <Button
-                                    size="small"
-                                    variant={isResumeSelected ? "contained" : "outlined"}
-                                    disabled={selectingResumeId === version.id}
-                                    onClick={() => {
-                                      setSelectingResumeId(version.id);
-                                      setImportStatus(null);
-                                      void bridge
-                                        .selectResume(version.id)
-                                        .then(async (selected) => {
-                                          if (!selected.ok) {
-                                            setSelectingResumeId(null);
-                                            setImportStatus(
-                                              selected.error.message ?? selected.error.title,
-                                            );
-                                            return;
-                                          }
-                                          const linked = await bridge.upsertPath({
-                                            id: path.id,
-                                            name: path.name,
-                                            notes: path.notes,
-                                            selectedResumeVersionId: version.id,
-                                          });
-                                          setSelectingResumeId(null);
-                                          if (!linked.ok) {
-                                            setImportStatus(
-                                              linked.error.message ?? linked.error.title,
-                                            );
-                                            return;
-                                          }
-                                          setImportStatus(
-                                            "Resume selected for this path. Nothing was sent.",
-                                          );
-                                          await refreshVersions();
-                                          await refreshPaths();
-                                        });
-                                    }}
-                                  >
-                                    {isResumeSelected ? "Selected" : "Select"}
-                                  </Button>
-                                }
-                              >
-                                <ListItemText
-                                  primary={version.label}
-                                  secondary={version.fileName}
-                                />
-                              </ListItem>
-                            );
-                          })}
-                        </List>
-                      ) : (
-                        <Typography color="text.secondary" variant="body2">
-                          No resumes for this Path yet.
-                        </Typography>
-                      )}
                     </Stack>
-                  ) : null}
+                  </Collapse>
                 </Stack>
               );
             })}
-          </Stack>
-        ) : (
-          <Typography color="text.secondary" variant="body2">
-            No paths yet. Add one for each career face you want under this profile.
-          </Typography>
-        )}
-      </Stack>
+
+            <Stack spacing={1.5} sx={{ px: 2, py: 1.5, pl: 5 }}>
+              <Typography color="text.secondary" variant="body2">
+                {paths.length === 0
+                  ? "Add a Path for each career face (for example Fullstack Developer)."
+                  : "Add another Path under this profile."}
+              </Typography>
+              <TextField
+                label="Path name"
+                value={pathName}
+                onChange={(event) => setPathName(event.target.value)}
+                size="small"
+                fullWidth
+                placeholder="e.g. Fullstack Developer"
+                slotProps={{ htmlInput: { "data-testid": "jj-path-name-input" } }}
+              />
+              <TextField
+                label="Notes (optional)"
+                value={pathNotes}
+                onChange={(event) => setPathNotes(event.target.value)}
+                size="small"
+                fullWidth
+                placeholder="e.g. React Native focus"
+              />
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="contained"
+                  disabled={savingPath || pathName.trim().length === 0}
+                  onClick={() => {
+                    setSavingPath(true);
+                    setPathStatus(null);
+                    void bridge
+                      .upsertPath({
+                        id: editingPathId ?? undefined,
+                        name: pathName,
+                        notes: pathNotes || undefined,
+                      })
+                      .then(async (result) => {
+                        setSavingPath(false);
+                        if (!result.ok) {
+                          setPathStatus(result.error.message ?? result.error.title);
+                          return;
+                        }
+                        setPathStatus(
+                          editingPathId
+                            ? "Path updated. Stored on this device."
+                            : "Path saved. Stored on this device.",
+                        );
+                        setPathName("");
+                        setPathNotes("");
+                        setEditingPathId(null);
+                        setPathsOpen(true);
+                        setOpenPathId(result.value.path.id);
+                        await refreshPaths();
+                      });
+                  }}
+                >
+                  {editingPathId ? "Update path" : "Add path"}
+                </Button>
+                {editingPathId ? (
+                  <Button
+                    variant="text"
+                    onClick={() => {
+                      setEditingPathId(null);
+                      setPathName("");
+                      setPathNotes("");
+                    }}
+                  >
+                    Cancel edit
+                  </Button>
+                ) : null}
+              </Stack>
+              {pathStatus ? (
+                <Typography role="status" color="text.secondary" variant="body2">
+                  {pathStatus}
+                </Typography>
+              ) : null}
+            </Stack>
+          </List>
+        </Collapse>
+      </List>
     </Stack>
+  );
+}
+
+type TreeRowProps = {
+  readonly depth: number;
+  readonly open: boolean;
+  readonly onToggle: () => void;
+  readonly icon: JSX.Element;
+  readonly primary: string;
+  readonly secondary?: string;
+  readonly testId: string;
+  readonly actions?: JSX.Element;
+};
+
+function TreeRow({
+  depth,
+  open,
+  onToggle,
+  icon,
+  primary,
+  secondary,
+  testId,
+  actions,
+}: TreeRowProps): JSX.Element {
+  return (
+    <ListItemButton
+      data-testid={testId}
+      onClick={onToggle}
+      sx={{
+        py: 1,
+        pl: 1 + depth * 2,
+        pr: 1,
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        gap: 0.5,
+      }}
+    >
+      <IconButton
+        size="small"
+        edge="start"
+        aria-label={open ? "Collapse" : "Expand"}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggle();
+        }}
+        sx={{ color: "text.secondary" }}
+      >
+        {open ? (
+          <ExpandMoreRoundedIcon fontSize="small" />
+        ) : (
+          <ChevronRightRoundedIcon fontSize="small" />
+        )}
+      </IconButton>
+      <ListItemIcon sx={{ minWidth: 32, color: "text.secondary" }}>{icon}</ListItemIcon>
+      <ListItemText
+        primary={primary}
+        secondary={secondary}
+        slotProps={{
+          primary: { variant: "body1" },
+          secondary: { variant: "body2" },
+        }}
+      />
+      {actions ? (
+        <Stack
+          direction="row"
+          spacing={0.5}
+          onClick={(event) => event.stopPropagation()}
+          sx={{ flexShrink: 0 }}
+        >
+          {actions}
+        </Stack>
+      ) : null}
+    </ListItemButton>
   );
 }
 
@@ -521,7 +612,6 @@ async function readFileBytes(file: File): Promise<Uint8Array> {
   if (typeof file.arrayBuffer === "function") {
     return new Uint8Array(await file.arrayBuffer());
   }
-  // jsdom File may lack arrayBuffer — text() is enough for fixture imports in tests.
   if (typeof file.text === "function") {
     return new TextEncoder().encode(await file.text());
   }
