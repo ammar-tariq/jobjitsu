@@ -21,6 +21,15 @@ export interface EventPayloadMap {
   "App.Started": { readonly version?: string };
   "Plugin.Loaded": { readonly pluginId: PluginId | string };
   "Resume.Imported": { readonly resumeId: string };
+  /**
+   * User attached a reviewed import to identity and/or a path — ids only.
+   * Never implies outbound send.
+   */
+  "Resume.Attached": {
+    readonly resumeId: string;
+    readonly profileId?: string;
+    readonly pathId?: string;
+  };
   /** Résumé prepared on-device — ID only, never full body on the bus. */
   "Resume.Generated": { readonly resumeId: string };
   "Job.Imported": { readonly roleId: RoleId };

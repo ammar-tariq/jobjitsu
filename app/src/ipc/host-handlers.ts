@@ -240,6 +240,120 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "identity.attachResume": async (payload) => {
+      const resumeLibrary = getResumeLibrary();
+      if (!resumeLibrary) {
+        return err(
+          createAppError("unavailable", "Resume library not ready", {
+            message: "Resume storage is not available yet.",
+            detail: "identity:resume-missing",
+          }),
+        );
+      }
+      const updateIdentity = payload.updateIdentity === true;
+      const pathId = payload.pathId?.trim() || undefined;
+      if (!updateIdentity && !pathId) {
+        return err(
+          createAppError("validation", "Choose where to attach", {
+            message: "Pick identity, a path, or both before attaching.",
+            detail: "identity:attach-empty",
+          }),
+        );
+      }
+      try {
+        const version = await resumeLibrary.get(payload.resumeId);
+        if (!version) {
+          throw new Error(
+            "That resume version is not in your library. Pick another and try again.",
+          );
+        }
+
+        let profile: {
+          id: string;
+          displayName: string;
+          email?: string;
+          location?: string;
+          updatedAt: string;
+        } | null = null;
+        if (updateIdentity) {
+          const profiles = getProfiles();
+          if (!profiles) {
+            return err(
+              createAppError("unavailable", "Profile not ready", {
+                message: "Identity storage is not available yet.",
+                detail: "identity:missing",
+              }),
+            );
+          }
+          const existing = (await profiles.getById(version.profileId)) ?? (await profiles.get());
+          const displayName = (version.contactName ?? existing?.displayName ?? "").trim();
+          if (!displayName) {
+            throw new Error("Add a display name on the resume review before updating identity.");
+          }
+          profile = await profiles.upsert({
+            id: existing?.id ?? version.profileId,
+            displayName,
+            email: version.contactEmail ?? existing?.email,
+          });
+          await profiles.select(profile.id);
+        }
+
+        let path: {
+          id: string;
+          profileId: string;
+          name: string;
+          notes?: string;
+          archived: boolean;
+          updatedAt: string;
+          selectedResumeVersionId?: string;
+        } | null = null;
+        if (pathId) {
+          const pathLibrary = getPathLibrary();
+          if (!pathLibrary) {
+            return err(
+              createAppError("unavailable", "Paths not ready", {
+                message: "Path storage is not available yet.",
+                detail: "identity:path-missing",
+              }),
+            );
+          }
+          const existingPath = await pathLibrary.get(pathId);
+          if (!existingPath) {
+            throw new Error("That path is not in your library. Pick another and try again.");
+          }
+          path = await pathLibrary.upsert({
+            id: existingPath.id,
+            name: existingPath.name,
+            notes: existingPath.notes,
+            profileId: existingPath.profileId,
+            selectedResumeVersionId: version.id,
+          });
+          await pathLibrary.select(path.id);
+          await resumeLibrary.select(version.id);
+        }
+
+        if (bus) {
+          await bus.publish("Resume.Attached", {
+            resumeId: version.id,
+            profileId: profile?.id,
+            pathId: path?.id,
+          });
+        }
+
+        return ok({ version, profile: profile ?? null, path: path ?? null });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not attach resume", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That resume could not be attached. Try again.",
+            detail: "identity:attach",
+            cause,
+          }),
+        );
+      }
+    },
     "identity.listPaths": async () => {
       const pathLibrary = getPathLibrary();
       if (!pathLibrary) {

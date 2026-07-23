@@ -282,6 +282,13 @@ function summarize(event: DomainEvent): string {
       const payload = event.payload as EventPayloadMap["Resume.Imported"];
       return `Resume imported (${payload.resumeId})`;
     }
+    case "Resume.Attached": {
+      const payload = event.payload as EventPayloadMap["Resume.Attached"];
+      const targets = [payload.profileId ? "identity" : null, payload.pathId ? "path" : null]
+        .filter(Boolean)
+        .join(" + ");
+      return `Resume attached (${payload.resumeId}${targets ? ` → ${targets}` : ""})`;
+    }
     case "Email.Synced": {
       const payload = event.payload as EventPayloadMap["Email.Synced"];
       return `Email synced (${payload.messageCount} messages)`;

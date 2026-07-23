@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInMemoryEventBus } from "@jobjitsu/events";
+import { createInMemoryEventBus, type EventPayloadMap } from "@jobjitsu/events";
 import {
   createMemoryPathLibrary,
   createMemoryProfileRepository,
@@ -31,6 +31,7 @@ describe("IPC allowlist", () => {
       "identity.importResume",
       "identity.getSelectedResume",
       "identity.selectResume",
+      "identity.attachResume",
       "identity.listPaths",
       "identity.upsertPath",
       "identity.archivePath",
@@ -109,6 +110,7 @@ describe("typed IPC bridge", () => {
     expect(bridge).not.toHaveProperty("complete");
     expect(Object.keys(bridge).sort()).toEqual([
       "archivePath",
+      "attachResume",
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
@@ -186,6 +188,47 @@ describe("typed IPC bridge", () => {
     expect(listed.ok && listed.value.versions).toHaveLength(1);
     expect(listed.ok && listed.value.versions[0]?.label).toBe("Baseline 2026");
     expect(listed.ok && listed.value.selectedId).toBe(saved.ok ? saved.value.version.id : null);
+  });
+
+  it("attaches a reviewed resume to path and optionally identity", async () => {
+    const profiles = createMemoryProfileRepository();
+    const pathLibrary = createMemoryPathLibrary();
+    const resumeLibrary = createMemoryResumeLibrary();
+    const bus = createInMemoryEventBus();
+    const attached: EventPayloadMap["Resume.Attached"][] = [];
+    bus.subscribe("Resume.Attached", async (event) => {
+      attached.push(event.payload);
+    });
+
+    const profile = await profiles.upsert({
+      displayName: "Sam Chen",
+      email: "keep@example.com",
+    });
+    const path = await pathLibrary.upsert({
+      name: "Fullstack",
+      profileId: profile.id,
+    });
+    const version = await resumeLibrary.import({
+      label: "Baseline",
+      fileName: "a.md",
+      bytes: new TextEncoder().encode("a"),
+      pathId: path.id,
+      profileId: profile.id,
+      contactName: "Other",
+      contactEmail: "other@example.com",
+    });
+
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({ profiles, pathLibrary, resumeLibrary, bus }),
+    );
+    const pathOnly = await bridge.attachResume({
+      resumeId: version.id,
+      pathId: path.id,
+    });
+    expect(pathOnly.ok).toBe(true);
+    expect((await profiles.get())?.email).toBe("keep@example.com");
+    expect((await pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(version.id);
+    expect(attached[0]).toEqual({ resumeId: version.id, pathId: path.id });
   });
 
   it("returns a calm error when import payload is empty", async () => {

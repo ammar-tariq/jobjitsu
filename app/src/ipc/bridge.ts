@@ -5,6 +5,7 @@ import type {
   IpcResultMap,
   PathPatchInput,
   ProfilePatchInput,
+  ResumeAttachInputPayload,
   ResumeImportInputPayload,
   ThemePreference,
 } from "./commands.js";
@@ -31,6 +32,9 @@ export type IpcBridge = {
   readonly selectResume: (
     resumeId: string,
   ) => Promise<Result<IpcResultMap["identity.selectResume"]>>;
+  readonly attachResume: (
+    input: ResumeAttachInputPayload,
+  ) => Promise<Result<IpcResultMap["identity.attachResume"]>>;
   readonly listPaths: () => Promise<Result<IpcResultMap["identity.listPaths"]>>;
   readonly upsertPath: (
     patch: PathPatchInput,
@@ -110,6 +114,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async selectResume(resumeId: string) {
       return (await dispatcher.invoke("identity.selectResume", { resumeId })) as Result<
         IpcResultMap["identity.selectResume"]
+      >;
+    },
+    async attachResume(input: ResumeAttachInputPayload) {
+      return (await dispatcher.invoke("identity.attachResume", input)) as Result<
+        IpcResultMap["identity.attachResume"]
       >;
     },
     async listPaths() {

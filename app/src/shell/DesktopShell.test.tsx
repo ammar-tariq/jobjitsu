@@ -205,7 +205,7 @@ describe("DesktopShell", () => {
     expect(await runtime.pathLibrary.list()).toHaveLength(2);
   });
 
-  it("reviews a resume import before saving and does not auto-attach", async () => {
+  it("reviews then attaches import to identity and path", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     const imported: string[] = [];
@@ -250,9 +250,13 @@ describe("DesktopShell", () => {
     );
     await user.click(within(review).getByRole("button", { name: "Save to library" }));
 
-    expect(
-      await screen.findByText(/Resume reviewed and saved on this device/i),
-    ).toBeInTheDocument();
+    const attach = await screen.findByTestId(`jj-import-attach-${path.id}`);
+    expect(within(attach).getByText(/Attach resume/i)).toBeInTheDocument();
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBeUndefined();
+
+    await user.click(within(attach).getByRole("button", { name: "Both" }));
+
+    expect(await screen.findByText(/Attached to identity and path/i)).toBeInTheDocument();
     const versions = await runtime.resumeLibrary.list();
     expect(versions).toHaveLength(1);
     expect(versions[0]?.label).toBe("Baseline 2026");
@@ -261,7 +265,54 @@ describe("DesktopShell", () => {
     expect(versions[0]?.contactEmail).toBe("sam@example.com");
     expect(versions[0]?.notes).toBe("Staff engineer notes");
     expect(imported).toEqual([versions[0]?.id]);
-    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBeUndefined();
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(versions[0]?.id);
+    expect((await runtime.profiles.get())?.email).toBe("sam@example.com");
+  });
+
+  it("attaches import to path only without overwriting identity", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    const attached: string[] = [];
+    runtime.bus.subscribe("Resume.Attached", async (event) => {
+      attached.push(event.payload.resumeId);
+    });
+
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.type(
+      within(createForm).getByRole("textbox", { name: /^email$/i }),
+      "keep@example.com",
+    );
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
+
+    const path = (await runtime.pathLibrary.list())[0]!;
+    const file = new File(["# Other\n"], "other.md", { type: "text/markdown" });
+    await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
+    const review = await screen.findByTestId(`jj-import-review-${path.id}`);
+    await user.type(within(review).getByRole("textbox", { name: /display name/i }), "Other Name");
+    await user.type(
+      within(review).getByRole("textbox", { name: /contact email/i }),
+      "other@example.com",
+    );
+    await user.click(within(review).getByRole("button", { name: "Save to library" }));
+
+    const attach = await screen.findByTestId(`jj-import-attach-${path.id}`);
+    await user.click(within(attach).getByRole("button", { name: "Save to path" }));
+
+    expect(await screen.findByText(/Attached to path/i)).toBeInTheDocument();
+    expect((await runtime.profiles.get())?.displayName).toBe("Sam Chen");
+    expect((await runtime.profiles.get())?.email).toBe("keep@example.com");
+    const versions = await runtime.resumeLibrary.list();
+    expect((await runtime.pathLibrary.get(path.id))?.selectedResumeVersionId).toBe(versions[0]?.id);
+    expect(attached).toEqual([versions[0]?.id]);
+    expect(runtime.bridge).not.toHaveProperty("send");
   });
 
   it("cancels import review without writing to the library", async () => {
