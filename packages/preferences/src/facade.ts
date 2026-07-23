@@ -21,6 +21,9 @@ export type PreferencesFacade = {
   setApprovalBeforeSend(value: boolean): Promise<boolean>;
   getCraftPreferences(): Promise<CraftPreferences>;
   setCraftPreferences(patch: CraftPreferencesPatch): Promise<CraftPreferences>;
+  /** On-device model path for local Agent — empty means not configured. */
+  getLocalModelPath(): Promise<string | undefined>;
+  setLocalModelPath(path: string | undefined): Promise<string | undefined>;
 };
 
 export function createPreferencesFacade(store: SettingsStore): PreferencesFacade {
@@ -54,6 +57,19 @@ export function createPreferencesFacade(store: SettingsStore): PreferencesFacade
       }
       const next = await store.set(update);
       return toCraft(next);
+    },
+    async getLocalModelPath() {
+      const settings = await store.get();
+      const path = settings.ai.localModelPath?.trim();
+      return path && path.length > 0 ? path : undefined;
+    },
+    async setLocalModelPath(path) {
+      const trimmed = path?.trim() ?? "";
+      const next = await store.set({
+        ai: { localModelPath: trimmed.length > 0 ? trimmed : undefined },
+      });
+      const saved = next.ai.localModelPath?.trim();
+      return saved && saved.length > 0 ? saved : undefined;
     },
   };
 }

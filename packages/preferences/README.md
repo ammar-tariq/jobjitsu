@@ -10,12 +10,12 @@
 
 ## Status
 
-| Piece                          | State                                          |
-| ------------------------------ | ---------------------------------------------- |
-| `AppSettings` / policy helpers | Done (via `@jobjitsu/config`)                  |
-| `createPreferencesFacade`      | Done — approval + craft (fit/tone/constraints) |
-| `createMemorySettingsStore`    | Done — browser/host boot                       |
-| `createKvSettingsStore`        | Done — `@jobjitsu/preferences/storage`         |
+| Piece                          | State                                      |
+| ------------------------------ | ------------------------------------------ |
+| `AppSettings` / policy helpers | Done (via `@jobjitsu/config`)              |
+| `createPreferencesFacade`      | Done — approval + craft + local model path |
+| `createMemorySettingsStore`    | Done — browser/host boot                   |
+| `createKvSettingsStore`        | Done — `@jobjitsu/preferences/storage`     |
 
 ```ts
 import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
