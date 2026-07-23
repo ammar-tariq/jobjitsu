@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | PE03 Identity & Resume Library |
 | **Story** | Profile screen IA — identity + Paths; Preferences = data folder |
-| **Status** | In progress |
+| **Status** | PR gate — [#86](https://github.com/ammar-tariq/jobjitsu/pull/86) |
 | **Note** | Resume import under each Path; approval/craft prefs deferred from Preferences UI |
 
 ## Completed slices
