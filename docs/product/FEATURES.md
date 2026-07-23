@@ -28,7 +28,7 @@ The **spine** of the Career OS. One product, one voice, one privacy model. Toget
 
 | Module | Purpose | Brand posture | Status |
 |--------|---------|---------------|--------|
-| **Identity & Resume** | On-device profile and Resume Library for tailoring | Stored locally; never “synced to JobJitsu cloud” | Core · H1 |
+| **Identity & Resume** | On-device profile, **Paths**, and Resume Library for tailoring | Stored locally; never “synced to JobJitsu cloud” | Core · H1 |
 | **Preferences** | Rules for fit, tone, constraints, approval gates | “Your rules, your signal” | Core · H1 |
 | **Local Intelligence** | AI Provider + Context Builder for roles and drafts | Status chrome: **Agent · On-device** | Core · H1 |
 | **Agent** | Prep work against preferences; pause/resume | Serves; does not own send. Idle: belt tied | Core · H1 |
@@ -98,7 +98,7 @@ Candidates for Horizons 2–4. Each must pass [PRINCIPLES.md](./PRINCIPLES.md) a
 | **Skills & learning map** | Link gaps to intentional growth | Optional; not a course marketplace | Future |
 | **Extensible agent skills (Plugins)** | Open-source community techniques | Inspectable; user-enabled only | Future |
 | **Host Extensions ecosystem** | Discovery/send/UI contributions | Capability-gated | Future |
-| **Multi-profile / multi-path** | Career pivots without account farms | Still local-first | Future |
+| **Multi-profile / multi-path** | Hard multi-identity for career pivots (day-to-day role faces = **Path** under PE03) | Still local-first | Future |
 | **Export & portability** | Leave with your data anytime | Reinforces sovereignty | Future |
 
 Future modules arrive as **calm rooms in the same dojo**, not as a suite of shouty micro-products.

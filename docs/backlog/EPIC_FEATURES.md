@@ -37,9 +37,10 @@ Stories live in [USER_STORIES.md](./USER_STORIES.md).
 
 | ID | Feature | Description |
 |----|---------|-------------|
-| E04-F01 | Resume import | User picks local file; stored on-device |
-| E04-F02 | Profile fields | Basic identity fields editable locally |
+| E04-F01 | Resume import + review/attach | Local file; review before attach; LinkedIn PDF guidance |
+| E04-F02 | Profile + Paths | Identity fields; career Paths (Fullstack, Mobile) under one person |
 | E04-F03 | Identity read API | Packages can read without egress |
+| E04-F04 | AI parse import (after E06) | Pre-fill review only; edit still mandatory |
 
 ## E05 Preferences & Privacy Chrome
 
@@ -123,7 +124,7 @@ Stories live in [USER_STORIES.md](./USER_STORIES.md).
 
 | ID | Feature | Description |
 |----|---------|-------------|
-| E14-F01 | First-run wizard | Resume → prefs → agent ready |
+| E14-F01 | First-run wizard | Identity → import → review → first Path → prefs; agent chrome |
 | E14-F02 | Empty states | Brand patterns per surface |
 
 ## E15 Outcomes & Reflection (H2)

@@ -12,6 +12,8 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Brand chrome: [../brand/BRAN
 |----------------|---------|-------------------------|
 | **Agent** | Preparative career assistant (user-facing) | Bot, autopilot, chatbot (UI) |
 | **Agent · On-device** | Status chrome for on-device intelligence | “Local LLM” in the status bar |
+| **Profile** | One on-device identity (person) | Conflating with Path / résumé version |
+| **Path** | Job-facing variant under a Profile (e.g. Fullstack, Mobile) | “Sub-profile”; separate accounts for every role |
 | **Queue** | Approval holding area before send | Inbox (unless Sprint-1 shell label is explicitly noted) |
 | **Applications** | Draft / tailor / track units of craft | Pipeline (in navigation) |
 | **Preferences** | User rules and approval gates | Settings (prefer Preferences in product IA; Settings OK as shell label for the same surface) |
@@ -26,7 +28,7 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Brand chrome: [../brand/BRAN
 | **Local Intelligence** | Product module for on-device AI | Using “LLM module” as the module name |
 | **Knowledge Base** | On-device career knowledge store | Conflating with Timeline |
 | **Context Builder** | Assembles minimal prompt context before inference | Dumping full history into every prompt |
-| **Resume Library** | Stored resume versions and variants | Ad-hoc “résumé folder” naming in specs |
+| **Resume Library** | Stored resume versions and variants (optionally per Path) | Ad-hoc “résumé folder” naming in specs |
 | **Workflow** | Declarative multi-step agent run | Free-form chat as the control plane |
 | **Task Queue** | AI/work-unit scheduler (Pending → … → Cancelled) | Confusing with review **Queue** |
 | **AI Validation** | Post-generation checks (formatting, ATS, skills, …) | Trusting first model output |
