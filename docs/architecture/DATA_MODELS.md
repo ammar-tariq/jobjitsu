@@ -13,6 +13,7 @@ IDs are opaque branded strings (`ProfileId`, `ResumeId`, `ApplicationId`, …) l
 | Entity | Write owner | Read by |
 |--------|-------------|---------|
 | Profile | `identity` | agent, ai (Context Builder), applications |
+| Path (career face under Profile) | `identity` | applications, agent (selection local-only) |
 | ResumeVersion / Resume Library | `identity` | agent, ai, applications |
 | KnowledgeEntry (Achievement, Story, STAR, Note) | `identity` (Knowledge Base surface) or future `knowledge` package — **default: identity** until split | Context Builder, agent |
 | Application | `applications` | queue, send, timeline, followups |
@@ -31,6 +32,15 @@ Knowledge Base **must not** duplicate Timeline (audit) rows as knowledge facts.
 
 Required: `id`, `displayName`, `updatedAt`  
 Optional (from platform spec): contact, links, location, workAuthorization notes, salary expectations (sensitive — local only), skills summary refs.
+
+## Path
+
+Career face under one Profile (UI: **Path** — e.g. Fullstack Developer, Mobile App). Not a second identity.
+
+Required: `id`, `profileId`, `name`, `archived`, `updatedAt`  
+Optional: `notes`, `selectedResumeVersionId` (wired when import attach / PE03-S07 lands)
+
+Selection of the active path is local-only and must never Send.
 
 ## ResumeVersion
 

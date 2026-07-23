@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type {
   DataRootSnapshot,
+  PathSnapshot,
   ProfileSnapshot,
   ResumeVersionSnapshot,
   ThemePreference,
@@ -24,7 +25,7 @@ export type PreferencesViewProps = {
   readonly bridge: IpcBridge;
 };
 
-/** Preferences — profile, resume library, data folder, appearance; on this device. */
+/** Preferences — profile, paths, resume library, data folder, appearance; on this device. */
 export function PreferencesView({
   theme,
   onThemeChange,
@@ -36,6 +37,15 @@ export function PreferencesView({
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const [paths, setPaths] = useState<readonly PathSnapshot[]>([]);
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null);
+  const [pathName, setPathName] = useState("");
+  const [pathNotes, setPathNotes] = useState("");
+  const [editingPathId, setEditingPathId] = useState<string | null>(null);
+  const [pathStatus, setPathStatus] = useState<string | null>(null);
+  const [savingPath, setSavingPath] = useState(false);
+  const [selectingPathId, setSelectingPathId] = useState<string | null>(null);
 
   const [versions, setVersions] = useState<readonly ResumeVersionSnapshot[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -69,6 +79,14 @@ export function PreferencesView({
     }
   };
 
+  const refreshPaths = async (): Promise<void> => {
+    const result = await bridge.listPaths();
+    if (result.ok) {
+      setPaths(result.value.paths);
+      setSelectedPathId(result.value.selectedId);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
     void bridge.getProfile().then((result) => {
@@ -80,6 +98,12 @@ export function PreferencesView({
       setDisplayName(next?.displayName ?? "");
       setEmail(next?.email ?? "");
       setLocation(next?.location ?? "");
+    });
+    void bridge.listPaths().then((result) => {
+      if (!cancelled && result.ok) {
+        setPaths(result.value.paths);
+        setSelectedPathId(result.value.selectedId);
+      }
     });
     void bridge.listResumeVersions().then((result) => {
       if (!cancelled && result.ok) {
@@ -279,8 +303,8 @@ export function PreferencesView({
           Preferences
         </Typography>
         <Typography color="text.secondary">
-          Profile, resume library, fit rules, send approval, data folder, and appearance stay on
-          this device. Nothing is uploaded to a JobJitsu cloud.
+          Profile, paths, resume library, fit rules, send approval, data folder, and appearance stay
+          on this device. Nothing is uploaded to a JobJitsu cloud.
         </Typography>
       </Stack>
 
@@ -403,6 +427,164 @@ export function PreferencesView({
             Last updated {new Date(profile.updatedAt).toLocaleString()}
           </Typography>
         ) : null}
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-path-library">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Paths
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          Career faces under this profile (for example Fullstack Developer or Mobile App). Selecting
+          a path stays on this device and does not send anything.
+        </Typography>
+        <TextField
+          label="Path name"
+          value={pathName}
+          onChange={(event) => setPathName(event.target.value)}
+          size="small"
+          fullWidth
+          placeholder="e.g. Fullstack Developer"
+          slotProps={{ htmlInput: { "data-testid": "jj-path-name-input" } }}
+        />
+        <TextField
+          label="Notes (optional)"
+          value={pathNotes}
+          onChange={(event) => setPathNotes(event.target.value)}
+          size="small"
+          fullWidth
+          placeholder="e.g. React Native focus"
+        />
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="contained"
+            disabled={savingPath || pathName.trim().length === 0}
+            onClick={() => {
+              setSavingPath(true);
+              setPathStatus(null);
+              void bridge
+                .upsertPath({
+                  id: editingPathId ?? undefined,
+                  name: pathName,
+                  notes: pathNotes || undefined,
+                })
+                .then(async (result) => {
+                  setSavingPath(false);
+                  if (!result.ok) {
+                    setPathStatus(result.error.message ?? result.error.title);
+                    return;
+                  }
+                  setPathStatus(
+                    editingPathId
+                      ? "Path updated. Stored on this device."
+                      : "Path saved. Stored on this device.",
+                  );
+                  setPathName("");
+                  setPathNotes("");
+                  setEditingPathId(null);
+                  await refreshPaths();
+                });
+            }}
+          >
+            {editingPathId ? "Update path" : "Add path"}
+          </Button>
+          {editingPathId ? (
+            <Button
+              variant="text"
+              onClick={() => {
+                setEditingPathId(null);
+                setPathName("");
+                setPathNotes("");
+              }}
+            >
+              Cancel edit
+            </Button>
+          ) : null}
+        </Stack>
+        {pathStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {pathStatus}
+          </Typography>
+        ) : null}
+        {paths.length > 0 ? (
+          <List dense disablePadding data-testid="jj-path-list">
+            {paths.map((path) => {
+              const isSelected = path.id === selectedPathId;
+              return (
+                <ListItem
+                  key={path.id}
+                  secondaryAction={
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        size="small"
+                        variant={isSelected ? "contained" : "outlined"}
+                        disabled={selectingPathId === path.id}
+                        onClick={() => {
+                          setSelectingPathId(path.id);
+                          setPathStatus(null);
+                          void bridge.selectPath(path.id).then(async (result) => {
+                            setSelectingPathId(null);
+                            if (!result.ok) {
+                              setPathStatus(result.error.message ?? result.error.title);
+                              return;
+                            }
+                            setPathStatus("Path selected. Nothing was sent.");
+                            await refreshPaths();
+                          });
+                        }}
+                      >
+                        {isSelected ? "Selected" : "Select"}
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => {
+                          setEditingPathId(path.id);
+                          setPathName(path.name);
+                          setPathNotes(path.notes ?? "");
+                          setPathStatus(null);
+                        }}
+                      >
+                        Rename
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="text"
+                        color="inherit"
+                        onClick={() => {
+                          setPathStatus(null);
+                          void bridge.archivePath(path.id).then(async (result) => {
+                            if (!result.ok) {
+                              setPathStatus(result.error.message ?? result.error.title);
+                              return;
+                            }
+                            if (editingPathId === path.id) {
+                              setEditingPathId(null);
+                              setPathName("");
+                              setPathNotes("");
+                            }
+                            setPathStatus("Path archived. Stored on this device.");
+                            await refreshPaths();
+                          });
+                        }}
+                      >
+                        Archive
+                      </Button>
+                    </Stack>
+                  }
+                >
+                  <ListItemText
+                    primary={path.name}
+                    secondary={path.notes ?? (isSelected ? "Active path" : undefined)}
+                  />
+                </ListItem>
+              );
+            })}
+          </List>
+        ) : (
+          <Typography color="text.secondary" variant="body2">
+            No paths yet. Add one for each career face you want to keep under this profile.
+          </Typography>
+        )}
       </Stack>
 
       <Stack spacing={1.5} data-testid="jj-resume-library">

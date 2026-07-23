@@ -333,7 +333,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Paths stay on device; select ≠ send.
 
-**Status:** proposed
+**Status:** done (2026-07-23)
 
 ### PE03-S06 — Review and edit after every import
 

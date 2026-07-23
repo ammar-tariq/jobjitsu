@@ -3,6 +3,7 @@ import type {
   AiStatusSnapshot,
   CraftPreferencesPatchInput,
   IpcResultMap,
+  PathPatchInput,
   ProfilePatchInput,
   ResumeImportInputPayload,
   ThemePreference,
@@ -26,6 +27,12 @@ export type IpcBridge = {
   readonly selectResume: (
     resumeId: string,
   ) => Promise<Result<IpcResultMap["identity.selectResume"]>>;
+  readonly listPaths: () => Promise<Result<IpcResultMap["identity.listPaths"]>>;
+  readonly upsertPath: (
+    patch: PathPatchInput,
+  ) => Promise<Result<IpcResultMap["identity.upsertPath"]>>;
+  readonly archivePath: (pathId: string) => Promise<Result<IpcResultMap["identity.archivePath"]>>;
+  readonly selectPath: (pathId: string) => Promise<Result<IpcResultMap["identity.selectPath"]>>;
   readonly getDataRoot: () => Promise<Result<IpcResultMap["storage.getDataRoot"]>>;
   readonly setDataRoot: (path: string) => Promise<Result<IpcResultMap["storage.setDataRoot"]>>;
   readonly resetDataRoot: () => Promise<Result<IpcResultMap["storage.resetDataRoot"]>>;
@@ -89,6 +96,26 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async selectResume(resumeId: string) {
       return (await dispatcher.invoke("identity.selectResume", { resumeId })) as Result<
         IpcResultMap["identity.selectResume"]
+      >;
+    },
+    async listPaths() {
+      return (await dispatcher.invoke("identity.listPaths")) as Result<
+        IpcResultMap["identity.listPaths"]
+      >;
+    },
+    async upsertPath(patch: PathPatchInput) {
+      return (await dispatcher.invoke("identity.upsertPath", patch)) as Result<
+        IpcResultMap["identity.upsertPath"]
+      >;
+    },
+    async archivePath(pathId: string) {
+      return (await dispatcher.invoke("identity.archivePath", { pathId })) as Result<
+        IpcResultMap["identity.archivePath"]
+      >;
+    },
+    async selectPath(pathId: string) {
+      return (await dispatcher.invoke("identity.selectPath", { pathId })) as Result<
+        IpcResultMap["identity.selectPath"]
       >;
     },
     async getDataRoot() {

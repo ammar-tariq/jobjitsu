@@ -22,6 +22,8 @@ import {
   createFakeResumeStore,
   createMemoryProfileRepository,
   createMemoryResumeLibrary,
+  createMemoryPathLibrary,
+  type PathLibrary,
   type ProfileRepository,
   type ResumeLibrary,
   type ResumeStore,
@@ -69,6 +71,8 @@ export type HostRuntime = {
   readonly profiles: ProfileRepository;
   /** On-device resume library (identity public API). */
   readonly resumeLibrary: ResumeLibrary;
+  /** Career paths under identity (UI: Path). */
+  readonly pathLibrary: PathLibrary;
   /** On-device data folder preference. */
   readonly dataRoot: DataRootStore;
   /** Preferences façade (config SSOT). */
@@ -86,6 +90,7 @@ export type CreateHostRuntimeOptions = {
   readonly appearance?: AppearanceStore;
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
+  readonly pathLibrary?: PathLibrary;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly folderPicker?: FolderPicker;
@@ -110,6 +115,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
+  const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
   const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
@@ -222,6 +228,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     appearance,
     profiles,
     resumeLibrary,
+    pathLibrary,
     dataRoot: dataRootStore,
     preferences,
     folderPicker,
@@ -240,6 +247,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     appearance,
     profiles,
     resumeLibrary,
+    pathLibrary,
     dataRoot: dataRootStore,
     preferences,
     async start() {

@@ -57,6 +57,14 @@ export async function createDurableHostRuntime(
       getSelected: () => stores.resumeLibrary.getSelected(),
       select: (id) => stores.resumeLibrary.select(id),
     },
+    pathLibrary: {
+      list: (options) => stores.pathLibrary.list(options),
+      get: (id) => stores.pathLibrary.get(id),
+      upsert: (patch) => stores.pathLibrary.upsert(patch),
+      archive: (id) => stores.pathLibrary.archive(id),
+      getSelected: () => stores.pathLibrary.getSelected(),
+      select: (id) => stores.pathLibrary.select(id),
+    },
     preferences: {
       getApprovalBeforeSend: () => stores.preferences.getApprovalBeforeSend(),
       setApprovalBeforeSend: (value) => stores.preferences.setApprovalBeforeSend(value),

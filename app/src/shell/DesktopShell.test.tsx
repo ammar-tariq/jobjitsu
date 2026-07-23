@@ -130,6 +130,37 @@ describe("DesktopShell", () => {
     expect(profile?.location).toMatch(/device/i);
   });
 
+  it("creates and selects a Path under identity without sending", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-path-library")).toBeInTheDocument();
+    expect(screen.getByText(/^Paths$/)).toBeInTheDocument();
+    expect(screen.queryByText(/sub-profile/i)).not.toBeInTheDocument();
+
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.type(screen.getByRole("textbox", { name: /notes/i }), "Primary web path");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
+    expect(screen.getByText("Fullstack Developer")).toBeInTheDocument();
+
+    await user.clear(screen.getByTestId("jj-path-name-input"));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Mobile App");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText("Mobile App")).toBeInTheDocument();
+
+    const selectButtons = screen.getAllByRole("button", { name: "Select" });
+    await user.click(selectButtons[selectButtons.length - 1]!);
+    expect(await screen.findByText(/path selected\. nothing was sent/i)).toBeInTheDocument();
+
+    expect((await runtime.pathLibrary.getSelected())?.name).toBe("Mobile App");
+    expect(await runtime.pathLibrary.list()).toHaveLength(2);
+  });
+
   it("imports a resume into the local library through the identity bridge", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

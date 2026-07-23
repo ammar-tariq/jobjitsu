@@ -15,6 +15,10 @@ export const IPC_ALLOWLIST = [
   "identity.importResume",
   "identity.getSelectedResume",
   "identity.selectResume",
+  "identity.listPaths",
+  "identity.upsertPath",
+  "identity.archivePath",
+  "identity.selectPath",
   "storage.getDataRoot",
   "storage.setDataRoot",
   "storage.resetDataRoot",
@@ -74,6 +78,22 @@ export type ResumeImportInputPayload = {
   readonly parentVersionId?: string;
 };
 
+export type PathSnapshot = {
+  readonly id: string;
+  readonly profileId: string;
+  readonly name: string;
+  readonly notes?: string;
+  readonly archived: boolean;
+  readonly updatedAt: string;
+  readonly selectedResumeVersionId?: string;
+};
+
+export type PathPatchInput = {
+  readonly id?: string;
+  readonly name: string;
+  readonly notes?: string;
+};
+
 export type DataRootSnapshot = {
   readonly path: string;
   readonly defaultPath: string;
@@ -103,6 +123,10 @@ export type IpcPayloadMap = {
   readonly "identity.importResume": ResumeImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
   readonly "identity.selectResume": { readonly resumeId: string };
+  readonly "identity.listPaths": undefined;
+  readonly "identity.upsertPath": PathPatchInput;
+  readonly "identity.archivePath": { readonly pathId: string };
+  readonly "identity.selectPath": { readonly pathId: string };
   readonly "storage.getDataRoot": undefined;
   readonly "storage.setDataRoot": { readonly path: string };
   readonly "storage.resetDataRoot": undefined;
@@ -127,6 +151,13 @@ export type IpcResultMap = {
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
   readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
   readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
+  readonly "identity.listPaths": {
+    readonly paths: readonly PathSnapshot[];
+    readonly selectedId: string | null;
+  };
+  readonly "identity.upsertPath": { readonly path: PathSnapshot };
+  readonly "identity.archivePath": { readonly path: PathSnapshot };
+  readonly "identity.selectPath": { readonly path: PathSnapshot };
   readonly "storage.getDataRoot": { readonly dataRoot: DataRootSnapshot };
   readonly "storage.setDataRoot": { readonly dataRoot: DataRootSnapshot };
   readonly "storage.resetDataRoot": { readonly dataRoot: DataRootSnapshot };
