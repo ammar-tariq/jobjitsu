@@ -30,6 +30,8 @@ export const IPC_ALLOWLIST = [
   "preferences.setApprovalBeforeSend",
   "preferences.getCraftPreferences",
   "preferences.setCraftPreferences",
+  "preferences.getLocalModelPath",
+  "preferences.setLocalModelPath",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -164,6 +166,8 @@ export type IpcPayloadMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": undefined;
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
+  readonly "preferences.getLocalModelPath": undefined;
+  readonly "preferences.setLocalModelPath": { readonly path: string };
 };
 
 export type IpcResultMap = {
@@ -208,6 +212,8 @@ export type IpcResultMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
+  readonly "preferences.getLocalModelPath": { readonly path: string | null };
+  readonly "preferences.setLocalModelPath": { readonly path: string | null };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

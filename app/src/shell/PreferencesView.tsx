@@ -26,6 +26,9 @@ export function PreferencesView({
   const [dataPathDraft, setDataPathDraft] = useState("");
   const [dataStatus, setDataStatus] = useState<string | null>(null);
   const [savingDataRoot, setSavingDataRoot] = useState(false);
+  const [modelPathDraft, setModelPathDraft] = useState("");
+  const [modelStatus, setModelStatus] = useState<string | null>(null);
+  const [savingModelPath, setSavingModelPath] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,10 +38,33 @@ export function PreferencesView({
         setDataPathDraft(result.value.dataRoot.path);
       }
     });
+    void bridge.getLocalModelPath().then((result) => {
+      if (!cancelled && result.ok) {
+        setModelPathDraft(result.value.path ?? "");
+      }
+    });
     return () => {
       cancelled = true;
     };
   }, [bridge]);
+
+  const onSaveModelPath = (): void => {
+    setSavingModelPath(true);
+    setModelStatus(null);
+    void bridge.setLocalModelPath(modelPathDraft).then((result) => {
+      setSavingModelPath(false);
+      if (!result.ok) {
+        setModelStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setModelPathDraft(result.value.path ?? "");
+      if (!result.value.path) {
+        setModelStatus("Model path cleared. Choose a path so Agent can run on this device.");
+        return;
+      }
+      setModelStatus("Model path saved. Stored on this device.");
+    });
+  };
 
   const onSaveDataRoot = (): void => {
     setSavingDataRoot(true);
@@ -143,6 +169,39 @@ export function PreferencesView({
         {dataRoot ? (
           <Typography color="text.secondary" variant="body2">
             {dataRoot.isCustom ? "Custom folder" : "Default folder"} · {dataRoot.path}
+          </Typography>
+        ) : null}
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-local-model-path">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Local model path
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          Point Agent at an on-device model file or folder. If Agent shows Unavailable, confirm this
+          path. Nothing leaves this device until Agent is ready.
+        </Typography>
+        <TextField
+          label="Model path"
+          value={modelPathDraft}
+          onChange={(event) => setModelPathDraft(event.target.value)}
+          size="small"
+          fullWidth
+          placeholder="/path/to/model"
+          slotProps={{ htmlInput: { "data-testid": "jj-local-model-path-input" } }}
+        />
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          <Button variant="contained" onClick={onSaveModelPath} disabled={savingModelPath}>
+            Save model path
+          </Button>
+        </Stack>
+        {modelStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {modelStatus}
+          </Typography>
+        ) : modelPathDraft.trim().length === 0 ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            Choose a local model path in Preferences so Agent can run on this device.
           </Typography>
         ) : null}
       </Stack>

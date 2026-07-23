@@ -9,3 +9,7 @@ export {
   createFakeContextAssembler,
   type FakeAiProviderOptions,
 } from "./fake-provider.js";
+export {
+  createPathGatedAiProvider,
+  type PathGatedAiProviderOptions,
+} from "./path-gated-provider.js";

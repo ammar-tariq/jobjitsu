@@ -73,6 +73,8 @@ export async function createDurableHostRuntime(
       setApprovalBeforeSend: (value) => stores.preferences.setApprovalBeforeSend(value),
       getCraftPreferences: () => stores.preferences.getCraftPreferences(),
       setCraftPreferences: (patch) => stores.preferences.setCraftPreferences(patch),
+      getLocalModelPath: () => stores.preferences.getLocalModelPath(),
+      setLocalModelPath: (path) => stores.preferences.setLocalModelPath(path),
     },
     dataRoot: dataRootStore,
     folderPicker,
