@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | PE03 Identity & Resume Library |
 | **Story** | PE03-S05 — Maintain career paths under identity ([#77](https://github.com/ammar-tariq/jobjitsu/issues/77)) |
-| **Status** | PR gate — pending |
+| **Status** | PR gate — [#84](https://github.com/ammar-tariq/jobjitsu/pull/84) |
 | **Note** | Path library + IPC + Preferences; select ≠ send; AI parse later |
 
 ## Completed slices
