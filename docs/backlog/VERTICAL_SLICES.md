@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE03 Identity & Resume Library |
-| **Story** | PE03-S06 — Review and edit after every import |
+| **Story** | PE03-S07 — Attach reviewed import to identity and/or path |
 | **Status** | In progress |
-| **Note** | Draft review before library write; cancel discards; no auto-attach (PE03-S07) |
+| **Note** | Attach choices after review save; Resume.Attached (ids only); select ≠ send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE03-S06 | 2026-07-23 | Review import before library write; PR #89 |
 | PE27-S01 (multi-profile) | 2026-07-23 | Multiple local profiles; Paths/resumes nested; PR #88 |
 | PE04-S03 | 2026-07-23 | Honest Agent privacy chrome; PR #76 |
 | PE04-S04 | 2026-07-23 | Fit/tone/constraints via façade + IPC; Preferences.Changed |

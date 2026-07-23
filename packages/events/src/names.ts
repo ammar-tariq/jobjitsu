@@ -7,6 +7,7 @@ export const EVENT_NAMES = [
   "App.Started",
   "Plugin.Loaded",
   "Resume.Imported",
+  "Resume.Attached",
   "Resume.Generated",
   "Job.Imported",
   "Jobs.Synced",

@@ -49,6 +49,7 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 | `App.Started` | Desktop host finished boot wiring |
 | `Plugin.Loaded` | Plugin module loaded into host (may still be disabled) |
 | `Resume.Imported` | User imported a résumé (ID only) |
+| `Resume.Attached` | Reviewed import attached to identity and/or path (IDs only; not send) |
 | `Resume.Generated` | On-device résumé prepared (ID only on bus) |
 | `Job.Imported` | Single role ingested |
 | `Jobs.Synced` | Job Provider sync batch finished (counts) |

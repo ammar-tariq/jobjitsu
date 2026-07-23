@@ -68,8 +68,15 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
     readonly contactEmail: string;
     readonly notes: string;
   } | null>(null);
+  const [attachPending, setAttachPending] = useState<{
+    readonly resumeId: string;
+    readonly pathId: string;
+    readonly profileId: string;
+    readonly suggestIdentity: boolean;
+  } | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [attaching, setAttaching] = useState(false);
   const [selectingResumeId, setSelectingResumeId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -239,7 +246,21 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
           setImportStatus(result.error.message ?? result.error.title);
           return;
         }
-        setImportStatus("Resume reviewed and saved on this device. Nothing was attached or sent.");
+        const version = result.value.version;
+        const profile = profiles.find((entry) => entry.id === version.profileId);
+        const suggestIdentity =
+          !profile?.email && Boolean(version.contactName || version.contactEmail);
+        setAttachPending({
+          resumeId: version.id,
+          pathId: draft.pathId,
+          profileId: version.profileId,
+          suggestIdentity,
+        });
+        setImportStatus(
+          suggestIdentity
+            ? "Resume saved. Attach to identity and this path, or path only."
+            : "Resume saved. Attach to this path, or update identity if you want.",
+        );
         clearImportDraft();
         await refreshVersions();
         await refreshPaths();
@@ -247,6 +268,46 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
       .catch(() => {
         setImporting(false);
         setImportStatus("Something went wrong importing that file. Try again.");
+      });
+  };
+
+  const onAttachResume = (options: {
+    readonly updateIdentity: boolean;
+    readonly attachPath: boolean;
+  }): void => {
+    if (!attachPending) {
+      return;
+    }
+    if (!options.updateIdentity && !options.attachPath) {
+      setImportStatus("Choose identity, this path, or both.");
+      return;
+    }
+    const pending = attachPending;
+    setAttaching(true);
+    setImportStatus(null);
+    void bridge
+      .attachResume({
+        resumeId: pending.resumeId,
+        updateIdentity: options.updateIdentity,
+        pathId: options.attachPath ? pending.pathId : undefined,
+      })
+      .then(async (result) => {
+        setAttaching(false);
+        if (!result.ok) {
+          setImportStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        const parts = [
+          options.updateIdentity ? "identity" : null,
+          options.attachPath ? "path" : null,
+        ]
+          .filter(Boolean)
+          .join(" and ");
+        setImportStatus(`Attached to ${parts}. Stored on this device. Nothing was sent.`);
+        setAttachPending(null);
+        await refreshProfiles();
+        await refreshVersions();
+        await refreshPaths();
       });
   };
 
@@ -513,6 +574,65 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             </Button>
                           </Stack>
                         </Stack>
+                      ) : attachPending?.pathId === path.id ? (
+                        <Stack
+                          spacing={1.5}
+                          data-testid={`jj-import-attach-${path.id}`}
+                          sx={{
+                            p: 1.5,
+                            border: "1px solid",
+                            borderColor: "divider",
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Typography variant="subtitle2">Attach resume</Typography>
+                          <Typography color="text.secondary" variant="body2">
+                            {attachPending.suggestIdentity
+                              ? "First import can update identity and this path. Later imports usually attach to a path only."
+                              : "Attach to this path without overwriting identity, or update both if you choose."}
+                          </Typography>
+                          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
+                            <Button
+                              variant={attachPending.suggestIdentity ? "contained" : "outlined"}
+                              disabled={attaching}
+                              onClick={() =>
+                                onAttachResume({ updateIdentity: true, attachPath: true })
+                              }
+                            >
+                              Both
+                            </Button>
+                            <Button
+                              variant={!attachPending.suggestIdentity ? "contained" : "outlined"}
+                              disabled={attaching}
+                              onClick={() =>
+                                onAttachResume({ updateIdentity: false, attachPath: true })
+                              }
+                            >
+                              Save to path
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              disabled={attaching}
+                              onClick={() =>
+                                onAttachResume({ updateIdentity: true, attachPath: false })
+                              }
+                            >
+                              Update identity
+                            </Button>
+                            <Button
+                              variant="text"
+                              disabled={attaching}
+                              onClick={() => {
+                                setAttachPending(null);
+                                setImportStatus(
+                                  "Skipped attach. Resume stays in the library on this device.",
+                                );
+                              }}
+                            >
+                              Skip for now
+                            </Button>
+                          </Stack>
+                        </Stack>
                       ) : (
                         <Button variant="outlined" component="label">
                           Import resume
@@ -527,6 +647,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                                 return;
                               }
                               setImportStatus(null);
+                              setAttachPending(null);
                               setImportDraft({
                                 pathId: path.id,
                                 file: next,

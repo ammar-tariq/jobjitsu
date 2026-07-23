@@ -17,6 +17,7 @@ export const IPC_ALLOWLIST = [
   "identity.importResume",
   "identity.getSelectedResume",
   "identity.selectResume",
+  "identity.attachResume",
   "identity.listPaths",
   "identity.upsertPath",
   "identity.archivePath",
@@ -91,6 +92,14 @@ export type ResumeImportInputPayload = {
   readonly notes?: string;
 };
 
+export type ResumeAttachInputPayload = {
+  readonly resumeId: string;
+  /** Patch allowlisted identity fields from the version's review data. */
+  readonly updateIdentity?: boolean;
+  /** When set, set this path's selected résumé to the version. */
+  readonly pathId?: string;
+};
+
 export type PathSnapshot = {
   readonly id: string;
   readonly profileId: string;
@@ -140,6 +149,7 @@ export type IpcPayloadMap = {
   readonly "identity.importResume": ResumeImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
   readonly "identity.selectResume": { readonly resumeId: string };
+  readonly "identity.attachResume": ResumeAttachInputPayload;
   readonly "identity.listPaths": undefined;
   readonly "identity.upsertPath": PathPatchInput;
   readonly "identity.archivePath": { readonly pathId: string };
@@ -173,6 +183,11 @@ export type IpcResultMap = {
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
   readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
   readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
+  readonly "identity.attachResume": {
+    readonly version: ResumeVersionSnapshot;
+    readonly profile: ProfileSnapshot | null;
+    readonly path: PathSnapshot | null;
+  };
   readonly "identity.listPaths": {
     readonly paths: readonly PathSnapshot[];
     readonly selectedId: string | null;
