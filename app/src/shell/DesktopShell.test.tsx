@@ -115,7 +115,8 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
     expect(screen.getByTestId("jj-profile-form")).toBeInTheDocument();
-    expect(screen.getByText(/stay on this device/i)).toBeInTheDocument();
+    expect(screen.getByTestId("jj-profile-tree")).toBeInTheDocument();
+    expect(screen.getByText(/menu tree|on this device/i)).toBeInTheDocument();
     expect(screen.queryByText(/cloud sync/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("jj-preferences")).not.toBeInTheDocument();
 
@@ -225,7 +226,7 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
-    await user.click(screen.getByRole("button", { name: "Resumes" }));
+    await user.click(screen.getByTestId(`jj-tree-path-${path.id}`));
     const resumes = screen.getByTestId(`jj-path-resumes-${path.id}`);
     await user.click(within(resumes).getByRole("button", { name: "Select" }));
 
