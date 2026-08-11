@@ -1,5 +1,7 @@
 import { useEffect, useState, type JSX } from "react";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { AgentPrivacyState } from "@jobjitsu/ui";
 import { DEFAULT_SHELL_NAV_ID, type ShellNavId } from "../index.js";
@@ -11,7 +13,7 @@ import { AgentView } from "./AgentView.js";
 import { ApplicationsView } from "./ApplicationsView.js";
 import { CraftView } from "./CraftView.js";
 import { FollowUpsView } from "./FollowUpsView.js";
-import { useHostActivity } from "./HostProvider.js";
+import { useHostActivity, useHostCraftSession } from "./HostProvider.js";
 import { OnboardingView } from "./OnboardingView.js";
 import { PreferencesView } from "./PreferencesView.js";
 import { ProfileView } from "./ProfileView.js";
@@ -27,13 +29,15 @@ export type DesktopShellProps = {
 
 /**
  * Desktop shell — Material dashboard layout (side menu + main), JobJitsu content.
- * Subscribes to host activity only; must never import `@jobjitsu/ai`.
+ * Subscribes to host activity / craft session; must never import `@jobjitsu/ai`.
  */
 export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps): JSX.Element {
   const [activeId, setActiveId] = useState<ShellNavId>(DEFAULT_SHELL_NAV_ID);
   const activity = useHostActivity();
+  const craftSession = useHostCraftSession();
   const [agentPrivacy, setAgentPrivacy] = useState<AgentPrivacyState>("unavailable");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const craftRunning = craftSession.job.status === "running";
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -112,6 +116,20 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             pt: 3,
           }}
         >
+          {craftRunning && activeId !== "craft" ? (
+            <Alert
+              severity="info"
+              data-testid="jj-craft-running-banner"
+              action={
+                <Button color="inherit" size="small" onClick={() => setActiveId("craft")}>
+                  Open Craft
+                </Button>
+              }
+            >
+              {craftSession.job.message ??
+                "Agent is preparing Craft drafts on this device. You can keep browsing."}
+            </Alert>
+          ) : null}
           {activeId === "craft" ? (
             <CraftView bridge={bridge} />
           ) : activeId === "applications" ? (

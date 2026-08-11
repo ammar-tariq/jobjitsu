@@ -1,7 +1,9 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
+import LinearProgress from "@mui/material/LinearProgress";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -18,7 +20,9 @@ import type {
   CraftChatTarget,
   CraftExportFormat,
   CraftGenerateKind,
+  CraftSessionSnapshot,
 } from "../ipc/commands.js";
+import { useHostCraftSession } from "./HostProvider.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
@@ -27,32 +31,97 @@ export type CraftViewProps = {
 type DraftTab = "resume" | "cover" | "preview";
 
 /**
- * Craft Studio — paste sources, prepare drafts, refine, export.
- * One job at a time; host owns Agent; never sends.
+ * Craft Studio — host-owned session so Agent prepare survives navigation.
+ * UI shows calm progress; never calls AI directly; never sends.
  */
 export function CraftView({ bridge }: CraftViewProps): JSX.Element {
-  const [resumeText, setResumeText] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [aboutCompany, setAboutCompany] = useState("");
-  const [resumeDraft, setResumeDraft] = useState("");
-  const [coverLetterDraft, setCoverLetterDraft] = useState("");
+  const hostSession = useHostCraftSession();
+  const [session, setSession] = useState<CraftSessionSnapshot | null>(hostSession);
   const [previewHtml, setPreviewHtml] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [chatBusy, setChatBusy] = useState(false);
-  const [chatTarget, setChatTarget] = useState<CraftChatTarget>("resume");
-  const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<readonly CraftChatMessageSnapshot[]>([]);
   const [savingApplication, setSavingApplication] = useState(false);
-  const [saveCompany, setSaveCompany] = useState("");
-  const [saveRole, setSaveRole] = useState("");
+  const [localStatus, setLocalStatus] = useState<string | null>(null);
   const [sourcesOpen, setSourcesOpen] = useState(true);
   const [refineOpen, setRefineOpen] = useState(false);
   const [draftTab, setDraftTab] = useState<DraftTab>("resume");
+  const [tick, setTick] = useState(0);
+  const patchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrated = useRef(false);
 
+  useEffect(() => {
+    if (hostSession) {
+      setSession(hostSession);
+      if (!hydrated.current) {
+        hydrated.current = true;
+        if (hostSession.resumeDraft.trim() || hostSession.coverLetterDraft.trim()) {
+          setSourcesOpen(hostSession.job.status === "running");
+          setRefineOpen(true);
+        }
+        if (hostSession.job.status === "running") {
+          setSourcesOpen(false);
+        }
+      }
+    }
+  }, [hostSession]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void bridge.getCraftSession().then((result) => {
+      if (!cancelled && result.ok) {
+        setSession(result.value.session);
+        hydrated.current = true;
+        if (
+          result.value.session.resumeDraft.trim() ||
+          result.value.session.coverLetterDraft.trim()
+        ) {
+          setSourcesOpen(result.value.session.job.status === "running");
+          setRefineOpen(true);
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [bridge]);
+
+  const resumeText = session?.resumeText ?? "";
+  const jobDescription = session?.jobDescription ?? "";
+  const aboutCompany = session?.aboutCompany ?? "";
+  const resumeDraft = session?.resumeDraft ?? "";
+  const coverLetterDraft = session?.coverLetterDraft ?? "";
+  const saveCompany = session?.saveCompany ?? "";
+  const saveRole = session?.saveRole ?? "";
+  const chatTarget = session?.chatTarget ?? "resume";
+  const chatInput = session?.chatInput ?? "";
+  const chatMessages = session?.chatMessages ?? [];
+  const job = session?.job;
+  const preparing = job?.status === "running";
   const hasDrafts = Boolean(resumeDraft.trim() || coverLetterDraft.trim());
-  const busy = generating || exporting || chatBusy || savingApplication;
+  const busy = preparing || exporting || chatBusy || savingApplication;
+  const status = localStatus ?? job?.message ?? null;
+  const elapsedSeconds =
+    preparing && job?.startedAt
+      ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000))
+      : 0;
+  const elapsedLabel = preparing ? ` · ${elapsedSeconds + tick - tick}s` : "";
+
+  useEffect(() => {
+    if (!preparing) {
+      return;
+    }
+    const id = setInterval(() => setTick((value) => value + 1), 1000);
+    return () => clearInterval(id);
+  }, [preparing]);
+
+  useEffect(() => {
+    if (job?.status === "ready" && job.message) {
+      setLocalStatus(null);
+      setSourcesOpen(false);
+      setRefineOpen(true);
+      setDraftTab(job.kind === "cover_letter" ? "cover" : "resume");
+    }
+  }, [job?.status, job?.message, job?.kind]);
 
   useEffect(() => {
     if (!resumeDraft.trim()) {
@@ -71,69 +140,77 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     };
   }, [bridge, resumeDraft]);
 
-  const onGenerate = (kind: CraftGenerateKind): void => {
-    setGenerating(true);
-    setStatus(null);
-    void bridge
-      .generateCraftDrafts({
-        kind,
-        resumeText,
-        jobDescription,
-        aboutCompany: aboutCompany.trim() || undefined,
-      })
-      .then((result) => {
-        setGenerating(false);
-        if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
-          return;
+  const flushPatch = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
+    if (patchTimer.current) {
+      clearTimeout(patchTimer.current);
+    }
+    patchTimer.current = setTimeout(() => {
+      void bridge.patchCraftSession(patch).then((result) => {
+        if (result.ok) {
+          setSession(result.value.session);
         }
-        const value = result.value;
-        if (value.craftStatus === "ready") {
-          if (kind === "resume" || kind === "both") {
-            setResumeDraft(value.resumeDraft);
-          }
-          if (kind === "cover_letter" || kind === "both") {
-            setCoverLetterDraft(value.coverLetterDraft);
-          }
-          setSourcesOpen(false);
-          setRefineOpen(true);
-          setDraftTab(kind === "cover_letter" ? "cover" : "resume");
-          setChatTarget(kind === "cover_letter" ? "cover_letter" : "resume");
-          setStatus("Drafts ready. Edit freely — you remain the author. Nothing was sent.");
-          return;
-        }
-        if (value.craftStatus === "unavailable") {
-          setStatus(
-            value.message ??
-              "Agent is not ready yet. Check Preferences for the on-device model name.",
-          );
-          return;
-        }
-        if (value.craftStatus === "invalid") {
-          setStatus(value.message ?? "Add your résumé and job description before generating.");
-          return;
-        }
-        setStatus(value.message ?? "Could not prepare those drafts. Try again when you are ready.");
-      })
-      .catch(() => {
-        setGenerating(false);
-        setStatus("Could not prepare those drafts. Try again when you are ready.");
       });
+    }, 200);
+  };
+
+  const patchNow = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
+    if (patchTimer.current) {
+      clearTimeout(patchTimer.current);
+      patchTimer.current = null;
+    }
+    void bridge.patchCraftSession(patch).then((result) => {
+      if (result.ok) {
+        setSession(result.value.session);
+      }
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (patchTimer.current) {
+        clearTimeout(patchTimer.current);
+      }
+    };
+  }, []);
+
+  const onGenerate = (kind: CraftGenerateKind): void => {
+    setLocalStatus(null);
+    patchNow({
+      resumeText,
+      jobDescription,
+      aboutCompany,
+    });
+    // Small delay so patch lands before prepare reads sources — patchNow is async.
+    void bridge.patchCraftSession({ resumeText, jobDescription, aboutCompany }).then((patched) => {
+      if (!patched.ok) {
+        setLocalStatus(patched.error.message ?? patched.error.title);
+        return;
+      }
+      setSession(patched.value.session);
+      return bridge.prepareCraftDrafts(kind).then((result) => {
+        if (!result.ok) {
+          setLocalStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setSession(result.value.session);
+        setSourcesOpen(false);
+      });
+    });
   };
 
   const onExport = (format: CraftExportFormat): void => {
     if (!resumeDraft.trim()) {
-      setStatus("Add a résumé draft before exporting.");
+      setLocalStatus("Add a résumé draft before exporting.");
       return;
     }
     setExporting(true);
-    setStatus(null);
+    setLocalStatus(null);
     void bridge
       .exportCraftResume({ draftText: resumeDraft, format, save: true })
       .then((result) => {
         setExporting(false);
         if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
+          setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
         const value = result.value;
@@ -141,41 +218,41 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           setPreviewHtml(value.html);
         }
         if (value.exportStatus === "saved") {
-          setStatus(value.message ?? "Saved on this device. Nothing was sent.");
+          setLocalStatus(value.message ?? "Saved on this device. Nothing was sent.");
           return;
         }
         if (value.exportStatus === "cancelled") {
-          setStatus(value.message ?? "Export cancelled. Nothing was saved.");
+          setLocalStatus(value.message ?? "Export cancelled. Nothing was saved.");
           return;
         }
         if (value.exportStatus === "unavailable") {
           downloadExport(value.fileName, format, value.html, value.pdfBase64);
-          setStatus("Download started on this device. Nothing was sent.");
+          setLocalStatus("Download started on this device. Nothing was sent.");
           return;
         }
         if (value.exportStatus === "invalid") {
-          setStatus(value.message ?? "Add a résumé draft before exporting.");
+          setLocalStatus(value.message ?? "Add a résumé draft before exporting.");
           return;
         }
-        setStatus(value.message ?? "Could not export that draft. Try again.");
+        setLocalStatus(value.message ?? "Could not export that draft. Try again.");
       })
       .catch(() => {
         setExporting(false);
-        setStatus("Could not export that draft. Try again.");
+        setLocalStatus("Could not export that draft. Try again.");
       });
   };
 
   const onSaveToApplication = (): void => {
     if (!resumeDraft.trim() && !coverLetterDraft.trim()) {
-      setStatus("Generate or paste a draft before saving to an application.");
+      setLocalStatus("Generate or paste a draft before saving to an application.");
       return;
     }
     if (!saveCompany.trim() || !saveRole.trim()) {
-      setStatus("Add a company and role title to save these drafts as an application.");
+      setLocalStatus("Add a company and role title to save these drafts as an application.");
       return;
     }
     setSavingApplication(true);
-    setStatus(null);
+    setLocalStatus(null);
     void bridge
       .createApplicationDraft({
         companyName: saveCompany.trim(),
@@ -187,16 +264,16 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       .then((result) => {
         setSavingApplication(false);
         if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
+          setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
-        setStatus(
+        setLocalStatus(
           `Saved to application “${result.value.application.companyName} · ${result.value.application.roleTitle}”. Nothing was sent.`,
         );
       })
       .catch(() => {
         setSavingApplication(false);
-        setStatus("Could not save that application. Try again.");
+        setLocalStatus("Could not save that application. Try again.");
       });
   };
 
@@ -208,9 +285,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     const history = chatMessages;
     const nextUser: CraftChatMessageSnapshot = { role: "user", content: message };
     setChatBusy(true);
-    setStatus(null);
-    setChatInput("");
-    setChatMessages([...history, nextUser]);
+    setLocalStatus(null);
+    patchNow({ chatInput: "", chatMessages: [...history, nextUser] });
     void bridge
       .refineCraftChat({
         message,
@@ -225,35 +301,31 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       .then((result) => {
         setChatBusy(false);
         if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
+          setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
         const value = result.value;
-        setResumeDraft(value.resumeDraft);
-        setCoverLetterDraft(value.coverLetterDraft);
         const assistantParts = [value.assistantMessage, ...value.clarifyingQuestions];
         const assistant: CraftChatMessageSnapshot = {
           role: "assistant",
           content: assistantParts.filter(Boolean).join("\n\n"),
         };
-        setChatMessages((prev) => [...prev, assistant]);
+        const nextMessages = [...history, nextUser, assistant];
+        patchNow({
+          resumeDraft: value.resumeDraft,
+          coverLetterDraft: value.coverLetterDraft,
+          chatMessages: nextMessages,
+          chatInput: "",
+        });
         if (value.chatStatus === "clarify") {
-          setStatus("Agent asked a few clarifying questions. Nothing was sent.");
+          setLocalStatus("Agent asked a few clarifying questions. Nothing was sent.");
           return;
         }
-        if (value.chatStatus === "reply") {
-          setStatus(value.assistantMessage);
-          return;
-        }
-        if (value.chatStatus === "unavailable") {
-          setStatus(value.assistantMessage);
-          return;
-        }
-        setStatus(value.assistantMessage);
+        setLocalStatus(value.assistantMessage);
       })
       .catch(() => {
         setChatBusy(false);
-        setStatus("Could not refine that draft. Try again when you are ready.");
+        setLocalStatus("Could not refine that draft. Try again when you are ready.");
       });
   }
 
@@ -264,9 +336,31 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           Craft
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Prepare a tailored résumé and cover letter on this device. Nothing is sent from here.
+          Prepare a tailored résumé and cover letter on this device. Agent keeps working if you
+          leave this screen. Nothing is sent from here.
         </Typography>
       </Stack>
+
+      {preparing ? (
+        <Alert
+          severity="info"
+          data-testid="jj-craft-progress"
+          sx={{ "& .MuiAlert-message": { width: "100%" } }}
+        >
+          <Stack spacing={1}>
+            <Typography variant="subtitle2">
+              Agent is working on this device{elapsedLabel}
+            </Typography>
+            <Typography variant="body2">
+              {job?.message ?? "Preparing drafts… Usually under a minute, depending on your model."}
+            </Typography>
+            <LinearProgress aria-label="Agent preparing drafts" />
+            <Typography variant="caption" color="text.secondary">
+              You can leave Craft — preparation continues in the background.
+            </Typography>
+          </Stack>
+        </Alert>
+      ) : null}
 
       <Stack
         spacing={1.5}
@@ -279,8 +373,13 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
         >
           <Typography variant="subtitle2">Sources</Typography>
-          {hasDrafts ? (
-            <Button size="small" variant="text" onClick={() => setSourcesOpen((open) => !open)}>
+          {hasDrafts || preparing ? (
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => setSourcesOpen((open) => !open)}
+              disabled={preparing}
+            >
               {sourcesOpen ? "Hide sources" : "Edit sources"}
             </Button>
           ) : null}
@@ -298,22 +397,32 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
               <TextField
                 label="Your résumé"
                 value={resumeText}
-                onChange={(event) => setResumeText(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSession((prev) => (prev ? { ...prev, resumeText: value } : prev));
+                  flushPatch({ resumeText: value });
+                }}
                 fullWidth
                 multiline
                 minRows={5}
                 maxRows={12}
+                disabled={preparing}
                 placeholder="Paste your current résumé…"
                 slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-input" } }}
               />
               <TextField
                 label="Job description"
                 value={jobDescription}
-                onChange={(event) => setJobDescription(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSession((prev) => (prev ? { ...prev, jobDescription: value } : prev));
+                  flushPatch({ jobDescription: value });
+                }}
                 fullWidth
                 multiline
                 minRows={5}
                 maxRows={12}
+                disabled={preparing}
                 placeholder="Paste the job description…"
                 slotProps={{ htmlInput: { "data-testid": "jj-craft-jd-input" } }}
               />
@@ -321,11 +430,16 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
             <TextField
               label="About the company"
               value={aboutCompany}
-              onChange={(event) => setAboutCompany(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSession((prev) => (prev ? { ...prev, aboutCompany: value } : prev));
+                flushPatch({ aboutCompany: value });
+              }}
               fullWidth
               multiline
               minRows={2}
               maxRows={4}
+              disabled={preparing}
               placeholder="Optional context"
               slotProps={{ htmlInput: { "data-testid": "jj-craft-about-company" } }}
             />
@@ -336,7 +450,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 onClick={() => onGenerate("both")}
                 data-testid="jj-craft-generate-both"
               >
-                {generating ? "Preparing…" : "Prepare drafts"}
+                {preparing ? "Preparing…" : "Prepare drafts"}
               </Button>
               <Button
                 variant="text"
@@ -358,14 +472,16 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           </Stack>
         </Collapse>
 
-        {!sourcesOpen && hasDrafts ? (
+        {!sourcesOpen && (hasDrafts || preparing) ? (
           <Typography color="text.secondary" variant="body2">
-            Sources are tucked away so you can focus on the draft.
+            {preparing
+              ? "Sources are locked while Agent prepares drafts."
+              : "Sources are tucked away so you can focus on the draft."}
           </Typography>
         ) : null}
       </Stack>
 
-      {status ? (
+      {status && !preparing ? (
         <Typography
           color="text.secondary"
           variant="body2"
@@ -375,15 +491,28 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           {status}
         </Typography>
       ) : null}
+      {preparing ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          role="status"
+          data-testid="jj-craft-status"
+          sx={{ display: "none" }}
+        >
+          {job?.message}
+        </Typography>
+      ) : null}
 
-      {hasDrafts ? (
+      {hasDrafts || preparing ? (
         <Stack spacing={1.5} data-testid="jj-craft-workspace">
           <Tabs
             value={draftTab}
             onChange={(_event, value: DraftTab) => {
               setDraftTab(value);
               if (value === "resume" || value === "cover") {
-                setChatTarget(value === "cover" ? "cover_letter" : "resume");
+                const target = value === "cover" ? "cover_letter" : "resume";
+                setSession((prev) => (prev ? { ...prev, chatTarget: target } : prev));
+                flushPatch({ chatTarget: target });
               }
             }}
             aria-label="Craft drafts"
@@ -402,12 +531,21 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
             <TextField
               label="Résumé draft"
               value={resumeDraft}
-              onChange={(event) => setResumeDraft(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSession((prev) => (prev ? { ...prev, resumeDraft: value } : prev));
+                flushPatch({ resumeDraft: value });
+              }}
               fullWidth
               multiline
               minRows={14}
               maxRows={24}
-              placeholder="Generated résumé draft appears here. Edit freely."
+              disabled={preparing}
+              placeholder={
+                preparing
+                  ? "Agent is preparing your résumé draft…"
+                  : "Generated résumé draft appears here. Edit freely."
+              }
               slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-draft" } }}
             />
           </Box>
@@ -416,12 +554,21 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
             <TextField
               label="Cover letter draft"
               value={coverLetterDraft}
-              onChange={(event) => setCoverLetterDraft(event.target.value)}
+              onChange={(event) => {
+                const value = event.target.value;
+                setSession((prev) => (prev ? { ...prev, coverLetterDraft: value } : prev));
+                flushPatch({ coverLetterDraft: value });
+              }}
               fullWidth
               multiline
               minRows={14}
               maxRows={24}
-              placeholder="Generated cover letter appears here. Edit freely."
+              disabled={preparing}
+              placeholder={
+                preparing
+                  ? "Agent is preparing your cover letter…"
+                  : "Generated cover letter appears here. Edit freely."
+              }
               slotProps={{ htmlInput: { "data-testid": "jj-craft-cover-draft" } }}
             />
           </Box>
@@ -493,7 +640,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 value={chatTarget}
                 onChange={(_event, value: CraftChatTarget | null) => {
                   if (value) {
-                    setChatTarget(value);
+                    setSession((prev) => (prev ? { ...prev, chatTarget: value } : prev));
+                    flushPatch({ chatTarget: value });
                     setDraftTab(value === "cover_letter" ? "cover" : "resume");
                   }
                 }}
@@ -532,11 +680,16 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 <TextField
                   label="Ask Agent"
                   value={chatInput}
-                  onChange={(event) => setChatInput(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSession((prev) => (prev ? { ...prev, chatInput: value } : prev));
+                    flushPatch({ chatInput: value });
+                  }}
                   fullWidth
                   multiline
                   minRows={2}
                   maxRows={4}
+                  disabled={preparing}
                   placeholder="Example: make the summary more systems-focused"
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
@@ -575,17 +728,27 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
               <TextField
                 label="Company"
                 value={saveCompany}
-                onChange={(event) => setSaveCompany(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSession((prev) => (prev ? { ...prev, saveCompany: value } : prev));
+                  flushPatch({ saveCompany: value });
+                }}
                 size="small"
                 fullWidth
+                disabled={preparing}
                 slotProps={{ htmlInput: { "data-testid": "jj-craft-save-company" } }}
               />
               <TextField
                 label="Role title"
                 value={saveRole}
-                onChange={(event) => setSaveRole(event.target.value)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSession((prev) => (prev ? { ...prev, saveRole: value } : prev));
+                  flushPatch({ saveRole: value });
+                }}
                 size="small"
                 fullWidth
+                disabled={preparing}
                 slotProps={{ htmlInput: { "data-testid": "jj-craft-save-role" } }}
               />
               <Button

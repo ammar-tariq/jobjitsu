@@ -45,6 +45,9 @@ export const IPC_ALLOWLIST = [
   "craft.generate",
   "craft.exportResume",
   "craft.chatRefine",
+  "craft.getSession",
+  "craft.patchSession",
+  "craft.prepareDrafts",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -307,6 +310,45 @@ export type CraftChatRefineResult = {
   readonly coverLetterDraft: string;
 };
 
+export type CraftJobPhase = "checking" | "resume" | "cover_letter" | null;
+
+export type CraftJobStatus = "idle" | "running" | "ready" | "failed" | "unavailable" | "invalid";
+
+export type CraftJobSnapshot = {
+  readonly status: CraftJobStatus;
+  readonly phase: CraftJobPhase;
+  readonly kind: CraftGenerateKind | null;
+  readonly message: string | null;
+  readonly startedAt: string | null;
+};
+
+export type CraftSessionSnapshot = {
+  readonly resumeText: string;
+  readonly jobDescription: string;
+  readonly aboutCompany: string;
+  readonly resumeDraft: string;
+  readonly coverLetterDraft: string;
+  readonly saveCompany: string;
+  readonly saveRole: string;
+  readonly chatTarget: CraftChatTarget;
+  readonly chatInput: string;
+  readonly chatMessages: readonly CraftChatMessageSnapshot[];
+  readonly job: CraftJobSnapshot;
+};
+
+export type CraftSessionPatchInput = {
+  readonly resumeText?: string;
+  readonly jobDescription?: string;
+  readonly aboutCompany?: string;
+  readonly resumeDraft?: string;
+  readonly coverLetterDraft?: string;
+  readonly saveCompany?: string;
+  readonly saveRole?: string;
+  readonly chatTarget?: CraftChatTarget;
+  readonly chatInput?: string;
+  readonly chatMessages?: readonly CraftChatMessageSnapshot[];
+};
+
 export type ApplicationDuplicateWarningSnapshot = {
   readonly matchedApplicationId: string;
   readonly message: string;
@@ -353,6 +395,9 @@ export type IpcPayloadMap = {
   readonly "craft.generate": CraftGenerateInput;
   readonly "craft.exportResume": CraftExportResumeInput;
   readonly "craft.chatRefine": CraftChatRefineInput;
+  readonly "craft.getSession": undefined;
+  readonly "craft.patchSession": CraftSessionPatchInput;
+  readonly "craft.prepareDrafts": { readonly kind: CraftGenerateKind };
 };
 
 export type IpcResultMap = {
@@ -418,6 +463,9 @@ export type IpcResultMap = {
   readonly "craft.generate": CraftGenerateResult;
   readonly "craft.exportResume": CraftExportResumeResult;
   readonly "craft.chatRefine": CraftChatRefineResult;
+  readonly "craft.getSession": { readonly session: CraftSessionSnapshot };
+  readonly "craft.patchSession": { readonly session: CraftSessionSnapshot };
+  readonly "craft.prepareDrafts": { readonly session: CraftSessionSnapshot };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

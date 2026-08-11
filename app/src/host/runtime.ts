@@ -49,6 +49,11 @@ import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-
 import { parseImportDraftWithAi } from "./parse-import-draft.js";
 import { refineCraftChatWithAi } from "./craft-chat-refine.js";
 import { generateCraftDraftsWithAi } from "./craft-generate.js";
+import {
+  createCraftSessionStore,
+  type CraftSessionState,
+  type CraftSessionStore,
+} from "./craft-session.js";
 import { generateApplicationCoverLetterWithAi } from "./cover-letter-application-draft.js";
 import { tailorApplicationDraftWithAi } from "./tailor-application-draft.js";
 import {
@@ -87,10 +92,14 @@ export type HostRuntime = {
   readonly dataRoot: DataRootStore;
   /** Preferences façade (config SSOT). */
   readonly preferences: PreferencesFacade;
+  /** Craft studio session — survives navigation while Agent prepares. */
+  readonly craftSession: CraftSessionStore;
   /** Start the host: App.Started → Agent readiness (no outbound send). */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
   subscribeActivity(listener: (entries: readonly HostActivityEntry[]) => void): () => void;
+  getCraftSession(): CraftSessionState;
+  subscribeCraftSession(listener: (session: CraftSessionState) => void): () => void;
 };
 
 export type CreateHostRuntimeOptions = {
@@ -160,6 +169,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
   const applications = options.applications ?? createMemoryApplicationRepository();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
+  const craftSession = createCraftSessionStore({ ai, assembler, bus });
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -304,6 +314,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
         assembler,
         input,
       }),
+    craftSession,
     refineCraftChat: (input) =>
       refineCraftChatWithAi({
         ai,
@@ -326,6 +337,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     applications,
     dataRoot: dataRootStore,
     preferences,
+    craftSession,
     async start() {
       await bus.publish("App.Started", {
         version: options.version ?? "0.0.0",
@@ -339,6 +351,8 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
         listeners.delete(listener);
       };
     },
+    getCraftSession: () => craftSession.get(),
+    subscribeCraftSession: (listener) => craftSession.subscribe(listener),
   };
 }
 
@@ -407,6 +421,10 @@ function summarize(event: DomainEvent): string {
       return "Agent checking readiness";
     case "Ai.LocalModelFailed":
       return "Agent unavailable — choose a model in Preferences";
+    case "Ai.Started":
+      return "Agent started work on this device";
+    case "Ai.Finished":
+      return "Agent finished work on this device";
     default:
       return event.name;
   }

@@ -66,6 +66,9 @@ describe("IPC allowlist", () => {
       "craft.generate",
       "craft.exportResume",
       "craft.chatRefine",
+      "craft.getSession",
+      "craft.patchSession",
+      "craft.prepareDrafts",
     ]);
   });
 
@@ -170,6 +173,7 @@ describe("typed IPC bridge", () => {
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
+      "getCraftSession",
       "getDataRoot",
       "getLocalModelPath",
       "getOnboardingCompleted",
@@ -183,8 +187,10 @@ describe("typed IPC bridge", () => {
       "listProfiles",
       "listResumeVersions",
       "parseImportDraft",
+      "patchCraftSession",
       "pickDataRoot",
       "ping",
+      "prepareCraftDrafts",
       "refineCraftChat",
       "resetDataRoot",
       "selectPath",

@@ -9,7 +9,9 @@ import type {
   CraftChatRefineInput,
   CraftExportResumeInput,
   CraftGenerateInput,
+  CraftGenerateKind,
   CraftPreferencesPatchInput,
+  CraftSessionPatchInput,
   IpcResultMap,
   PathPatchInput,
   ProfilePatchInput,
@@ -105,6 +107,13 @@ export type IpcBridge = {
   readonly refineCraftChat: (
     input: CraftChatRefineInput,
   ) => Promise<Result<IpcResultMap["craft.chatRefine"]>>;
+  readonly getCraftSession: () => Promise<Result<IpcResultMap["craft.getSession"]>>;
+  readonly patchCraftSession: (
+    patch: CraftSessionPatchInput,
+  ) => Promise<Result<IpcResultMap["craft.patchSession"]>>;
+  readonly prepareCraftDrafts: (
+    kind: CraftGenerateKind,
+  ) => Promise<Result<IpcResultMap["craft.prepareDrafts"]>>;
 };
 
 /**
@@ -300,6 +309,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async refineCraftChat(input: CraftChatRefineInput) {
       return (await dispatcher.invoke("craft.chatRefine", input)) as Result<
         IpcResultMap["craft.chatRefine"]
+      >;
+    },
+    async getCraftSession() {
+      return (await dispatcher.invoke("craft.getSession")) as Result<
+        IpcResultMap["craft.getSession"]
+      >;
+    },
+    async patchCraftSession(patch: CraftSessionPatchInput) {
+      return (await dispatcher.invoke("craft.patchSession", patch)) as Result<
+        IpcResultMap["craft.patchSession"]
+      >;
+    },
+    async prepareCraftDrafts(kind: CraftGenerateKind) {
+      return (await dispatcher.invoke("craft.prepareDrafts", { kind })) as Result<
+        IpcResultMap["craft.prepareDrafts"]
       >;
     },
   };
