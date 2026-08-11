@@ -57,6 +57,7 @@ describe("IPC allowlist", () => {
       "applications.updateDraft",
       "applications.tailorDraft",
       "craft.generate",
+      "craft.exportResume",
     ]);
   });
 
@@ -125,6 +126,7 @@ describe("typed IPC bridge", () => {
       "archivePath",
       "attachResume",
       "createApplicationDraft",
+      "exportCraftResume",
       "generateCraftDrafts",
       "getAiStatus",
       "getApprovalBeforeSend",
@@ -220,6 +222,36 @@ describe("typed IPC bridge", () => {
     expect(tailored.ok && tailored.value.draftText).toMatch(/Tailored résumé draft/i);
     expect(tailored.ok && tailored.value.application?.trackingStatus).toBe("ResumePrepared");
     expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("exports résumé HTML and PDF on device without sending", async () => {
+    const { createStubFileSaver } = await import("../host/file-saver.js");
+    const saved: string[] = [];
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        fileSaver: createStubFileSaver(async ({ defaultPath, contents }) => {
+          saved.push(defaultPath);
+          expect(contents).toBeTruthy();
+          return { status: "saved", path: `/tmp/${defaultPath}` };
+        }),
+      }),
+    );
+    const preview = await bridge.exportCraftResume({
+      draftText: "Sam Chen\nStaff engineer",
+      format: "html",
+    });
+    expect(preview.ok && preview.value.exportStatus).toBe("ready");
+    expect(preview.ok && preview.value.html).toContain("Sam Chen");
+
+    const pdf = await bridge.exportCraftResume({
+      draftText: "Sam Chen\nStaff engineer",
+      format: "pdf",
+      save: true,
+    });
+    expect(pdf.ok && pdf.value.exportStatus).toBe("saved");
+    expect(pdf.ok && pdf.value.pdfBase64.length).toBeGreaterThan(20);
+    expect(saved).toContain("jobjitsu-resume-draft.pdf");
     expect(bridge).not.toHaveProperty("approveSend");
   });
 

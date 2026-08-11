@@ -38,6 +38,7 @@ export const IPC_ALLOWLIST = [
   "applications.updateDraft",
   "applications.tailorDraft",
   "craft.generate",
+  "craft.exportResume",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -227,6 +228,24 @@ export type CraftGenerateResult = {
   readonly message?: string;
 };
 
+export type CraftExportFormat = "html" | "pdf";
+
+export type CraftExportResumeInput = {
+  readonly draftText: string;
+  readonly format: CraftExportFormat;
+  /** When true, host opens a save dialog and writes on this device. */
+  readonly save?: boolean;
+};
+
+export type CraftExportResumeResult = {
+  readonly html: string;
+  readonly pdfBase64: string;
+  readonly fileName: string;
+  readonly savedPath: string | null;
+  readonly exportStatus: "ready" | "saved" | "cancelled" | "invalid" | "failed" | "unavailable";
+  readonly message?: string;
+};
+
 export type ApplicationDuplicateWarningSnapshot = {
   readonly matchedApplicationId: string;
   readonly message: string;
@@ -266,6 +285,7 @@ export type IpcPayloadMap = {
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
   readonly "craft.generate": CraftGenerateInput;
+  readonly "craft.exportResume": CraftExportResumeInput;
 };
 
 export type IpcResultMap = {
@@ -324,6 +344,7 @@ export type IpcResultMap = {
   };
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
   readonly "craft.generate": CraftGenerateResult;
+  readonly "craft.exportResume": CraftExportResumeResult;
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

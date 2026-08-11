@@ -58,6 +58,7 @@ import {
   type DataRootStore,
   type DataRootSnapshot,
 } from "./data-root-store.js";
+import { createHostFileSaver, type FileSaver } from "./file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
 export type HostActivityEntry = {
@@ -106,6 +107,7 @@ export type CreateHostRuntimeOptions = {
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly folderPicker?: FolderPicker;
+  readonly fileSaver?: FileSaver;
   /** Rebind durable stores when the data folder changes. */
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
   /**
@@ -127,6 +129,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const errors = createErrorReporter({ logger });
   const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
+  const fileSaver = options.fileSaver ?? createHostFileSaver();
   const defaultToFakeAi =
     options.useFakeAi === true ||
     (options.useFakeAi !== false &&
@@ -289,6 +292,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     dataRoot: dataRootStore,
     preferences,
     folderPicker,
+    fileSaver,
     onDataRootChanged: options.onDataRootChanged,
     getAiStatus: () => aiStatus,
     bus,
