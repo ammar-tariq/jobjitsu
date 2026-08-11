@@ -64,12 +64,11 @@ export async function generateCraftDraftsWithAi(options: {
   try {
     if (options.input.kind === "resume" || options.input.kind === "both") {
       options.onPhase?.("resume");
-      const prompt = buildCraftUserPrompt({
-        kind: "resume",
-        jobDescription,
-        resumeText,
-        aboutCompany,
-        tonePreferences,
+      const prompt = options.assembler.assemble({
+        role: "tailor",
+        resumeExcerpts: [resumeText],
+        roleDescription,
+        draftExcerpt: aboutCompany,
       });
       const completion = await options.ai.complete({ role: "tailor", prompt });
       resumeDraft = completion.text.trim();
@@ -85,12 +84,11 @@ export async function generateCraftDraftsWithAi(options: {
 
     if (options.input.kind === "cover_letter" || options.input.kind === "both") {
       options.onPhase?.("cover_letter");
-      const prompt = buildCraftUserPrompt({
-        kind: "cover_letter",
-        jobDescription,
-        resumeText,
-        aboutCompany,
-        tonePreferences,
+      const prompt = options.assembler.assemble({
+        role: "cover_letter",
+        resumeExcerpts: [resumeText],
+        roleDescription,
+        draftExcerpt: aboutCompany,
       });
       const completion = await options.ai.complete({ role: "cover_letter", prompt });
       coverLetterDraft = completion.text.trim();

@@ -15,7 +15,7 @@ Never build multiple features in parallel in the same change set.
 | **Epic** | Product polish / sellable local MVP |
 | **Story** | Durable apps + Queue/Follow-ups/Timeline + honest Agent startup |
 | **Status** | In review |
-| **Note** | See [SELLABLE_LOCAL_MVP.md](../product/SELLABLE_LOCAL_MVP.md). Craft prepare: host session + working view (inputs/phases/CPU·RAM). |
+| **Note** | See [SELLABLE_LOCAL_MVP.md](../product/SELLABLE_LOCAL_MVP.md) |
 
 ## Completed slices
 

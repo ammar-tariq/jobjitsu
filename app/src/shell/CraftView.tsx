@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type JSX } from "react";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
+import LinearProgress from "@mui/material/LinearProgress";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -18,10 +20,8 @@ import type {
   CraftChatTarget,
   CraftExportFormat,
   CraftGenerateKind,
-  CraftSessionPatchInput,
   CraftSessionSnapshot,
 } from "../ipc/commands.js";
-import { CraftWorkingView } from "./CraftWorkingView.js";
 import { useHostCraftSession } from "./HostProvider.js";
 
 export type CraftViewProps = {
@@ -29,34 +29,6 @@ export type CraftViewProps = {
 };
 
 type DraftTab = "resume" | "cover" | "preview";
-
-/**
- * Prefer in-flight local edits over a host snapshot so one field’s patch
- * cannot wipe another field the user already typed.
- */
-function mergeHostSession(
-  host: CraftSessionSnapshot,
-  local: CraftSessionSnapshot | null,
-  pending: CraftSessionPatchInput,
-): CraftSessionSnapshot {
-  const base = local ?? host;
-  return {
-    ...host,
-    resumeText: pending.resumeText !== undefined ? base.resumeText : host.resumeText,
-    jobDescription:
-      pending.jobDescription !== undefined ? base.jobDescription : host.jobDescription,
-    aboutCompany: pending.aboutCompany !== undefined ? base.aboutCompany : host.aboutCompany,
-    resumeDraft: pending.resumeDraft !== undefined ? base.resumeDraft : host.resumeDraft,
-    coverLetterDraft:
-      pending.coverLetterDraft !== undefined ? base.coverLetterDraft : host.coverLetterDraft,
-    saveCompany: pending.saveCompany !== undefined ? base.saveCompany : host.saveCompany,
-    saveRole: pending.saveRole !== undefined ? base.saveRole : host.saveRole,
-    chatTarget: pending.chatTarget !== undefined ? base.chatTarget : host.chatTarget,
-    chatInput: pending.chatInput !== undefined ? base.chatInput : host.chatInput,
-    chatMessages: pending.chatMessages !== undefined ? base.chatMessages : host.chatMessages,
-    job: host.job,
-  };
-}
 
 /**
  * Craft Studio — host-owned session so Agent prepare survives navigation.
@@ -75,22 +47,43 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [draftTab, setDraftTab] = useState<DraftTab>("resume");
   const [tick, setTick] = useState(0);
   const patchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingPatch = useRef<CraftSessionPatchInput>({});
   const hydrated = useRef(false);
 
   useEffect(() => {
-    setSession((prev) => mergeHostSession(hostSession, prev, pendingPatch.current));
-    if (!hydrated.current) {
-      hydrated.current = true;
-      if (hostSession.resumeDraft.trim() || hostSession.coverLetterDraft.trim()) {
-        setSourcesOpen(hostSession.job.status === "running");
-        setRefineOpen(true);
-      }
-      if (hostSession.job.status === "running") {
-        setSourcesOpen(false);
+    if (hostSession) {
+      setSession(hostSession);
+      if (!hydrated.current) {
+        hydrated.current = true;
+        if (hostSession.resumeDraft.trim() || hostSession.coverLetterDraft.trim()) {
+          setSourcesOpen(hostSession.job.status === "running");
+          setRefineOpen(true);
+        }
+        if (hostSession.job.status === "running") {
+          setSourcesOpen(false);
+        }
       }
     }
   }, [hostSession]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void bridge.getCraftSession().then((result) => {
+      if (!cancelled && result.ok) {
+        setSession(result.value.session);
+        hydrated.current = true;
+        if (
+          result.value.session.resumeDraft.trim() ||
+          result.value.session.coverLetterDraft.trim()
+        ) {
+          setSourcesOpen(result.value.session.job.status === "running");
+          setRefineOpen(true);
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [bridge]);
 
   const resumeText = session?.resumeText ?? "";
   const jobDescription = session?.jobDescription ?? "";
@@ -109,8 +102,9 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const status = localStatus ?? job?.message ?? null;
   const elapsedSeconds =
     preparing && job?.startedAt
-      ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000) + tick - tick)
+      ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000))
       : 0;
+  const elapsedLabel = preparing ? ` · ${elapsedSeconds + tick - tick}s` : "";
 
   useEffect(() => {
     if (!preparing) {
@@ -146,80 +140,59 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     };
   }, [bridge, resumeDraft]);
 
-  // Host emits every session change through HostProvider, in order. Patch
-  // responses are deliberately not applied to state — replaying them here can
-  // land out of order and clobber newer host updates.
-  const flushPatch = (patch: CraftSessionPatchInput): void => {
-    pendingPatch.current = { ...pendingPatch.current, ...patch };
+  const flushPatch = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
     if (patchTimer.current) {
       clearTimeout(patchTimer.current);
     }
     patchTimer.current = setTimeout(() => {
-      const toSend = pendingPatch.current;
-      pendingPatch.current = {};
-      void bridge.patchCraftSession(toSend).then((result) => {
-        if (!result.ok) {
-          // Keep unsent fields pending so a later keystroke / prepare can retry.
-          pendingPatch.current = { ...toSend, ...pendingPatch.current };
+      void bridge.patchCraftSession(patch).then((result) => {
+        if (result.ok) {
+          setSession(result.value.session);
         }
       });
     }, 200);
   };
 
-  const patchNow = (patch: CraftSessionPatchInput): void => {
+  const patchNow = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
     if (patchTimer.current) {
       clearTimeout(patchTimer.current);
       patchTimer.current = null;
     }
-    const toSend = { ...pendingPatch.current, ...patch };
-    pendingPatch.current = {};
-    void bridge.patchCraftSession(toSend).then((result) => {
-      if (!result.ok) {
-        pendingPatch.current = { ...toSend, ...pendingPatch.current };
+    void bridge.patchCraftSession(patch).then((result) => {
+      if (result.ok) {
+        setSession(result.value.session);
       }
     });
   };
 
   useEffect(() => {
-    // On unmount, send (not drop) anything still debouncing so the last
-    // keystrokes survive navigating away from Craft.
     return () => {
       if (patchTimer.current) {
         clearTimeout(patchTimer.current);
-        patchTimer.current = null;
-      }
-      const leftover = pendingPatch.current;
-      pendingPatch.current = {};
-      if (Object.keys(leftover).length > 0) {
-        void bridge.patchCraftSession(leftover);
       }
     };
-  }, [bridge]);
+  }, []);
 
   const onGenerate = (kind: CraftGenerateKind): void => {
     setLocalStatus(null);
-    if (patchTimer.current) {
-      clearTimeout(patchTimer.current);
-      patchTimer.current = null;
-    }
-    const toSend: CraftSessionPatchInput = {
-      ...pendingPatch.current,
+    patchNow({
       resumeText,
       jobDescription,
       aboutCompany,
-    };
-    pendingPatch.current = {};
-    void bridge.patchCraftSession(toSend).then((patched) => {
+    });
+    // Small delay so patch lands before prepare reads sources — patchNow is async.
+    void bridge.patchCraftSession({ resumeText, jobDescription, aboutCompany }).then((patched) => {
       if (!patched.ok) {
-        pendingPatch.current = { ...toSend, ...pendingPatch.current };
         setLocalStatus(patched.error.message ?? patched.error.title);
         return;
       }
+      setSession(patched.value.session);
       return bridge.prepareCraftDrafts(kind).then((result) => {
         if (!result.ok) {
           setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
+        setSession(result.value.session);
         setSourcesOpen(false);
       });
     });
@@ -357,14 +330,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       });
   }
 
-  if (preparing && session) {
-    return (
-      <Box data-testid="jj-craft-view">
-        <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
-      </Box>
-    );
-  }
-
   return (
     <Stack spacing={2.5} data-testid="jj-craft-view" sx={{ maxWidth: "56rem", width: "100%" }}>
       <Stack spacing={0.75}>
@@ -376,6 +341,27 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           leave this screen. Nothing is sent from here.
         </Typography>
       </Stack>
+
+      {preparing ? (
+        <Alert
+          severity="info"
+          data-testid="jj-craft-progress"
+          sx={{ "& .MuiAlert-message": { width: "100%" } }}
+        >
+          <Stack spacing={1}>
+            <Typography variant="subtitle2">
+              Agent is working on this device{elapsedLabel}
+            </Typography>
+            <Typography variant="body2">
+              {job?.message ?? "Preparing drafts… Usually under a minute, depending on your model."}
+            </Typography>
+            <LinearProgress aria-label="Agent preparing drafts" />
+            <Typography variant="caption" color="text.secondary">
+              You can leave Craft — preparation continues in the background.
+            </Typography>
+          </Stack>
+        </Alert>
+      ) : null}
 
       <Stack
         spacing={1.5}
@@ -496,7 +482,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         ) : null}
       </Stack>
 
-      {status ? (
+      {status && !preparing ? (
         <Typography
           color="text.secondary"
           variant="body2"
@@ -504,6 +490,17 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           data-testid="jj-craft-status"
         >
           {status}
+        </Typography>
+      ) : null}
+      {preparing ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          role="status"
+          data-testid="jj-craft-status"
+          sx={{ display: "none" }}
+        >
+          {job?.message}
         </Typography>
       ) : null}
 

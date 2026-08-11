@@ -114,7 +114,6 @@ export type IpcBridge = {
   readonly prepareCraftDrafts: (
     kind: CraftGenerateKind,
   ) => Promise<Result<IpcResultMap["craft.prepareDrafts"]>>;
-  readonly getResources: () => Promise<Result<IpcResultMap["system.getResources"]>>;
 };
 
 /**
@@ -325,11 +324,6 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async prepareCraftDrafts(kind: CraftGenerateKind) {
       return (await dispatcher.invoke("craft.prepareDrafts", { kind })) as Result<
         IpcResultMap["craft.prepareDrafts"]
-      >;
-    },
-    async getResources() {
-      return (await dispatcher.invoke("system.getResources")) as Result<
-        IpcResultMap["system.getResources"]
       >;
     },
   };
