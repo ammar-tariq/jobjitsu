@@ -35,6 +35,31 @@ describe("craft session store", () => {
     expect(snapshots.some((entry) => entry.startsWith("running:"))).toBe(true);
   });
 
+  it("keeps stored fields when a patch arrives with undefined keys (IPC shape)", () => {
+    const store = createCraftSessionStore({
+      ai: createFakeAiProvider(),
+      assembler: createFakeContextAssembler(),
+    });
+
+    store.patch({ resumeText: "Sam Chen — résumé body" });
+    // IPC handlers send every key, undefined for untouched fields.
+    const next = store.patch({
+      resumeText: undefined,
+      jobDescription: "Staff Engineer at Acme",
+      aboutCompany: undefined,
+      resumeDraft: undefined,
+      coverLetterDraft: undefined,
+      saveCompany: undefined,
+      saveRole: undefined,
+      chatTarget: undefined,
+      chatInput: undefined,
+      chatMessages: undefined,
+    });
+
+    expect(next.resumeText).toBe("Sam Chen — résumé body");
+    expect(next.jobDescription).toBe("Staff Engineer at Acme");
+  });
+
   it("does not start a second prepare while one is running", async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {

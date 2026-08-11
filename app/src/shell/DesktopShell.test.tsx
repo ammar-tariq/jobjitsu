@@ -120,18 +120,21 @@ describe("DesktopShell", () => {
 
     await user.click(resumeInput);
     await user.paste("Sam Chen\nStaff engineer résumé body");
+    // Let the résumé patch flush on its own so the JD paste is a separate patch —
+    // this is the path that used to wipe the first field.
+    await waitFor(() => {
+      expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
+    });
+
     await user.click(jdInput);
     await user.paste("Staff Engineer at Acme — on-device privacy");
 
     await waitFor(() => {
-      expect(resumeInput).toHaveValue("Sam Chen\nStaff engineer résumé body");
-      expect(jdInput).toHaveValue("Staff Engineer at Acme — on-device privacy");
-    });
-
-    await waitFor(() => {
-      expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
       expect(runtime.craftSession.get().jobDescription).toContain("Staff Engineer at Acme");
     });
+    expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
+    expect(resumeInput).toHaveValue("Sam Chen\nStaff engineer résumé body");
+    expect(jdInput).toHaveValue("Staff Engineer at Acme — on-device privacy");
   });
 
   it("shows a Craft working view with inputs, phases, and device load while preparing", async () => {
@@ -157,7 +160,9 @@ describe("DesktopShell", () => {
 
     expect(await screen.findByTestId("jj-craft-working-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Sam Chen/);
-    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Staff Engineer at Acme/);
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(
+      /Staff Engineer at Acme/,
+    );
     expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Privacy-first tools/);
     expect(screen.getByTestId("jj-craft-working-phases")).toBeInTheDocument();
     expect(screen.getByTestId("jj-craft-working-resources")).toBeInTheDocument();

@@ -92,28 +92,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     }
   }, [hostSession]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void bridge.getCraftSession().then((result) => {
-      if (!cancelled && result.ok) {
-        setSession((prev) =>
-          mergeHostSession(result.value.session, prev, pendingPatch.current),
-        );
-        hydrated.current = true;
-        if (
-          result.value.session.resumeDraft.trim() ||
-          result.value.session.coverLetterDraft.trim()
-        ) {
-          setSourcesOpen(result.value.session.job.status === "running");
-          setRefineOpen(true);
-        }
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [bridge]);
-
   const resumeText = session?.resumeText ?? "";
   const jobDescription = session?.jobDescription ?? "";
   const aboutCompany = session?.aboutCompany ?? "";
@@ -168,10 +146,9 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     };
   }, [bridge, resumeDraft]);
 
-  const applyHostResult = (next: CraftSessionSnapshot): void => {
-    setSession((prev) => mergeHostSession(next, prev, pendingPatch.current));
-  };
-
+  // Host emits every session change through HostProvider, in order. Patch
+  // responses are deliberately not applied to state — replaying them here can
+  // land out of order and clobber newer host updates.
   const flushPatch = (patch: CraftSessionPatchInput): void => {
     pendingPatch.current = { ...pendingPatch.current, ...patch };
     if (patchTimer.current) {
@@ -181,12 +158,10 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       const toSend = pendingPatch.current;
       pendingPatch.current = {};
       void bridge.patchCraftSession(toSend).then((result) => {
-        if (result.ok) {
-          applyHostResult(result.value.session);
-          return;
+        if (!result.ok) {
+          // Keep unsent fields pending so a later keystroke / prepare can retry.
+          pendingPatch.current = { ...toSend, ...pendingPatch.current };
         }
-        // Keep unsent fields pending so a later keystroke / prepare can retry.
-        pendingPatch.current = { ...toSend, ...pendingPatch.current };
       });
     }, 200);
   };
@@ -199,21 +174,27 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     const toSend = { ...pendingPatch.current, ...patch };
     pendingPatch.current = {};
     void bridge.patchCraftSession(toSend).then((result) => {
-      if (result.ok) {
-        applyHostResult(result.value.session);
-        return;
+      if (!result.ok) {
+        pendingPatch.current = { ...toSend, ...pendingPatch.current };
       }
-      pendingPatch.current = { ...toSend, ...pendingPatch.current };
     });
   };
 
   useEffect(() => {
+    // On unmount, send (not drop) anything still debouncing so the last
+    // keystrokes survive navigating away from Craft.
     return () => {
       if (patchTimer.current) {
         clearTimeout(patchTimer.current);
+        patchTimer.current = null;
+      }
+      const leftover = pendingPatch.current;
+      pendingPatch.current = {};
+      if (Object.keys(leftover).length > 0) {
+        void bridge.patchCraftSession(leftover);
       }
     };
-  }, []);
+  }, [bridge]);
 
   const onGenerate = (kind: CraftGenerateKind): void => {
     setLocalStatus(null);
@@ -234,13 +215,11 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         setLocalStatus(patched.error.message ?? patched.error.title);
         return;
       }
-      applyHostResult(patched.value.session);
       return bridge.prepareCraftDrafts(kind).then((result) => {
         if (!result.ok) {
           setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
-        applyHostResult(result.value.session);
         setSourcesOpen(false);
       });
     });
@@ -327,7 +306,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
 
   function onChatSend(): void {
     const message = chatInput.trim();
-    if (!message) {
+    // Guard here (not only on the button) — ⌘/Ctrl+Enter bypasses disabled state.
+    if (!message || busy) {
       return;
     }
     const history = chatMessages;
@@ -516,7 +496,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         ) : null}
       </Stack>
 
-      {status && !preparing ? (
+      {status ? (
         <Typography
           color="text.secondary"
           variant="body2"
@@ -524,17 +504,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           data-testid="jj-craft-status"
         >
           {status}
-        </Typography>
-      ) : null}
-      {preparing ? (
-        <Typography
-          color="text.secondary"
-          variant="body2"
-          role="status"
-          data-testid="jj-craft-status"
-          sx={{ display: "none" }}
-        >
-          {job?.message}
         </Typography>
       ) : null}
 

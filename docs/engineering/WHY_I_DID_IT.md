@@ -5,15 +5,24 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
-## 2026-08-11 — Craft source paste race (résumé ↔ JD)
+## 2026-08-11 — Craft full audit: undefined-key patch wipe (real root cause)
 
 ### The problem
 
-Pasting into résumé cleared job description (and the reverse). Debounced `patchCraftSession` sent **only the last field**; host subscribe then overwrote local UI with that partial host snapshot.
+Résumé ↔ JD still wiped each other after the first paste-race fix. Full read of the Craft path found the actual bug **in the host, not the view**: the `craft.patchSession` IPC handler always builds the patch with every key present (`resumeText: payload.resumeText, …`), so a one-field patch arrives as `{ resumeText: undefined, jobDescription: "…" }`. The store then spread `{ ...prev, ...patch }` — and spreading an explicit `undefined` **overwrites** the stored value. The earlier UI fix only masked it when both edits landed inside one 200 ms debounce window.
 
 ### Decision
 
-Accumulate pending field patches, flush them together, and when applying host snapshots **keep any still-pending local fields**.
+1. **Store patch is field-by-field** (`patch.x ?? prev.x`) so absent keys can never erase state. Fixed at the SSOT, not per-caller.
+2. **Patch responses are no longer applied to view state.** The host emits every change through `HostProvider` in order; replaying responses could land out of order and clobber newer state. Pending local edits still win during merge.
+3. **Unmount flushes (not drops) the pending debounce patch** so the last keystrokes survive navigating away.
+4. **⌘/Ctrl+Enter chat send now respects busy** — the keyboard path bypassed the disabled button and could fire concurrent refines.
+5. Removed the unreachable hidden status block (dead since the working view early-return).
+
+### Tests
+
+- Store: a patch shaped like the IPC payload (undefined keys) keeps stored fields.
+- Shell: two pastes flushed as **separate** patches keep both résumé and JD.
 
 No new libraries.
 

@@ -130,9 +130,19 @@ export function createCraftSessionStore(options: {
     },
 
     patch(patch) {
+      // Field-by-field so an absent (undefined) key never erases a stored value —
+      // IPC payloads arrive with every key present, undefined for untouched fields.
       return update((prev) => ({
         ...prev,
-        ...patch,
+        resumeText: patch.resumeText ?? prev.resumeText,
+        jobDescription: patch.jobDescription ?? prev.jobDescription,
+        aboutCompany: patch.aboutCompany ?? prev.aboutCompany,
+        resumeDraft: patch.resumeDraft ?? prev.resumeDraft,
+        coverLetterDraft: patch.coverLetterDraft ?? prev.coverLetterDraft,
+        saveCompany: patch.saveCompany ?? prev.saveCompany,
+        saveRole: patch.saveRole ?? prev.saveRole,
+        chatTarget: patch.chatTarget ?? prev.chatTarget,
+        chatInput: patch.chatInput ?? prev.chatInput,
         chatMessages: patch.chatMessages ? [...patch.chatMessages] : prev.chatMessages,
         job: prev.job,
       }));
