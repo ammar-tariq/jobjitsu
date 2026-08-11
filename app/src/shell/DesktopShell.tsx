@@ -9,6 +9,7 @@ import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { agentPrivacyStateFromStatus } from "./agent-privacy.js";
 import { ApplicationsView } from "./ApplicationsView.js";
 import { ComingSoonView } from "./ComingSoonView.js";
+import { CraftView } from "./CraftView.js";
 import { EventActivityView } from "./EventActivityView.js";
 import { useHostActivity } from "./HostProvider.js";
 import { PreferencesView } from "./PreferencesView.js";
@@ -77,7 +78,9 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             pt: 3,
           }}
         >
-          {activeId === "applications" ? (
+          {activeId === "craft" ? (
+            <CraftView bridge={bridge} />
+          ) : activeId === "applications" ? (
             <ApplicationsView bridge={bridge} />
           ) : activeId === "agent" ? (
             <EventActivityView />

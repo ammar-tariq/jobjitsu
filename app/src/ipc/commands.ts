@@ -37,6 +37,7 @@ export const IPC_ALLOWLIST = [
   "applications.createDraft",
   "applications.updateDraft",
   "applications.tailorDraft",
+  "craft.generate",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -210,6 +211,22 @@ export type ApplicationTailorDraftResult = {
   readonly tailorStatus: "ready" | "unavailable" | "failed";
 };
 
+export type CraftGenerateKind = "resume" | "cover_letter" | "both";
+
+export type CraftGenerateInput = {
+  readonly kind: CraftGenerateKind;
+  readonly resumeText: string;
+  readonly jobDescription: string;
+  readonly aboutCompany?: string;
+};
+
+export type CraftGenerateResult = {
+  readonly resumeDraft: string;
+  readonly coverLetterDraft: string;
+  readonly craftStatus: "ready" | "unavailable" | "failed" | "invalid";
+  readonly message?: string;
+};
+
 export type ApplicationDuplicateWarningSnapshot = {
   readonly matchedApplicationId: string;
   readonly message: string;
@@ -248,6 +265,7 @@ export type IpcPayloadMap = {
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
+  readonly "craft.generate": CraftGenerateInput;
 };
 
 export type IpcResultMap = {
@@ -305,6 +323,7 @@ export type IpcResultMap = {
     readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
   };
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
+  readonly "craft.generate": CraftGenerateResult;
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

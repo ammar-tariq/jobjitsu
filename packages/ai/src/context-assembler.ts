@@ -37,6 +37,7 @@ export const CONTEXT_INPUT_ALLOWLIST = [
 
 const DEFAULT_BUDGET_CHARS: Record<AiPromptRole, number> = {
   tailor: 4000,
+  cover_letter: 3000,
   match_explain: 2000,
   follow_up_draft: 1500,
   parse_assist: 3000,
