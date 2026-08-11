@@ -28,6 +28,7 @@ import { buildResumeExportArtifacts, toBase64 } from "../host/resume-export.js";
 import type {
   AiStatusSnapshot,
   ApplicationCoverLetterDraftInput,
+  LocalModelsListResult,
   ApplicationSnapshot,
   ApplicationTailorDraftInput,
   CraftChatRefineInput,
@@ -66,6 +67,11 @@ export type CreateHostIpcOptions = {
   readonly initialTheme?: ThemePreference;
   readonly aiStatus?: AiStatusSnapshot;
   readonly getAiStatus?: () => AiStatusSnapshot;
+  /**
+   * Host-owned Ollama model list (PE05-S07). UI never calls the network.
+   * When omitted, list returns calm unavailable.
+   */
+  readonly listLocalModels?: () => Promise<LocalModelsListResult>;
   readonly profiles?: ProfileRepository;
   readonly getProfiles?: () => ProfileRepository | undefined;
   readonly resumeLibrary?: ResumeLibrary;
@@ -136,6 +142,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         ready: false,
         locality: "unavailable" as const,
       });
+  const listLocalModels = options.listLocalModels;
   const getProfiles = options.getProfiles ?? (() => options.profiles);
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const getPathLibrary = options.getPathLibrary ?? (() => options.pathLibrary);
@@ -170,6 +177,24 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       return ok({ theme });
     },
     "ai.getStatus": () => ok(getAiStatus()),
+    "ai.listLocalModels": async () => {
+      if (!listLocalModels) {
+        return ok({
+          models: [],
+          listStatus: "unavailable" as const,
+          message: "Ollama is not reachable on this device. Start Ollama, then refresh the list.",
+        });
+      }
+      try {
+        return ok(await listLocalModels());
+      } catch {
+        return ok({
+          models: [],
+          listStatus: "unavailable" as const,
+          message: "Ollama is not reachable on this device. Start Ollama, then refresh the list.",
+        });
+      }
+    },
     "identity.getProfile": async () => {
       const profiles = getProfiles();
       if (!profiles) {

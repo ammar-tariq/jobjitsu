@@ -15,6 +15,17 @@ export type OllamaAiProviderOptions = {
   readonly fetch?: typeof fetch;
 };
 
+export type ListOllamaModelsOptions = {
+  readonly baseUrl?: string;
+  readonly fetch?: typeof fetch;
+};
+
+export type ListOllamaModelsResult = {
+  readonly status: "ready" | "empty" | "unavailable";
+  readonly models: readonly string[];
+  readonly message?: string;
+};
+
 type OllamaTagsResponse = {
   readonly models?: readonly { readonly name?: string }[];
 };
@@ -53,40 +64,88 @@ function modelIsInstalled(configured: string, installedNames: readonly string[])
   return false;
 }
 
+function assertLoopbackBaseUrl(baseUrl: string): string {
+  const normalized = baseUrl.replace(/\/$/, "");
+  if (!isLoopbackBaseUrl(normalized)) {
+    throw new Error(
+      "Ollama Agent only accepts a loopback URL (127.0.0.1 / localhost). Remote endpoints are opt-in elsewhere.",
+    );
+  }
+  return normalized;
+}
+
+async function requestOllamaJson<T>(
+  baseUrl: string,
+  fetchImpl: typeof fetch,
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  const response = await fetchImpl(`${baseUrl}${path}`, {
+    ...init,
+    headers: {
+      Accept: "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(
+      body.trim() || `Ollama returned ${response.status}. Is Ollama running on this device?`,
+    );
+  }
+  return (await response.json()) as T;
+}
+
+/**
+ * List models installed in local Ollama (PE05-S07).
+ * Host-only network to loopback — UI never calls this directly.
+ */
+export async function listOllamaModels(
+  options: ListOllamaModelsOptions = {},
+): Promise<ListOllamaModelsResult> {
+  const baseUrl = assertLoopbackBaseUrl(options.baseUrl ?? DEFAULT_BASE_URL);
+  const fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
+
+  try {
+    const tags = await requestOllamaJson<OllamaTagsResponse>(baseUrl, fetchImpl, "/api/tags");
+    const models = [
+      ...new Set(
+        (tags.models ?? [])
+          .map((model) => model.name?.trim())
+          .filter((name): name is string => Boolean(name)),
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+
+    if (models.length === 0) {
+      return {
+        status: "empty",
+        models: [],
+        message:
+          "Ollama is running but no models are installed yet. Pull a free model, then refresh.",
+      };
+    }
+
+    return { status: "ready", models };
+  } catch {
+    return {
+      status: "unavailable",
+      models: [],
+      message: "Ollama is not reachable on this device. Start Ollama, then refresh the list.",
+    };
+  }
+}
+
 /**
  * On-device Agent via local Ollama (PE05-S06).
  * Talks only to a loopback endpoint; no cloud fallback.
  */
 export function createOllamaAiProvider(options: OllamaAiProviderOptions): AiProvider {
   const id = options.id ?? "ollama-local";
-  const baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, "");
+  const baseUrl = assertLoopbackBaseUrl(options.baseUrl ?? DEFAULT_BASE_URL);
   const fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
-
-  if (!isLoopbackBaseUrl(baseUrl)) {
-    throw new Error(
-      "Ollama Agent only accepts a loopback URL (127.0.0.1 / localhost). Remote endpoints are opt-in elsewhere.",
-    );
-  }
 
   async function resolveModelId(): Promise<string | undefined> {
     return (await options.getModelId())?.trim() || undefined;
-  }
-
-  async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-    const response = await fetchImpl(`${baseUrl}${path}`, {
-      ...init,
-      headers: {
-        Accept: "application/json",
-        ...(init?.headers ?? {}),
-      },
-    });
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      throw new Error(
-        body.trim() || `Ollama returned ${response.status}. Is Ollama running on this device?`,
-      );
-    }
-    return (await response.json()) as T;
   }
 
   return {
@@ -100,56 +159,53 @@ export function createOllamaAiProvider(options: OllamaAiProviderOptions): AiProv
           locality: "local",
           providerId: id,
           message:
-            "Choose a local Ollama model name in Preferences (for example qwen2.5:3b). Nothing leaves this device until Agent is ready.",
+            "Choose a local model in Preferences. Nothing leaves this device until Agent is ready.",
         };
       }
 
-      try {
-        const tags = await requestJson<OllamaTagsResponse>("/api/tags");
-        const names = (tags.models ?? [])
-          .map((model) => model.name?.trim())
-          .filter((name): name is string => Boolean(name));
-
-        if (names.length === 0) {
-          return {
-            status: "misconfigured",
-            locality: "local",
-            providerId: id,
-            message:
-              "Ollama is running but no models are installed. Pull a free model (see docs/guides/LOCAL_AGENT_MODELS.md).",
-          };
-        }
-
-        if (!modelIsInstalled(modelId, names)) {
-          return {
-            status: "misconfigured",
-            locality: "local",
-            providerId: id,
-            message: `Model “${modelId}” was not found in Ollama. Pull it locally, then save the name in Preferences.`,
-          };
-        }
-
-        return {
-          status: "ready",
-          locality: "local",
-          providerId: id,
-          message: "Agent ready on this device (Ollama).",
-        };
-      } catch {
+      const listed = await listOllamaModels({ baseUrl, fetch: fetchImpl });
+      if (listed.status === "unavailable") {
         return {
           status: "unavailable",
           locality: "local",
           providerId: id,
           message:
-            "Ollama is not reachable on this device. Start Ollama, then confirm the model name in Preferences.",
+            listed.message ??
+            "Ollama is not reachable on this device. Start Ollama, then choose a model in Preferences.",
         };
       }
+      if (listed.status === "empty") {
+        return {
+          status: "misconfigured",
+          locality: "local",
+          providerId: id,
+          message:
+            listed.message ??
+            "Ollama is running but no models are installed. Pull a free model (see docs/guides/LOCAL_AGENT_MODELS.md).",
+        };
+      }
+
+      if (!modelIsInstalled(modelId, listed.models)) {
+        return {
+          status: "misconfigured",
+          locality: "local",
+          providerId: id,
+          message: `Model “${modelId}” was not found in Ollama. Pull it locally, then choose it in Preferences.`,
+        };
+      }
+
+      return {
+        status: "ready",
+        locality: "local",
+        providerId: id,
+        message: "Agent ready on this device (Ollama).",
+      };
     },
     async complete(request: AiCompleteRequest): Promise<AiCompleteResult> {
       const modelId = await resolveModelId();
       if (!modelId) {
         throw new Error(
-          "Choose a local Ollama model name in Preferences. Nothing leaves this device until Agent is ready.",
+          "Choose a local model in Preferences. Nothing leaves this device until Agent is ready.",
         );
       }
 
@@ -165,18 +221,23 @@ export function createOllamaAiProvider(options: OllamaAiProviderOptions): AiProv
                 : "Help with on-device career craft. Be precise and calm. User remains the author.";
 
       try {
-        const payload = await requestJson<OllamaGenerateResponse>("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: modelId,
-            prompt: request.prompt,
-            system,
-            stream: false,
-            format: request.responseFormat === "json" ? "json" : undefined,
-          }),
-          signal: request.abortSignal,
-        });
+        const payload = await requestOllamaJson<OllamaGenerateResponse>(
+          baseUrl,
+          fetchImpl,
+          "/api/generate",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: modelId,
+              prompt: request.prompt,
+              system,
+              stream: false,
+              format: request.responseFormat === "json" ? "json" : undefined,
+            }),
+            signal: request.abortSignal,
+          },
+        );
 
         if (payload.error) {
           throw new Error(payload.error);
@@ -194,7 +255,7 @@ export function createOllamaAiProvider(options: OllamaAiProviderOptions): AiProv
           throw cause;
         }
         throw new Error(
-          "Could not reach Ollama on this device. Start Ollama and confirm the model name in Preferences.",
+          "Could not reach Ollama on this device. Start Ollama and choose a model in Preferences.",
         );
       }
     },

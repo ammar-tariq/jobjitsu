@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createOllamaAiProvider } from "./ollama-provider.js";
+import { createOllamaAiProvider, listOllamaModels } from "./ollama-provider.js";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -7,6 +7,41 @@ function jsonResponse(body: unknown, status = 200): Response {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+describe("listOllamaModels (PE05-S07)", () => {
+  it("lists installed model names from loopback /api/tags", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe("http://127.0.0.1:11434/api/tags");
+      return jsonResponse({
+        models: [{ name: "qwen3.6:27b" }, { name: "qwen3:8b" }, { name: "qwen3:8b" }],
+      });
+    });
+
+    const result = await listOllamaModels({
+      fetch: fetchMock as unknown as typeof fetch,
+    });
+    expect(result.status).toBe("ready");
+    expect(result.models).toEqual(["qwen3:8b", "qwen3.6:27b"]);
+  });
+
+  it("returns empty when Ollama has no models", async () => {
+    const result = await listOllamaModels({
+      fetch: (async () => jsonResponse({ models: [] })) as unknown as typeof fetch,
+    });
+    expect(result.status).toBe("empty");
+    expect(result.models).toEqual([]);
+  });
+
+  it("returns unavailable when Ollama is down", async () => {
+    const result = await listOllamaModels({
+      fetch: (async () => {
+        throw new Error("connection refused");
+      }) as unknown as typeof fetch,
+    });
+    expect(result.status).toBe("unavailable");
+    expect(result.models).toEqual([]);
+  });
+});
 
 describe("createOllamaAiProvider (PE05-S06)", () => {
   it("rejects non-loopback base URLs", () => {

@@ -49,7 +49,7 @@ ollama run qwen2.5:3b "Write one calm résumé summary sentence for a staff engi
 ## 3. Point JobJitsu at the model
 
 1. Open **Preferences**
-2. Under **On-device Agent model**, enter the same name you pulled (e.g. `qwen2.5:3b`)
+2. Under **On-device Agent model**, choose an installed model from the list (Refresh if you just pulled one)
 3. Save — chrome should move toward **Agent · On-device** when Ollama is up
 
 ## 4. Privacy notes
@@ -64,7 +64,7 @@ ollama run qwen2.5:3b "Write one calm résumé summary sentence for a staff engi
 | Symptom | What to try |
 |---------|-------------|
 | Agent · Unavailable | Start the Ollama app; run `ollama list` |
-| Model not found | `ollama pull <name>` then save the exact name in Preferences |
+| Model not found | `ollama pull <name>`, then Refresh list and choose it in Preferences |
 | Slow first reply | First load pulls weights into memory — wait, then retry |
 | Want better quality | Pull `qwen2.5:7b` or `llama3.1:8b` if you have RAM |
 
@@ -76,5 +76,6 @@ On **Craft**, after drafts exist, use **Refine with Agent** for a focused edit. 
 
 - Epic: PE28 Local Craft Studio (#101)
 - Story: PE05-S06 real on-device Agent (#102)
+- Story: PE05-S07 list local Ollama models (#112)
 - Story: PE28-S03 craft chat refine (#105)
 - Architecture: [AI_ARCHITECTURE.md](../architecture/AI_ARCHITECTURE.md)
