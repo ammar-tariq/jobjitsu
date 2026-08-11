@@ -49,6 +49,9 @@ describe("IPC allowlist", () => {
       "preferences.setCraftPreferences",
       "preferences.getLocalModelPath",
       "preferences.setLocalModelPath",
+      "applications.list",
+      "applications.createDraft",
+      "applications.updateDraft",
     ]);
   });
 

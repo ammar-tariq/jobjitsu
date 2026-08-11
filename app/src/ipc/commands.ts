@@ -33,6 +33,9 @@ export const IPC_ALLOWLIST = [
   "preferences.setCraftPreferences",
   "preferences.getLocalModelPath",
   "preferences.setLocalModelPath",
+  "applications.list",
+  "applications.createDraft",
+  "applications.updateDraft",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -226,6 +229,9 @@ export type IpcPayloadMap = {
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
   readonly "preferences.getLocalModelPath": undefined;
   readonly "preferences.setLocalModelPath": { readonly path: string };
+  readonly "applications.list": undefined;
+  readonly "applications.createDraft": ApplicationDraftCreateInput;
+  readonly "applications.updateDraft": ApplicationDraftUpdateInput;
 };
 
 export type IpcResultMap = {
@@ -273,6 +279,15 @@ export type IpcResultMap = {
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.getLocalModelPath": { readonly path: string | null };
   readonly "preferences.setLocalModelPath": { readonly path: string | null };
+  readonly "applications.list": { readonly applications: readonly ApplicationSnapshot[] };
+  readonly "applications.createDraft": {
+    readonly application: ApplicationSnapshot;
+    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
+  };
+  readonly "applications.updateDraft": {
+    readonly application: ApplicationSnapshot;
+    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
+  };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

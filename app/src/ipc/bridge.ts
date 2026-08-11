@@ -67,6 +67,13 @@ export type IpcBridge = {
   readonly setLocalModelPath: (
     path: string,
   ) => Promise<Result<IpcResultMap["preferences.setLocalModelPath"]>>;
+  readonly listApplications: () => Promise<Result<IpcResultMap["applications.list"]>>;
+  readonly createApplicationDraft: (
+    input: ApplicationDraftCreateInput,
+  ) => Promise<Result<IpcResultMap["applications.createDraft"]>>;
+  readonly updateApplicationDraft: (
+    input: ApplicationDraftUpdateInput,
+  ) => Promise<Result<IpcResultMap["applications.updateDraft"]>>;
 };
 
 /**
@@ -204,6 +211,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async setLocalModelPath(path: string) {
       return (await dispatcher.invoke("preferences.setLocalModelPath", { path })) as Result<
         IpcResultMap["preferences.setLocalModelPath"]
+      >;
+    },
+    async listApplications() {
+      return (await dispatcher.invoke("applications.list")) as Result<
+        IpcResultMap["applications.list"]
+      >;
+    },
+    async createApplicationDraft(input: ApplicationDraftCreateInput) {
+      return (await dispatcher.invoke("applications.createDraft", input)) as Result<
+        IpcResultMap["applications.createDraft"]
+      >;
+    },
+    async updateApplicationDraft(input: ApplicationDraftUpdateInput) {
+      return (await dispatcher.invoke("applications.updateDraft", input)) as Result<
+        IpcResultMap["applications.updateDraft"]
       >;
     },
   };

@@ -25,6 +25,7 @@ import {
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
 import type {
   AiStatusSnapshot,
+  ApplicationSnapshot,
   ResumeParseImportInputPayload,
   ResumeParseImportResult,
   ThemePreference,
@@ -687,6 +688,121 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "That model path could not be saved. Try again.",
             detail: "preferences:localModelPath",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.list": async () => {
+      const applications = getApplications();
+      if (!applications) {
+        return ok({ applications: [] });
+      }
+      const listed = await applications.list();
+      return ok({ applications: listed.map(toApplicationSnapshot) });
+    },
+    "applications.createDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      try {
+        const result = await createApplicationDraft({
+          repository: applications,
+          bus,
+          input: {
+            companyName: payload.companyName,
+            roleTitle: payload.roleTitle,
+            sourceUrl: payload.sourceUrl,
+            requisitionId: payload.requisitionId,
+            roleId: payload.roleId ? (payload.roleId as RoleId) : undefined,
+            resumeVersionId: payload.resumeVersionId,
+            notes: payload.notes,
+          },
+        });
+        return ok({
+          application: toApplicationSnapshot(result.application),
+          duplicateWarning: result.duplicateWarning
+            ? {
+                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
+                message: result.duplicateWarning.message,
+              }
+            : undefined,
+        });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not create application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be created. Try again.",
+            detail: "applications:create",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.updateDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      if (payload.stage !== undefined && !isPipelineStage(payload.stage)) {
+        return err(
+          createAppError("validation", "Unknown application stage", {
+            message: "That stage is not recognized. Try again.",
+            detail: "applications:stage",
+          }),
+        );
+      }
+      try {
+        const result = await updateApplicationDraft({
+          repository: applications,
+          bus,
+          patch: {
+            id: payload.id as ApplicationId,
+            companyName: payload.companyName,
+            roleTitle: payload.roleTitle,
+            sourceUrl: payload.sourceUrl,
+            requisitionId: payload.requisitionId,
+            roleId:
+              payload.roleId === null
+                ? null
+                : payload.roleId
+                  ? (payload.roleId as RoleId)
+                  : undefined,
+            resumeVersionId: payload.resumeVersionId,
+            notes: payload.notes,
+            stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
+          },
+        });
+        return ok({
+          application: toApplicationSnapshot(result.application),
+          duplicateWarning: result.duplicateWarning
+            ? {
+                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
+                message: result.duplicateWarning.message,
+              }
+            : undefined,
+        });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be updated. Try again.",
+            detail: "applications:update",
             cause,
           }),
         );
