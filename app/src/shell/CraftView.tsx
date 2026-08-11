@@ -1,10 +1,13 @@
 import { useEffect, useState, type JSX } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Collapse from "@mui/material/Collapse";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -21,9 +24,11 @@ export type CraftViewProps = {
   readonly bridge: IpcBridge;
 };
 
+type DraftTab = "resume" | "cover" | "preview";
+
 /**
- * Craft Studio — generate, export, and chat refine (PE28-S01…S03).
- * Host owns Agent; never sends.
+ * Craft Studio — paste sources, prepare drafts, refine, export.
+ * One job at a time; host owns Agent; never sends.
  */
 export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [resumeText, setResumeText] = useState("");
@@ -42,6 +47,12 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [savingApplication, setSavingApplication] = useState(false);
   const [saveCompany, setSaveCompany] = useState("");
   const [saveRole, setSaveRole] = useState("");
+  const [sourcesOpen, setSourcesOpen] = useState(true);
+  const [refineOpen, setRefineOpen] = useState(false);
+  const [draftTab, setDraftTab] = useState<DraftTab>("resume");
+
+  const hasDrafts = Boolean(resumeDraft.trim() || coverLetterDraft.trim());
+  const busy = generating || exporting || chatBusy || savingApplication;
 
   useEffect(() => {
     if (!resumeDraft.trim()) {
@@ -84,6 +95,10 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           if (kind === "cover_letter" || kind === "both") {
             setCoverLetterDraft(value.coverLetterDraft);
           }
+          setSourcesOpen(false);
+          setRefineOpen(true);
+          setDraftTab(kind === "cover_letter" ? "cover" : "resume");
+          setChatTarget(kind === "cover_letter" ? "cover_letter" : "resume");
           setStatus("Drafts ready. Edit freely — you remain the author. Nothing was sent.");
           return;
         }
@@ -134,7 +149,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           return;
         }
         if (value.exportStatus === "unavailable") {
-          // Browser/Vite: offer a local download from the returned bytes/html.
           downloadExport(value.fileName, format, value.html, value.pdfBase64);
           setStatus("Download started on this device. Nothing was sent.");
           return;
@@ -244,238 +258,353 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   }
 
   return (
-    <Stack spacing={2} data-testid="jj-craft-view" sx={{ maxWidth: "48rem" }}>
-      <Typography component="h2" variant="h2">
-        Craft
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        Paste your résumé and a job description. Agent prepares tailored drafts on this device —
-        nothing is sent from here.
-      </Typography>
-
-      <TextField
-        label="Your résumé"
-        value={resumeText}
-        onChange={(event) => setResumeText(event.target.value)}
-        fullWidth
-        multiline
-        minRows={12}
-        placeholder="Paste your current résumé…"
-        slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-input" } }}
-      />
-      <TextField
-        label="Job description"
-        value={jobDescription}
-        onChange={(event) => setJobDescription(event.target.value)}
-        fullWidth
-        multiline
-        minRows={12}
-        placeholder="Paste the job description…"
-        slotProps={{ htmlInput: { "data-testid": "jj-craft-jd-input" } }}
-      />
-      <TextField
-        label="About the company"
-        value={aboutCompany}
-        onChange={(event) => setAboutCompany(event.target.value)}
-        fullWidth
-        multiline
-        minRows={3}
-        placeholder="Optional"
-        slotProps={{ htmlInput: { "data-testid": "jj-craft-about-company" } }}
-      />
-
-      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-        <Button
-          variant="contained"
-          disabled={generating || exporting || chatBusy}
-          onClick={() => onGenerate("both")}
-          data-testid="jj-craft-generate-both"
-        >
-          {generating ? "Preparing…" : "Generate both"}
-        </Button>
-        <Button
-          variant="outlined"
-          disabled={generating || exporting || chatBusy}
-          onClick={() => onGenerate("resume")}
-          data-testid="jj-craft-generate-resume"
-        >
-          Résumé draft
-        </Button>
-        <Button
-          variant="outlined"
-          disabled={generating || exporting || chatBusy}
-          onClick={() => onGenerate("cover_letter")}
-          data-testid="jj-craft-generate-cover"
-        >
-          Cover letter
-        </Button>
-      </Stack>
-
-      {status ? (
-        <Typography color="text.secondary" variant="body2" data-testid="jj-craft-status">
-          {status}
+    <Stack spacing={2.5} data-testid="jj-craft-view" sx={{ maxWidth: "56rem", width: "100%" }}>
+      <Stack spacing={0.75}>
+        <Typography component="h2" variant="h2">
+          Craft
         </Typography>
-      ) : null}
-
-      <TextField
-        label="Tailored résumé draft"
-        value={resumeDraft}
-        onChange={(event) => setResumeDraft(event.target.value)}
-        fullWidth
-        multiline
-        minRows={10}
-        placeholder="Generated résumé draft appears here. Edit freely."
-        slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-draft" } }}
-      />
-
-      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-        <Button
-          variant="outlined"
-          disabled={generating || exporting || chatBusy || !resumeDraft.trim()}
-          onClick={() => onExport("html")}
-          data-testid="jj-craft-export-html"
-        >
-          Save HTML
-        </Button>
-        <Button
-          variant="contained"
-          disabled={generating || exporting || chatBusy || !resumeDraft.trim()}
-          onClick={() => onExport("pdf")}
-          data-testid="jj-craft-export-pdf"
-        >
-          {exporting ? "Saving…" : "Save PDF"}
-        </Button>
+        <Typography color="text.secondary" variant="body2">
+          Prepare a tailored résumé and cover letter on this device. Nothing is sent from here.
+        </Typography>
       </Stack>
 
       <Stack
         spacing={1.5}
-        data-testid="jj-craft-save-application"
-        sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+        sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+        data-testid="jj-craft-sources"
       >
-        <Typography variant="subtitle2">Save to application</Typography>
-        <Typography color="text.secondary" variant="body2">
-          Keep these drafts on this device as an application. Nothing is sent.
-        </Typography>
-        <TextField
-          label="Company"
-          value={saveCompany}
-          onChange={(event) => setSaveCompany(event.target.value)}
-          size="small"
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-craft-save-company" } }}
-        />
-        <TextField
-          label="Role title"
-          value={saveRole}
-          onChange={(event) => setSaveRole(event.target.value)}
-          size="small"
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-craft-save-role" } }}
-        />
-        <Button
-          variant="outlined"
-          disabled={
-            generating ||
-            exporting ||
-            chatBusy ||
-            savingApplication ||
-            (!resumeDraft.trim() && !coverLetterDraft.trim())
-          }
-          onClick={onSaveToApplication}
-          data-testid="jj-craft-save-application-btn"
-          sx={{ alignSelf: "flex-start" }}
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
         >
-          {savingApplication ? "Saving…" : "Save to application"}
-        </Button>
+          <Typography variant="subtitle2">Sources</Typography>
+          {hasDrafts ? (
+            <Button size="small" variant="text" onClick={() => setSourcesOpen((open) => !open)}>
+              {sourcesOpen ? "Hide sources" : "Edit sources"}
+            </Button>
+          ) : null}
+        </Stack>
+
+        <Collapse in={sourcesOpen} timeout="auto" unmountOnExit={false}>
+          <Stack spacing={1.5}>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 1.5,
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              }}
+            >
+              <TextField
+                label="Your résumé"
+                value={resumeText}
+                onChange={(event) => setResumeText(event.target.value)}
+                fullWidth
+                multiline
+                minRows={5}
+                maxRows={12}
+                placeholder="Paste your current résumé…"
+                slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-input" } }}
+              />
+              <TextField
+                label="Job description"
+                value={jobDescription}
+                onChange={(event) => setJobDescription(event.target.value)}
+                fullWidth
+                multiline
+                minRows={5}
+                maxRows={12}
+                placeholder="Paste the job description…"
+                slotProps={{ htmlInput: { "data-testid": "jj-craft-jd-input" } }}
+              />
+            </Box>
+            <TextField
+              label="About the company"
+              value={aboutCompany}
+              onChange={(event) => setAboutCompany(event.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+              maxRows={4}
+              placeholder="Optional context"
+              slotProps={{ htmlInput: { "data-testid": "jj-craft-about-company" } }}
+            />
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center" }}>
+              <Button
+                variant="contained"
+                disabled={busy}
+                onClick={() => onGenerate("both")}
+                data-testid="jj-craft-generate-both"
+              >
+                {generating ? "Preparing…" : "Prepare drafts"}
+              </Button>
+              <Button
+                variant="text"
+                disabled={busy}
+                onClick={() => onGenerate("resume")}
+                data-testid="jj-craft-generate-resume"
+              >
+                Résumé only
+              </Button>
+              <Button
+                variant="text"
+                disabled={busy}
+                onClick={() => onGenerate("cover_letter")}
+                data-testid="jj-craft-generate-cover"
+              >
+                Cover letter only
+              </Button>
+            </Stack>
+          </Stack>
+        </Collapse>
+
+        {!sourcesOpen && hasDrafts ? (
+          <Typography color="text.secondary" variant="body2">
+            Sources are tucked away so you can focus on the draft.
+          </Typography>
+        ) : null}
       </Stack>
 
-      {previewHtml ? (
-        <Stack spacing={1} data-testid="jj-craft-html-preview">
-          <Typography variant="subtitle2">Résumé preview</Typography>
-          <Box
-            component="iframe"
-            title="Résumé HTML preview"
-            srcDoc={previewHtml}
-            sandbox=""
-            sx={{
-              width: "100%",
-              minHeight: "20rem",
-              border: "1px solid",
-              borderColor: "divider",
-              borderRadius: 1,
-              bgcolor: "background.paper",
-            }}
-          />
-        </Stack>
+      {status ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          role="status"
+          data-testid="jj-craft-status"
+        >
+          {status}
+        </Typography>
       ) : null}
 
-      <TextField
-        label="Cover letter draft"
-        value={coverLetterDraft}
-        onChange={(event) => setCoverLetterDraft(event.target.value)}
-        fullWidth
-        multiline
-        minRows={8}
-        placeholder="Generated cover letter appears here. Edit freely."
-        slotProps={{ htmlInput: { "data-testid": "jj-craft-cover-draft" } }}
-      />
+      {hasDrafts ? (
+        <Stack spacing={1.5} data-testid="jj-craft-workspace">
+          <Tabs
+            value={draftTab}
+            onChange={(_event, value: DraftTab) => {
+              setDraftTab(value);
+              if (value === "resume" || value === "cover") {
+                setChatTarget(value === "cover" ? "cover_letter" : "resume");
+              }
+            }}
+            aria-label="Craft drafts"
+          >
+            <Tab label="Résumé" value="resume" data-testid="jj-craft-tab-resume" />
+            <Tab label="Cover letter" value="cover" data-testid="jj-craft-tab-cover" />
+            <Tab
+              label="Preview"
+              value="preview"
+              disabled={!resumeDraft.trim()}
+              data-testid="jj-craft-tab-preview"
+            />
+          </Tabs>
 
-      <Stack spacing={1.5} data-testid="jj-craft-chat">
-        <Typography variant="subtitle2">Refine with Agent</Typography>
-        <Typography color="text.secondary" variant="body2">
-          Ask for a focused edit. If details are thin, Agent will ask clarifying questions instead
-          of inventing facts. Nothing is sent.
-        </Typography>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={chatTarget}
-          onChange={(_event, value: CraftChatTarget | null) => {
-            if (value) {
-              setChatTarget(value);
-            }
-          }}
-          aria-label="Draft to refine"
-        >
-          <ToggleButton value="resume" data-testid="jj-craft-chat-target-resume">
-            Résumé
-          </ToggleButton>
-          <ToggleButton value="cover_letter" data-testid="jj-craft-chat-target-cover">
-            Cover letter
-          </ToggleButton>
-        </ToggleButtonGroup>
-        {chatMessages.length > 0 ? (
-          <List dense disablePadding data-testid="jj-craft-chat-log">
-            {chatMessages.map((entry, index) => (
-              <ListItem key={`${entry.role}-${index}`} alignItems="flex-start" disableGutters>
-                <ListItemText
-                  primary={entry.role === "user" ? "You" : "Agent"}
-                  secondary={entry.content}
-                  sx={{ "& .MuiListItemText-secondary": { whiteSpace: "pre-wrap" } }}
+          <Box hidden={draftTab !== "resume"}>
+            <TextField
+              label="Résumé draft"
+              value={resumeDraft}
+              onChange={(event) => setResumeDraft(event.target.value)}
+              fullWidth
+              multiline
+              minRows={14}
+              maxRows={24}
+              placeholder="Generated résumé draft appears here. Edit freely."
+              slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-draft" } }}
+            />
+          </Box>
+
+          <Box hidden={draftTab !== "cover"}>
+            <TextField
+              label="Cover letter draft"
+              value={coverLetterDraft}
+              onChange={(event) => setCoverLetterDraft(event.target.value)}
+              fullWidth
+              multiline
+              minRows={14}
+              maxRows={24}
+              placeholder="Generated cover letter appears here. Edit freely."
+              slotProps={{ htmlInput: { "data-testid": "jj-craft-cover-draft" } }}
+            />
+          </Box>
+
+          <Box hidden={draftTab !== "preview"} data-testid="jj-craft-html-preview">
+            {previewHtml ? (
+              <Box
+                component="iframe"
+                title="Résumé HTML preview"
+                srcDoc={previewHtml}
+                sandbox=""
+                sx={{
+                  width: "100%",
+                  minHeight: "24rem",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  bgcolor: "background.paper",
+                }}
+              />
+            ) : (
+              <Typography color="text.secondary" variant="body2">
+                Preview appears when a résumé draft is ready.
+              </Typography>
+            )}
+          </Box>
+
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              disabled={busy || !resumeDraft.trim()}
+              onClick={() => onExport("pdf")}
+              data-testid="jj-craft-export-pdf"
+            >
+              {exporting ? "Saving…" : "Save PDF"}
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={busy || !resumeDraft.trim()}
+              onClick={() => onExport("html")}
+              data-testid="jj-craft-export-html"
+            >
+              Save HTML
+            </Button>
+            <Button
+              variant="text"
+              disabled={busy}
+              onClick={() => setRefineOpen((open) => !open)}
+              data-testid="jj-craft-refine-toggle"
+            >
+              {refineOpen ? "Hide refine" : "Refine with Agent"}
+            </Button>
+          </Stack>
+
+          <Collapse in={refineOpen} timeout="auto">
+            <Stack
+              spacing={1.5}
+              data-testid="jj-craft-chat"
+              sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+            >
+              <Typography variant="subtitle2">Refine with Agent</Typography>
+              <Typography color="text.secondary" variant="body2">
+                Ask for a focused edit. If details are thin, Agent asks clarifying questions instead
+                of inventing facts.
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                size="small"
+                value={chatTarget}
+                onChange={(_event, value: CraftChatTarget | null) => {
+                  if (value) {
+                    setChatTarget(value);
+                    setDraftTab(value === "cover_letter" ? "cover" : "resume");
+                  }
+                }}
+                aria-label="Draft to refine"
+              >
+                <ToggleButton value="resume" data-testid="jj-craft-chat-target-resume">
+                  Résumé
+                </ToggleButton>
+                <ToggleButton value="cover_letter" data-testid="jj-craft-chat-target-cover">
+                  Cover letter
+                </ToggleButton>
+              </ToggleButtonGroup>
+              {chatMessages.length > 0 ? (
+                <List
+                  dense
+                  disablePadding
+                  data-testid="jj-craft-chat-log"
+                  sx={{ maxHeight: "12rem", overflow: "auto" }}
+                >
+                  {chatMessages.map((entry, index) => (
+                    <ListItem key={`${entry.role}-${index}`} alignItems="flex-start" disableGutters>
+                      <ListItemText
+                        primary={entry.role === "user" ? "You" : "Agent"}
+                        secondary={entry.content}
+                        sx={{ "& .MuiListItemText-secondary": { whiteSpace: "pre-wrap" } }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              ) : null}
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                sx={{ alignItems: "flex-end" }}
+              >
+                <TextField
+                  label="Ask Agent"
+                  value={chatInput}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  fullWidth
+                  multiline
+                  minRows={2}
+                  maxRows={4}
+                  placeholder="Example: make the summary more systems-focused"
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                      event.preventDefault();
+                      onChatSend();
+                    }
+                  }}
+                  slotProps={{ htmlInput: { "data-testid": "jj-craft-chat-input" } }}
                 />
-              </ListItem>
-            ))}
-          </List>
-        ) : null}
-        <TextField
-          label="Ask Agent"
-          value={chatInput}
-          onChange={(event) => setChatInput(event.target.value)}
-          fullWidth
-          multiline
-          minRows={2}
-          placeholder="Example: make the summary more systems-focused"
-          slotProps={{ htmlInput: { "data-testid": "jj-craft-chat-input" } }}
-        />
-        <Button
-          variant="outlined"
-          disabled={generating || exporting || chatBusy || !chatInput.trim()}
-          onClick={onChatSend}
-          data-testid="jj-craft-chat-send"
-        >
-          {chatBusy ? "Thinking…" : "Ask Agent"}
-        </Button>
-      </Stack>
+                <Button
+                  variant="outlined"
+                  disabled={busy || !chatInput.trim()}
+                  onClick={onChatSend}
+                  data-testid="jj-craft-chat-send"
+                  sx={{ flexShrink: 0 }}
+                >
+                  {chatBusy ? "Thinking…" : "Ask Agent"}
+                </Button>
+              </Stack>
+              <Typography color="text.secondary" variant="caption">
+                ⌘/Ctrl + Enter to send
+              </Typography>
+            </Stack>
+          </Collapse>
+
+          <Stack
+            spacing={1.5}
+            data-testid="jj-craft-save-application"
+            sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+          >
+            <Typography variant="subtitle2">Keep as an application</Typography>
+            <Typography color="text.secondary" variant="body2">
+              Save these drafts on this device. Nothing is sent.
+            </Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+              <TextField
+                label="Company"
+                value={saveCompany}
+                onChange={(event) => setSaveCompany(event.target.value)}
+                size="small"
+                fullWidth
+                slotProps={{ htmlInput: { "data-testid": "jj-craft-save-company" } }}
+              />
+              <TextField
+                label="Role title"
+                value={saveRole}
+                onChange={(event) => setSaveRole(event.target.value)}
+                size="small"
+                fullWidth
+                slotProps={{ htmlInput: { "data-testid": "jj-craft-save-role" } }}
+              />
+              <Button
+                variant="outlined"
+                disabled={busy || (!resumeDraft.trim() && !coverLetterDraft.trim())}
+                onClick={onSaveToApplication}
+                data-testid="jj-craft-save-application-btn"
+                sx={{ flexShrink: 0 }}
+              >
+                {savingApplication ? "Saving…" : "Save"}
+              </Button>
+            </Stack>
+          </Stack>
+        </Stack>
+      ) : (
+        <Typography color="text.secondary" variant="body2" data-testid="jj-craft-empty">
+          Paste a résumé and job description above, then prepare drafts when you are ready.
+        </Typography>
+      )}
     </Stack>
   );
 }
