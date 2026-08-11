@@ -1,3 +1,4 @@
+import { createKvApplicationRepository, type ApplicationRepository } from "@jobjitsu/applications";
 import { createKvProfileRepository } from "@jobjitsu/identity";
 import { createStoragePathLibrary, createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 import { createPreferencesFacade } from "@jobjitsu/preferences";
@@ -14,13 +15,14 @@ export type DurableHostStores = {
   readonly profiles: ProfileRepository;
   readonly resumeLibrary: ResumeLibrary;
   readonly pathLibrary: PathLibrary;
+  readonly applications: ApplicationRepository;
   readonly preferences: PreferencesFacade;
   readonly appearance: AppearanceStore;
   readonly settings: SettingsStore;
 };
 
 /**
- * Open identity + preferences under an on-device data root.
+ * Open identity, applications, and preferences under an on-device data root.
  */
 export async function openDurableHostStores(
   dataRoot: string,
@@ -35,6 +37,7 @@ export async function openDurableHostStores(
     profiles: createKvProfileRepository(provider.kv),
     resumeLibrary: createStorageResumeLibrary(provider.kv, provider.blobs),
     pathLibrary: createStoragePathLibrary(provider.kv),
+    applications: createKvApplicationRepository(provider.kv),
     preferences,
     appearance,
     settings,

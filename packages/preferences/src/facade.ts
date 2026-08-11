@@ -19,6 +19,8 @@ export type CraftPreferencesPatch = {
 export type PreferencesFacade = {
   getApprovalBeforeSend(): Promise<boolean>;
   setApprovalBeforeSend(value: boolean): Promise<boolean>;
+  getOnboardingCompleted(): Promise<boolean>;
+  setOnboardingCompleted(value: boolean): Promise<boolean>;
   getCraftPreferences(): Promise<CraftPreferences>;
   setCraftPreferences(patch: CraftPreferencesPatch): Promise<CraftPreferences>;
   /** On-device model path for local Agent — empty means not configured. */
@@ -35,6 +37,14 @@ export function createPreferencesFacade(store: SettingsStore): PreferencesFacade
     async setApprovalBeforeSend(value) {
       const next = await store.set({ requireApprovalBeforeSend: value });
       return next.requireApprovalBeforeSend;
+    },
+    async getOnboardingCompleted() {
+      const settings = await store.get();
+      return settings.onboardingCompleted;
+    },
+    async setOnboardingCompleted(value) {
+      const next = await store.set({ onboardingCompleted: value });
+      return next.onboardingCompleted;
     },
     async getCraftPreferences() {
       const settings = await store.get();

@@ -1,10 +1,12 @@
 import { useEffect, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
+import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -19,8 +21,7 @@ export type PreferencesViewProps = {
 };
 
 /**
- * Preferences — data folder, on-device Agent model picker, appearance.
- * Profile / Paths live under Profile. Shell never calls Ollama directly.
+ * Preferences — data folder, approval gate, craft tone, on-device Agent model, appearance.
  */
 export function PreferencesView({
   theme,
@@ -38,6 +39,11 @@ export function PreferencesView({
   const [listStatus, setListStatus] = useState<LocalModelsListStatus | null>(null);
   const [listMessage, setListMessage] = useState<string | null>(null);
   const [listingModels, setListingModels] = useState(false);
+  const [requireApproval, setRequireApproval] = useState(true);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
+  const [toneDraft, setToneDraft] = useState("");
+  const [craftStatus, setCraftStatus] = useState<string | null>(null);
+  const [savingCraft, setSavingCraft] = useState(false);
 
   const refreshLocalModels = (): void => {
     setListingModels(true);
@@ -66,6 +72,16 @@ export function PreferencesView({
     void bridge.getLocalModelPath().then((result) => {
       if (!cancelled && result.ok) {
         setModelPathDraft(result.value.path ?? "");
+      }
+    });
+    void bridge.getApprovalBeforeSend().then((result) => {
+      if (!cancelled && result.ok) {
+        setRequireApproval(result.value.requireApprovalBeforeSend);
+      }
+    });
+    void bridge.getCraftPreferences().then((result) => {
+      if (!cancelled && result.ok) {
+        setToneDraft(result.value.craft.tone);
       }
     });
     void bridge.listLocalModels().then((result) => {
@@ -109,6 +125,37 @@ export function PreferencesView({
     modelPathDraft.trim() && !localModels.includes(modelPathDraft.trim())
       ? [modelPathDraft.trim(), ...localModels]
       : localModels;
+
+  const onToggleApproval = (_event: unknown, checked: boolean): void => {
+    setRequireApproval(checked);
+    setApprovalStatus(null);
+    void bridge.setApprovalBeforeSend(checked).then((result) => {
+      if (!result.ok) {
+        setApprovalStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setRequireApproval(result.value.requireApprovalBeforeSend);
+      setApprovalStatus(
+        result.value.requireApprovalBeforeSend
+          ? "Approval required before anything leaves this device."
+          : "Approval preference updated. You still choose every send.",
+      );
+    });
+  };
+
+  const onSaveCraft = (): void => {
+    setSavingCraft(true);
+    setCraftStatus(null);
+    void bridge.setCraftPreferences({ tone: toneDraft }).then((result) => {
+      setSavingCraft(false);
+      if (!result.ok) {
+        setCraftStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setToneDraft(result.value.craft.tone);
+      setCraftStatus("Writing voice saved. Stored on this device.");
+    });
+  };
 
   const onSaveDataRoot = (): void => {
     setSavingDataRoot(true);
@@ -170,13 +217,68 @@ export function PreferencesView({
         </Typography>
       </Stack>
 
+      <Stack spacing={1.5} data-testid="jj-approval-before-send">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Outbound approval
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          When this is on, JobJitsu asks before anything leaves this device. Agent never sends on
+          its own.
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={requireApproval}
+              onChange={onToggleApproval}
+              data-testid="jj-approval-switch"
+            />
+          }
+          label="Require approval before send"
+        />
+        {approvalStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {approvalStatus}
+          </Typography>
+        ) : null}
+      </Stack>
+
+      <Stack spacing={1.5} data-testid="jj-craft-preferences">
+        <Typography component="h3" variant="body2" color="text.secondary">
+          Writing voice
+        </Typography>
+        <Typography color="text.secondary" variant="body2">
+          Optional tone for drafts (for example: calm and precise). Stored on this device.
+        </Typography>
+        <TextField
+          label="Tone"
+          value={toneDraft}
+          onChange={(event) => setToneDraft(event.target.value)}
+          size="small"
+          fullWidth
+          slotProps={{ htmlInput: { "data-testid": "jj-craft-tone-input" } }}
+        />
+        <Button
+          variant="outlined"
+          onClick={onSaveCraft}
+          disabled={savingCraft}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          Save writing voice
+        </Button>
+        {craftStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {craftStatus}
+          </Typography>
+        ) : null}
+      </Stack>
+
       <Stack spacing={1.5} data-testid="jj-data-folder">
         <Typography component="h3" variant="body2" color="text.secondary">
           Data folder
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Profile, paths, resumes, and preferences are saved as files in this folder on this device.
-          Choose a folder you can back up.
+          Profile, paths, résumés, applications, and preferences are saved as files in this folder
+          on this device. Choose a folder you can back up.
         </Typography>
         <TextField
           label="Folder path"

@@ -6,4 +6,5 @@ export const STUB_LOCAL_MODEL_PATH = "/models/jobjitsu-stub.gguf";
 /** Configure a local model path so path-gated Agent health can become ready. */
 export async function configureStubLocalModel(preferences: PreferencesFacade): Promise<void> {
   await preferences.setLocalModelPath(STUB_LOCAL_MODEL_PATH);
+  await preferences.setOnboardingCompleted(true);
 }

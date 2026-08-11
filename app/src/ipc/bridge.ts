@@ -9,7 +9,9 @@ import type {
   CraftChatRefineInput,
   CraftExportResumeInput,
   CraftGenerateInput,
+  CraftGenerateKind,
   CraftPreferencesPatchInput,
+  CraftSessionPatchInput,
   IpcResultMap,
   PathPatchInput,
   ProfilePatchInput,
@@ -64,6 +66,12 @@ export type IpcBridge = {
   readonly setApprovalBeforeSend: (
     requireApprovalBeforeSend: boolean,
   ) => Promise<Result<IpcResultMap["preferences.setApprovalBeforeSend"]>>;
+  readonly getOnboardingCompleted: () => Promise<
+    Result<IpcResultMap["preferences.getOnboardingCompleted"]>
+  >;
+  readonly setOnboardingCompleted: (
+    completed: boolean,
+  ) => Promise<Result<IpcResultMap["preferences.setOnboardingCompleted"]>>;
   readonly getCraftPreferences: () => Promise<
     Result<IpcResultMap["preferences.getCraftPreferences"]>
   >;
@@ -81,6 +89,9 @@ export type IpcBridge = {
   readonly updateApplicationDraft: (
     input: ApplicationDraftUpdateInput,
   ) => Promise<Result<IpcResultMap["applications.updateDraft"]>>;
+  readonly deleteApplicationDraft: (
+    id: string,
+  ) => Promise<Result<IpcResultMap["applications.deleteDraft"]>>;
   readonly tailorApplicationDraft: (
     input: ApplicationTailorDraftInput,
   ) => Promise<Result<IpcResultMap["applications.tailorDraft"]>>;
@@ -96,6 +107,13 @@ export type IpcBridge = {
   readonly refineCraftChat: (
     input: CraftChatRefineInput,
   ) => Promise<Result<IpcResultMap["craft.chatRefine"]>>;
+  readonly getCraftSession: () => Promise<Result<IpcResultMap["craft.getSession"]>>;
+  readonly patchCraftSession: (
+    patch: CraftSessionPatchInput,
+  ) => Promise<Result<IpcResultMap["craft.patchSession"]>>;
+  readonly prepareCraftDrafts: (
+    kind: CraftGenerateKind,
+  ) => Promise<Result<IpcResultMap["craft.prepareDrafts"]>>;
 };
 
 /**
@@ -218,6 +236,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
         requireApprovalBeforeSend,
       })) as Result<IpcResultMap["preferences.setApprovalBeforeSend"]>;
     },
+    async getOnboardingCompleted() {
+      return (await dispatcher.invoke("preferences.getOnboardingCompleted")) as Result<
+        IpcResultMap["preferences.getOnboardingCompleted"]
+      >;
+    },
+    async setOnboardingCompleted(completed: boolean) {
+      return (await dispatcher.invoke("preferences.setOnboardingCompleted", {
+        completed,
+      })) as Result<IpcResultMap["preferences.setOnboardingCompleted"]>;
+    },
     async getCraftPreferences() {
       return (await dispatcher.invoke("preferences.getCraftPreferences")) as Result<
         IpcResultMap["preferences.getCraftPreferences"]
@@ -253,6 +281,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
         IpcResultMap["applications.updateDraft"]
       >;
     },
+    async deleteApplicationDraft(id: string) {
+      return (await dispatcher.invoke("applications.deleteDraft", { id })) as Result<
+        IpcResultMap["applications.deleteDraft"]
+      >;
+    },
     async tailorApplicationDraft(input: ApplicationTailorDraftInput) {
       return (await dispatcher.invoke("applications.tailorDraft", input)) as Result<
         IpcResultMap["applications.tailorDraft"]
@@ -276,6 +309,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async refineCraftChat(input: CraftChatRefineInput) {
       return (await dispatcher.invoke("craft.chatRefine", input)) as Result<
         IpcResultMap["craft.chatRefine"]
+      >;
+    },
+    async getCraftSession() {
+      return (await dispatcher.invoke("craft.getSession")) as Result<
+        IpcResultMap["craft.getSession"]
+      >;
+    },
+    async patchCraftSession(patch: CraftSessionPatchInput) {
+      return (await dispatcher.invoke("craft.patchSession", patch)) as Result<
+        IpcResultMap["craft.patchSession"]
+      >;
+    },
+    async prepareCraftDrafts(kind: CraftGenerateKind) {
+      return (await dispatcher.invoke("craft.prepareDrafts", { kind })) as Result<
+        IpcResultMap["craft.prepareDrafts"]
       >;
     },
   };

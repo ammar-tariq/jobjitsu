@@ -30,6 +30,7 @@ describe("@jobjitsu/preferences", () => {
 
   it("defaults approval-before-send on and sound off", () => {
     expect(DEFAULT_APP_SETTINGS.requireApprovalBeforeSend).toBe(true);
+    expect(DEFAULT_APP_SETTINGS.onboardingCompleted).toBe(false);
     expect(DEFAULT_APP_SETTINGS.notifications.soundEnabled).toBe(false);
     expect(DEFAULT_APP_SETTINGS.theme).toBe("dark");
     expect(requiresApprovalBeforeSend(DEFAULT_APP_SETTINGS)).toBe(true);

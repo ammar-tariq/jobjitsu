@@ -54,6 +54,7 @@ function hydrate(settings: AppSettings): AppSettings {
     ...DEFAULT_APP_SETTINGS,
     ...settings,
     requireApprovalBeforeSend: settings.requireApprovalBeforeSend ?? true,
+    onboardingCompleted: settings.onboardingCompleted ?? false,
     theme: settings.theme ?? DEFAULT_APP_SETTINGS.theme,
     ai: { ...DEFAULT_APP_SETTINGS.ai, ...settings.ai },
     notifications: {

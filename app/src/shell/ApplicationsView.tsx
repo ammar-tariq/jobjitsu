@@ -15,9 +15,8 @@ export type ApplicationsViewProps = {
 };
 
 /**
- * Create, list, and open application drafts on-device (PE08-S01 / PE08-S04).
- * Tailor résumé (PE03-S04) and cover letter (PE08-S02) via host Agent.
- * Soft-duplicate warns; never sends.
+ * Create, list, and open application drafts on-device.
+ * Tailor résumé and cover letter via host Agent. Queue / follow-up stay local. Never sends.
  */
 export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
@@ -28,6 +27,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   const [notes, setNotes] = useState("");
   const [resumeDraftText, setResumeDraftText] = useState("");
   const [coverLetterDraftText, setCoverLetterDraftText] = useState("");
+  const [followUpAt, setFollowUpAt] = useState("");
+  const [followUpDraftText, setFollowUpDraftText] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -40,6 +41,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     const result = await bridge.listApplications();
     if (result.ok) {
       setApplications(result.value.applications);
+    } else {
+      setStatus(result.error.message ?? result.error.title);
     }
   };
 
@@ -55,6 +58,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setNotes("");
     setResumeDraftText("");
     setCoverLetterDraftText("");
+    setFollowUpAt("");
+    setFollowUpDraftText("");
     setDuplicateWarning(null);
   };
 
@@ -66,6 +71,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setNotes(application.notes ?? "");
     setResumeDraftText(application.resumeDraftText ?? "");
     setCoverLetterDraftText(application.coverLetterDraftText ?? "");
+    setFollowUpAt(application.followUpAt ?? "");
+    setFollowUpDraftText(application.followUpDraftText ?? "");
     setDuplicateWarning(null);
     setStatus(null);
   };
@@ -88,6 +95,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           notes: notes.trim() || null,
           resumeDraftText: resumeDraftText.trim() || null,
           coverLetterDraftText: coverLetterDraftText.trim() || null,
+          followUpAt: followUpAt.trim() || null,
+          followUpDraftText: followUpDraftText.trim() || null,
         })
       : bridge.createApplicationDraft({
           companyName: companyName.trim(),
@@ -109,6 +118,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
         setCoverLetterDraftText(
           result.value.application.coverLetterDraftText ?? coverLetterDraftText,
         );
+        setFollowUpAt(result.value.application.followUpAt ?? followUpAt);
+        setFollowUpDraftText(result.value.application.followUpDraftText ?? followUpDraftText);
         setStatus(
           selectedId
             ? "Application draft updated. Nothing was sent."
@@ -147,7 +158,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           return;
         }
         if (result.value.tailorStatus === "unavailable") {
-          setStatus("Agent is not ready yet. Check Preferences for the on-device model path.");
+          setStatus("Agent is not ready yet. Choose an on-device model in Preferences.");
           return;
         }
         setStatus("Could not prepare that draft. Try again when you are ready.");
@@ -183,7 +194,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           return;
         }
         if (result.value.coverLetterStatus === "unavailable") {
-          setStatus("Agent is not ready yet. Check Preferences for the on-device model path.");
+          setStatus("Agent is not ready yet. Choose an on-device model in Preferences.");
           return;
         }
         setStatus("Could not prepare that cover letter. Try again when you are ready.");
@@ -191,6 +202,55 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
       .catch(() => {
         setCovering(false);
         setStatus("Could not prepare that cover letter. Try again when you are ready.");
+      });
+  };
+
+  const onReadyForReview = (): void => {
+    if (!selectedId) {
+      return;
+    }
+    setSaving(true);
+    setStatus(null);
+    void bridge
+      .updateApplicationDraft({ id: selectedId, stage: "queue" })
+      .then(async (result) => {
+        setSaving(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setStatus(
+          "Marked ready for review. Open Queue when you want to approve. Nothing was sent.",
+        );
+        await refresh();
+      })
+      .catch(() => {
+        setSaving(false);
+        setStatus("Could not update that application. Try again.");
+      });
+  };
+
+  const onDelete = (): void => {
+    if (!selectedId) {
+      return;
+    }
+    setSaving(true);
+    setStatus(null);
+    void bridge
+      .deleteApplicationDraft(selectedId)
+      .then(async (result) => {
+        setSaving(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        clearForm();
+        setStatus("Application removed from this device. Nothing was sent.");
+        await refresh();
+      })
+      .catch(() => {
+        setSaving(false);
+        setStatus("Could not remove that application. Try again.");
       });
   };
 
@@ -276,6 +336,29 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
               placeholder="Prepare a cover letter, then edit freely. You remain the author."
               slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
             />
+            <TextField
+              label="Follow-up date"
+              type="date"
+              value={followUpAt}
+              onChange={(event) => setFollowUpAt(event.target.value)}
+              size="small"
+              fullWidth
+              slotProps={{
+                inputLabel: { shrink: true },
+                htmlInput: { "data-testid": "jj-application-followup-date" },
+              }}
+            />
+            <TextField
+              label="Follow-up note"
+              value={followUpDraftText}
+              onChange={(event) => setFollowUpDraftText(event.target.value)}
+              size="small"
+              fullWidth
+              multiline
+              minRows={2}
+              placeholder="Optional reminder — never sent automatically."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-followup-note" } }}
+            />
           </>
         ) : null}
         {duplicateWarning ? (
@@ -309,6 +392,23 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
                 data-testid="jj-application-cover-letter"
               >
                 {covering ? "Preparing letter…" : "Cover letter"}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={onReadyForReview}
+                disabled={busy || selected?.stage === "queue"}
+                data-testid="jj-application-ready-for-review"
+              >
+                Ready for review
+              </Button>
+              <Button
+                variant="text"
+                color="error"
+                onClick={onDelete}
+                disabled={busy}
+                data-testid="jj-application-delete"
+              >
+                Delete
               </Button>
             </>
           ) : null}

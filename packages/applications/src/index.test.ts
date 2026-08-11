@@ -127,4 +127,24 @@ describe("@jobjitsu/applications drafts (PE08-S01)", () => {
     expect(updated.application.resumeDraftText).toBe("Edited résumé draft on this device");
     expect(trackingStatusForStage(updated.application.stage)).toBe("ResumePrepared");
   });
+
+  it("deletes drafts and persists follow-up fields", async () => {
+    const repository = createMemoryApplicationRepository();
+    const created = await createApplicationDraft({
+      repository,
+      input: { companyName: "Acme", roleTitle: "Engineer" },
+    });
+    const scheduled = await updateApplicationDraft({
+      repository,
+      patch: {
+        id: created.application.id,
+        followUpAt: "2026-08-20",
+        followUpDraftText: "Check in politely",
+        followUpId: "followup_test",
+      },
+    });
+    expect(scheduled.application.followUpAt).toBe("2026-08-20");
+    expect(await repository.delete(created.application.id)).toBe(true);
+    expect(await repository.list()).toHaveLength(0);
+  });
 });

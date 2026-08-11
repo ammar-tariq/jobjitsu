@@ -1,5 +1,6 @@
 import {
   createApplicationDraft,
+  deleteApplicationDraft,
   trackingStatusForStage,
   updateApplicationDraft,
   type Application,
@@ -10,6 +11,7 @@ import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/id
 import type { PreferencesFacade } from "@jobjitsu/preferences";
 import {
   createAppError,
+  createEntityId,
   err,
   isPipelineStage,
   ok,
@@ -25,6 +27,11 @@ import {
 import { createHostFileSaver, type FileSaver } from "../host/file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
 import { buildResumeExportArtifacts, toBase64 } from "../host/resume-export.js";
+import {
+  EMPTY_CRAFT_SESSION,
+  type CraftSessionState,
+  type CraftSessionStore,
+} from "../host/craft-session.js";
 import type {
   AiStatusSnapshot,
   ApplicationCoverLetterDraftInput,
@@ -36,11 +43,37 @@ import type {
   CraftExportResumeResult,
   CraftGenerateInput,
   CraftGenerateResult,
+  CraftSessionSnapshot,
   ResumeParseImportInputPayload,
   ResumeParseImportResult,
   ThemePreference,
 } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
+
+function toCraftSessionSnapshot(session: CraftSessionState): CraftSessionSnapshot {
+  return {
+    resumeText: session.resumeText,
+    jobDescription: session.jobDescription,
+    aboutCompany: session.aboutCompany,
+    resumeDraft: session.resumeDraft,
+    coverLetterDraft: session.coverLetterDraft,
+    saveCompany: session.saveCompany,
+    saveRole: session.saveRole,
+    chatTarget: session.chatTarget,
+    chatInput: session.chatInput,
+    chatMessages: session.chatMessages.map((entry) => ({
+      role: entry.role,
+      content: entry.content,
+    })),
+    job: {
+      status: session.job.status,
+      phase: session.job.phase,
+      kind: session.job.kind,
+      message: session.job.message,
+      startedAt: session.job.startedAt,
+    },
+  };
+}
 
 function toApplicationSnapshot(application: Application): ApplicationSnapshot {
   return {
@@ -56,6 +89,9 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     notes: application.notes,
     resumeDraftText: application.resumeDraftText,
     coverLetterDraftText: application.coverLetterDraftText,
+    followUpAt: application.followUpAt,
+    followUpDraftText: application.followUpDraftText,
+    followUpId: application.followUpId,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -121,6 +157,8 @@ export type CreateHostIpcOptions = {
    * When omitted, generate returns calm unavailable.
    */
   readonly generateCraftDrafts?: (input: CraftGenerateInput) => Promise<CraftGenerateResult>;
+  /** Host-owned Craft session — survives navigation while Agent prepares. */
+  readonly craftSession?: CraftSessionStore;
   /**
    * Host-owned Craft chat refine (PE28-S03). UI never calls AI directly.
    * When omitted, chat returns calm unavailable.
@@ -157,6 +195,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const tailorApplicationDraft = options.tailorApplicationDraft;
   const generateApplicationCoverLetter = options.generateApplicationCoverLetter;
   const generateCraftDrafts = options.generateCraftDrafts;
+  const craftSession = options.craftSession;
   const refineCraftChat = options.refineCraftChat;
 
   async function commitDataRoot(next: DataRootSnapshot) {
@@ -684,6 +723,42 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "preferences.getOnboardingCompleted": async () => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return ok({ completed: false });
+      }
+      return ok({ completed: await preferences.getOnboardingCompleted() });
+    },
+    "preferences.setOnboardingCompleted": async (payload) => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
+      try {
+        const completed = await preferences.setOnboardingCompleted(payload.completed);
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["onboardingCompleted"] });
+        }
+        return ok({ completed });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update onboarding", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That preference could not be saved. Try again.",
+            detail: "preferences:onboarding",
+            cause,
+          }),
+        );
+      }
+    },
     "preferences.getCraftPreferences": async () => {
       const preferences = getPreferences();
       if (!preferences) {
@@ -793,6 +868,8 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             roleId: payload.roleId ? (payload.roleId as RoleId) : undefined,
             resumeVersionId: payload.resumeVersionId,
             notes: payload.notes,
+            resumeDraftText: payload.resumeDraftText,
+            coverLetterDraftText: payload.coverLetterDraftText,
           },
         });
         return ok({
@@ -836,6 +913,22 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
       try {
+        const existing = await applications.get(payload.id as ApplicationId);
+        let followUpId: string | null | undefined;
+        let followUpAt: string | null | undefined = payload.followUpAt;
+        if (payload.followUpAt === null) {
+          followUpId = null;
+          followUpAt = null;
+        } else if (payload.followUpAt !== undefined) {
+          const trimmed = payload.followUpAt.trim();
+          if (!trimmed) {
+            followUpAt = null;
+            followUpId = null;
+          } else {
+            followUpAt = trimmed;
+            followUpId = existing?.followUpId ?? createEntityId("followup");
+          }
+        }
         const result = await updateApplicationDraft({
           repository: applications,
           bus,
@@ -855,6 +948,9 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             notes: payload.notes,
             resumeDraftText: payload.resumeDraftText,
             coverLetterDraftText: payload.coverLetterDraftText,
+            followUpAt,
+            followUpDraftText: payload.followUpDraftText,
+            followUpId,
             stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
           },
         });
@@ -875,6 +971,36 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "That application draft could not be updated. Try again.",
             detail: "applications:update",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.deleteDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      try {
+        const deleted = await deleteApplicationDraft({
+          repository: applications,
+          bus,
+          id: payload.id as ApplicationId,
+        });
+        return ok({ deleted });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not delete application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be removed. Try again.",
+            detail: "applications:delete",
             cause,
           }),
         );
@@ -1038,6 +1164,46 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           coverLetterDraft: payload.coverLetterDraft,
         });
       }
+    },
+    "craft.getSession": async () => {
+      const session = craftSession?.get() ?? EMPTY_CRAFT_SESSION;
+      return ok({ session: toCraftSessionSnapshot(session) });
+    },
+    "craft.patchSession": async (payload) => {
+      if (!craftSession) {
+        return ok({ session: toCraftSessionSnapshot(EMPTY_CRAFT_SESSION) });
+      }
+      const session = craftSession.patch({
+        resumeText: payload.resumeText,
+        jobDescription: payload.jobDescription,
+        aboutCompany: payload.aboutCompany,
+        resumeDraft: payload.resumeDraft,
+        coverLetterDraft: payload.coverLetterDraft,
+        saveCompany: payload.saveCompany,
+        saveRole: payload.saveRole,
+        chatTarget: payload.chatTarget,
+        chatInput: payload.chatInput,
+        chatMessages: payload.chatMessages,
+      });
+      return ok({ session: toCraftSessionSnapshot(session) });
+    },
+    "craft.prepareDrafts": async (payload) => {
+      if (!craftSession) {
+        return ok({
+          session: toCraftSessionSnapshot({
+            ...EMPTY_CRAFT_SESSION,
+            job: {
+              status: "unavailable",
+              phase: null,
+              kind: payload.kind,
+              message: "Agent is not ready yet. Check Preferences for the on-device model name.",
+              startedAt: null,
+            },
+          }),
+        });
+      }
+      const session = craftSession.prepareDrafts(payload.kind);
+      return ok({ session: toCraftSessionSnapshot(session) });
     },
   };
 }

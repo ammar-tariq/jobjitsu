@@ -16,7 +16,7 @@ export type CreateDurableHostRuntimeOptions = CreateHostRuntimeOptions & {
 
 /**
  * Host runtime with career data on disk under the active data folder.
- * Profile, resumes, and preferences land in `kv/` + `blobs/` for backup/inspectability.
+ * Profile, resumes, applications, and preferences land in `kv/` + `blobs/`.
  */
 export async function createDurableHostRuntime(
   options: CreateDurableHostRuntimeOptions,
@@ -68,9 +68,18 @@ export async function createDurableHostRuntime(
       getSelected: () => stores.pathLibrary.getSelected(),
       select: (id) => stores.pathLibrary.select(id),
     },
+    applications: {
+      list: () => stores.applications.list(),
+      get: (id) => stores.applications.get(id),
+      create: (input) => stores.applications.create(input),
+      update: (patch) => stores.applications.update(patch),
+      delete: (id) => stores.applications.delete(id),
+    },
     preferences: {
       getApprovalBeforeSend: () => stores.preferences.getApprovalBeforeSend(),
       setApprovalBeforeSend: (value) => stores.preferences.setApprovalBeforeSend(value),
+      getOnboardingCompleted: () => stores.preferences.getOnboardingCompleted(),
+      setOnboardingCompleted: (value) => stores.preferences.setOnboardingCompleted(value),
       getCraftPreferences: () => stores.preferences.getCraftPreferences(),
       setCraftPreferences: (patch) => stores.preferences.setCraftPreferences(patch),
       getLocalModelPath: () => stores.preferences.getLocalModelPath(),

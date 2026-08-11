@@ -16,6 +16,8 @@ export type CraftGenerateResult = {
   readonly message?: string;
 };
 
+export type CraftGeneratePhase = "checking" | "resume" | "cover_letter";
+
 /**
  * Host-only Craft Studio generate (PE28-S01).
  * Produces editable drafts from résumé + JD (+ optional about company).
@@ -25,6 +27,7 @@ export async function generateCraftDraftsWithAi(options: {
   readonly ai: AiProvider;
   readonly assembler: ContextAssembler;
   readonly input: CraftGenerateRequest;
+  readonly onPhase?: (phase: CraftGeneratePhase) => void;
 }): Promise<CraftGenerateResult> {
   const resumeText = options.input.resumeText.trim();
   const jobDescription = options.input.jobDescription.trim();
@@ -39,6 +42,7 @@ export async function generateCraftDraftsWithAi(options: {
     };
   }
 
+  options.onPhase?.("checking");
   const health = await options.ai.health();
   if (health.status !== "ready") {
     return {
@@ -59,6 +63,7 @@ export async function generateCraftDraftsWithAi(options: {
 
   try {
     if (options.input.kind === "resume" || options.input.kind === "both") {
+      options.onPhase?.("resume");
       const prompt = options.assembler.assemble({
         role: "tailor",
         resumeExcerpts: [resumeText],
@@ -78,6 +83,7 @@ export async function generateCraftDraftsWithAi(options: {
     }
 
     if (options.input.kind === "cover_letter" || options.input.kind === "both") {
+      options.onPhase?.("cover_letter");
       const prompt = options.assembler.assemble({
         role: "cover_letter",
         resumeExcerpts: [resumeText],
