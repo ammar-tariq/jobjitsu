@@ -4,16 +4,16 @@ Application draft lifecycle — create/edit on-device drafts linked to résumés
 
 ## Status
 
-| Piece                                   | State                                  |
-| --------------------------------------- | -------------------------------------- |
-| Application entity + tracking stage map | Done (PE08-S01)                        |
-| `createMemoryApplicationRepository`     | Done — browser-safe host               |
-| `createApplicationDraft` / update       | Done — emits DraftCreated / Updated    |
-| Duplicate soft-warn                     | Done — company + role + URL (+ req id) |
-| `resumeDraftText` on Application        | Done (PE03-S04) — editable tailor body |
-| `coverLetterDraftText` on Application   | Done (PE08-S02) — editable letter body |
-| List/detail UI polish                   | PE08-S04                               |
-| Send                                    | Later stories                          |
+| Piece                                    | State                                  |
+| ---------------------------------------- | -------------------------------------- |
+| Application entity + tracking stage map  | Done (PE08-S01)                        |
+| `createMemoryApplicationRepository`      | Done — browser-safe host               |
+| `createApplicationDraft` / update        | Done — emits DraftCreated / Updated    |
+| Duplicate soft-warn                      | Done — company + role + URL (+ req id) |
+| `resumeDraftText` on Application         | Done (PE03-S04) — editable tailor body |
+| `coverLetterDraftText` on Application    | Done (PE08-S02) — editable letter body |
+| List + open detail (status, empty state) | Done (PE08-S04)                        |
+| Send                                     | Later stories                          |
 
 ## Create a draft
 

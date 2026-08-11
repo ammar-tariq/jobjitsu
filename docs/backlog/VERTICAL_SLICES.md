@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE08 Applications & Pipeline |
-| **Story** | PE08-S02 — Cover letter draft |
+| **Story** | PE08-S04 — List and open applications |
 | **Status** | In progress |
-| **Note** | Applications cover letter; edit; no send |
+| **Note** | List status; open detail; calm empty; no send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE08-S02 | 2026-08-11 | Application cover letter draft; PR #110 |
 | PE28-S03 | 2026-08-11 | Craft chat refine + clarifying questions; PR #109 |
 | PE28-S02 | 2026-08-11 | HTML preview + local PDF export; PR #108 |
 | PE28-S01 | 2026-08-11 | Craft screen résumé + cover letter; PR #107 |

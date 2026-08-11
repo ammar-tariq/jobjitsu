@@ -952,11 +952,11 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Priority:** P0
 
-**Technical notes:** backlog E08-F03.
+**Technical notes:** GitHub #34 · Applications list + inline detail; trackingStatus on rows.
 
-**Testing notes:** List/detail UI test.
+**Testing notes:** List/detail UI test; empty state; open ↛ send.
 
-**Status:** proposed
+**Status:** done (2026-08-11)
 
 ## PE09
 
