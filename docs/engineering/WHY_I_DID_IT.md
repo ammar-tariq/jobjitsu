@@ -5,6 +5,23 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Styled exports: structure parsed from plain text, not model markdown
+
+### The problem
+
+Exports and the Craft preview rendered the draft as undifferentiated paragraphs — "very plain". Asking the model for markdown styling was rejected earlier (it caused the export mojibake bug and `flattenMarkdown` strips it), so styling has to come from the renderer.
+
+### Decision
+
+Add a deterministic `parseResumeBlocks` pass in `resume-export.ts`: plain text already carries structure — name/contact preamble, ALL-CAPS or known section headings, "Company — Title" entry lines, "Location | Dates" meta lines, "Label: …" skill lines, "- " bullets. Both renderers style those blocks:
+
+- **HTML** (also the Craft Preview tab via iframe): large name, small contact line, uppercase ruled section headings, bold roles, italic muted dates, bold skill labels, real bullet lists.
+- **PDF**: Helvetica + Helvetica-Bold + Helvetica-Oblique with `/Encoding /WinAnsiEncoding`, hairline rules under headings, bullet glyphs, and real typography (en/em dashes, curly quotes map to WinAnsi bytes instead of ASCII stand-ins). Layout stays a single top-to-bottom cursor with keep-with-next page breaks for headings; offsets stay byte-accurate (1 char = 1 byte after `toWinAnsi`).
+
+Heuristics only affect presentation — the parser never rewrites, reorders, or invents text. A misread line falls back to a normal paragraph. Still no PDF library: the layout needs are narrow and the hand-rolled writer stays auditable.
+
+---
+
 ## 2026-08-11 — Tailor prompt: adopt the resume-analysis improvement kit (truthfully)
 
 ### The problem
