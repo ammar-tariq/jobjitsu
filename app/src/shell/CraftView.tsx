@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
-import LinearProgress from "@mui/material/LinearProgress";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -22,6 +20,7 @@ import type {
   CraftGenerateKind,
   CraftSessionSnapshot,
 } from "../ipc/commands.js";
+import { CraftWorkingView } from "./CraftWorkingView.js";
 import { useHostCraftSession } from "./HostProvider.js";
 
 export type CraftViewProps = {
@@ -102,9 +101,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const status = localStatus ?? job?.message ?? null;
   const elapsedSeconds =
     preparing && job?.startedAt
-      ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000))
+      ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000) + tick - tick)
       : 0;
-  const elapsedLabel = preparing ? ` · ${elapsedSeconds + tick - tick}s` : "";
 
   useEffect(() => {
     if (!preparing) {
@@ -329,6 +327,14 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       });
   }
 
+  if (preparing && session) {
+    return (
+      <Box data-testid="jj-craft-view">
+        <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
+      </Box>
+    );
+  }
+
   return (
     <Stack spacing={2.5} data-testid="jj-craft-view" sx={{ maxWidth: "56rem", width: "100%" }}>
       <Stack spacing={0.75}>
@@ -340,27 +346,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           leave this screen. Nothing is sent from here.
         </Typography>
       </Stack>
-
-      {preparing ? (
-        <Alert
-          severity="info"
-          data-testid="jj-craft-progress"
-          sx={{ "& .MuiAlert-message": { width: "100%" } }}
-        >
-          <Stack spacing={1}>
-            <Typography variant="subtitle2">
-              Agent is working on this device{elapsedLabel}
-            </Typography>
-            <Typography variant="body2">
-              {job?.message ?? "Preparing drafts… Usually under a minute, depending on your model."}
-            </Typography>
-            <LinearProgress aria-label="Agent preparing drafts" />
-            <Typography variant="caption" color="text.secondary">
-              You can leave Craft — preparation continues in the background.
-            </Typography>
-          </Stack>
-        </Alert>
-      ) : null}
 
       <Stack
         spacing={1.5}

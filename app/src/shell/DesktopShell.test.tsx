@@ -108,6 +108,47 @@ describe("DesktopShell", () => {
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
   });
 
+  it("shows a Craft working view with inputs, phases, and device load while preparing", async () => {
+    const user = userEvent.setup();
+    const inner = createFakeAiProvider();
+    const runtime = createHostRuntime({
+      ai: {
+        ...inner,
+        async complete(request) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          return inner.complete(request);
+        },
+      },
+    });
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen\nStaff engineer");
+    await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer at Acme");
+    await user.type(screen.getByTestId("jj-craft-about-company"), "Privacy-first tools");
+    await user.click(screen.getByTestId("jj-craft-generate-both"));
+
+    expect(await screen.findByTestId("jj-craft-working-view")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Sam Chen/);
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Staff Engineer at Acme/);
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Privacy-first tools/);
+    expect(screen.getByTestId("jj-craft-working-phases")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-working-resources")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-resource-cpu")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-resource-memory")).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-craft-resume-input")).not.toBeInTheDocument();
+
+    expect(
+      await screen.findByText(
+        /Drafts ready\. Edit freely — you remain the author\. Nothing was sent/i,
+        {},
+        { timeout: 5000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-craft-working-view")).not.toBeInTheDocument();
+  });
+
   it("previews résumé HTML and exports PDF on Craft (PE28-S02)", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime({

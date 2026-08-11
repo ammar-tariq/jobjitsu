@@ -83,5 +83,6 @@ See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 - No career egress from the renderer; startup never sends mail.
 - Shell must not import `@jobjitsu/ai`.
-- Webview capabilities stay deny-by-default: dialog open + scoped FS for the on-device data folder, plus `allow_data_directory` for custom folders — no shell/HTTP career egress.
+- Webview capabilities stay deny-by-default: dialog open + scoped FS for the on-device data folder, `allow_data_directory` for custom folders, and `allow-resource-snapshot` for local CPU/memory during Craft prepare — no shell/HTTP career egress.
 - Narrow IPC allowlist in `src/ipc` — unknown commands and `ai.complete` are denied ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
+- **Craft prepare** lives in the host session; while running, the shell shows a working view (inputs, phases, device load). Preparation survives navigation.

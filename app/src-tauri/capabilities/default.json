@@ -7,6 +7,7 @@
     "core:default",
     "core:path:default",
     "allow-data-directory",
+    "allow-resource-snapshot",
     "dialog:allow-open",
     "fs:allow-mkdir",
     "fs:allow-read-dir",

@@ -50,6 +50,7 @@ describe("PE01-S01 launch desktop host", () => {
     expect(names).toContain("core:path:default");
     expect(names).toContain("dialog:allow-open");
     expect(names).toContain("allow-data-directory");
+    expect(names).toContain("allow-resource-snapshot");
     expect(names).toContain("fs:scope");
     expect(names.some((name) => name.startsWith("shell:"))).toBe(false);
     expect(names.some((name) => name.startsWith("http:"))).toBe(false);

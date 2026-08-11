@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-resource-snapshot"
+description = "Reads local CPU and memory usage for on-device Agent progress chrome. No career data; no network."
+commands.allow = ["get_resource_snapshot"]

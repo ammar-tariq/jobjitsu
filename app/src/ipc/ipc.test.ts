@@ -69,6 +69,7 @@ describe("IPC allowlist", () => {
       "craft.getSession",
       "craft.patchSession",
       "craft.prepareDrafts",
+      "system.getResources",
     ]);
   });
 
@@ -111,6 +112,17 @@ describe("typed IPC bridge", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value).toEqual({ ok: true, service: "jobjitsu-host" });
+    }
+  });
+
+  it("reads local resource usage without career egress", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const result = await bridge.getResources();
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.resources.message).toMatch(/device|Browser|desktop/i);
+      expect(typeof result.value.resources.available).toBe("boolean");
     }
   });
 
@@ -178,6 +190,7 @@ describe("typed IPC bridge", () => {
       "getLocalModelPath",
       "getOnboardingCompleted",
       "getProfile",
+      "getResources",
       "getSelectedResume",
       "getTheme",
       "importResume",

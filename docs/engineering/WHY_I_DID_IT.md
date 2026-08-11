@@ -5,6 +5,57 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Craft working view (inputs + phases + CPU/RAM)
+
+### The problem
+
+Prepare still felt opaque: a thin progress alert on top of the form. Users needed to see **what was pasted**, **which phase Agent is in**, and preferably **device load** (CPU / memory) while a local model runs.
+
+### Options considered
+
+| Option | Pros | Cons | Verdict |
+|--------|------|------|---------|
+| Bigger Alert + checklist only | Cheap | Still no input review; no load | Rejected |
+| Fake % progress bar | Familiar | Lies about Ollama wall time | Rejected |
+| **Dedicated Craft working view + sysinfo** | Clear SSOT UI; honest machine meters | Native + IPC surface | **Chosen** |
+| Electron/`os` from renderer | Easy in browser | Wrong stack; breaks Tauri deny-by-default | Rejected |
+
+### Decision
+
+While `job.status === "running"`, Craft swaps to **`CraftWorkingView`**:
+
+1. **Inputs** — truncated résumé / JD / about with character counts (read-only mirror of host session).
+2. **Phases** — checking → résumé → cover (by kind), with Now / Done / Next.
+3. **Elapsed seconds** + calm “usually under a minute” copy (no fake ETA %).
+4. **This device** — processor % and memory used/total via host IPC.
+
+Leaving Craft still keeps the host job alive (prior decision); shell banner unchanged.
+
+### Libraries / packages used (and why)
+
+| Piece | Why |
+|-------|-----|
+| **`sysinfo` 0.33** (Rust, Tauri command) | Local CPU + RAM only; no network; inspectable crate |
+| Existing deny-by-default IPC (`system.getResources`) | Renderer never imports native APIs; ADR 0013 |
+| `allow-resource-snapshot` Tauri permission | Explicit capability; launch-smoke asserts it |
+| MUI `LinearProgress` determinate meters | Already in shell; calm bars, not dashboard widgets |
+| Browser fallback in `resource-snapshot.ts` | Vitest / web: JS-heap estimate or clear “open desktop” note |
+
+We did **not** stream Ollama token metrics into the UI — that would push model jargon into the main path and needs a separate Agent advanced surface later.
+
+### How it was built
+
+1. Tauri `get_resource_snapshot` — brief CPU refresh delay (~120ms) so usage is non-zero.
+2. Host `readResourceSnapshot` + IPC `system.getResources`.
+3. `CraftWorkingView` polls resources ~1.5s while mounted; Craft early-returns this view when preparing.
+4. Tests: working view appears with slow fake AI; IPC allowlist; formatBytes; capability smoke.
+
+### Privacy
+
+Resource snapshot never includes résumé/JD text. Career data stays in the craft session; meters are machine load only.
+
+---
+
 ## 2026-08-11 — Craft prepare: progress + survive navigation
 
 ### The problem
