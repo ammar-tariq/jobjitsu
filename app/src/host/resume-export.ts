@@ -9,6 +9,36 @@ export type ResumeExportArtifacts = {
   readonly fileNameBase: string;
 };
 
+/**
+ * Local models often answer in markdown. Flatten the common notation
+ * (headings, bold/italic, rules, links) into clean résumé text so exports
+ * don't show literal `###` / `**` / `---`. The editable draft keeps whatever
+ * the user typed — this runs only when building export artifacts.
+ */
+export function flattenMarkdown(text: string): string {
+  const lines = text.replaceAll("\r\n", "\n").split("\n");
+  const out: string[] = [];
+  for (const rawLine of lines) {
+    // Horizontal rules become paragraph breaks.
+    if (/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(rawLine)) {
+      out.push("");
+      continue;
+    }
+    let line = rawLine;
+    line = line.replace(/^\s{0,3}#{1,6}\s+/, "");
+    line = line.replace(/^\s*>\s?/, "");
+    line = line.replace(/\[([^\]]*)\]\(([^)]*)\)/g, "$1");
+    line = line.replace(/\*\*([^*]+)\*\*/g, "$1");
+    line = line.replace(/\*([^*]+)\*/g, "$1");
+    line = line.replaceAll("`", "");
+    out.push(line);
+  }
+  return out
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export function escapeHtml(text: string): string {
   return text
     .replaceAll("&", "&amp;")
@@ -213,13 +243,13 @@ export function toBase64(bytes: Uint8Array): string {
 }
 
 export function buildResumeExportArtifacts(draftText: string): ResumeExportArtifacts | null {
-  const trimmed = draftText.trim();
-  if (!trimmed) {
+  const cleaned = flattenMarkdown(draftText);
+  if (!cleaned) {
     return null;
   }
   return {
-    html: renderResumeHtml(trimmed),
-    pdfBytes: renderResumePdfBytes(trimmed),
+    html: renderResumeHtml(cleaned),
+    pdfBytes: renderResumePdfBytes(cleaned),
     fileNameBase: "jobjitsu-resume-draft",
   };
 }

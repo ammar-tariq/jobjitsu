@@ -5,6 +5,18 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Export flattens model markdown (no literal ### / \*\* / ---)
+
+### The problem
+
+Local models answer in markdown. Exported PDFs/HTML showed literal `### **Summary**`, `**bold**`, `---` rules, and `[label](url)` — “weird characters” to the user.
+
+### Decision
+
+`buildResumeExportArtifacts` runs a small deterministic `flattenMarkdown` pass (headings, bold/italic, rules → paragraph breaks, links → label, backticks) before rendering HTML and PDF. **The editable draft is untouched** — the user keeps exactly what the model wrote; only export artifacts are cleaned. No markdown library: the notation set is small, and a parser dependency would be harder to audit than 20 lines of regex.
+
+---
+
 ## 2026-08-11 — Craft export failed: missing save-dialog permission (+ PDF bytes)
 
 ### The problem
