@@ -86,6 +86,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   } | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [parsingImport, setParsingImport] = useState(false);
   const [attaching, setAttaching] = useState(false);
   const [selectingResumeId, setSelectingResumeId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -221,9 +222,72 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
 
   const clearImportDraft = (): void => {
     setImportDraft(null);
+    setParsingImport(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const beginImportReview = (
+    pathId: string,
+    file: File,
+    source: "resume" | "linkedin-pdf",
+  ): void => {
+    const label =
+      source === "linkedin-pdf"
+        ? file.name.replace(/\.[^.]+$/, "") || "LinkedIn profile"
+        : file.name.replace(/\.[^.]+$/, "") || file.name;
+    setImportStatus(null);
+    setAttachPending(null);
+    setImportDraft({
+      pathId,
+      file,
+      label,
+      contactName: "",
+      contactEmail: "",
+      notes: "",
+      source,
+    });
+    setParsingImport(true);
+    void readFileBytes(file)
+      .then((bytes) =>
+        bridge.parseImportDraft({
+          contentBase64: bytesToBase64(bytes),
+          fileName: file.name,
+          contentType: file.type || undefined,
+        }),
+      )
+      .then((result) => {
+        setParsingImport(false);
+        if (!result.ok) {
+          setImportStatus("Couldn’t suggest fields. Edit below by hand — nothing was sent.");
+          return;
+        }
+        setImportDraft((current) => {
+          if (!current || current.file !== file || current.pathId !== pathId) {
+            return current;
+          }
+          return {
+            ...current,
+            contactName: result.value.contactName || current.contactName,
+            contactEmail: result.value.contactEmail || current.contactEmail,
+            notes: result.value.notes || current.notes,
+          };
+        });
+        if (result.value.parseStatus === "unavailable") {
+          setImportStatus(
+            "Agent isn’t ready yet. Edit the fields below by hand — nothing was sent.",
+          );
+        } else if (result.value.parseStatus === "prefilled") {
+          setImportStatus("Agent suggested fields below. Review and edit before saving.");
+        } else {
+          setImportStatus("Edit what you can before saving. Empty fields stay empty.");
+        }
+      })
+      .catch(() => {
+        setParsingImport(false);
+        setImportStatus("Couldn’t suggest fields. Edit below by hand — nothing was sent.");
+      });
   };
 
   const onConfirmImport = (): void => {
@@ -534,8 +598,9 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                               : "Review import"}
                           </Typography>
                           <Typography color="text.secondary" variant="body2">
-                            Edit what you can before saving. Empty fields stay empty — nothing is
-                            invented. Cancel discards this draft; the library stays unchanged.
+                            {parsingImport
+                              ? "Looking for suggestions on this device…"
+                              : "Edit what you can before saving. Empty fields stay empty — nothing is invented. Cancel discards this draft; the library stays unchanged."}
                           </Typography>
                           <Typography variant="body2">
                             File: {importDraft.file.name}
@@ -551,6 +616,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             required
                             fullWidth
                             placeholder="e.g. Baseline 2026"
+                            disabled={parsingImport}
                           />
                           <TextField
                             label="Display name"
@@ -561,6 +627,10 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             size="small"
                             fullWidth
                             placeholder="Optional — as on the resume"
+                            disabled={parsingImport}
+                            slotProps={{
+                              htmlInput: { "data-testid": `jj-import-contact-name-${path.id}` },
+                            }}
                           />
                           <TextField
                             label="Contact email"
@@ -571,6 +641,10 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             size="small"
                             fullWidth
                             placeholder="Optional"
+                            disabled={parsingImport}
+                            slotProps={{
+                              htmlInput: { "data-testid": `jj-import-contact-email-${path.id}` },
+                            }}
                           />
                           <TextField
                             label="Notes"
@@ -583,12 +657,15 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                             multiline
                             minRows={2}
                             placeholder="Optional free-text notes from the file"
+                            disabled={parsingImport}
                           />
                           <Stack direction="row" spacing={1}>
                             <Button
                               variant="contained"
                               onClick={onConfirmImport}
-                              disabled={importing || importDraft.label.trim().length === 0}
+                              disabled={
+                                importing || parsingImport || importDraft.label.trim().length === 0
+                              }
                             >
                               Save to library
                             </Button>
@@ -678,17 +755,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                                   if (!next) {
                                     return;
                                   }
-                                  setImportStatus(null);
-                                  setAttachPending(null);
-                                  setImportDraft({
-                                    pathId: path.id,
-                                    file: next,
-                                    label: next.name.replace(/\.[^.]+$/, "") || next.name,
-                                    contactName: "",
-                                    contactEmail: "",
-                                    notes: "",
-                                    source: "resume",
-                                  });
+                                  beginImportReview(path.id, next, "resume");
                                 }}
                               />
                             </Button>
@@ -704,17 +771,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
                                   if (!next) {
                                     return;
                                   }
-                                  setImportStatus(null);
-                                  setAttachPending(null);
-                                  setImportDraft({
-                                    pathId: path.id,
-                                    file: next,
-                                    label: next.name.replace(/\.[^.]+$/, "") || "LinkedIn profile",
-                                    contactName: "",
-                                    contactEmail: "",
-                                    notes: "",
-                                    source: "linkedin-pdf",
-                                  });
+                                  beginImportReview(path.id, next, "linkedin-pdf");
                                 }}
                               />
                             </Button>

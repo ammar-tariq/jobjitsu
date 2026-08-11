@@ -6,6 +6,7 @@ import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { createHostRuntime } from "../host/runtime.js";
+import { configureStubLocalModel } from "../host/test-local-model.js";
 import { App } from "../App.js";
 
 afterEach(() => {
@@ -17,6 +18,7 @@ describe("DesktopShell", () => {
   it("renders JobJitsu chrome and primary H1 nav", async () => {
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
@@ -45,6 +47,7 @@ describe("DesktopShell", () => {
 
     expect(screen.getByRole("status", { name: "Agent · Unavailable" })).toBeInTheDocument();
 
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
@@ -56,6 +59,7 @@ describe("DesktopShell", () => {
       ai: createFakeAiProvider({ id: "fake-remote", locality: "remote" }),
     });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(await screen.findByRole("status", { name: "Agent · Ready" })).toBeInTheDocument();
@@ -66,6 +70,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Agent" }));
@@ -81,6 +86,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Queue" }));
@@ -95,6 +101,7 @@ describe("DesktopShell", () => {
     const appearance = createMemoryAppearanceStore("dark");
     const runtime = createHostRuntime({ appearance });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -111,6 +118,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -147,6 +155,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -173,6 +182,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -214,6 +224,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -227,7 +238,7 @@ describe("DesktopShell", () => {
 
     const path = (await runtime.pathLibrary.list())[0]!;
     expect(screen.getByTestId(`jj-path-resumes-${path.id}`)).toBeInTheDocument();
-    const file = new File(["# Sam Chen\nStaff engineer\n"], "sam-chen.md", {
+    const file = new File(["# Sam Chen\nsam@example.com\nStaff engineer\n"], "sam-chen.md", {
       type: "text/markdown",
     });
     await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
@@ -235,19 +246,18 @@ describe("DesktopShell", () => {
     const review = await screen.findByTestId(`jj-import-review-${path.id}`);
     expect(within(review).getByText(/Review import/i)).toBeInTheDocument();
     expect(await runtime.resumeLibrary.list()).toHaveLength(0);
+    expect(await screen.findByText(/Agent suggested fields/i)).toBeInTheDocument();
+    expect(within(review).getByRole("textbox", { name: /display name/i })).toHaveValue("Sam Chen");
+    expect(within(review).getByRole("textbox", { name: /contact email/i })).toHaveValue(
+      "sam@example.com",
+    );
 
     const labelField = within(review).getByRole("textbox", { name: /version label/i });
     await user.clear(labelField);
     await user.type(labelField, "Baseline 2026");
-    await user.type(within(review).getByRole("textbox", { name: /display name/i }), "Sam Chen");
-    await user.type(
-      within(review).getByRole("textbox", { name: /contact email/i }),
-      "sam@example.com",
-    );
-    await user.type(
-      within(review).getByRole("textbox", { name: /^notes$/i }),
-      "Staff engineer notes",
-    );
+    const notesField = within(review).getByRole("textbox", { name: /^notes$/i });
+    await user.clear(notesField);
+    await user.type(notesField, "Staff engineer notes");
     await user.click(within(review).getByRole("button", { name: "Save to library" }));
 
     const attach = await screen.findByTestId(`jj-import-attach-${path.id}`);
@@ -278,6 +288,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -293,10 +304,13 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
 
     const path = (await runtime.pathLibrary.list())[0]!;
-    const file = new File(["# Other\n"], "other.md", { type: "text/markdown" });
+    const file = new File(["# Other Name\n"], "other.md", { type: "text/markdown" });
     await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
     const review = await screen.findByTestId(`jj-import-review-${path.id}`);
-    await user.type(within(review).getByRole("textbox", { name: /display name/i }), "Other Name");
+    expect(await screen.findByText(/Agent suggested fields/i)).toBeInTheDocument();
+    expect(within(review).getByRole("textbox", { name: /display name/i })).toHaveValue(
+      "Other Name",
+    );
     await user.type(
       within(review).getByRole("textbox", { name: /contact email/i }),
       "other@example.com",
@@ -315,10 +329,37 @@ describe("DesktopShell", () => {
     expect(runtime.bridge).not.toHaveProperty("send");
   });
 
+  it("falls back to manual import review when Agent is unavailable", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime({
+      ai: createFakeAiProvider({ healthStatus: "unavailable", locality: "local" }),
+    });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByRole("textbox", { name: /display name/i }), "Sam Chen");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    await user.type(screen.getByTestId("jj-path-name-input"), "Fullstack Developer");
+    await user.click(screen.getByRole("button", { name: "Add path" }));
+    expect(await screen.findByText(/path saved/i)).toBeInTheDocument();
+
+    const path = (await runtime.pathLibrary.list())[0]!;
+    const file = new File(["# Sam Chen\n"], "sam.md", { type: "text/markdown" });
+    await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
+
+    expect(await screen.findByTestId(`jj-import-review-${path.id}`)).toBeInTheDocument();
+    expect(await screen.findByText(/Agent isn’t ready yet/i)).toBeInTheDocument();
+    expect(screen.getByTestId(`jj-import-contact-name-${path.id}`)).toHaveValue("");
+    expect(await runtime.resumeLibrary.list()).toHaveLength(0);
+  });
+
   it("cancels import review without writing to the library", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -333,6 +374,7 @@ describe("DesktopShell", () => {
     const file = new File(["# Draft\n"], "draft.md", { type: "text/markdown" });
     await user.upload(screen.getByTestId(`jj-path-resume-file-${path.id}`), file);
     const review = await screen.findByTestId(`jj-import-review-${path.id}`);
+    expect(await screen.findByText(/Agent suggested fields/i)).toBeInTheDocument();
     await user.click(within(review).getByRole("button", { name: "Cancel" }));
 
     expect(await screen.findByText(/Import cancelled\. Nothing was saved/i)).toBeInTheDocument();
@@ -344,6 +386,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -365,6 +408,9 @@ describe("DesktopShell", () => {
 
     const review = await screen.findByTestId(`jj-import-review-${path.id}`);
     expect(within(review).getByText(/Review LinkedIn PDF/i)).toBeInTheDocument();
+    expect(
+      await within(review).findByText(/Edit what you can before saving\. Empty fields stay empty/i),
+    ).toBeInTheDocument();
     await user.click(within(review).getByRole("button", { name: "Save to library" }));
 
     expect(await screen.findByTestId(`jj-import-attach-${path.id}`)).toBeInTheDocument();
@@ -386,6 +432,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -435,6 +482,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -457,6 +505,7 @@ describe("DesktopShell", () => {
     });
     const runtime = createHostRuntime({ dataRoot });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -489,6 +538,7 @@ describe("DesktopShell", () => {
     const folderPicker = createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu");
     const runtime = createHostRuntime({ dataRoot, folderPicker });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -499,39 +549,25 @@ describe("DesktopShell", () => {
     expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
   });
 
-  it("creates and edits application drafts with soft duplicate warn — no send", async () => {
+  it("keeps Agent unavailable when model path is missing and recovers from Preferences", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
-    const created: string[] = [];
-    runtime.bus.subscribe("Application.DraftCreated", async (event) => {
-      created.push(event.payload.applicationId);
-    });
     render(<App runtime={runtime} />);
     await runtime.start();
 
-    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
-    await user.type(screen.getByTestId("jj-application-company"), "Acme");
-    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
-    await user.type(screen.getByTestId("jj-application-source-url"), "https://example.com/jobs/1");
-    await user.click(screen.getByTestId("jj-application-save"));
+    expect(await screen.findByRole("status", { name: "Agent · Unavailable" })).toBeInTheDocument();
 
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-local-model-path")).toBeInTheDocument();
     expect(
-      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+      screen.getByText(/Choose a local model path in Preferences so Agent can run/i),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/Acme · Staff Engineer/i)).toBeInTheDocument();
-    expect(created).toHaveLength(1);
-    expect(await runtime.applications.list()).toHaveLength(1);
 
-    await user.click(screen.getByRole("button", { name: "Clear" }));
-    await user.type(screen.getByTestId("jj-application-company"), "Acme");
-    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
-    await user.type(screen.getByTestId("jj-application-source-url"), "https://example.com/jobs/1");
-    await user.click(screen.getByTestId("jj-application-save"));
+    const pathField = screen.getByRole("textbox", { name: "Model path" });
+    await user.type(pathField, "/models/jobjitsu-stub.gguf");
+    await user.click(screen.getByRole("button", { name: "Save model path" }));
 
-    expect(await screen.findByTestId("jj-application-duplicate-warn")).toHaveTextContent(
-      /similar/i,
-    );
-    expect(await runtime.applications.list()).toHaveLength(2);
-    expect(runtime.bridge).not.toHaveProperty("send");
+    expect(await screen.findByText(/Model path saved/i)).toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
   });
 });

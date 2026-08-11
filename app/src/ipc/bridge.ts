@@ -9,6 +9,7 @@ import type {
   ProfilePatchInput,
   ResumeAttachInputPayload,
   ResumeImportInputPayload,
+  ResumeParseImportInputPayload,
   ThemePreference,
 } from "./commands.js";
 import type { IpcDispatcher } from "./dispatcher.js";
@@ -30,6 +31,9 @@ export type IpcBridge = {
   readonly importResume: (
     input: ResumeImportInputPayload,
   ) => Promise<Result<IpcResultMap["identity.importResume"]>>;
+  readonly parseImportDraft: (
+    input: ResumeParseImportInputPayload,
+  ) => Promise<Result<IpcResultMap["identity.parseImportDraft"]>>;
   readonly getSelectedResume: () => Promise<Result<IpcResultMap["identity.getSelectedResume"]>>;
   readonly selectResume: (
     resumeId: string,
@@ -59,13 +63,10 @@ export type IpcBridge = {
   readonly setCraftPreferences: (
     patch: CraftPreferencesPatchInput,
   ) => Promise<Result<IpcResultMap["preferences.setCraftPreferences"]>>;
-  readonly listApplications: () => Promise<Result<IpcResultMap["applications.list"]>>;
-  readonly createApplicationDraft: (
-    input: ApplicationDraftCreateInput,
-  ) => Promise<Result<IpcResultMap["applications.createDraft"]>>;
-  readonly updateApplicationDraft: (
-    input: ApplicationDraftUpdateInput,
-  ) => Promise<Result<IpcResultMap["applications.updateDraft"]>>;
+  readonly getLocalModelPath: () => Promise<Result<IpcResultMap["preferences.getLocalModelPath"]>>;
+  readonly setLocalModelPath: (
+    path: string,
+  ) => Promise<Result<IpcResultMap["preferences.setLocalModelPath"]>>;
 };
 
 /**
@@ -113,6 +114,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async importResume(input: ResumeImportInputPayload) {
       return (await dispatcher.invoke("identity.importResume", input)) as Result<
         IpcResultMap["identity.importResume"]
+      >;
+    },
+    async parseImportDraft(input: ResumeParseImportInputPayload) {
+      return (await dispatcher.invoke("identity.parseImportDraft", input)) as Result<
+        IpcResultMap["identity.parseImportDraft"]
       >;
     },
     async getSelectedResume() {
@@ -190,19 +196,14 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
         IpcResultMap["preferences.setCraftPreferences"]
       >;
     },
-    async listApplications() {
-      return (await dispatcher.invoke("applications.list")) as Result<
-        IpcResultMap["applications.list"]
+    async getLocalModelPath() {
+      return (await dispatcher.invoke("preferences.getLocalModelPath")) as Result<
+        IpcResultMap["preferences.getLocalModelPath"]
       >;
     },
-    async createApplicationDraft(input: ApplicationDraftCreateInput) {
-      return (await dispatcher.invoke("applications.createDraft", input)) as Result<
-        IpcResultMap["applications.createDraft"]
-      >;
-    },
-    async updateApplicationDraft(input: ApplicationDraftUpdateInput) {
-      return (await dispatcher.invoke("applications.updateDraft", input)) as Result<
-        IpcResultMap["applications.updateDraft"]
+    async setLocalModelPath(path: string) {
+      return (await dispatcher.invoke("preferences.setLocalModelPath", { path })) as Result<
+        IpcResultMap["preferences.setLocalModelPath"]
       >;
     },
   };

@@ -15,6 +15,7 @@ export const IPC_ALLOWLIST = [
   "identity.selectProfile",
   "identity.listResumeVersions",
   "identity.importResume",
+  "identity.parseImportDraft",
   "identity.getSelectedResume",
   "identity.selectResume",
   "identity.attachResume",
@@ -30,9 +31,8 @@ export const IPC_ALLOWLIST = [
   "preferences.setApprovalBeforeSend",
   "preferences.getCraftPreferences",
   "preferences.setCraftPreferences",
-  "applications.list",
-  "applications.createDraft",
-  "applications.updateDraft",
+  "preferences.getLocalModelPath",
+  "preferences.setLocalModelPath",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -95,6 +95,20 @@ export type ResumeImportInputPayload = {
   readonly contactEmail?: string;
   readonly notes?: string;
   readonly source?: "resume" | "linkedin-pdf";
+};
+
+/** Draft-only parse request — does not import, attach, or send. */
+export type ResumeParseImportInputPayload = {
+  readonly contentBase64: string;
+  readonly fileName?: string;
+  readonly contentType?: string;
+};
+
+export type ResumeParseImportResult = {
+  readonly contactName: string;
+  readonly contactEmail: string;
+  readonly notes: string;
+  readonly parseStatus: "prefilled" | "unavailable" | "manual";
 };
 
 export type ResumeAttachInputPayload = {
@@ -194,6 +208,7 @@ export type IpcPayloadMap = {
   readonly "identity.selectProfile": { readonly profileId: string };
   readonly "identity.listResumeVersions": undefined;
   readonly "identity.importResume": ResumeImportInputPayload;
+  readonly "identity.parseImportDraft": ResumeParseImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
   readonly "identity.selectResume": { readonly resumeId: string };
   readonly "identity.attachResume": ResumeAttachInputPayload;
@@ -209,9 +224,8 @@ export type IpcPayloadMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": undefined;
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
-  readonly "applications.list": undefined;
-  readonly "applications.createDraft": ApplicationDraftCreateInput;
-  readonly "applications.updateDraft": ApplicationDraftUpdateInput;
+  readonly "preferences.getLocalModelPath": undefined;
+  readonly "preferences.setLocalModelPath": { readonly path: string };
 };
 
 export type IpcResultMap = {
@@ -231,6 +245,7 @@ export type IpcResultMap = {
     readonly selectedId: string | null;
   };
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
+  readonly "identity.parseImportDraft": ResumeParseImportResult;
   readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
   readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
   readonly "identity.attachResume": {
@@ -256,15 +271,8 @@ export type IpcResultMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
-  readonly "applications.list": { readonly applications: readonly ApplicationSnapshot[] };
-  readonly "applications.createDraft": {
-    readonly application: ApplicationSnapshot;
-    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
-  };
-  readonly "applications.updateDraft": {
-    readonly application: ApplicationSnapshot;
-    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
-  };
+  readonly "preferences.getLocalModelPath": { readonly path: string | null };
+  readonly "preferences.setLocalModelPath": { readonly path: string | null };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

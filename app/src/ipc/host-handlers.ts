@@ -23,7 +23,12 @@ import {
   type DataRootStore,
 } from "../host/data-root-store.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
-import type { AiStatusSnapshot, ApplicationSnapshot, ThemePreference } from "./commands.js";
+import type {
+  AiStatusSnapshot,
+  ResumeParseImportInputPayload,
+  ResumeParseImportResult,
+  ThemePreference,
+} from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
 function toApplicationSnapshot(application: Application): ApplicationSnapshot {
@@ -67,10 +72,17 @@ export type CreateHostIpcOptions = {
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
+  /**
+   * Host-owned import parse (PE03-S10). UI never calls AI directly.
+   * When omitted, parse returns calm unavailable/manual empty fields.
+   */
+  readonly parseImportDraft?: (
+    input: ResumeParseImportInputPayload,
+  ) => Promise<ResumeParseImportResult>;
 };
 
 /**
- * Host IPC handlers — allowlisted only; no AI complete / send.
+ * Host IPC handlers — allowlisted only; UI never gets AI complete.
  */
 export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHandlerMap {
   const getAppearance =
@@ -92,6 +104,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
   const bus = options.bus;
   const onDataRootChanged = options.onDataRootChanged;
+  const parseImportDraft = options.parseImportDraft;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {
@@ -239,6 +252,27 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             cause,
           }),
         );
+      }
+    },
+    "identity.parseImportDraft": async (payload) => {
+      if (!parseImportDraft) {
+        return ok({
+          contactName: "",
+          contactEmail: "",
+          notes: "",
+          parseStatus: "unavailable" as const,
+        });
+      }
+      try {
+        const draft = await parseImportDraft(payload);
+        return ok(draft);
+      } catch {
+        return ok({
+          contactName: "",
+          contactEmail: "",
+          notes: "",
+          parseStatus: "manual" as const,
+        });
       }
     },
     "identity.getSelectedResume": async () => {
@@ -622,116 +656,37 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
-    "applications.list": async () => {
-      const applications = getApplications();
-      if (!applications) {
-        return ok({ applications: [] });
+    "preferences.getLocalModelPath": async () => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return ok({ path: null });
       }
-      const listed = await applications.list();
-      return ok({ applications: listed.map(toApplicationSnapshot) });
+      return ok({ path: (await preferences.getLocalModelPath()) ?? null });
     },
-    "applications.createDraft": async (payload) => {
-      const applications = getApplications();
-      if (!applications) {
+    "preferences.setLocalModelPath": async (payload) => {
+      const preferences = getPreferences();
+      if (!preferences) {
         return err(
-          createAppError("unavailable", "Applications not ready", {
-            message: "Application storage is not available yet.",
-            detail: "applications:missing",
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
           }),
         );
       }
       try {
-        const result = await createApplicationDraft({
-          repository: applications,
-          bus,
-          input: {
-            companyName: payload.companyName,
-            roleTitle: payload.roleTitle,
-            sourceUrl: payload.sourceUrl,
-            requisitionId: payload.requisitionId,
-            roleId: payload.roleId ? (payload.roleId as RoleId) : undefined,
-            resumeVersionId: payload.resumeVersionId,
-            notes: payload.notes,
-          },
-        });
-        return ok({
-          application: toApplicationSnapshot(result.application),
-          duplicateWarning: result.duplicateWarning
-            ? {
-                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
-                message: result.duplicateWarning.message,
-              }
-            : undefined,
-        });
+        const path = (await preferences.setLocalModelPath(payload.path)) ?? null;
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["ai.localModelPath"] });
+        }
+        return ok({ path });
       } catch (cause) {
         return err(
-          createAppError("validation", "Could not create application", {
+          createAppError("validation", "Could not update model path", {
             message:
               cause instanceof Error
                 ? cause.message
-                : "That application draft could not be created. Try again.",
-            detail: "applications:create",
-            cause,
-          }),
-        );
-      }
-    },
-    "applications.updateDraft": async (payload) => {
-      const applications = getApplications();
-      if (!applications) {
-        return err(
-          createAppError("unavailable", "Applications not ready", {
-            message: "Application storage is not available yet.",
-            detail: "applications:missing",
-          }),
-        );
-      }
-      if (payload.stage !== undefined && !isPipelineStage(payload.stage)) {
-        return err(
-          createAppError("validation", "Unknown application stage", {
-            message: "That stage is not recognized. Try again.",
-            detail: "applications:stage",
-          }),
-        );
-      }
-      try {
-        const result = await updateApplicationDraft({
-          repository: applications,
-          bus,
-          patch: {
-            id: payload.id as ApplicationId,
-            companyName: payload.companyName,
-            roleTitle: payload.roleTitle,
-            sourceUrl: payload.sourceUrl,
-            requisitionId: payload.requisitionId,
-            roleId:
-              payload.roleId === null
-                ? null
-                : payload.roleId
-                  ? (payload.roleId as RoleId)
-                  : undefined,
-            resumeVersionId: payload.resumeVersionId,
-            notes: payload.notes,
-            stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
-          },
-        });
-        return ok({
-          application: toApplicationSnapshot(result.application),
-          duplicateWarning: result.duplicateWarning
-            ? {
-                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
-                message: result.duplicateWarning.message,
-              }
-            : undefined,
-        });
-      } catch (cause) {
-        return err(
-          createAppError("validation", "Could not update application", {
-            message:
-              cause instanceof Error
-                ? cause.message
-                : "That application draft could not be updated. Try again.",
-            detail: "applications:update",
+                : "That model path could not be saved. Try again.",
+            detail: "preferences:localModelPath",
             cause,
           }),
         );

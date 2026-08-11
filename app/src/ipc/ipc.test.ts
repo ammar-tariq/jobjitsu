@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMemoryApplicationRepository } from "@jobjitsu/applications";
+import { createFakeAiProvider, createFakeContextAssembler } from "@jobjitsu/ai";
 import { createInMemoryEventBus, type EventPayloadMap } from "@jobjitsu/events";
 import {
   createMemoryPathLibrary,
@@ -9,6 +9,7 @@ import {
 import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
+import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -30,6 +31,7 @@ describe("IPC allowlist", () => {
       "identity.selectProfile",
       "identity.listResumeVersions",
       "identity.importResume",
+      "identity.parseImportDraft",
       "identity.getSelectedResume",
       "identity.selectResume",
       "identity.attachResume",
@@ -45,9 +47,8 @@ describe("IPC allowlist", () => {
       "preferences.setApprovalBeforeSend",
       "preferences.getCraftPreferences",
       "preferences.setCraftPreferences",
-      "applications.list",
-      "applications.createDraft",
-      "applications.updateDraft",
+      "preferences.getLocalModelPath",
+      "preferences.setLocalModelPath",
     ]);
   });
 
@@ -120,6 +121,7 @@ describe("typed IPC bridge", () => {
       "getApprovalBeforeSend",
       "getCraftPreferences",
       "getDataRoot",
+      "getLocalModelPath",
       "getProfile",
       "getSelectedResume",
       "getTheme",
@@ -128,6 +130,7 @@ describe("typed IPC bridge", () => {
       "listPaths",
       "listProfiles",
       "listResumeVersions",
+      "parseImportDraft",
       "pickDataRoot",
       "ping",
       "resetDataRoot",
@@ -137,6 +140,7 @@ describe("typed IPC bridge", () => {
       "setApprovalBeforeSend",
       "setCraftPreferences",
       "setDataRoot",
+      "setLocalModelPath",
       "setProfile",
       "setTheme",
       "updateApplicationDraft",
@@ -144,34 +148,38 @@ describe("typed IPC bridge", () => {
     ]);
   });
 
-  it("creates application drafts with soft duplicate warn and no send", async () => {
-    const bus = createInMemoryEventBus();
-    const names: string[] = [];
-    bus.subscribeAll((event) => {
-      names.push(event.name);
-    });
-    const applications = createMemoryApplicationRepository();
-    const bridge = createIpcBridge(createHostIpcDispatcher({ applications, bus }));
+  it("prefills import draft via host parse without exposing AI complete", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        parseImportDraft: (input) => parseImportDraftWithAi({ ai, assembler, input }),
+      }),
+    );
 
-    const first = await bridge.createApplicationDraft({
-      companyName: "Acme",
-      roleTitle: "Staff Engineer",
-      sourceUrl: "https://example.com/jobs/1",
+    const parsed = await bridge.parseImportDraft({
+      contentBase64: btoa("# Sam Chen\nsam@example.com\n"),
+      fileName: "sam.md",
+      contentType: "text/markdown",
     });
-    expect(first.ok && first.value.application.trackingStatus).toBe("Discovered");
-    expect(first.ok && first.value.duplicateWarning).toBeUndefined();
-    expect(names).toContain("Application.DraftCreated");
+    expect(parsed.ok && parsed.value.parseStatus).toBe("prefilled");
+    expect(parsed.ok && parsed.value.contactName).toBe("Sam Chen");
+    expect(parsed.ok && parsed.value.contactEmail).toBe("sam@example.com");
+    expect(bridge).not.toHaveProperty("complete");
+  });
 
-    const second = await bridge.createApplicationDraft({
-      companyName: "Acme",
-      roleTitle: "Staff Engineer",
-      sourceUrl: "https://example.com/jobs/1",
+  it("returns calm unavailable parse when Agent is not wired", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const parsed = await bridge.parseImportDraft({
+      contentBase64: btoa("# Sam Chen\n"),
+      fileName: "sam.md",
     });
-    expect(second.ok && second.value.duplicateWarning?.message).toMatch(/similar/i);
-
-    const listed = await bridge.listApplications();
-    expect(listed.ok && listed.value.applications).toHaveLength(2);
-    expect(bridge).not.toHaveProperty("send");
+    expect(parsed.ok && parsed.value).toEqual({
+      contactName: "",
+      contactEmail: "",
+      notes: "",
+      parseStatus: "unavailable",
+    });
   });
 
   it("reads and writes profile through identity APIs", async () => {
@@ -450,5 +458,24 @@ describe("typed IPC bridge", () => {
       tone: "calm and precise",
       constraints: ["no relocate"],
     });
+  });
+
+  it("reads and writes local model path through preferences APIs", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const preferences = createPreferencesFacade(createMemorySettingsStore());
+    const bridge = createIpcBridge(createHostIpcDispatcher({ preferences, bus }));
+
+    const before = await bridge.getLocalModelPath();
+    expect(before.ok && before.value.path).toBeNull();
+
+    const saved = await bridge.setLocalModelPath("/models/agent.gguf");
+    expect(saved.ok && saved.value.path).toBe("/models/agent.gguf");
+    expect(changed).toEqual([["ai.localModelPath"]]);
+    expect(await preferences.getLocalModelPath()).toBe("/models/agent.gguf");
   });
 });

@@ -1,8 +1,10 @@
 import type { AiProvider } from "@jobjitsu/ai";
 import {
   createAiProviderRegistry,
+  createContextAssembler,
   createFakeAiProvider,
   createFakeContextAssembler,
+  createPathGatedAiProvider,
 } from "@jobjitsu/ai";
 import {
   createMemoryApplicationRepository,
@@ -48,6 +50,7 @@ import {
 } from "../ipc/index.js";
 import type { AiStatusSnapshot } from "../ipc/commands.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
+import { parseImportDraftWithAi } from "./parse-import-draft.js";
 import {
   createMemoryDataRootStore,
   type DataRootStore,
@@ -115,9 +118,15 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const logger = createLogger(sink, { component: "host" });
   const services = createServiceRegistry();
   const errors = createErrorReporter({ logger });
-  const ai = options.ai ?? createFakeAiProvider({ id: "fake-ai" });
+  const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
+  const baseAi = options.ai ?? createFakeAiProvider({ id: "fake-ai" });
+  const ai = createPathGatedAiProvider({
+    inner: baseAi,
+    getLocalModelPath: () => preferences.getLocalModelPath(),
+  });
   const aiRegistry = createAiProviderRegistry([ai]);
-  const assembler = createFakeContextAssembler();
+  const assembler = createContextAssembler();
   const resumes: ResumeStore = createFakeResumeStore({ resume: null });
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
@@ -125,8 +134,6 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
   const applications = options.applications ?? createMemoryApplicationRepository();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
-  const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
-  const folderPicker = options.folderPicker ?? createHostFolderPicker();
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -160,7 +167,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   });
 
   bus.subscribe("Plugin.Loaded", async () => {
-    logger.info("plugin loaded — generating résumé via host AI");
+    logger.info("plugin loaded — checking Agent readiness (lazy; no model load yet)");
     await bus.publish("Ai.LocalModelLoading", { providerId: ai.id });
 
     const health = await ai.health();
@@ -177,6 +184,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       locality: health.locality,
     });
 
+    // Demo résumé prep uses complete() only after health is ready — still no weight load in stub.
     const seed = createDefaultFakeResume();
     const prompt = assembler.assemble({
       role: "generic",
@@ -232,6 +240,27 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     };
   });
 
+  // Path change rechecks readiness only — does not load weights or re-run demo cascade.
+  bus.subscribe("Preferences.Changed", async (event) => {
+    const payload = event.payload as EventPayloadMap["Preferences.Changed"];
+    if (!payload.keys.includes("ai.localModelPath")) {
+      return;
+    }
+    await bus.publish("Ai.LocalModelLoading", { providerId: ai.id });
+    const health = await ai.health();
+    if (health.status !== "ready") {
+      await bus.publish("Ai.LocalModelFailed", {
+        providerId: ai.id,
+        code: health.status,
+      });
+      return;
+    }
+    await bus.publish("Ai.LocalModelReady", {
+      providerId: ai.id,
+      locality: health.locality,
+    });
+  });
+
   const ipc = createHostIpcDispatcher({
     appearance,
     profiles,
@@ -244,6 +273,12 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     onDataRootChanged: options.onDataRootChanged,
     getAiStatus: () => aiStatus,
     bus,
+    parseImportDraft: (input) =>
+      parseImportDraftWithAi({
+        ai,
+        assembler,
+        input,
+      }),
   });
   const bridge = createIpcBridge(ipc);
 
@@ -319,6 +354,8 @@ function summarize(event: DomainEvent): string {
       return "Agent runtime ready (fake)";
     case "Ai.LocalModelLoading":
       return "Agent runtime loading";
+    case "Ai.LocalModelFailed":
+      return "Agent unavailable — check model path in Preferences";
     default:
       return event.name;
   }

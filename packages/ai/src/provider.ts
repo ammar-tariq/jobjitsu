@@ -67,15 +67,30 @@ export interface AiProviderRegistry {
 
 /**
  * Builds minimal local context — field allowlists enforced by implementations.
- * Must not dump full timeline into every prompt.
+ * Must not dump full Timeline into every prompt.
+ *
+ * Slice order (apply-craft): Profile → Resume → Projects → Achievements →
+ * Current Job → listing/tone/draft → Knowledge → prior send meta.
  */
 export interface ContextAssemblerInput {
   readonly role: AiPromptRole;
+  readonly profileExcerpt?: string;
   readonly resumeExcerpts?: readonly string[];
+  readonly projectsExcerpt?: string;
+  readonly achievementsExcerpt?: string;
+  readonly currentJobExcerpt?: string;
   readonly roleDescription?: string;
   readonly tonePreferences?: string;
   readonly draftExcerpt?: string;
   readonly priorSendMeta?: string;
+}
+
+/** Knowledge Base read port — identity implements in PE14; Core may no-op. */
+export interface KnowledgeReader {
+  read(request: {
+    readonly role: AiPromptRole;
+    readonly budgetChars: number;
+  }): readonly { readonly text: string }[];
 }
 
 export interface ContextAssembler {
