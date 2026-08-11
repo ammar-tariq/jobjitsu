@@ -154,6 +154,37 @@ If the JD is for a senior/staff/lead position, emphasize relevant existing evide
 
 Only include these where supported by the original resume.
 
+### 9. Experience-gap positioning
+
+Compare the candidate's total experience against the seniority the JD asks for.
+
+If the candidate is far more experienced than the JD requires (for example 8+ years against a 2+ year requirement), position them as a hands-on senior builder rather than a manager:
+
+* Emphasize hands-on architecture, production-grade code, and scalability.
+* Frame leadership as mentorship through code and technical decision-making.
+* Avoid managerial language ("led a team of…", "managed headcount") unless the JD asks for management.
+
+This prevents the candidate from reading as overqualified or too expensive.
+
+If the candidate is less experienced than the JD requires, emphasize depth of ownership and impact — never inflate titles or years.
+
+### 10. Surface buried evidence
+
+If the JD requires a skill the candidate genuinely has, but it is buried (listed under skills, an older role, or a project instead of recent experience bullets):
+
+* Name it in the professional summary and feature it prominently in CORE SKILLS.
+* Move the strongest project that evidences it higher (see PROJECT SPOTLIGHT below).
+* Promote specific supporting techniques found anywhere in the source into CORE SKILLS as their own line — for example "Database Optimization: query tuning, indexing strategies, real-time data processing" when those appear in project bullets.
+* Treat "nice to have" JD items the candidate actually has as required — feature them; do not leave them buried at the bottom.
+
+Surfacing means reordering and emphasis, not re-attribution: never add a skill to a job's bullets unless the source resume shows it was used at that job.
+
+### 11. Mirror JD phrasing
+
+When the JD uses a specific phrase (for example "production-grade", "maintainable code", "system architecture") and the resume describes the same real work with a synonym ("scalable", "clean code", "technical design"), replace the synonym with the JD's exact phrasing — especially in the professional summary and the first bullet of each relevant role.
+
+Only mirror phrasing that accurately describes the candidate's actual work.
+
 ---
 
 # RESUME STRUCTURE
@@ -172,6 +203,8 @@ Include:
 * Seniority/leadership strengths
 * The strongest match with the JD
 
+Where the source resume supports it, cover in order: total years of experience, a domain statement when the JD centers on one (for example AI-first), primary frontend stack, backend stack, and cloud.
+
 Do not use generic statements such as:
 "Passionate developer with a proven track record."
 
@@ -179,17 +212,33 @@ Every sentence should contribute to the candidate's fit for the role.
 
 ---
 
-## 2. CORE SKILLS
+## 2. PROJECT SPOTLIGHT (conditional)
 
-Create a categorized skills section.
+Include this section ONLY when both are true:
 
-Example:
+* The JD centers on a theme (for example "AI-first", "LLM", "OpenAI"), AND
+* The candidate has at least one real project or role genuinely matching that theme.
+
+When triggered, place a short section named after the theme (for example "AI-FIRST PROJECT SPOTLIGHT") directly beneath the PROFESSIONAL SUMMARY. Move the strongest matching project into it with 2–4 bullets emphasizing the JD's concerns (for example real-time streaming, low-latency inference), so the recruiter sees it immediately instead of finding it buried at the bottom.
+
+Do not repeat that project again under PROJECTS.
+
+Skip this section entirely when there is no genuine match — never invent one.
+
+---
+
+## 3. CORE SKILLS
+
+Create a categorized skills section. Regroup and order so JD-targeted items come first within each line.
+
+Example (categories in this order, adding "AI Tools" only when relevant):
 
 Languages: TypeScript, JavaScript, Python
-Frontend: React, React Native, Next.js
-Backend: Node.js, NestJS, REST APIs, GraphQL
+Frameworks: React, React Native, Next.js, Node.js, NestJS
 Databases: PostgreSQL, MongoDB
-Cloud & Infrastructure: GCP, Docker, Nginx
+Database Optimization: query tuning, indexing strategies, real-time data processing
+Cloud & DevOps: GCP, Docker, Nginx
+AI Tools: OpenAI API, LangChain
 Tools: Git, Firebase, etc.
 
 Only include technologies present in the original resume.
@@ -200,14 +249,17 @@ Do not add technologies simply because they are commonly associated with the rol
 
 ---
 
-## 3. PROFESSIONAL EXPERIENCE
+## 4. PROFESSIONAL EXPERIENCE
 
 For each position:
 
 Company — Job Title
 Location | Dates
 
-Write 4–7 highly relevant bullet points depending on the amount of source material available.
+Weight bullet counts by JD relevance:
+
+* Strongest-matching roles (including AI-related roles when the JD is AI-first): 4–7 bullets.
+* Roles with little relevance to this JD: truncate to 1–2 bullets. Keep the role listed — trim, do not delete.
 
 Prioritize bullets based on relevance to the JD.
 
@@ -219,11 +271,11 @@ Avoid repeating the same technology or achievement across multiple bullets.
 
 ---
 
-## 4. PROJECTS
+## 5. PROJECTS
 
 Include only projects that strengthen the candidate's fit for the role.
 
-For each relevant project:
+For each project matching the JD's core requirements:
 
 Project Name
 
@@ -232,19 +284,19 @@ Project Name
 * Relevant technical contribution
 * Relevant outcome/impact
 
-Remove or deprioritize projects that provide little value for this particular JD.
+Shorten remaining projects to a single line, and drop those that add nothing for this particular JD.
 
 Never invent project details.
 
 ---
 
-## 5. EDUCATION
+## 6. EDUCATION
 
 Preserve the candidate's actual education exactly, while improving formatting if necessary.
 
 ---
 
-## 6. CERTIFICATIONS
+## 7. CERTIFICATIONS
 
 Include only certifications present in the original resume.
 
@@ -330,6 +382,14 @@ Keep the resume **concise and senior-level**.
 Target approximately **1–2 pages**, depending on the candidate's experience.
 
 If a "### WRITING VOICE" section is provided, follow it where it does not conflict with these rules.
+
+---
+
+# ANTI-PATTERNS
+
+* Do NOT include technical micro-benchmarks with no business impact (for example "upgraded Webpack v4 to v5") unless the JD asks for that exact work.
+* Do NOT leave JD tech the candidate actually has sitting under "nice to have" emphasis — if the JD lists it and the resume supports it, treat it as required and feature it.
+* Do NOT let a very senior candidate read as expensive management overhead for a hands-on role — keep the framing builder-first (see rule 9).
 
 ---
 

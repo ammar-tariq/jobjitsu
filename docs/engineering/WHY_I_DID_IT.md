@@ -5,6 +5,30 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Tailor prompt: adopt the resume-analysis improvement kit (truthfully)
+
+### The problem
+
+A field analysis of a generated résumé (8-year candidate against a 2-year AI-first JD) surfaced six gaps in the tailor prompt: no overqualification framing, JD-required skills left buried when recent roles don't feature them, no spotlight for the JD's central theme, no JD phrase mirroring, irrelevant roles kept at full length, and micro-benchmark bullets with no business impact.
+
+### Decision
+
+Fold the kit into `TAILOR_SYSTEM_PROMPT`:
+
+- **Rule 9 — experience-gap positioning** (kit R001): far-more-experienced candidates are framed as hands-on senior builders, not managers.
+- **Rule 10 — surface buried evidence** (kit R002 + R006 + anti-pattern 2, made truthful): promote genuinely evidenced skills into summary/skills/spotlight, promote optimization techniques into CORE SKILLS, treat supported nice-to-haves as required. Explicit guard: “surfacing means reordering and emphasis, not re-attribution.”
+- **Rule 11 — mirror JD phrasing** (kit R005): replace synonyms with the JD's exact phrase where it describes real work.
+- **PROJECT SPOTLIGHT (conditional)** (kit R003): theme-named section under the summary when the JD centers on a theme and a real matching project exists.
+- **JD-weighted structure** (kit template): summary coverage order, skills regrouped with JD items first, 4–7 bullets for matching roles vs 1–2 for weak ones, non-matching projects as one-liners.
+- **ANTI-PATTERNS** section: no impact-free micro-benchmarks; builder-first framing.
+
+### Rejected from the kit
+
+- **R002 as written** rewrites recent role bullets to claim a skill (e.g. Python) in roles whose source bullets never show it — fabrication of responsibilities, against core rule 1 and the constitution's “honest help”. Adopted only the truthful surfacing variant.
+- **R004 markdown mandate** (`##` headers, `**bold**` metrics, `*italic*` stacks) — Craft output is plain text by design: markdown caused the export “weird characters” bug, and `flattenMarkdown` would strip the styling anyway. Visual hierarchy comes from uppercase section headers in plain text.
+
+---
+
 ## 2026-08-11 — Craft prepare: rich ATS / cover prompts for weak local models
 
 ### The problem

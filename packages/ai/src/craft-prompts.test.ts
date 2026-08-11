@@ -48,6 +48,20 @@ describe("craft prompts", () => {
     expect(COVER_LETTER_SYSTEM_PROMPT).toContain("# FINAL VALIDATION");
     expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Return ONLY the finished cover letter/i);
   });
+
+  it("tailor prompt surfaces buried evidence without re-attributing it", () => {
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Experience-gap positioning");
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/hands-on senior builder/i);
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Surface buried evidence");
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/reordering and emphasis, not re-attribution/i);
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Mirror JD phrasing");
+    expect(TAILOR_SYSTEM_PROMPT).toContain("PROJECT SPOTLIGHT (conditional)");
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(
+      /Skip this section entirely when there is no genuine match/i,
+    );
+    expect(TAILOR_SYSTEM_PROMPT).toContain("# ANTI-PATTERNS");
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/truncate to 1–2 bullets/i);
+  });
 });
 
 describe("ollama provider uses craft system prompts", () => {
