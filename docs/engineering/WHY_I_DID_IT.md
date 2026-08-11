@@ -5,6 +5,24 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Cover letter: hard length budget and an explicit letter layout
+
+### The problem
+
+Generated cover letters ran long and arrived as a solid block of prose. The prompt allowed 250–400 words (weak local models overshoot the top of any range) and never described the *visual* shape of a letter, so the plain-text output had no greeting, paragraph breaks, or sign-off.
+
+### Decision
+
+Tighten `COVER_LETTER_SYSTEM_PROMPT`:
+
+- Budget: **200–300 words, never exceed 350**, with per-paragraph sentence counts on each STRUCTURE section (opening 2–3 sentences, evidence paragraphs 2–4, closing 1–2).
+- New **LETTER LAYOUT** section showing the exact plain-text skeleton: greeting → 3–5 blank-line-separated paragraphs → "Best regards," + candidate name. Guards: never invent a contact name, no invented addresses/dates/phones, name from the résumé only.
+- FINAL VALIDATION now checks the word count and blank-line paragraphs.
+
+Fixed in the prompt, not post-processing — the draft stays exactly what the model wrote, and the same layout holds when the user copies the letter out of the app.
+
+---
+
 ## 2026-08-11 — Craft prompts are profession-agnostic, tech is just an example
 
 ### The problem

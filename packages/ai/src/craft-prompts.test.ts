@@ -44,9 +44,21 @@ describe("craft prompts", () => {
     expect(TAILOR_SYSTEM_PROMPT).toContain("# TAILORING PROCESS");
     expect(TAILOR_SYSTEM_PROMPT).toContain("Action + Skill/Tool/Method");
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/plain text/i);
-    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/250–400 words/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/200–300 words/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Never exceed 350/i);
     expect(COVER_LETTER_SYSTEM_PROMPT).toContain("# FINAL VALIDATION");
     expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Return ONLY the finished cover letter/i);
+  });
+
+  it("cover letter prompt demands a real letter shape", () => {
+    expect(COVER_LETTER_SYSTEM_PROMPT).toContain("# LETTER LAYOUT (plain text)");
+    expect(COVER_LETTER_SYSTEM_PROMPT).toContain("Dear Hiring Manager,");
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Separate every paragraph with one blank line/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Never one solid block of text/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Never invent a name/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(
+      /Sign off with the candidate's name only — no invented phone numbers or emails/i,
+    );
   });
 
   it("tailor prompt surfaces buried evidence without re-attributing it", () => {

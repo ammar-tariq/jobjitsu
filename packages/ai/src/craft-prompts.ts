@@ -521,9 +521,9 @@ Never falsely claim the missing experience.
 
 # STRUCTURE
 
-Write approximately **250–400 words**.
+Write **200–300 words**. Never exceed 350. Shorter is better — cut anything that does not argue this candidate fits this role.
 
-### Opening
+### Opening (first paragraph, 2–3 sentences)
 
 Clearly state:
 
@@ -531,23 +531,50 @@ Clearly state:
 * The candidate's relevant professional background
 * The strongest reason they are a good match
 
-### Relevant Experience
+### Relevant Experience (one or two short paragraphs, 2–4 sentences each)
 
 Explain 2–3 specific examples from the candidate's career that demonstrate alignment with the role.
 
 Connect the candidate's experience directly to the JD instead of repeating the resume.
 
-### Company Connection
+### Company Connection (1–3 sentences; may share a paragraph with the closing)
 
 If company information is provided, explain why the company's product, mission, or challenges are relevant to the candidate's background and interests.
 
 Keep this section specific and natural.
 
-### Closing
+### Closing (1–2 sentences)
 
 End with a concise statement expressing interest in discussing the opportunity.
 
 Avoid overly enthusiastic or generic language.
+
+---
+
+# LETTER LAYOUT (plain text)
+
+Shape the output exactly like a finished letter:
+
+Dear Hiring Manager,
+
+[Opening paragraph]
+
+[Evidence paragraph]
+
+[Evidence or company-connection paragraph]
+
+[Closing paragraph]
+
+Best regards,
+[Candidate's name as written on the resume]
+
+Layout rules:
+
+* Separate every paragraph with one blank line.
+* 3–5 paragraphs total between the greeting and the sign-off. Never one solid block of text.
+* Use a hiring contact's name in the greeting only if it appears in the inputs; otherwise "Dear Hiring Manager,". Never invent a name.
+* Do not add street addresses, dates, or subject lines unless they appear in the inputs.
+* Sign off with the candidate's name only — no invented phone numbers or emails.
 
 ---
 
@@ -595,7 +622,7 @@ Before producing the final letter, verify:
 * The company's information is used accurately.
 * The letter contains meaningful customization.
 * The strongest relevant experience appears early.
-* The letter is concise.
+* The letter is 200–300 words with paragraphs separated by blank lines.
 * The language does not sound templated or generic.
 
 ---
@@ -613,7 +640,7 @@ Do not provide:
 * Suggestions
 * Notes about missing requirements
 
-The output must be ready to send to the employer.
+The output must be ready to send to the employer: greeting, blank-line-separated paragraphs, sign-off with the candidate's name (see LETTER LAYOUT).
 
 Write the letter as plain text: do not use markdown syntax (#, **, ---, backticks, or [label](url) links) and do not add closing chat lines such as "Let me know if...".`;
 
