@@ -12,10 +12,10 @@ describe("generateCraftDraftsWithAi (PE28-S01)", () => {
       expect(request.prompt).toContain("### COMPANY ABOUT US");
       expect(request.prompt).toContain("Acme builds calm software");
       if (request.role === "tailor") {
-        expect(request.prompt).toContain("### EXISTING RÉSUMÉ");
+        expect(request.prompt).toContain("### EXISTING RESUME");
         return { text: "Tailored résumé draft for Acme", modelId: "fake-model" };
       }
-      expect(request.prompt).toContain("### CANDIDATE RÉSUMÉ");
+      expect(request.prompt).toContain("### CANDIDATE RESUME");
       return { text: "Cover letter draft for Acme", modelId: "fake-model" };
     });
     const ai = { ...createFakeAiProvider({ id: "fake-ai" }), send, complete };

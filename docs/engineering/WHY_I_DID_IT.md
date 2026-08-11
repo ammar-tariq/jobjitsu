@@ -13,10 +13,10 @@ Craft prepare used a one-line Ollama system message plus a `role=` / `resume=` /
 
 ### Decision
 
-Adopt instruction-heavy prompts (ATS résumé writer + cover-letter writer) adapted for JobJitsu:
+Adopt the full instruction-heavy prompts (ATS résumé writer + cover-letter writer) verbatim, split system/user:
 
-- **System** (`packages/ai/src/craft-prompts.ts` → Ollama `system`): never fabricate, tailor/ATS rules, fixed structure, plain text only, return-only output.
-- **User** (`buildCraftUserPrompt`): labeled `JOB DESCRIPTION` / `EXISTING RÉSUMÉ` or `CANDIDATE RÉSUMÉ` / `COMPANY ABOUT US` (+ optional Preferences `WRITING VOICE`), with soft char budgets.
+- **System** (`packages/ai/src/craft-prompts.ts` → Ollama `system`): the complete prompt text — never fabricate, tailor/ATS rules, fixed structure, tailoring process, final validation — plus a plain-text output addendum (no markdown, no chat filler) so exports stay clean.
+- **User** (`buildCraftUserPrompt`): the `## INPUTS` section — `### JOB DESCRIPTION` / `### EXISTING RESUME` or `### CANDIDATE RESUME` / `### COMPANY ABOUT US` (+ optional Preferences `### WRITING VOICE`), with soft char budgets.
 - Craft session reads tone from Preferences when preparing.
 
 Context assembler remains for application tailor / chat refine / other roles. Export `flattenMarkdown` stays as a safety net.

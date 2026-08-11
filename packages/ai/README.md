@@ -83,7 +83,7 @@ const prompt = assembler.assemble({
 ```ts
 import { buildCraftUserPrompt, systemPromptForRole } from "@jobjitsu/ai";
 
-const system = systemPromptForRole("tailor"); // rich ATS résumé instructions
+const system = systemPromptForRole("tailor"); // full ATS résumé writer instructions
 const prompt = buildCraftUserPrompt({
   kind: "resume",
   jobDescription: "…",
@@ -94,7 +94,7 @@ const prompt = buildCraftUserPrompt({
 ```
 
 - Ollama uses `systemPromptForRole` for `tailor` / `cover_letter` (shorter prompts for other roles)
-- User prompt is labeled INPUTS only — rules stay in `system` so weak local models stay structured and truthful
+- User prompt is the labeled `## INPUTS` section only — all rules stay in `system` so weak local models stay structured and truthful
 - Host Craft prepare wires Preferences tone when set
 
 ## Laws

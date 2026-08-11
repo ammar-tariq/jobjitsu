@@ -16,10 +16,10 @@ describe("craft prompts", () => {
     });
     expect(prompt).toContain("### JOB DESCRIPTION");
     expect(prompt).toContain("Staff Engineer at Acme");
-    expect(prompt).toContain("### EXISTING RÉSUMÉ");
+    expect(prompt).toContain("### EXISTING RESUME");
     expect(prompt).toContain("Sam Chen");
     expect(prompt).toContain("Not provided — do not invent company details.");
-    expect(prompt).toMatch(/Return ONLY the final tailored résumé/i);
+    expect(prompt).toMatch(/Return ONLY the final tailored resume/i);
     expect(prompt).not.toContain("### WRITING VOICE");
   });
 
@@ -31,18 +31,21 @@ describe("craft prompts", () => {
       aboutCompany: "Acme builds privacy tools",
       tonePreferences: "calm and precise",
     });
-    expect(prompt).toContain("### CANDIDATE RÉSUMÉ");
+    expect(prompt).toContain("### CANDIDATE RESUME");
     expect(prompt).toContain("Acme builds privacy tools");
     expect(prompt).toContain("### WRITING VOICE");
     expect(prompt).toContain("calm and precise");
   });
 
-  it("exposes rich tailor / cover system prompts for weak local models", () => {
+  it("exposes the full ATS / cover-letter system prompts", () => {
     expect(systemPromptForRole("tailor")).toBe(TAILOR_SYSTEM_PROMPT);
     expect(systemPromptForRole("cover_letter")).toBe(COVER_LETTER_SYSTEM_PROMPT);
-    expect(TAILOR_SYSTEM_PROMPT).toMatch(/Never fabricate/i);
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/Never fabricate experience/i);
+    expect(TAILOR_SYSTEM_PROMPT).toContain("# TAILORING PROCESS");
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Action + Technology/Method");
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/plain text/i);
-    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/250–400 words|250-400 words/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/250–400 words/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toContain("# FINAL VALIDATION");
     expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/Return ONLY the finished cover letter/i);
   });
 });

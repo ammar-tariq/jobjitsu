@@ -42,7 +42,10 @@ function phaseIndex(phase: CraftJobPhase, steps: readonly PhaseStep[]): number {
   return steps.findIndex((step) => step.phase === phase);
 }
 
-function summarize(text: string, emptyLabel: string): { readonly preview: string; readonly chars: number } {
+function summarize(
+  text: string,
+  emptyLabel: string,
+): { readonly preview: string; readonly chars: number } {
   const trimmed = text.trim();
   if (!trimmed) {
     return { preview: emptyLabel, chars: 0 };
@@ -115,7 +118,11 @@ export function CraftWorkingView({
       : "—";
 
   return (
-    <Stack spacing={2.5} data-testid="jj-craft-working-view" sx={{ maxWidth: "56rem", width: "100%" }}>
+    <Stack
+      spacing={2.5}
+      data-testid="jj-craft-working-view"
+      sx={{ maxWidth: "56rem", width: "100%" }}
+    >
       <Stack spacing={0.75}>
         <Typography component="h2" variant="h2">
           Agent is preparing
@@ -182,7 +189,11 @@ export function CraftWorkingView({
         sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
       >
         <Typography variant="subtitle2">What Agent is using</Typography>
-        <InputBlock title="Your résumé" preview={resume.preview} meta={`${resume.chars} characters`} />
+        <InputBlock
+          title="Your résumé"
+          preview={resume.preview}
+          meta={`${resume.chars} characters`}
+        />
         <InputBlock
           title="Job description"
           preview={listing.preview}
