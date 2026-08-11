@@ -59,10 +59,12 @@ export function PreferencesView({
       }
       setModelPathDraft(result.value.path ?? "");
       if (!result.value.path) {
-        setModelStatus("Model path cleared. Choose a path so Agent can run on this device.");
+        setModelStatus(
+          "Model cleared. Choose an Ollama model name so Agent can run on this device.",
+        );
         return;
       }
-      setModelStatus("Model path saved. Stored on this device.");
+      setModelStatus("Model saved. Stored on this device.");
     });
   };
 
@@ -175,24 +177,25 @@ export function PreferencesView({
 
       <Stack spacing={1.5} data-testid="jj-local-model-path">
         <Typography component="h3" variant="body2" color="text.secondary">
-          Local model path
+          On-device Agent model
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Point Agent at an on-device model file or folder. If Agent shows Unavailable, confirm this
-          path. Nothing leaves this device until Agent is ready.
+          Agent runs through local Ollama on this device. Install Ollama, pull a free model, then
+          save the model name here (for example qwen2.5:3b). Nothing leaves this device until Agent
+          is ready.
         </Typography>
         <TextField
-          label="Model path"
+          label="Ollama model name"
           value={modelPathDraft}
           onChange={(event) => setModelPathDraft(event.target.value)}
           size="small"
           fullWidth
-          placeholder="/path/to/model"
+          placeholder="qwen2.5:3b"
           slotProps={{ htmlInput: { "data-testid": "jj-local-model-path-input" } }}
         />
         <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
           <Button variant="contained" onClick={onSaveModelPath} disabled={savingModelPath}>
-            Save model path
+            Save model
           </Button>
         </Stack>
         {modelStatus ? (
@@ -201,7 +204,7 @@ export function PreferencesView({
           </Typography>
         ) : modelPathDraft.trim().length === 0 ? (
           <Typography role="status" color="text.secondary" variant="body2">
-            Choose a local model path in Preferences so Agent can run on this device.
+            Choose a local Ollama model name so Agent can run on this device.
           </Typography>
         ) : null}
       </Stack>

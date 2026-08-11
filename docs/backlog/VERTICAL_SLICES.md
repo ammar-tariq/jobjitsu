@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE03 Resume Engine |
-| **Story** | PE03-S04 — Tailor resume draft (no send) |
-| **Status** | In review |
-| **Note** | Host tailorDraft + Applications “Tailor draft”; fence tailor ↛ send |
+| **Epic** | PE28 Local Craft Studio |
+| **Story** | PE05-S06 — Run real on-device Agent (Ollama) |
+| **Status** | In progress |
+| **Note** | Loopback Ollama provider; free model guide; unblocks Craft (#103) |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE03-S04 | 2026-08-11 | Tailor résumé draft no send; PR #100 |
 | PE08-S01 | 2026-08-11 | Application drafts create/edit; soft-duplicate; PR #98 |
 | PE03-S10 | 2026-08-11 | AI parse import draft; Profile prefill; PR #97 |
 | PE05-S05 | 2026-08-11 | Offline / local-primary Agent; PR #96 |

@@ -54,6 +54,7 @@ describe("IPC allowlist", () => {
       "applications.list",
       "applications.createDraft",
       "applications.updateDraft",
+      "applications.tailorDraft",
     ]);
   });
 

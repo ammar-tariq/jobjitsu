@@ -4,15 +4,34 @@ Local Intelligence contracts: **AI Provider**, fake in-process provider, and **C
 
 ## Status
 
-| Piece                                                 | State                            |
-| ----------------------------------------------------- | -------------------------------- |
-| `AiProvider` / registry / context assembler contracts | Done                             |
-| `createFakeAiProvider`                                | Done — **no Ollama, no network** |
-| `createContextAssembler` (Context Builder)            | Done — allowlist + budget        |
-| `KnowledgeReader` port                                | Done — no-op OK until PE14       |
-| Real local model runner                               | Not yet                          |
+| Piece                                                 | State                          |
+| ----------------------------------------------------- | ------------------------------ |
+| `AiProvider` / registry / context assembler contracts | Done                           |
+| `createFakeAiProvider`                                | Done — tests / offline demos   |
+| `createOllamaAiProvider` (PE05-S06)                   | Done — loopback Ollama only    |
+| `createContextAssembler` (Context Builder)            | Done — allowlist + budget      |
+| `KnowledgeReader` port                                | Done — no-op OK until PE14     |
+| In-app model download UI                              | Not yet (use Ollama CLI / app) |
 
-## Fake AI
+## Local Ollama Agent (PE05-S06)
+
+```ts
+import { createOllamaAiProvider, createPathGatedAiProvider } from "@jobjitsu/ai";
+
+const inner = createOllamaAiProvider({
+  getModelId: async () => "qwen2.5:3b",
+});
+const provider = createPathGatedAiProvider({
+  inner,
+  getLocalModelPath: async () => "qwen2.5:3b",
+});
+```
+
+- Loopback only (`127.0.0.1` / `localhost`) — rejects remote base URLs
+- Desktop host defaults to Ollama; Vitest keeps the fake provider
+- Free model install guide: [LOCAL_AGENT_MODELS.md](../../docs/guides/LOCAL_AGENT_MODELS.md)
+
+## Fake AI (tests)
 
 ```ts
 import {
@@ -24,17 +43,16 @@ import {
 const inner = createFakeAiProvider();
 const provider = createPathGatedAiProvider({
   inner,
-  getLocalModelPath: async () => "/models/local.gguf",
+  getLocalModelPath: async () => "qwen2.5:3b",
 });
 const registry = createAiProviderRegistry([provider]);
 ```
 
 - `locality: "local"` with an honest “fake” health message
 - Deterministic `complete` / `embed`
-- `createPathGatedAiProvider` gates health/complete on a configured local model path (no weight load in `health`)
+- `createPathGatedAiProvider` gates health/complete on a configured model id/path (no weight load in `health`)
 - Registry keeps the first/local active until `setActive` — no silent remote promotion
-- Offline / local-primary: health + complete work with `fetch` disabled; local failure never auto-calls a remote provider
-- Safe for unit tests and early shell demos
+- Offline / local-primary: fake health + complete work with `fetch` disabled; local failure never auto-calls a remote provider
 
 ## Context Builder
 

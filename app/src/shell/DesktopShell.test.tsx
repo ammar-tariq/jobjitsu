@@ -587,14 +587,14 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Preferences" }));
     expect(screen.getByTestId("jj-local-model-path")).toBeInTheDocument();
     expect(
-      screen.getByText(/Choose a local model path in Preferences so Agent can run/i),
+      screen.getByText(/Choose a local Ollama model name so Agent can run/i),
     ).toBeInTheDocument();
 
-    const pathField = screen.getByRole("textbox", { name: "Model path" });
-    await user.type(pathField, "/models/jobjitsu-stub.gguf");
-    await user.click(screen.getByRole("button", { name: "Save model path" }));
+    const pathField = screen.getByRole("textbox", { name: "Ollama model name" });
+    await user.type(pathField, "qwen2.5:3b");
+    await user.click(screen.getByRole("button", { name: "Save model" }));
 
-    expect(await screen.findByText(/Model path saved/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Model saved\. Stored on this device/i)).toBeInTheDocument();
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
   });
 });
