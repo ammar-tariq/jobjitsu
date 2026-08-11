@@ -21,7 +21,7 @@ Never build multiple features in parallel in the same change set.
 
 | Story | Date | Notes |
 |-------|------|-------|
-| PE03-S10 | 2026-08-11 | Host parseImportDraft pre-fills review; calm unavailable fallback; UI↛AI |
+| PE03-S10 | 2026-08-11 | Host parseImportDraft pre-fills review; calm unavailable fallback; PR #97 |
 | PE05-S01 | 2026-07-23 | Fake provider health/complete; Ai.LocalModel*; no silent cloud fallback; PR #93 |
 | PE03-S09 | 2026-07-23 | Create Path from existing résumé; PR #92 |
 | PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |
