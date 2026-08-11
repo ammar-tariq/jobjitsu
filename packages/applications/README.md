@@ -10,8 +10,9 @@ Application draft lifecycle — create/edit on-device drafts linked to résumés
 | `createMemoryApplicationRepository`     | Done — browser-safe host               |
 | `createApplicationDraft` / update       | Done — emits DraftCreated / Updated    |
 | Duplicate soft-warn                     | Done — company + role + URL (+ req id) |
+| `resumeDraftText` on Application        | Done (PE03-S04) — editable tailor body |
 | List/detail UI polish                   | PE08-S04                               |
-| Cover letter / tailor / send            | Later stories                          |
+| Cover letter / send                     | Later stories                          |
 
 ## Create a draft
 

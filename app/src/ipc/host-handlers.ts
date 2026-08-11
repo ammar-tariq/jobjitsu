@@ -44,6 +44,7 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     roleId: application.roleId,
     resumeVersionId: application.resumeVersionId,
     notes: application.notes,
+    resumeDraftText: application.resumeDraftText,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -80,6 +81,15 @@ export type CreateHostIpcOptions = {
   readonly parseImportDraft?: (
     input: ResumeParseImportInputPayload,
   ) => Promise<ResumeParseImportResult>;
+  /**
+   * Host-owned résumé tailor (PE03-S04). UI never calls AI directly.
+   * When omitted, tailor returns calm unavailable.
+   */
+  readonly tailorApplicationDraft?: (input: ApplicationTailorDraftInput) => Promise<{
+    readonly application: Application | null;
+    readonly draftText: string;
+    readonly tailorStatus: "ready" | "unavailable" | "failed";
+  }>;
 };
 
 /**
@@ -106,6 +116,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const bus = options.bus;
   const onDataRootChanged = options.onDataRootChanged;
   const parseImportDraft = options.parseImportDraft;
+  const tailorApplicationDraft = options.tailorApplicationDraft;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {

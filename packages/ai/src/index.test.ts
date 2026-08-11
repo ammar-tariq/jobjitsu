@@ -25,7 +25,7 @@ describe("@jobjitsu/ai fake provider", () => {
       role: "tailor",
       prompt: "Rewrite this bullet for a staff engineer role",
     });
-    expect(result.text).toContain("[fake:tailor]");
+    expect(result.text).toContain("Tailored résumé draft");
     expect(result.modelId).toBe("fake-model");
   });
 

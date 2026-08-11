@@ -131,6 +131,12 @@ export function createMemoryApplicationRepository(): ApplicationRepository {
             : patch.notes !== undefined
               ? optionalText(patch.notes)
               : existing.notes,
+        resumeDraftText:
+          patch.resumeDraftText === null
+            ? undefined
+            : patch.resumeDraftText !== undefined
+              ? optionalText(patch.resumeDraftText)
+              : existing.resumeDraftText,
         stage,
         updatedAt: new Date().toISOString(),
       };

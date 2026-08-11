@@ -52,7 +52,7 @@ describe("@jobjitsu/ai offline / local-primary (PE05-S05)", () => {
       role: "tailor",
       prompt: "offline craft draft",
     });
-    expect(result.text).toContain("[fake:tailor]");
+    expect(result.text).toContain("Tailored résumé draft");
     expect(net.fetchCalls()).toBe(0);
   });
 

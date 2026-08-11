@@ -32,6 +32,8 @@ export type Application = {
   readonly roleId?: RoleId;
   readonly resumeVersionId?: string;
   readonly notes?: string;
+  /** Editable tailored résumé draft text — user remains author (PE03-S04). */
+  readonly resumeDraftText?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -61,6 +63,7 @@ export type ApplicationDraftPatch = {
   readonly roleId?: RoleId | null;
   readonly resumeVersionId?: string | null;
   readonly notes?: string | null;
+  readonly resumeDraftText?: string | null;
   readonly stage?: PipelineStage;
 };
 

@@ -3,6 +3,7 @@ import type {
   AiStatusSnapshot,
   ApplicationDraftCreateInput,
   ApplicationDraftUpdateInput,
+  ApplicationTailorDraftInput,
   CraftPreferencesPatchInput,
   IpcResultMap,
   PathPatchInput,
