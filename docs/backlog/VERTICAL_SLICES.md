@@ -21,7 +21,7 @@ Never build multiple features in parallel in the same change set.
 
 | Story | Date | Notes |
 |-------|------|-------|
-| PE05-S03 | 2026-08-11 | ContextAssembler allowlist/budget; no-op KnowledgeReader; host wired |
+| PE05-S03 | 2026-08-11 | ContextAssembler allowlist/budget; no-op KnowledgeReader; host wired; PR #95 |
 | PE05-S01 | 2026-07-23 | Fake provider health/complete; Ai.LocalModel*; no silent cloud fallback; PR #93 |
 | PE03-S09 | 2026-07-23 | Create Path from existing résumé; PR #92 |
 | PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |
