@@ -812,7 +812,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** CRUD + duplicate test.
 
-**Status:** proposed
+**Status:** done (2026-08-11)
 
 ### PE08-S02 — Generate cover letter draft
 

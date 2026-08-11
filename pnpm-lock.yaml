@@ -65,6 +65,9 @@ importers:
       '@jobjitsu/ai':
         specifier: workspace:*
         version: link:../packages/ai
+      '@jobjitsu/applications':
+        specifier: workspace:*
+        version: link:../packages/applications
       '@jobjitsu/config':
         specifier: workspace:^
         version: link:../packages/config
@@ -203,6 +206,12 @@ importers:
       '@jobjitsu/core':
         specifier: workspace:*
         version: link:../core
+      '@jobjitsu/events':
+        specifier: workspace:*
+        version: link:../events
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@jobjitsu/storage':
         specifier: workspace:*
         version: link:../storage

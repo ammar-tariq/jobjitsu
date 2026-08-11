@@ -1,7 +1,21 @@
-import { createAppError, err, ok } from "@jobjitsu/shared";
+import {
+  createApplicationDraft,
+  trackingStatusForStage,
+  updateApplicationDraft,
+  type Application,
+  type ApplicationRepository,
+} from "@jobjitsu/applications";
+import type { EventBus } from "@jobjitsu/events";
 import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
-import type { EventBus } from "@jobjitsu/events";
+import {
+  createAppError,
+  err,
+  isPipelineStage,
+  ok,
+  type ApplicationId,
+  type RoleId,
+} from "@jobjitsu/shared";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import {
   createMemoryDataRootStore,
@@ -9,8 +23,25 @@ import {
   type DataRootStore,
 } from "../host/data-root-store.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
-import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
+import type { AiStatusSnapshot, ApplicationSnapshot, ThemePreference } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
+
+function toApplicationSnapshot(application: Application): ApplicationSnapshot {
+  return {
+    id: application.id,
+    stage: application.stage,
+    trackingStatus: trackingStatusForStage(application.stage),
+    companyName: application.companyName,
+    roleTitle: application.roleTitle,
+    sourceUrl: application.sourceUrl,
+    requisitionId: application.requisitionId,
+    roleId: application.roleId,
+    resumeVersionId: application.resumeVersionId,
+    notes: application.notes,
+    createdAt: application.createdAt,
+    updatedAt: application.updatedAt,
+  };
+}
 
 export type CreateHostIpcOptions = {
   readonly appearance?: AppearanceStore;
@@ -24,6 +55,8 @@ export type CreateHostIpcOptions = {
   readonly getResumeLibrary?: () => ResumeLibrary | undefined;
   readonly pathLibrary?: PathLibrary;
   readonly getPathLibrary?: () => PathLibrary | undefined;
+  readonly applications?: ApplicationRepository;
+  readonly getApplications?: () => ApplicationRepository | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly getPreferences?: () => PreferencesFacade | undefined;
@@ -37,7 +70,7 @@ export type CreateHostIpcOptions = {
 };
 
 /**
- * Host IPC handlers — allowlisted only; no AI complete.
+ * Host IPC handlers — allowlisted only; no AI complete / send.
  */
 export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHandlerMap {
   const getAppearance =
@@ -53,6 +86,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const getProfiles = options.getProfiles ?? (() => options.profiles);
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const getPathLibrary = options.getPathLibrary ?? (() => options.pathLibrary);
+  const getApplications = options.getApplications ?? (() => options.applications);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const getPreferences = options.getPreferences ?? (() => options.preferences);
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
@@ -583,6 +617,121 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "Those preferences could not be saved. Try again.",
             detail: "preferences:craft",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.list": async () => {
+      const applications = getApplications();
+      if (!applications) {
+        return ok({ applications: [] });
+      }
+      const listed = await applications.list();
+      return ok({ applications: listed.map(toApplicationSnapshot) });
+    },
+    "applications.createDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      try {
+        const result = await createApplicationDraft({
+          repository: applications,
+          bus,
+          input: {
+            companyName: payload.companyName,
+            roleTitle: payload.roleTitle,
+            sourceUrl: payload.sourceUrl,
+            requisitionId: payload.requisitionId,
+            roleId: payload.roleId ? (payload.roleId as RoleId) : undefined,
+            resumeVersionId: payload.resumeVersionId,
+            notes: payload.notes,
+          },
+        });
+        return ok({
+          application: toApplicationSnapshot(result.application),
+          duplicateWarning: result.duplicateWarning
+            ? {
+                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
+                message: result.duplicateWarning.message,
+              }
+            : undefined,
+        });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not create application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be created. Try again.",
+            detail: "applications:create",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.updateDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      if (payload.stage !== undefined && !isPipelineStage(payload.stage)) {
+        return err(
+          createAppError("validation", "Unknown application stage", {
+            message: "That stage is not recognized. Try again.",
+            detail: "applications:stage",
+          }),
+        );
+      }
+      try {
+        const result = await updateApplicationDraft({
+          repository: applications,
+          bus,
+          patch: {
+            id: payload.id as ApplicationId,
+            companyName: payload.companyName,
+            roleTitle: payload.roleTitle,
+            sourceUrl: payload.sourceUrl,
+            requisitionId: payload.requisitionId,
+            roleId:
+              payload.roleId === null
+                ? null
+                : payload.roleId
+                  ? (payload.roleId as RoleId)
+                  : undefined,
+            resumeVersionId: payload.resumeVersionId,
+            notes: payload.notes,
+            stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
+          },
+        });
+        return ok({
+          application: toApplicationSnapshot(result.application),
+          duplicateWarning: result.duplicateWarning
+            ? {
+                matchedApplicationId: result.duplicateWarning.matchedApplicationId,
+                message: result.duplicateWarning.message,
+              }
+            : undefined,
+        });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be updated. Try again.",
+            detail: "applications:update",
             cause,
           }),
         );

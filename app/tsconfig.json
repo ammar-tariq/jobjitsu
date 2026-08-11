@@ -15,6 +15,7 @@
     { "path": "../packages/events" },
     { "path": "../packages/logger" },
     { "path": "../packages/ai" },
+    { "path": "../packages/applications" },
     { "path": "../packages/identity" },
     { "path": "../packages/preferences" },
     { "path": "../packages/storage" },

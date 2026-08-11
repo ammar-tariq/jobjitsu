@@ -12,15 +12,17 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE05 Local Intelligence |
-| **Story** | PE05-S01 — AI Provider health and complete |
-| **Status** | In progress |
-| **Note** | Fake provider + registry; Ai.LocalModel* on host cascade; no silent cloud fallback |
+| **Epic** | PE08 Applications & Pipeline |
+| **Story** | PE08-S01 — Create and edit application drafts |
+| **Status** | In review |
+| **Note** | Application entity + DraftCreated; soft duplicate warn; Applications UI create/edit |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE08-S01 | 2026-08-11 | Application drafts + duplicate soft-warn; Applications create/edit UI |
+| PE05-S01 | 2026-07-23 | Fake provider health/complete; Ai.LocalModel*; no silent cloud fallback; PR #93 |
 | PE03-S09 | 2026-07-23 | Create Path from existing résumé; PR #92 |
 | PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |
 | PE03-S07 | 2026-07-23 | Attach identity/path/both after review; PR #90 |

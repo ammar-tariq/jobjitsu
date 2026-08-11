@@ -30,6 +30,9 @@ export const IPC_ALLOWLIST = [
   "preferences.setApprovalBeforeSend",
   "preferences.getCraftPreferences",
   "preferences.setCraftPreferences",
+  "applications.list",
+  "applications.createDraft",
+  "applications.updateDraft",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -138,6 +141,48 @@ export type CraftPreferencesPatchInput = {
   readonly constraints?: readonly string[];
 };
 
+export type ApplicationSnapshot = {
+  readonly id: string;
+  readonly stage: string;
+  readonly trackingStatus: string;
+  readonly companyName: string;
+  readonly roleTitle: string;
+  readonly sourceUrl?: string;
+  readonly requisitionId?: string;
+  readonly roleId?: string;
+  readonly resumeVersionId?: string;
+  readonly notes?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+};
+
+export type ApplicationDraftCreateInput = {
+  readonly companyName: string;
+  readonly roleTitle: string;
+  readonly sourceUrl?: string;
+  readonly requisitionId?: string;
+  readonly roleId?: string;
+  readonly resumeVersionId?: string;
+  readonly notes?: string;
+};
+
+export type ApplicationDraftUpdateInput = {
+  readonly id: string;
+  readonly companyName?: string;
+  readonly roleTitle?: string;
+  readonly sourceUrl?: string | null;
+  readonly requisitionId?: string | null;
+  readonly roleId?: string | null;
+  readonly resumeVersionId?: string | null;
+  readonly notes?: string | null;
+  readonly stage?: string;
+};
+
+export type ApplicationDuplicateWarningSnapshot = {
+  readonly matchedApplicationId: string;
+  readonly message: string;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
@@ -164,6 +209,9 @@ export type IpcPayloadMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": undefined;
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
+  readonly "applications.list": undefined;
+  readonly "applications.createDraft": ApplicationDraftCreateInput;
+  readonly "applications.updateDraft": ApplicationDraftUpdateInput;
 };
 
 export type IpcResultMap = {
@@ -208,6 +256,15 @@ export type IpcResultMap = {
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
+  readonly "applications.list": { readonly applications: readonly ApplicationSnapshot[] };
+  readonly "applications.createDraft": {
+    readonly application: ApplicationSnapshot;
+    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
+  };
+  readonly "applications.updateDraft": {
+    readonly application: ApplicationSnapshot;
+    readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
+  };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

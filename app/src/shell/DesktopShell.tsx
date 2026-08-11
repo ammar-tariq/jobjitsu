@@ -7,6 +7,7 @@ import type { IpcBridge } from "../ipc/bridge.js";
 import type { ThemePreference } from "../ipc/commands.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { agentPrivacyStateFromStatus } from "./agent-privacy.js";
+import { ApplicationsView } from "./ApplicationsView.js";
 import { ComingSoonView } from "./ComingSoonView.js";
 import { EventActivityView } from "./EventActivityView.js";
 import { useHostActivity } from "./HostProvider.js";
@@ -76,7 +77,9 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             pt: 3,
           }}
         >
-          {activeId === "agent" ? (
+          {activeId === "applications" ? (
+            <ApplicationsView bridge={bridge} />
+          ) : activeId === "agent" ? (
             <EventActivityView />
           ) : activeId === "profile" ? (
             <ProfileView bridge={bridge} />

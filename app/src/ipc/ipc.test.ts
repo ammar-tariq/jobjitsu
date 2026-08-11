@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createMemoryApplicationRepository } from "@jobjitsu/applications";
 import { createInMemoryEventBus, type EventPayloadMap } from "@jobjitsu/events";
 import {
   createMemoryPathLibrary,
@@ -44,6 +45,9 @@ describe("IPC allowlist", () => {
       "preferences.setApprovalBeforeSend",
       "preferences.getCraftPreferences",
       "preferences.setCraftPreferences",
+      "applications.list",
+      "applications.createDraft",
+      "applications.updateDraft",
     ]);
   });
 
@@ -111,6 +115,7 @@ describe("typed IPC bridge", () => {
     expect(Object.keys(bridge).sort()).toEqual([
       "archivePath",
       "attachResume",
+      "createApplicationDraft",
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
@@ -119,6 +124,7 @@ describe("typed IPC bridge", () => {
       "getSelectedResume",
       "getTheme",
       "importResume",
+      "listApplications",
       "listPaths",
       "listProfiles",
       "listResumeVersions",
@@ -133,8 +139,39 @@ describe("typed IPC bridge", () => {
       "setDataRoot",
       "setProfile",
       "setTheme",
+      "updateApplicationDraft",
       "upsertPath",
     ]);
+  });
+
+  it("creates application drafts with soft duplicate warn and no send", async () => {
+    const bus = createInMemoryEventBus();
+    const names: string[] = [];
+    bus.subscribeAll((event) => {
+      names.push(event.name);
+    });
+    const applications = createMemoryApplicationRepository();
+    const bridge = createIpcBridge(createHostIpcDispatcher({ applications, bus }));
+
+    const first = await bridge.createApplicationDraft({
+      companyName: "Acme",
+      roleTitle: "Staff Engineer",
+      sourceUrl: "https://example.com/jobs/1",
+    });
+    expect(first.ok && first.value.application.trackingStatus).toBe("Discovered");
+    expect(first.ok && first.value.duplicateWarning).toBeUndefined();
+    expect(names).toContain("Application.DraftCreated");
+
+    const second = await bridge.createApplicationDraft({
+      companyName: "Acme",
+      roleTitle: "Staff Engineer",
+      sourceUrl: "https://example.com/jobs/1",
+    });
+    expect(second.ok && second.value.duplicateWarning?.message).toMatch(/similar/i);
+
+    const listed = await bridge.listApplications();
+    expect(listed.ok && listed.value.applications).toHaveLength(2);
+    expect(bridge).not.toHaveProperty("send");
   });
 
   it("reads and writes profile through identity APIs", async () => {

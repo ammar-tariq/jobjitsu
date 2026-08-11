@@ -1,6 +1,8 @@
 import type { Result } from "@jobjitsu/shared";
 import type {
   AiStatusSnapshot,
+  ApplicationDraftCreateInput,
+  ApplicationDraftUpdateInput,
   CraftPreferencesPatchInput,
   IpcResultMap,
   PathPatchInput,
@@ -57,6 +59,13 @@ export type IpcBridge = {
   readonly setCraftPreferences: (
     patch: CraftPreferencesPatchInput,
   ) => Promise<Result<IpcResultMap["preferences.setCraftPreferences"]>>;
+  readonly listApplications: () => Promise<Result<IpcResultMap["applications.list"]>>;
+  readonly createApplicationDraft: (
+    input: ApplicationDraftCreateInput,
+  ) => Promise<Result<IpcResultMap["applications.createDraft"]>>;
+  readonly updateApplicationDraft: (
+    input: ApplicationDraftUpdateInput,
+  ) => Promise<Result<IpcResultMap["applications.updateDraft"]>>;
 };
 
 /**
@@ -179,6 +188,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async setCraftPreferences(patch: CraftPreferencesPatchInput) {
       return (await dispatcher.invoke("preferences.setCraftPreferences", patch)) as Result<
         IpcResultMap["preferences.setCraftPreferences"]
+      >;
+    },
+    async listApplications() {
+      return (await dispatcher.invoke("applications.list")) as Result<
+        IpcResultMap["applications.list"]
+      >;
+    },
+    async createApplicationDraft(input: ApplicationDraftCreateInput) {
+      return (await dispatcher.invoke("applications.createDraft", input)) as Result<
+        IpcResultMap["applications.createDraft"]
+      >;
+    },
+    async updateApplicationDraft(input: ApplicationDraftUpdateInput) {
+      return (await dispatcher.invoke("applications.updateDraft", input)) as Result<
+        IpcResultMap["applications.updateDraft"]
       >;
     },
   };

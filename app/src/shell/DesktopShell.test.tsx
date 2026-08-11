@@ -22,7 +22,7 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
-    expect(screen.getByText("Coming Soon")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
@@ -497,5 +497,41 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
     expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
+  });
+
+  it("creates and edits application drafts with soft duplicate warn — no send", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    const created: string[] = [];
+    runtime.bus.subscribe("Application.DraftCreated", async (event) => {
+      created.push(event.payload.applicationId);
+    });
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
+    await user.type(screen.getByTestId("jj-application-source-url"), "https://example.com/jobs/1");
+    await user.click(screen.getByTestId("jj-application-save"));
+
+    expect(
+      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/Acme · Staff Engineer/i)).toBeInTheDocument();
+    expect(created).toHaveLength(1);
+    expect(await runtime.applications.list()).toHaveLength(1);
+
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
+    await user.type(screen.getByTestId("jj-application-source-url"), "https://example.com/jobs/1");
+    await user.click(screen.getByTestId("jj-application-save"));
+
+    expect(await screen.findByTestId("jj-application-duplicate-warn")).toHaveTextContent(
+      /similar/i,
+    );
+    expect(await runtime.applications.list()).toHaveLength(2);
+    expect(runtime.bridge).not.toHaveProperty("send");
   });
 });
