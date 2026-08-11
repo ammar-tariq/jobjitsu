@@ -51,6 +51,7 @@ import {
 import type { AiStatusSnapshot } from "../ipc/commands.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 import { parseImportDraftWithAi } from "./parse-import-draft.js";
+import { refineCraftChatWithAi } from "./craft-chat-refine.js";
 import { generateCraftDraftsWithAi } from "./craft-generate.js";
 import { tailorApplicationDraftWithAi } from "./tailor-application-draft.js";
 import {
@@ -312,6 +313,12 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       }),
     generateCraftDrafts: (input) =>
       generateCraftDraftsWithAi({
+        ai,
+        assembler,
+        input,
+      }),
+    refineCraftChat: (input) =>
+      refineCraftChatWithAi({
         ai,
         assembler,
         input,

@@ -68,8 +68,13 @@ ollama run qwen2.5:3b "Write one calm résumé summary sentence for a staff engi
 | Slow first reply | First load pulls weights into memory — wait, then retry |
 | Want better quality | Pull `qwen2.5:7b` or `llama3.1:8b` if you have RAM |
 
+## Craft chat (PE28-S03)
+
+On **Craft**, after drafts exist, use **Refine with Agent** for a focused edit. If the résumé/JD is thin or the request asks to invent experience, Agent asks clarifying questions instead of fabricating facts. Nothing is sent from Craft.
+
 ## Related
 
 - Epic: PE28 Local Craft Studio (#101)
 - Story: PE05-S06 real on-device Agent (#102)
+- Story: PE28-S03 craft chat refine (#105)
 - Architecture: [AI_ARCHITECTURE.md](../architecture/AI_ARCHITECTURE.md)

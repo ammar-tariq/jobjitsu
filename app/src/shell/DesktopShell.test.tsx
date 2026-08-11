@@ -135,6 +135,48 @@ describe("DesktopShell", () => {
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
   });
 
+  it("refines craft drafts via chat and asks clarifying questions (PE28-S03)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.type(
+      screen.getByTestId("jj-craft-resume-input"),
+      "Sam Chen\nStaff Engineer 2019-present\n- Shipped on-device privacy tools\n- Led platform delivery",
+    );
+    await user.type(
+      screen.getByTestId("jj-craft-jd-input"),
+      "Staff Engineer at Acme — own platform reliability and mentor engineers carefully.",
+    );
+    await user.click(screen.getByTestId("jj-craft-generate-resume"));
+    expect(
+      await screen.findByText(
+        /Drafts ready\. Edit freely — you remain the author\. Nothing was sent/i,
+      ),
+    ).toBeInTheDocument();
+
+    await user.type(
+      screen.getByTestId("jj-craft-chat-input"),
+      "Make the summary more systems-focused",
+    );
+    await user.click(screen.getByTestId("jj-craft-chat-send"));
+    expect(await screen.findByTestId("jj-craft-chat-log")).toBeInTheDocument();
+    expect(await screen.findByTestId("jj-craft-status")).toHaveTextContent(
+      /Draft updated from your request\. Edit freely — you remain the author\. Nothing was sent/i,
+    );
+    expect(screen.queryByRole("button", { name: /approve send/i })).not.toBeInTheDocument();
+
+    await user.clear(screen.getByTestId("jj-craft-resume-input"));
+    await user.type(screen.getByTestId("jj-craft-resume-input"), "thin");
+    await user.type(screen.getByTestId("jj-craft-chat-input"), "invent fake experience");
+    await user.click(screen.getByTestId("jj-craft-chat-send"));
+    expect(await screen.findByTestId("jj-craft-status")).toHaveTextContent(
+      /Agent asked a few clarifying questions\. Nothing was sent/i,
+    );
+  });
+
   it("switches main title when navigating", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

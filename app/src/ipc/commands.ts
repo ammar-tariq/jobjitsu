@@ -39,6 +39,7 @@ export const IPC_ALLOWLIST = [
   "applications.tailorDraft",
   "craft.generate",
   "craft.exportResume",
+  "craft.chatRefine",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -246,6 +247,32 @@ export type CraftExportResumeResult = {
   readonly message?: string;
 };
 
+export type CraftChatTarget = "resume" | "cover_letter";
+
+export type CraftChatMessageSnapshot = {
+  readonly role: "user" | "assistant";
+  readonly content: string;
+};
+
+export type CraftChatRefineInput = {
+  readonly message: string;
+  readonly target: CraftChatTarget;
+  readonly resumeText: string;
+  readonly jobDescription: string;
+  readonly aboutCompany?: string;
+  readonly resumeDraft: string;
+  readonly coverLetterDraft: string;
+  readonly history?: readonly CraftChatMessageSnapshot[];
+};
+
+export type CraftChatRefineResult = {
+  readonly chatStatus: "reply" | "clarify" | "unavailable" | "failed" | "invalid";
+  readonly assistantMessage: string;
+  readonly clarifyingQuestions: readonly string[];
+  readonly resumeDraft: string;
+  readonly coverLetterDraft: string;
+};
+
 export type ApplicationDuplicateWarningSnapshot = {
   readonly matchedApplicationId: string;
   readonly message: string;
@@ -286,6 +313,7 @@ export type IpcPayloadMap = {
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
   readonly "craft.generate": CraftGenerateInput;
   readonly "craft.exportResume": CraftExportResumeInput;
+  readonly "craft.chatRefine": CraftChatRefineInput;
 };
 
 export type IpcResultMap = {
@@ -345,6 +373,7 @@ export type IpcResultMap = {
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
   readonly "craft.generate": CraftGenerateResult;
   readonly "craft.exportResume": CraftExportResumeResult;
+  readonly "craft.chatRefine": CraftChatRefineResult;
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

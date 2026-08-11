@@ -728,6 +728,27 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** PDF magic header; export ↛ send.
 
+**Status:** done (2026-08-11)
+
+### CS-S03 — Craft chat refine with clarifying questions
+
+> Board id: **PE28-S03** (#105)
+
+**Description:** As a user, I can chat with Agent to refine drafts; Agent asks clarifying questions instead of inventing facts.
+
+**Acceptance criteria:**
+  - Chat under Craft for résumé / cover letter target.
+  - Thin inputs or invent requests → clarifying questions (no fabricated employers).
+  - Successful refine updates the editable draft; nothing is sent.
+
+**Dependencies:** CS-S01 / PE28-S01, PE05-S06
+
+**Priority:** P0
+
+**Technical notes:** GitHub #105 · IPC `craft.chatRefine`.
+
+**Testing notes:** Clarify policy unit tests; chat ↛ send fence.
+
 **Status:** in progress (2026-08-11)
 
 ## PE06

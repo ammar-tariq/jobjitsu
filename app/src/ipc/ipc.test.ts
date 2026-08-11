@@ -11,6 +11,7 @@ import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/pr
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
+import { refineCraftChatWithAi } from "../host/craft-chat-refine.js";
 import { generateCraftDraftsWithAi } from "../host/craft-generate.js";
 import { tailorApplicationDraftWithAi } from "../host/tailor-application-draft.js";
 import {
@@ -58,6 +59,7 @@ describe("IPC allowlist", () => {
       "applications.tailorDraft",
       "craft.generate",
       "craft.exportResume",
+      "craft.chatRefine",
     ]);
   });
 
@@ -144,6 +146,7 @@ describe("typed IPC bridge", () => {
       "parseImportDraft",
       "pickDataRoot",
       "ping",
+      "refineCraftChat",
       "resetDataRoot",
       "selectPath",
       "selectProfile",
@@ -222,6 +225,27 @@ describe("typed IPC bridge", () => {
     expect(tailored.ok && tailored.value.draftText).toMatch(/Tailored résumé draft/i);
     expect(tailored.ok && tailored.value.application?.trackingStatus).toBe("ResumePrepared");
     expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("clarifies thin craft chat without exposing send", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        refineCraftChat: (input) => refineCraftChatWithAi({ ai, assembler, input }),
+      }),
+    );
+    const clarified = await bridge.refineCraftChat({
+      message: "Rewrite everything",
+      target: "resume",
+      resumeText: "x",
+      jobDescription: "y",
+      resumeDraft: "",
+      coverLetterDraft: "",
+    });
+    expect(clarified.ok && clarified.value.chatStatus).toBe("clarify");
+    expect(clarified.ok && clarified.value.clarifyingQuestions.length).toBeGreaterThan(0);
     expect(bridge).not.toHaveProperty("approveSend");
   });
 

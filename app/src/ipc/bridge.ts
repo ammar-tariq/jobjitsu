@@ -4,6 +4,7 @@ import type {
   ApplicationDraftCreateInput,
   ApplicationDraftUpdateInput,
   ApplicationTailorDraftInput,
+  CraftChatRefineInput,
   CraftExportResumeInput,
   CraftGenerateInput,
   CraftPreferencesPatchInput,
@@ -86,6 +87,9 @@ export type IpcBridge = {
   readonly exportCraftResume: (
     input: CraftExportResumeInput,
   ) => Promise<Result<IpcResultMap["craft.exportResume"]>>;
+  readonly refineCraftChat: (
+    input: CraftChatRefineInput,
+  ) => Promise<Result<IpcResultMap["craft.chatRefine"]>>;
 };
 
 /**
@@ -253,6 +257,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async exportCraftResume(input: CraftExportResumeInput) {
       return (await dispatcher.invoke("craft.exportResume", input)) as Result<
         IpcResultMap["craft.exportResume"]
+      >;
+    },
+    async refineCraftChat(input: CraftChatRefineInput) {
+      return (await dispatcher.invoke("craft.chatRefine", input)) as Result<
+        IpcResultMap["craft.chatRefine"]
       >;
     },
   };
