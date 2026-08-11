@@ -757,12 +757,11 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
     expect(screen.getByTestId("jj-local-model-path")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Choose a local Ollama model name so Agent can run/i),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("jj-local-model-select")).toBeInTheDocument();
+    expect(screen.getByText(/Choose a local model so Agent can run/i)).toBeInTheDocument();
 
-    const pathField = screen.getByRole("textbox", { name: "Ollama model name" });
-    await user.type(pathField, "qwen2.5:3b");
+    await user.click(screen.getByLabelText("Installed model"));
+    await user.click(await screen.findByRole("option", { name: "qwen2.5:3b" }));
     await user.click(screen.getByRole("button", { name: "Save model" }));
 
     expect(await screen.findByText(/Model saved\. Stored on this device/i)).toBeInTheDocument();

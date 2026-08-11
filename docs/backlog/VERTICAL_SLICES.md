@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE08 Applications & Pipeline |
-| **Story** | PE08-S04 — List and open applications |
+| **Epic** | PE05 Local Intelligence |
+| **Story** | PE05-S07 — List on-device Agent models from Ollama |
 | **Status** | In progress |
-| **Note** | List status; open detail; calm empty; no send |
+| **Note** | Preferences picker from loopback `/api/tags` |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE08-S04 | 2026-08-11 | Applications list + open detail; PR #111 |
 | PE08-S02 | 2026-08-11 | Application cover letter draft; PR #110 |
 | PE28-S03 | 2026-08-11 | Craft chat refine + clarifying questions; PR #109 |
 | PE28-S02 | 2026-08-11 | HTML preview + local PDF export; PR #108 |

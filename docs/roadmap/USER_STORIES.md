@@ -684,6 +684,26 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Status:** done (2026-08-11)
 
+### PE05-S07 — List on-device Agent models from Ollama
+
+**Description:** As a user, I can pick an installed local model from a list instead of typing its name.
+
+**Acceptance criteria:**
+  - Host lists models from loopback Ollama (`/api/tags`) via allowlisted IPC.
+  - Preferences shows a picker with Refresh; calm copy when Ollama is down or empty.
+  - Saving still stores the selected name in `ai.localModelPath`.
+  - Shell never calls Ollama/network directly; UI says Agent.
+
+**Dependencies:** PE05-S06
+
+**Priority:** P0
+
+**Technical notes:** GitHub #112 · IPC `ai.listLocalModels` · `listOllamaModels`.
+
+**Testing notes:** Mocked tags list; Preferences select + save; list ↛ send.
+
+**Status:** done (2026-08-11)
+
 ### CS-S01 — Craft screen: tailored résumé + cover letter from JD
 
 > Board id: **PE28-S01** (#103) under Local Craft Studio epic (#101).  

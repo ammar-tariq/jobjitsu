@@ -4,6 +4,7 @@ import {
   createContextAssembler,
   createFakeAiProvider,
   createOllamaAiProvider,
+  listOllamaModels,
   createPathGatedAiProvider,
 } from "@jobjitsu/ai";
 import {
@@ -297,6 +298,20 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     fileSaver,
     onDataRootChanged: options.onDataRootChanged,
     getAiStatus: () => aiStatus,
+    listLocalModels: async () => {
+      if (defaultToFakeAi) {
+        return {
+          models: ["qwen2.5:3b", "qwen3:8b"],
+          listStatus: "ready" as const,
+        };
+      }
+      const listed = await listOllamaModels();
+      return {
+        models: listed.models,
+        listStatus: listed.status,
+        message: listed.message,
+      };
+    },
     bus,
     parseImportDraft: (input) =>
       parseImportDraftWithAi({

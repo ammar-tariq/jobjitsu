@@ -9,6 +9,7 @@ export const IPC_ALLOWLIST = [
   "theme.get",
   "theme.set",
   "ai.getStatus",
+  "ai.listLocalModels",
   "identity.getProfile",
   "identity.setProfile",
   "identity.listProfiles",
@@ -46,6 +47,14 @@ export const IPC_ALLOWLIST = [
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
 
 export type ThemePreference = "dark" | "light";
+
+export type LocalModelsListStatus = "ready" | "empty" | "unavailable";
+
+export type LocalModelsListResult = {
+  readonly models: readonly string[];
+  readonly listStatus: LocalModelsListStatus;
+  readonly message?: string;
+};
 
 export type AiStatusSnapshot = {
   readonly ready: boolean;
@@ -298,6 +307,7 @@ export type IpcPayloadMap = {
   readonly "theme.get": undefined;
   readonly "theme.set": { readonly theme: ThemePreference };
   readonly "ai.getStatus": undefined;
+  readonly "ai.listLocalModels": undefined;
   readonly "identity.getProfile": undefined;
   readonly "identity.setProfile": ProfilePatchInput;
   readonly "identity.listProfiles": undefined;
@@ -337,6 +347,7 @@ export type IpcResultMap = {
   readonly "theme.get": { readonly theme: ThemePreference };
   readonly "theme.set": { readonly theme: ThemePreference };
   readonly "ai.getStatus": AiStatusSnapshot;
+  readonly "ai.listLocalModels": LocalModelsListResult;
   readonly "identity.getProfile": { readonly profile: ProfileSnapshot | null };
   readonly "identity.setProfile": { readonly profile: ProfileSnapshot };
   readonly "identity.listProfiles": {

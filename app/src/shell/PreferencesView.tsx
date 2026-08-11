@@ -1,12 +1,16 @@
 import { useEffect, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { DataRootSnapshot, ThemePreference } from "../ipc/commands.js";
+import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -15,7 +19,8 @@ export type PreferencesViewProps = {
 };
 
 /**
- * Preferences — data folder (and appearance). Profile / Paths live under Profile.
+ * Preferences — data folder, on-device Agent model picker, appearance.
+ * Profile / Paths live under Profile. Shell never calls Ollama directly.
  */
 export function PreferencesView({
   theme,
@@ -29,6 +34,26 @@ export function PreferencesView({
   const [modelPathDraft, setModelPathDraft] = useState("");
   const [modelStatus, setModelStatus] = useState<string | null>(null);
   const [savingModelPath, setSavingModelPath] = useState(false);
+  const [localModels, setLocalModels] = useState<readonly string[]>([]);
+  const [listStatus, setListStatus] = useState<LocalModelsListStatus | null>(null);
+  const [listMessage, setListMessage] = useState<string | null>(null);
+  const [listingModels, setListingModels] = useState(false);
+
+  const refreshLocalModels = (): void => {
+    setListingModels(true);
+    void bridge.listLocalModels().then((result) => {
+      setListingModels(false);
+      if (!result.ok) {
+        setLocalModels([]);
+        setListStatus("unavailable");
+        setListMessage(result.error.message ?? result.error.title);
+        return;
+      }
+      setLocalModels(result.value.models);
+      setListStatus(result.value.listStatus);
+      setListMessage(result.value.message ?? null);
+    });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -42,6 +67,20 @@ export function PreferencesView({
       if (!cancelled && result.ok) {
         setModelPathDraft(result.value.path ?? "");
       }
+    });
+    void bridge.listLocalModels().then((result) => {
+      if (cancelled) {
+        return;
+      }
+      if (!result.ok) {
+        setLocalModels([]);
+        setListStatus("unavailable");
+        setListMessage(result.error.message ?? result.error.title);
+        return;
+      }
+      setLocalModels(result.value.models);
+      setListStatus(result.value.listStatus);
+      setListMessage(result.value.message ?? null);
     });
     return () => {
       cancelled = true;
@@ -59,14 +98,17 @@ export function PreferencesView({
       }
       setModelPathDraft(result.value.path ?? "");
       if (!result.value.path) {
-        setModelStatus(
-          "Model cleared. Choose an Ollama model name so Agent can run on this device.",
-        );
+        setModelStatus("Model cleared. Choose a local model so Agent can run on this device.");
         return;
       }
       setModelStatus("Model saved. Stored on this device.");
     });
   };
+
+  const selectOptions =
+    modelPathDraft.trim() && !localModels.includes(modelPathDraft.trim())
+      ? [modelPathDraft.trim(), ...localModels]
+      : localModels;
 
   const onSaveDataRoot = (): void => {
     setSavingDataRoot(true);
@@ -180,31 +222,63 @@ export function PreferencesView({
           On-device Agent model
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Agent runs through local Ollama on this device. Install Ollama, pull a free model, then
-          save the model name here (for example qwen2.5:3b). Nothing leaves this device until Agent
-          is ready.
+          Agent runs through local Ollama on this device. Choose an installed model from the list —
+          nothing leaves this device until Agent is ready.
         </Typography>
-        <TextField
-          label="Ollama model name"
-          value={modelPathDraft}
-          onChange={(event) => setModelPathDraft(event.target.value)}
-          size="small"
-          fullWidth
-          placeholder="qwen2.5:3b"
-          slotProps={{ htmlInput: { "data-testid": "jj-local-model-path-input" } }}
-        />
+        <FormControl size="small" fullWidth>
+          <InputLabel id="jj-local-model-select-label">Installed model</InputLabel>
+          <Select
+            labelId="jj-local-model-select-label"
+            label="Installed model"
+            value={modelPathDraft}
+            onChange={(event) => setModelPathDraft(String(event.target.value))}
+            displayEmpty
+            data-testid="jj-local-model-select"
+            inputProps={{ "data-testid": "jj-local-model-path-input" }}
+          >
+            <MenuItem value="">
+              <em>None selected</em>
+            </MenuItem>
+            {selectOptions.map((name) => (
+              <MenuItem key={name} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button variant="contained" onClick={onSaveModelPath} disabled={savingModelPath}>
+          <Button
+            variant="contained"
+            onClick={onSaveModelPath}
+            disabled={savingModelPath || listingModels}
+          >
             Save model
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={refreshLocalModels}
+            disabled={listingModels || savingModelPath}
+            data-testid="jj-local-model-refresh"
+          >
+            {listingModels ? "Refreshing…" : "Refresh list"}
           </Button>
         </Stack>
         {modelStatus ? (
           <Typography role="status" color="text.secondary" variant="body2">
             {modelStatus}
           </Typography>
-        ) : modelPathDraft.trim().length === 0 ? (
+        ) : listMessage ? (
+          <Typography
+            role="status"
+            color="text.secondary"
+            variant="body2"
+            data-testid="jj-local-model-list-status"
+          >
+            {listMessage}
+          </Typography>
+        ) : listStatus === "ready" && modelPathDraft.trim().length === 0 ? (
           <Typography role="status" color="text.secondary" variant="body2">
-            Choose a local Ollama model name so Agent can run on this device.
+            Choose a local model so Agent can run on this device.
           </Typography>
         ) : null}
       </Stack>

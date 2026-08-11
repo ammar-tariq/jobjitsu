@@ -30,6 +30,7 @@ describe("IPC allowlist", () => {
       "theme.get",
       "theme.set",
       "ai.getStatus",
+      "ai.listLocalModels",
       "identity.getProfile",
       "identity.setProfile",
       "identity.listProfiles",
@@ -126,6 +127,35 @@ describe("typed IPC bridge", () => {
     expect(status.ok && status.value).toEqual({ ready: true, locality: "local" });
 
     expect(bridge).not.toHaveProperty("complete");
+
+    const listedUnavailable = await bridge.listLocalModels();
+    expect(listedUnavailable.ok && listedUnavailable.value.listStatus).toBe("unavailable");
+  });
+
+  it("lists local Ollama models via host without exposing send", async () => {
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        listLocalModels: async () => ({
+          models: ["qwen3:8b", "qwen3.6:27b"],
+          listStatus: "ready",
+        }),
+      }),
+    );
+    const listed = await bridge.listLocalModels();
+    expect(listed.ok && listed.value).toEqual({
+      models: ["qwen3:8b", "qwen3.6:27b"],
+      listStatus: "ready",
+    });
+    expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("exposes bridge keys for allowlisted methods only", async () => {
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        aiStatus: { ready: true, locality: "local" },
+      }),
+    );
     expect(Object.keys(bridge).sort()).toEqual([
       "archivePath",
       "attachResume",
@@ -143,6 +173,7 @@ describe("typed IPC bridge", () => {
       "getTheme",
       "importResume",
       "listApplications",
+      "listLocalModels",
       "listPaths",
       "listProfiles",
       "listResumeVersions",

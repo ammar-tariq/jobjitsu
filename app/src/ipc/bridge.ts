@@ -2,6 +2,7 @@ import type { Result } from "@jobjitsu/shared";
 import type {
   AiStatusSnapshot,
   ApplicationCoverLetterDraftInput,
+  LocalModelsListResult,
   ApplicationDraftCreateInput,
   ApplicationDraftUpdateInput,
   ApplicationTailorDraftInput,
@@ -24,6 +25,7 @@ export type IpcBridge = {
   readonly getTheme: () => Promise<Result<IpcResultMap["theme.get"]>>;
   readonly setTheme: (theme: ThemePreference) => Promise<Result<IpcResultMap["theme.set"]>>;
   readonly getAiStatus: () => Promise<Result<AiStatusSnapshot>>;
+  readonly listLocalModels: () => Promise<Result<LocalModelsListResult>>;
   readonly getProfile: () => Promise<Result<IpcResultMap["identity.getProfile"]>>;
   readonly setProfile: (
     patch: ProfilePatchInput,
@@ -112,6 +114,9 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     },
     async getAiStatus() {
       return (await dispatcher.invoke("ai.getStatus")) as Result<AiStatusSnapshot>;
+    },
+    async listLocalModels() {
+      return (await dispatcher.invoke("ai.listLocalModels")) as Result<LocalModelsListResult>;
     },
     async getProfile() {
       return (await dispatcher.invoke("identity.getProfile")) as Result<

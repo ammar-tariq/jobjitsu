@@ -9,6 +9,7 @@ Local Intelligence contracts: **AI Provider**, fake in-process provider, and **C
 | `AiProvider` / registry / context assembler contracts | Done                           |
 | `createFakeAiProvider`                                | Done — tests / offline demos   |
 | `createOllamaAiProvider` (PE05-S06)                   | Done — loopback Ollama only    |
+| `listOllamaModels` (PE05-S07)                         | Done — loopback `/api/tags`    |
 | `createContextAssembler` (Context Builder)            | Done — allowlist + budget      |
 | `KnowledgeReader` port                                | Done — no-op OK until PE14     |
 | In-app model download UI                              | Not yet (use Ollama CLI / app) |
