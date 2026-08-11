@@ -44,6 +44,8 @@ describe("IPC allowlist", () => {
       "preferences.setApprovalBeforeSend",
       "preferences.getCraftPreferences",
       "preferences.setCraftPreferences",
+      "preferences.getLocalModelPath",
+      "preferences.setLocalModelPath",
     ]);
   });
 
@@ -115,6 +117,7 @@ describe("typed IPC bridge", () => {
       "getApprovalBeforeSend",
       "getCraftPreferences",
       "getDataRoot",
+      "getLocalModelPath",
       "getProfile",
       "getSelectedResume",
       "getTheme",
@@ -131,6 +134,7 @@ describe("typed IPC bridge", () => {
       "setApprovalBeforeSend",
       "setCraftPreferences",
       "setDataRoot",
+      "setLocalModelPath",
       "setProfile",
       "setTheme",
       "upsertPath",
@@ -413,5 +417,24 @@ describe("typed IPC bridge", () => {
       tone: "calm and precise",
       constraints: ["no relocate"],
     });
+  });
+
+  it("reads and writes local model path through preferences APIs", async () => {
+    const bus = createInMemoryEventBus();
+    const changed: string[][] = [];
+    bus.subscribe("Preferences.Changed", async (event) => {
+      changed.push([...event.payload.keys]);
+    });
+
+    const preferences = createPreferencesFacade(createMemorySettingsStore());
+    const bridge = createIpcBridge(createHostIpcDispatcher({ preferences, bus }));
+
+    const before = await bridge.getLocalModelPath();
+    expect(before.ok && before.value.path).toBeNull();
+
+    const saved = await bridge.setLocalModelPath("/models/agent.gguf");
+    expect(saved.ok && saved.value.path).toBe("/models/agent.gguf");
+    expect(changed).toEqual([["ai.localModelPath"]]);
+    expect(await preferences.getLocalModelPath()).toBe("/models/agent.gguf");
   });
 });

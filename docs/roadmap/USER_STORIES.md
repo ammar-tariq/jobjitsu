@@ -586,7 +586,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Fake provider contract tests; host emits Ai.LocalModel*; no silent remote fallback.
 
-**Status:** in progress
+**Status:** done (2026-07-23)
 
 ### PE05-S02 — Configure local model path
 
@@ -604,7 +604,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Misconfig recovery test.
 
-**Status:** proposed
+**Status:** in progress
 
 ### PE05-S03 — Context Builder minimizes prompt context
 
