@@ -5,6 +5,28 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Craft prepare: rich ATS / cover prompts for weak local models
+
+### The problem
+
+Craft prepare used a one-line Ollama system message plus a `role=` / `resume=` / `listing=` body. Weak local models then produced markdown, chat filler, and unstructured drafts.
+
+### Decision
+
+Adopt instruction-heavy prompts (ATS résumé writer + cover-letter writer) adapted for JobJitsu:
+
+- **System** (`packages/ai/src/craft-prompts.ts` → Ollama `system`): never fabricate, tailor/ATS rules, fixed structure, plain text only, return-only output.
+- **User** (`buildCraftUserPrompt`): labeled `JOB DESCRIPTION` / `EXISTING RÉSUMÉ` or `CANDIDATE RÉSUMÉ` / `COMPANY ABOUT US` (+ optional Preferences `WRITING VOICE`), with soft char budgets.
+- Craft session reads tone from Preferences when preparing.
+
+Context assembler remains for application tailor / chat refine / other roles. Export `flattenMarkdown` stays as a safety net.
+
+### Libraries
+
+No new deps — prompts live in `@jobjitsu/ai`.
+
+---
+
 ## 2026-08-11 — Export flattens model markdown (no literal ### / \*\* / ---)
 
 ### The problem

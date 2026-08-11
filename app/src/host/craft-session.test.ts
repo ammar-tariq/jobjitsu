@@ -1,14 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { createFakeAiProvider, createFakeContextAssembler } from "@jobjitsu/ai";
+import { createFakeAiProvider } from "@jobjitsu/ai";
 import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createCraftSessionStore } from "./craft-session.js";
 
 describe("craft session store", () => {
   it("keeps prepare running and fills drafts after completion", async () => {
     const ai = createFakeAiProvider({ id: "fake-ai" });
-    const assembler = createFakeContextAssembler();
     const bus = createInMemoryEventBus();
-    const store = createCraftSessionStore({ ai, assembler, bus });
+    const store = createCraftSessionStore({ ai, bus });
 
     store.patch({
       resumeText: "Sam Chen — staff engineer",
@@ -38,7 +37,6 @@ describe("craft session store", () => {
   it("keeps stored fields when a patch arrives with undefined keys (IPC shape)", () => {
     const store = createCraftSessionStore({
       ai: createFakeAiProvider(),
-      assembler: createFakeContextAssembler(),
     });
 
     store.patch({ resumeText: "Sam Chen — résumé body" });
@@ -60,6 +58,23 @@ describe("craft session store", () => {
     expect(next.jobDescription).toBe("Staff Engineer at Acme");
   });
 
+  it("passes tone preferences into prepare", async () => {
+    const complete = vi.fn(async () => ({ text: "Draft", modelId: "fake" }));
+    const store = createCraftSessionStore({
+      ai: { ...createFakeAiProvider(), complete },
+      getTonePreferences: async () => "calm coach voice",
+    });
+    store.patch({
+      resumeText: "Sam Chen",
+      jobDescription: "Engineer",
+    });
+    store.prepareDrafts("resume");
+    await vi.waitFor(() => {
+      expect(store.get().job.status).toBe("ready");
+    });
+    expect(complete.mock.calls[0]?.[0]?.prompt).toContain("calm coach voice");
+  });
+
   it("does not start a second prepare while one is running", async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
@@ -72,10 +87,7 @@ describe("craft session store", () => {
         return { text: "Slow draft", modelId: "fake-model" };
       },
     };
-    const store = createCraftSessionStore({
-      ai,
-      assembler: createFakeContextAssembler(),
-    });
+    const store = createCraftSessionStore({ ai });
     store.patch({
       resumeText: "Résumé",
       jobDescription: "Role",

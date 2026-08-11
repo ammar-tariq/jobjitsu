@@ -169,7 +169,15 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
   const applications = options.applications ?? createMemoryApplicationRepository();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
-  const craftSession = createCraftSessionStore({ ai, assembler, bus });
+  const craftSession = createCraftSessionStore({
+    ai,
+    bus,
+    getTonePreferences: async () => {
+      const craft = await preferences.getCraftPreferences();
+      const tone = craft.tone.trim();
+      return tone.length > 0 ? tone : undefined;
+    },
+  });
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);
@@ -311,7 +319,6 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     generateCraftDrafts: (input) =>
       generateCraftDraftsWithAi({
         ai,
-        assembler,
         input,
       }),
     craftSession,

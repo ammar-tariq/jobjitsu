@@ -1,4 +1,5 @@
-import type { AiProvider, ContextAssembler } from "@jobjitsu/ai";
+import type { AiProvider } from "@jobjitsu/ai";
+import { buildCraftUserPrompt } from "@jobjitsu/ai";
 
 export type CraftGenerateKind = "resume" | "cover_letter" | "both";
 
@@ -7,6 +8,8 @@ export type CraftGenerateRequest = {
   readonly resumeText: string;
   readonly jobDescription: string;
   readonly aboutCompany?: string;
+  /** Optional writing voice from Preferences. */
+  readonly tonePreferences?: string;
 };
 
 export type CraftGenerateResult = {
@@ -21,17 +24,18 @@ export type CraftGeneratePhase = "checking" | "resume" | "cover_letter";
 /**
  * Host-only Craft Studio generate (PE28-S01).
  * Produces editable drafts from résumé + JD (+ optional about company).
- * Never sends or enqueues.
+ * Uses instruction-heavy system prompts (Ollama) + labeled INPUTS user prompts
+ * so weaker local models stay structured and truthful. Never sends or enqueues.
  */
 export async function generateCraftDraftsWithAi(options: {
   readonly ai: AiProvider;
-  readonly assembler: ContextAssembler;
   readonly input: CraftGenerateRequest;
   readonly onPhase?: (phase: CraftGeneratePhase) => void;
 }): Promise<CraftGenerateResult> {
   const resumeText = options.input.resumeText.trim();
   const jobDescription = options.input.jobDescription.trim();
   const aboutCompany = options.input.aboutCompany?.trim();
+  const tonePreferences = options.input.tonePreferences?.trim();
 
   if (!resumeText || !jobDescription) {
     return {
@@ -54,21 +58,18 @@ export async function generateCraftDraftsWithAi(options: {
     };
   }
 
-  const roleDescription = aboutCompany
-    ? `${jobDescription}\n\nAbout company: ${aboutCompany}`
-    : jobDescription;
-
   let resumeDraft = "";
   let coverLetterDraft = "";
 
   try {
     if (options.input.kind === "resume" || options.input.kind === "both") {
       options.onPhase?.("resume");
-      const prompt = options.assembler.assemble({
-        role: "tailor",
-        resumeExcerpts: [resumeText],
-        roleDescription,
-        draftExcerpt: aboutCompany,
+      const prompt = buildCraftUserPrompt({
+        kind: "resume",
+        jobDescription,
+        resumeText,
+        aboutCompany,
+        tonePreferences,
       });
       const completion = await options.ai.complete({ role: "tailor", prompt });
       resumeDraft = completion.text.trim();
@@ -84,11 +85,12 @@ export async function generateCraftDraftsWithAi(options: {
 
     if (options.input.kind === "cover_letter" || options.input.kind === "both") {
       options.onPhase?.("cover_letter");
-      const prompt = options.assembler.assemble({
-        role: "cover_letter",
-        resumeExcerpts: [resumeText],
-        roleDescription,
-        draftExcerpt: aboutCompany,
+      const prompt = buildCraftUserPrompt({
+        kind: "cover_letter",
+        jobDescription,
+        resumeText,
+        aboutCompany,
+        tonePreferences,
       });
       const completion = await options.ai.complete({ role: "cover_letter", prompt });
       coverLetterDraft = completion.text.trim();
