@@ -100,4 +100,3 @@ pnpm --filter @jobjitsu/extension-sdk typecheck
 
 - [EXTENSION_SYSTEM.md](../../docs/architecture/EXTENSION_SYSTEM.md)
 - [PLUGIN_ARCHITECTURE.md](../../docs/architecture/PLUGIN_ARCHITECTURE.md)
-- Sprint story **DF-10** in [sprint-1.md](../../docs/backlog/sprint-1.md)

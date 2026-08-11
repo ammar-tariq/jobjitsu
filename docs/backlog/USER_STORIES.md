@@ -1,402 +1,177 @@
-# User Stories & Acceptance Criteria
+# User stories — epic catalog
 
-Format: **Story** then **Acceptance Criteria (AC)**. Tasks: [TECHNICAL_TASKS.md](./TECHNICAL_TASKS.md).
+Compact map of JobJitsu's platform epics (PE01–PE13) and their stories.
 
----
-
-# E01 Platform Foundation
+> **SSOT:** the [JobJitsu Development board](https://github.com/users/ammar-tariq/projects/2) owns
+> acceptance-criteria detail and live status. This file is the map, not the spec.
 
-### E01-F01-S01 — As a developer, I can install and typecheck the monorepo
-**AC**
-- Given a clean clone, when I run the documented install, packages link via pnpm workspaces.
-- `packages/core` (or equivalent stub) typechecks.
-- README documents the install command.
-- No network calls that upload user data exist in scaffolding.
-
-### E01-F02-S01 — As a developer, I can open an empty Tauri window
-**AC**
-- `app` builds and launches a window on the primary supported OS in CI/dev docs.
-- Window title is `JobJitsu`.
-- No Electron dependency introduced.
-
-**Status:** Done (`app/src-tauri` + `pnpm dev:desktop`)
-
-### E01-F03-S01 — As a developer, I see a React root inside the shell
-**AC**
-- Webview renders a React “JobJitsu” placeholder using Inter if available.
-- TS strict mode enabled for `app/ui`.
-- Hot reload path documented (dev only).
-
-### E01-F04-S01 — As a developer, dark theme tokens apply to the shell background
-**AC**
-- Canvas uses Midnight Ink semantic token.
-- Token CSS (or TS theme module) lives in `packages/ui` (or `packages/tokens`).
-- Light theme tokens exist but dark is default.
-
----
-
-# E02 Storage & Event Spine
-
-### E02-F01-S01 — As the host, I can persist a key-value/document row locally
-**AC**
-- Storage writes under the app user-data directory.
-- Restart preserves data.
-- Unit test uses temp directory; no cloud endpoint.
-
-### E02-F02-S01 — As a developer, I have typed event names for core domains
-**AC**
-- Events include Agent.*, Queue.*, Send.*, Ai.*, FollowUp.*, Privacy.* stubs per architecture catalog.
-- Payloads typed without requiring résumé bodies on Progress events.
-
-### E02-F03-S01 — As a package, I can publish and subscribe to events in-process
-**AC**
-- Subscriber receives matching events in order for a single publisher test.
-- Bus does not perform network I/O.
-
-**Status:** Done (`createInMemoryEventBus` in `@jobjitsu/events`)
-
-
-### E02-F04-S01 — As timeline (later), I can hook durable persistence for a subset
-**AC**
-- Interface/callback exists for “durable events.”
-- Default no-op implementation; test verifies invocation for Send.Attempted sample.
-
----
-
-# E03 Desktop Shell & IPC
-
-### E03-F01-S01 — As the UI, I can call only allowlisted host commands
-**AC**
-- Documented ping/health command succeeds.
-- Arbitrary/unknown command fails closed.
-- Test covers deny path.
-
-### E03-F02-S01 — As a user, I can navigate primary sections
-**AC**
-- Nav labels: Applications, Queue, Follow-ups, Agent, Preferences (sentence case nouns).
-- One main view visible at a time.
-- Status region reserved at bottom/chrome.
-
-### E03-F03-S01 — As a user, I can switch light/dark theme
-**AC**
-- Default dark on first launch.
-- Preference persists locally.
-- Contrast remains AA for primary text both themes.
-
-### E03-F04-S01 — As a developer, I can use JjButton and JjBadge
-**AC**
-- Primary/secondary/ghost variants exist.
-- Components use semantic tokens, not raw hex in call sites.
-
----
-
-# E04 Identity & Resume
-
-### E04-F01-S01 — As a user, I can import a résumé from disk
-**AC**
-- File picker selects local file only.
-- File stored on-device; UI confirms “Stored on this device.”
-- No upload toast or cloud wording.
-
-### E04-F01-S02 — As a user, I review and edit after every import (twin: PE03-S06)
-**AC**
-- Import never auto-commits to identity or path without review.
-- Manual fields editable without AI parse.
-- Cancel does not attach.
-
-### E04-F01-S03 — As a user, I attach a reviewed import to identity and/or path (twin: PE03-S07)
-**AC**
-- Choices: update identity, save to path (pick/create), or both.
-- Attach is local-only; select ≠ send.
-
-### E04-F01-S04 — As a user, I can import LinkedIn via exported PDF (twin: PE03-S08)
-**AC**
-- Calm export-as-PDF guidance; no scraping or LinkedIn login.
-- Same review → attach pipeline as résumé import.
-
-### E04-F02-S01 — As a user, I can edit basic profile fields
-**AC**
-- Name and contact fields save locally.
-- Reload shows saved values.
-
-### E04-F02-S02 — As a user, I maintain career paths under my identity (twin: PE03-S05)
-**AC**
-- Create / rename / archive Path (e.g. Fullstack, Mobile) under one Profile.
-- Chrome says Path, not sub-profile; switch ≠ send.
-
-### E04-F02-S03 — As a user, I can create a path from an existing résumé (twin: PE03-S09)
-**AC**
-- Pick library version → name path → set selected résumé.
-- No AI; no send.
-
-### E04-F03-S01 — As AI/applications packages, I can read identity safely
-**AC**
-- Read API returns structured data.
-- No method on identity package performs egress.
-
-### E04-F04-S01 — As a user, AI may pre-fill import review after Agent is ready (twin: PE03-S10)
-**AC**
-- Host-only AI; edit still mandatory before attach.
-- Unavailable Agent → manual review; no guilt.
-- Deferred until E06 / PE05.
-
----
-
-# E05 Preferences & Privacy Chrome
-
-### E05-F01-S01 — As a user, my preferences persist across restarts
-**AC**
-- Changing a pref + restart restores it.
-
-### E05-F02-S01 — As a user, approval-before-send defaults on
-**AC**
-- Fresh profile has require-approval enabled.
-- Quiet hours fields exist (even if unused until scheduler).
-
-### E05-F03-S01 — As a user, I always see Agent · On-device status
-**AC**
-- Pill visible on main chrome (`JjAgentPrivacyPill`).
-- States: unavailable / loading / ready (and remote label if configured later).
-- Ready does not claim on-device when provider is remote.
-
-### E05-F04-S01 — As a user, I can edit preferences in a calm settings view
-**AC**
-- Copy is sentence case, no FOMO.
-- Toggle labels describe enabled state.
-
----
-
-# E06 Local Intelligence
-
-### E06-F01-S01 — As the system, I talk to models via a provider interface
-**AC**
-- Interface exposes health + complete.
-- No default cloud base URL in config.
-
-### E06-F02-S01 — As a developer, I can run AI flows with a fake provider
-**AC**
-- Fake returns deterministic text.
-- Used in unit tests without network.
-
-### E06-F03-S01 — As a user, I can set a local model path preference
-**AC**
-- Pref stores path string.
-- Invalid path → health unavailable + plain error (no metaphor).
-
-### E06-F04-S01 — As tailor flow, context excludes unnecessary PII volume
-**AC**
-- Assembler includes résumé excerpts + role + prefs tone only as designed.
-- Unit test asserts full unrelated timeline not included.
-
-### E06-F05-S01 — As Agent · On-device chrome, I reflect AI health events
-**AC**
-- Loading/ready/failed events update the privacy pill within one UI tick subscription path.
-- Copy matches brand loading line when loading (optional microcopy).
-
----
-
-# E07 Discovery & Curation
-
-### E07-F01-S01 — As an extension (later), I implement a discovery source
-**AC**
-- Interface: fetch candidates → normalized role shape.
-- Built-in registration path for first-party sources.
-
-### E07-F02-S01 — As a user, I can import roles from a local CSV/fixture
-**AC**
-- Import creates local role records.
-- No remote job-board scraping required for H1 MVP path.
-
-### E07-F03-S01 — As a user, curation respects fit preferences
-**AC**
-- Filter reduces set using prefs keywords/constraints.
-- Empty filter result shows calm empty state (not shame).
-
-### E07-F04-S01 — As a user, I can browse curated roles
-**AC**
-- List shows title/company.
-- Selecting a role can start an application draft (wired in E08 or stub CTA).
-
----
-
-# E08 Applications
-
-### E08-F01-S01 — As a user, I can create and edit an application draft
-**AC**
-- Draft persists locally with status `draft`.
-- Delete draft requires explicit confirm copy.
-
-### E08-F02-S01 — As a user, I can tailor a draft with local AI
-**AC**
-- Tailor uses provider + context assembler.
-- Result is editable; user remains author.
-- Does not send anywhere.
-
-### E08-F03-S01 — As a user, I can list applications and open detail
-**AC**
-- List shows status.
-- Detail shows draft body + meta.
-
----
-
-# E09 Queue & Review
-
-### E09-F01-S01 — As the agent/user, I can enqueue an application for review
-**AC**
-- Status becomes queued.
-- Queue.Enqueued emitted.
-
-### E09-F02-S01 — As a user with approval required, send is blocked until approve
-**AC**
-- Approve transitions to approved-for-send.
-- Reject returns to draft/queued policy as specified.
-- Without approve, send service refuses (contract with E10).
-
-### E09-F03-S01 — As a user, I review queue items calmly
-**AC**
-- Queue UI lists items needing review.
-- Primary actions: Approve send / Reject.
-- No urgency countdown.
-
----
-
-# E10 Send (Egress Boundary)
-
-### E10-F01-S01 — As the system, only send package performs career egress
-**AC**
-- Architecture/test fence: agent dependency must not import send execute.
-- Send API is the sole documented egress.
-
-### E10-F02-S01 — As a user, I can complete send via a safe first channel
-**AC**
-- H1 channel: local file export of application package and/or mailto stub — documented.
-- User explicitly triggers send after approval.
-
-### E10-F03-S01 — As a user, I see honest send outcomes
-**AC**
-- Success → quiet success toast (“Application sent” / throw microcopy allowed).
-- Failure → plain recovery error.
-- Unknown → not shown as success; copy per error guidelines.
-
-### E10-F04-S01 — As trust chrome, egress is audited
-**AC**
-- Privacy.EgressRecorded (or timeline write) includes destination class + application id + timestamp.
-- Résumé body not required in event payload.
-
----
-
-# E11 Follow-ups & Scheduler
+**Status legend:** **Shipped** — issue closed or verified in code · **Partial** — open issue, some
+code landed · **Todo** — not started.
 
-### E11-F01-S01 — As a user, I can schedule a follow-up after send
-**AC**
-- Follow-up linked to application.
-- Appears in Follow-ups list as scheduled.
-
-### E11-F02-S01 — As the system, due jobs fire locally after restart
-**AC**
-- Scheduler persists jobs.
-- Time-travel test marks due.
+Build order: [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) · Delivery process: [VERTICAL_SLICES.md](./VERTICAL_SLICES.md)
 
-### E11-F03-S01 — As a user, I get a polite due reminder
-**AC**
-- Caution tone, not error red.
-- Copy aligns with “gently nudge.”
-- No sound by default.
+## PE01 — Desktop Shell & Foundation ([#1](https://github.com/ammar-tariq/jobjitsu/issues/1))
 
-### E11-F04-S01 — As a user, I can dismiss or send follow-up under policy
-**AC**
-- Dismiss removes/snoozes per design.
-- Send follow-up goes through send + approval rules.
+Calm desktop shell: window, primary navigation, deny-by-default IPC, dark-first appearance.
 
----
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE01-S01 | Open JobJitsu as a desktop app with calm chrome | Shipped · [#14](https://github.com/ammar-tariq/jobjitsu/issues/14) |
+| PE01-S02 | Move between Applications, Queue, Follow-ups, Agent, Preferences, Timeline | Shipped · [#16](https://github.com/ammar-tariq/jobjitsu/issues/16) |
+| PE01-S03 | UI calls only allowlisted host commands; unknown commands fail closed | Shipped · [#15](https://github.com/ammar-tariq/jobjitsu/issues/15) |
+| PE01-S04 | Default to a calm dark theme; Appearance persists across restarts | Shipped · [#17](https://github.com/ammar-tariq/jobjitsu/issues/17) |
 
-# E12 Agent
+## PE02 — Storage & Event Spine ([#2](https://github.com/ammar-tariq/jobjitsu/issues/2))
 
-### E12-F01-S01 — As a user, I can start, pause, and resume the agent
-**AC**
-- Pause leaves queue intact.
-- Pause emits Agent.Paused.
-- Agent cannot reach send.execute.
+On-device persistence and the typed local event bus every package rides on.
 
-### E12-F02-S01 — As a user, the agent prepares drafts into the queue
-**AC**
-- Given prefs + identity + at least one role, agent run creates/tailors and enqueues ≥1 item in test fixture mode.
-- Never auto-sends.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE02-S01 | Persist profile and application documents under the user data dir | Shipped · [#19](https://github.com/ammar-tariq/jobjitsu/issues/19) |
+| PE02-S02 | Publish and subscribe typed `Domain.Action` events in-process | Shipped · [#20](https://github.com/ammar-tariq/jobjitsu/issues/20) |
+| PE02-S03 | Durable event hook persists the Timeline allowlist | Shipped · [#21](https://github.com/ammar-tariq/jobjitsu/issues/21) |
 
-### E12-F03-S01 — As a user, idle agent feels calm
-**AC**
-- Idle shows readiness (“Your belt is tied…” allowed).
-- Progress toasts batch counts, no spam per step.
+## PE03 — Identity & Resume Library ([#3](https://github.com/ammar-tariq/jobjitsu/issues/3))
 
----
+One local identity with career paths and a résumé library: import → review → attach → tailor.
 
-# E13 Timeline & Trust
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE03-S01 | Create and edit an on-device profile | Shipped · [#22](https://github.com/ammar-tariq/jobjitsu/issues/22) |
+| PE03-S02 | Import a résumé file into the local library | Shipped · [#23](https://github.com/ammar-tariq/jobjitsu/issues/23) |
+| PE03-S03 | Keep multiple résumé versions and pick one per application | Shipped · [#24](https://github.com/ammar-tariq/jobjitsu/issues/24) |
+| PE03-S04 | Request a tailored résumé draft for a job — draft only, never sends | Shipped · [#39](https://github.com/ammar-tariq/jobjitsu/issues/39) |
+| PE03-S05 | Maintain career paths (Fullstack, Mobile, …) under one identity | Shipped · [#77](https://github.com/ammar-tariq/jobjitsu/issues/77) |
+| PE03-S06 | Review and edit every import before anything attaches | Shipped · [#78](https://github.com/ammar-tariq/jobjitsu/issues/78) |
+| PE03-S07 | Attach a reviewed import to identity, a path, or both | Shipped · [#79](https://github.com/ammar-tariq/jobjitsu/issues/79) |
+| PE03-S08 | Import LinkedIn via exported PDF with calm guidance | Shipped · [#80](https://github.com/ammar-tariq/jobjitsu/issues/80) |
+| PE03-S09 | Create a path from an existing résumé version without AI | Shipped · [#81](https://github.com/ammar-tariq/jobjitsu/issues/81) |
+| PE03-S10 | Pre-fill import review with on-device AI parse; still editable | Shipped · [#82](https://github.com/ammar-tariq/jobjitsu/issues/82) |
 
-### E13-F01-S01 — As the system, timeline stores local audit entries
-**AC**
-- Append-only API.
-- Survives restart.
+## PE04 — Preferences & Privacy Chrome ([#4](https://github.com/ammar-tariq/jobjitsu/issues/4))
 
-### E13-F02-S01 — As the bus, durable events land in timeline
-**AC**
-- Send.* and Queue.Approved (and Agent.Paused) create timeline rows.
+Preferences with approval-before-send on by default and honest Agent · On-device chrome.
 
-### E13-F03-S01 — As a user, I can inspect what left / what stayed
-**AC**
-- Timeline UI lists egress vs local-only actions.
-- Logs view shows sanitized lines (no accidental full résumé dump by default).
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE04-S01 | Approval-before-send on by default, editable in Preferences | Shipped · [#25](https://github.com/ammar-tariq/jobjitsu/issues/25) |
+| PE04-S02 | Set quiet hours so nudges do not interrupt (schema only; no UI yet) | Partial · [#27](https://github.com/ammar-tariq/jobjitsu/issues/27) |
+| PE04-S03 | Honest Agent · On-device status chrome | Shipped · [#18](https://github.com/ammar-tariq/jobjitsu/issues/18) |
+| PE04-S04 | Set fit, tone, and constraint preferences for curation and Agent | Shipped · [#26](https://github.com/ammar-tariq/jobjitsu/issues/26) |
+| PE04-S05 | See and change the on-device data folder | Shipped · [#68](https://github.com/ammar-tariq/jobjitsu/issues/68) |
+| PE04-S06 | Profile, résumés, and preferences persist as files under that folder | Shipped · [#72](https://github.com/ammar-tariq/jobjitsu/issues/72) |
 
----
+## PE05 — Local Intelligence ([#5](https://github.com/ammar-tariq/jobjitsu/issues/5))
 
-# E14 Onboarding & Empty States
+Local-first intelligence: provider, Context Builder, model management, offline path, real on-device models.
 
-### E14-F01-S01 — As a new user, I complete a three-beat first run
-**AC**
-- Steps: Connect resume → Set preferences → Agent ready.
-- Can skip non-critical steps with clear consequences.
-- Ends on calm home with pill visible.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE05-S01 | Run health and complete against a local AI Provider | Shipped · [#29](https://github.com/ammar-tariq/jobjitsu/issues/29) |
+| PE05-S02 | Point at an on-device model path with calm misconfig recovery | Shipped · [#32](https://github.com/ammar-tariq/jobjitsu/issues/32) |
+| PE05-S03 | Context Builder includes only task-needed slices in prompts | Shipped · [#30](https://github.com/ammar-tariq/jobjitsu/issues/30) |
+| PE05-S04 | Optional remote provider with user-owned keys (Experimental; no board issue yet) | Todo |
+| PE05-S05 | Local AI keeps working offline; no silent remote fallback | Shipped · [#31](https://github.com/ammar-tariq/jobjitsu/issues/31) |
+| PE05-S06 | Run a real local model through loopback Ollama | Shipped · [#102](https://github.com/ammar-tariq/jobjitsu/issues/102) |
+| PE05-S07 | Pick an installed local model from a list in Preferences | Shipped · [#112](https://github.com/ammar-tariq/jobjitsu/issues/112) |
 
-### E14-F02-S01 — As a user, empty surfaces invite without shame
-**AC**
-- Applications/Queue/Follow-ups empty states match brand docs.
-- One primary CTA each.
+## Local Craft Studio — board epic PE28 ([#101](https://github.com/ammar-tariq/jobjitsu/issues/101))
 
----
+JD → résumé + cover letter craft on this device; shipped alongside PE05.
 
-# E15–E19 (summary stories)
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE28-S01 | Paste résumé + job description; generate editable drafts on-device | Shipped · [#103](https://github.com/ammar-tariq/jobjitsu/issues/103) |
+| PE28-S02 | Preview a résumé as HTML and save a PDF on this device | Shipped · [#104](https://github.com/ammar-tariq/jobjitsu/issues/104) |
+| PE28-S03 | Chat-refine drafts; Agent asks clarifying questions instead of inventing | Shipped · [#105](https://github.com/ammar-tariq/jobjitsu/issues/105) |
 
-### E15-F01-S01 — Capture outcomes on applications without guilt UX
-**AC:** Outcome enum + note; no “you’re behind” prompts.
+## PE06 — Agent (preparative) ([#6](https://github.com/ammar-tariq/jobjitsu/issues/6))
 
-### E15-F02-S01 — View calm reflection summary
-**AC:** Aggregates local counts; no streaks/leaderboards.
+Preparative agent: start, pause, and orchestrate drafts into the review Queue — never send.
 
-### E16-F01-S01 — Add notes to timeline/application
-**AC:** Local-only notes persist.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE06-S01 | Start preparative work and pause anytime; Queue stays intact | Todo · [#48](https://github.com/ammar-tariq/jobjitsu/issues/48) |
+| PE06-S02 | Orchestrate drafts into the review Queue without sending | Todo · [#49](https://github.com/ammar-tariq/jobjitsu/issues/49) |
 
-### E16-F02-S01 — Filter timeline by type
-**AC:** Filter egress vs agent vs approvals.
+## PE07 — Discovery & Job Providers ([#7](https://github.com/ammar-tariq/jobjitsu/issues/7))
 
-### E17-F01-S01 — Open interview readiness shell module
-**AC:** On-device; no guaranteed-offer copy; admitted via module test.
+Discovery through registered job providers (local/CSV first), curated toward fit — not a feed.
 
-### E17-F02-S01 — Narrative studio shell
-**AC:** Drafts local; user owns voice.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE07-S01 | Register a Job Provider source with list / sync / normalize (fake source exists; no registry) | Partial · [#35](https://github.com/ammar-tariq/jobjitsu/issues/35) |
+| PE07-S02 | Curate roles toward fit using preferences | Todo · [#36](https://github.com/ammar-tariq/jobjitsu/issues/36) |
+| PE07-S03 | Analyze a job against the profile — local and advisory | Todo · [#40](https://github.com/ammar-tariq/jobjitsu/issues/40) |
+| PE07-S04 | Browse curated roles and start an application draft | Todo · [#37](https://github.com/ammar-tariq/jobjitsu/issues/37) |
 
-### E17-F03-S01 — Role-fit compass shell
-**AC:** Guidance language only.
+## PE08 — Applications & Pipeline ([#8](https://github.com/ammar-tariq/jobjitsu/issues/8))
 
-### E18-F01-S01 — Define plugin manifest schema
-**AC:** Capabilities listed; invalid manifest refuses load.
+Application drafts and pipeline: create/edit, cover letters, list/detail, post-send tracking.
 
-### E18-F02-S01 — Enable/disable plugin fail-closed
-**AC:** Disabled plugins do not run; missing caps denied.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE08-S01 | Create and edit application drafts linked to résumés | Shipped · [#33](https://github.com/ammar-tariq/jobjitsu/issues/33) |
+| PE08-S02 | Generate an editable cover letter draft | Shipped · [#38](https://github.com/ammar-tariq/jobjitsu/issues/38) |
+| PE08-S03 | Track status after send (Submitted → … → Archived) | Todo · [#46](https://github.com/ammar-tariq/jobjitsu/issues/46) |
+| PE08-S04 | List applications and open a detail view | Shipped · [#34](https://github.com/ammar-tariq/jobjitsu/issues/34) |
 
-### E18-F03-S01 — Ship one official sample skill
-**AC:** Inspectable; preparative only; no send.
+## PE09 — Queue & Human Review ([#9](https://github.com/ammar-tariq/jobjitsu/issues/9))
 
-### E19-F01-S01 — Register a discovery contribution point
-**AC:** Extension SDK stub + host registration.
+Human review Queue — distinct from the AI Task Queue; the approval gate before egress.
 
-### E19-F02-S01 — Export my data on demand
-**AC:** User-triggered archive; no ambient cloud sync.
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE09-S01 | Enqueue an application awaiting approval | Shipped · [#41](https://github.com/ammar-tariq/jobjitsu/issues/41) |
+| PE09-S02 | Approve or reject queued items (queue view works; no `canSend` policy yet) | Partial · [#42](https://github.com/ammar-tariq/jobjitsu/issues/42) |
+
+## PE10 — Send (Egress Boundary) ([#10](https://github.com/ammar-tariq/jobjitsu/issues/10))
+
+The sole egress boundary: policy-checked send with honest success / failed / unknown outcomes.
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE10-S01 | Career payloads leave only via the send package after policy checks (channel exists; no host path) | Partial · [#44](https://github.com/ammar-tariq/jobjitsu/issues/44) |
+| PE10-S02 | Audit on the Timeline what left the machine | Todo · [#45](https://github.com/ammar-tariq/jobjitsu/issues/45) |
+
+## PE11 — Follow-ups & Scheduler ([#11](https://github.com/ammar-tariq/jobjitsu/issues/11))
+
+Polite follow-ups on a durable scheduler that respects quiet hours.
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE11-S01 | Schedule a follow-up for a submitted application (application fields only; no scheduler arm) | Partial · [#50](https://github.com/ammar-tariq/jobjitsu/issues/50) |
+| PE11-S02 | Calm nudge when a follow-up is due, outside quiet hours | Todo · [#52](https://github.com/ammar-tariq/jobjitsu/issues/52) |
+| PE11-S03 | Scheduled follow-ups survive restart | Todo · [#51](https://github.com/ammar-tariq/jobjitsu/issues/51) |
+| PE11-S04 | Dismiss or send a due follow-up under approval policy (dismiss works; no send-under-policy) | Partial · [#53](https://github.com/ammar-tariq/jobjitsu/issues/53) |
+
+## PE12 — Timeline & Trust ([#12](https://github.com/ammar-tariq/jobjitsu/issues/12))
+
+Local activity timeline and sanitized logs that earn trust.
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE12-S01 | Inspect a local timeline of meaningful events (session-only; not durable) | Partial · [#43](https://github.com/ammar-tariq/jobjitsu/issues/43) |
+| PE12-S02 | Sanitized logs view without secrets or résumé bodies | Todo · [#47](https://github.com/ammar-tariq/jobjitsu/issues/47) |
+
+## PE13 — Onboarding & Empty States ([#13](https://github.com/ammar-tariq/jobjitsu/issues/13))
+
+Calm first run and empty states that invite one next step.
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE13-S01 | Complete first-run onboarding without pressure (missing résumé import + approval steps) | Partial · [#54](https://github.com/ammar-tariq/jobjitsu/issues/54) |
+| PE13-S02 | Calm empty states for primary lists (inline empties; no shared component) | Partial · [#28](https://github.com/ammar-tariq/jobjitsu/issues/28) |
+
+## Cross-cutting
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE-QA | H1 must-pass privacy gates: egress, approval, pause, honest outcomes (suites partial) | Partial · [#55](https://github.com/ammar-tariq/jobjitsu/issues/55) |
+
+## Beyond H1
+
+PE14–PE20 (Experimental: knowledge base, AI validation, workflows, automation, playground, email)
+and PE21–PE30 (Future) are roadmap bands only. Stories join this catalog when a board issue exists.
+
+**Tally:** 35 shipped · 10 partial · 11 todo — 56 tracked stories.

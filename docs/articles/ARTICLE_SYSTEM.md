@@ -6,16 +6,14 @@ How JobJitsu turns meaningful engineering milestones into community content — 
 
 ```
 docs/articles/
-├── ARTICLE_SYSTEM.md          # This file
-├── SERIES_PLAN.md             # Planned series (placeholders only for future)
-├── ARTICLE_TEMPLATE.md        # Required sections for every article
+├── ARTICLE_SYSTEM.md          # This file: process, series plan, template
 ├── proposals/                 # AI/human proposals awaiting approval
 ├── drafts/                    # In-progress articles
 ├── published/                 # Final published copies (repo record)
 └── research/                  # Blueprints and research briefs
 ```
 
-Related: [SERIES_PLAN.md](./SERIES_PLAN.md) · [ARTICLE_TEMPLATE.md](./ARTICLE_TEMPLATE.md) · [AI development workflow](../development/AI_DEVELOPMENT_WORKFLOW.md) · `.cursor/prompts/article-review.md`
+Related: [AI development workflow](../development/AI_DEVELOPMENT_WORKFLOW.md) · `.cursor/prompts/article-review.md`
 
 ---
 
@@ -96,21 +94,43 @@ Publish externally (e.g. Medium) + copy in docs/articles/published/
 
 ---
 
-## Article structure
+## Article structure (template)
 
 Every article must:
 
 1. Stay aligned with product/architecture SSOT under `/docs`.  
 2. Use calm JobJitsu voice (`docs/brand/VOICE_AND_TONE.md`).  
 3. Say **Agent** (not bot/autopilot) in user-facing narrative; reserve model jargon for technical depth.  
-4. Include the **Join the Journey** section from [ARTICLE_TEMPLATE.md](./ARTICLE_TEMPLATE.md).  
-5. State shipping status honestly (e.g. early foundation vs released capability).
+4. State shipping status honestly (e.g. early foundation vs released capability).
+
+Required sections, in order:
+
+```
+# Title
+Status (Draft | Approved | Published) · related proposal · related issue
+Audience (contributors | users | both)
+Summary (2–4 sentences, honest about shipping status)
+Body: opening → context/problem → what JobJitsu is (and is not)
+      → technical narrative (documented work only)
+      → challenges (optional) → what comes next (optional)
+Join the Journey (community invitation, below)
+Sources (links to /docs paths and ADRs used)
+```
+
+**Join the Journey** closes every article: JobJitsu is open source; help sought with development, documentation, testing, design, branding, and community — no pressure copy. Link the [repository](https://github.com/ammar-tariq/jobjitsu) and [docs site](https://ammar-tariq.github.io/jobjitsu/).
 
 ---
 
-## Community invitation
+## Series plan
 
-All articles end with the Join the Journey block (template). Help sought: development, documentation, testing, design, branding, community building — no pressure copy.
+Document JobJitsu as an open-source, local-first AI Career Operating System — vision, architecture laws, and milestones — for readers who want understanding, not hype. Future slots are placeholders only; a slot opens when a real milestone earns a proposal (never invent features).
+
+| # | Article | Status |
+|---|---------|--------|
+| 01 | *The Gentle Art of Landing the Job: Why We’re Building a Local-First Career OS* — draft: [drafts/001-initial-vision.md](./drafts/001-initial-vision.md), proposal: [proposals/001-initial-vision.md](./proposals/001-initial-vision.md), issue [#56](https://github.com/ammar-tariq/jobjitsu/issues/56) | Approved · drafting |
+| 02+ | *(TBD — opens after a meaningful milestone)* | Proposal + human approval |
+
+See also: [proposals/future-proposals.md](./proposals/future-proposals.md)
 
 ---
 
@@ -122,6 +142,6 @@ All articles end with the Join the Journey block (template). Help sought: develo
 | `drafts/` | Work in progress |
 | `published/` | Canonical in-repo copy after external publish |
 | `research/` | Blueprints and research (not the Medium post itself) |
-| `SERIES_PLAN.md` | Series map; future slots are placeholders only |
+| Series plan (above) | Series map; future slots are placeholders only |
 
-Update `SERIES_PLAN.md` when an article moves from proposal → published. Do not invent future feature articles ahead of admitted product status.
+Update the series plan table when an article moves from proposal → published. Do not invent future feature articles ahead of admitted product status.

@@ -19,9 +19,9 @@ export default function ChangelogPage(): ReactNode {
           description: "Horizons and delivery direction.",
         },
         {
-          label: "Implementation roadmap",
-          to: "https://github.com/ammar-tariq/jobjitsu/blob/main/IMPLEMENTATION_ROADMAP.md",
-          description: "Ordered waves in the repository.",
+          label: "Project board",
+          to: "https://github.com/users/ammar-tariq/projects/2",
+          description: "Live story status on GitHub.",
         },
       ]}
     >

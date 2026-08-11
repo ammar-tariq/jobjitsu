@@ -4,8 +4,7 @@
 > This document synthesizes the architecture folder into one implementable system view.  
 > It does **not** redefine product vision ([../product/](../product/)) or invent features.
 
-**Readiness:** [ARCHITECTURE_READINESS_REPORT.md](../../ARCHITECTURE_READINESS_REPORT.md) (score ≥ 95 required before treating this as implementation-ready).  
-**Terms:** [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md) · **Rules:** [../../ARCHITECTURE_PRINCIPLES.md](../../ARCHITECTURE_PRINCIPLES.md) · **What:** [../product/PLATFORM_SPECIFICATION.md](../product/PLATFORM_SPECIFICATION.md)
+**Terms:** [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md) · **Rules:** [OVERVIEW.md](./OVERVIEW.md) + [PACKAGE_BOUNDARIES.md](./PACKAGE_BOUNDARIES.md) · **What:** [../product/PLATFORM_SPECIFICATION.md](../product/PLATFORM_SPECIFICATION.md)
 
 Detail lives in sibling docs; this file is the **system map**.
 
@@ -16,13 +15,11 @@ Detail lives in sibling docs; this file is the **system map**.
 | Events | [EVENT_SYSTEM.md](./EVENT_SYSTEM.md) |
 | Desktop / IPC | [DESKTOP_ARCHITECTURE.md](./DESKTOP_ARCHITECTURE.md) · [TAURI_TS_RUNTIME.md](./TAURI_TS_RUNTIME.md) |
 | AI | [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) |
-| Workflow / Task Queue / Validation | [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) |
+| Workflow / Task Queue / Validation | [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) (workflow engine section) |
 | Data models | [DATA_MODELS.md](./DATA_MODELS.md) |
 | Plugins / Extensions | [PLUGIN_ARCHITECTURE.md](./PLUGIN_ARCHITECTURE.md) · [EXTENSION_SYSTEM.md](./EXTENSION_SYSTEM.md) |
 | Scheduler / Testing | [SCHEDULER.md](./SCHEDULER.md) · [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) |
 | Decisions | [../adr/README.md](../adr/README.md) |
-
-Root index (entry for contributors): [../../SYSTEM_ARCHITECTURE.md](../../SYSTEM_ARCHITECTURE.md)
 
 ---
 
@@ -161,7 +158,7 @@ sequenceDiagram
 
 ## 5. AI control plane
 
-See [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) and [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md).
+See [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) (including its workflow engine section).
 
 | Piece | Package | Status |
 |-------|---------|--------|
@@ -246,7 +243,7 @@ From [../product/NON_GOALS.md](../product/NON_GOALS.md) and OVERVIEW laws:
 2. Enforce fences with tests/lint (`agent` ↛ `send`, UI ↛ `ai`).
 3. Emit catalog events with PII-minimized payloads.
 4. Treat Experimental modules as optional until backlog admits them.
-5. Process: [../../DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md) · [../../ENGINEERING_CONSTITUTION.md](../../ENGINEERING_CONSTITUTION.md).
+5. Process: [../../DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md) · [`.cursor/rules/`](../../.cursor/rules/architecture.mdc).
 
 ---
 

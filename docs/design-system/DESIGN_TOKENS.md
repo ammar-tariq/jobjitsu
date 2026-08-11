@@ -112,19 +112,73 @@ Themes assign these. Prefer these in `Jj*` components.
 
 ---
 
-## 3. Non-color token categories
+## 3. Spacing
 
-| Category | Doc |
-|----------|-----|
-| Spacing | [SPACING.md](./SPACING.md) |
-| Typography | [TYPOGRAPHY.md](./TYPOGRAPHY.md) |
-| Radius | [BORDER_RADIUS.md](./BORDER_RADIUS.md) |
-| Motion | [ANIMATION.md](./ANIMATION.md) |
-| Elevation | [ELEVATION.md](./ELEVATION.md) |
+**4px base unit** (`--jj-space-unit`). Desktop-dense: tighter than consumer mobile, never cramped. All spacing is a multiple of 4 (hairline borders `1px` excepted).
+
+| Token | Value | Typical use |
+|-------|-------|-------------|
+| `--jj-space-0.5` | `2px` | Icon optical tweaks |
+| `--jj-space-1` | `4px` | Tight inline gaps |
+| `--jj-space-2` | `8px` | Label → control; button group gap |
+| `--jj-space-3` | `12px` | Control padding Y; list row vertical |
+| `--jj-space-4` | `16px` | Default gap; list row padding X |
+| `--jj-space-5` | `20px` | Section inner padding (compact) |
+| `--jj-space-6` | `24px` | Panel/modal padding; section gap |
+| `--jj-space-8` | `32px` | View padding; major stacks |
+| `--jj-space-10` | `40px` | Empty-state vertical rhythm |
+| `--jj-space-12` | `48px` | Rare large separations |
+| `--jj-space-16` | `64px` | Onboarding hero breathing room |
+
+Rules: prefer scale tokens over arbitrary values; density first (one step tighter than marketing-site padding); hierarchy via type and section gaps, not oversized card padding; click targets stay ≥ 32px tall ([RESPONSIVE.md](./RESPONSIVE.md)).
 
 ---
 
-## 4. Icon size tokens
+## 4. Border radius
+
+Subtle rounding — native tool, not toy. Pills are reserved for privacy/status chrome.
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--jj-radius-none` | `0` | Full-bleed panels; tables/logs flush to edge |
+| `--jj-radius-sm` | `4px` | Inputs, selects, compact chips |
+| `--jj-radius-md` | `6px` | Buttons, list row hover, menus |
+| `--jj-radius-lg` | `8px` | Panels, dialogs, popovers, toasts |
+| `--jj-radius-xl` | `12px` | Rare large empty-state frames |
+| `--jj-radius-pill` | `999px` | Agent · On-device pill, status containers |
+
+Rules: never default everything to `rounded-full`; nested radii inner ≤ outer; tables and logs stay near `none`/`sm` for density.
+
+---
+
+## 5. Elevation
+
+Soft, short shadows — paper in low light, not floating marketing cards. Prefer surface + hairline border (`--jj-color-border-subtle`) before adding shadow. Values are dark-theme defaults; light theme uses softer alphas ([THEME_LIGHT.md](./THEME_LIGHT.md)).
+
+| Token | Value (dark) | Use |
+|-------|--------------|-----|
+| `--jj-shadow-none` | `none` | Flat lists, tables, logs, sidebars |
+| `--jj-shadow-sm` | `0 1px 2px rgba(0,0,0,0.35)` | Subtle controls, compact menus |
+| `--jj-shadow-md` | `0 4px 12px rgba(0,0,0,0.40)` | Popovers, dropdowns |
+| `--jj-shadow-lg` | `0 8px 24px rgba(0,0,0,0.45)` | Modals, toasts |
+| `--jj-shadow-focus` | `0 0 0 3px color-mix(in srgb, var(--jj-color-focus-ring) 45%, transparent)` | Focus ring companion |
+
+Overlay scrim: `--jj-overlay-scrim` — dark `rgba(0,0,0,0.55)`, light `rgba(15,23,42,0.35)`. Modals use scrim + lg shadow.
+
+Rules: no stacked colored glows (teal bloom, purple haze); only one elevated layer competing at a time; never use elevation to manufacture urgency.
+
+---
+
+## 6. Other token categories
+
+| Category | Doc |
+|----------|-----|
+| Typography | [TYPOGRAPHY.md](./TYPOGRAPHY.md) |
+| Motion | [ANIMATION.md](./ANIMATION.md) |
+
+---
+
+## 7. Icon size tokens
 
 | Token | Value | Use |
 |-------|-------|-----|
@@ -136,7 +190,7 @@ Stroke: **2px**, rounded caps/joins (Lucide). Colors follow text/icon semantic t
 
 ---
 
-## 5. Z-index scale
+## 8. Z-index scale
 
 | Token | Value | Layer |
 |-------|-------|-------|
@@ -152,7 +206,7 @@ Keep the scale short — calm UI, few competing layers.
 
 ---
 
-## 6. Usage rules
+## 9. Usage rules
 
 - Do **not** use purple nebula accents or glow stacks — off-brand.
 - Teal envelope flap on the logo stays `#2DD4BF` — never retint.

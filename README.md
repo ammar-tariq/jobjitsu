@@ -35,9 +35,7 @@ One calm operating system for the loop — not a cockpit of anxiety, not a cloud
 
 ## Status
 
-This repository is in early foundation: brand, product vision, engineering standards, and **monorepo scaffold** (Turborepo + packages) are in place. Domain business logic is not implemented yet.
-
-Your belt will be tied. Waiting for the first throw.
+Early but usable locally: the desktop shell runs **Craft** (paste a résumé + job listing → the on-device Agent prepares a tailored résumé and cover letter → refine, save, export HTML/PDF), plus Applications, review Queue, Follow-ups, Profile, Preferences, and a session Timeline, with first-run onboarding. Agent orchestration, discovery sources, real outbound send, and the durable scheduler are not built yet — see the [backlog](docs/backlog/USER_STORIES.md) for the live map.
 
 ---
 
@@ -58,7 +56,7 @@ JobJitsu/
 └── LICENSE               # TBD — open-source intent; license not chosen yet
 ```
 
-Today the desktop shell still lives at `app/` (not yet `apps/desktop/`). `packages/`, `website/`, `docs/`, and `.github/workflows/` are already in place. See [MONOREPO.md](./MONOREPO.md).
+Today the desktop shell still lives at `app/` (not yet `apps/desktop/`). `packages/`, `website/`, `docs/`, and `.github/workflows/` are already in place. See [docs/architecture/MONOREPO.md](./docs/architecture/MONOREPO.md).
 
 ---
 
@@ -88,7 +86,7 @@ pnpm dev:desktop
 ```
 
 - Opens a native window titled **JobJitsu** (Tauri + React; needs [Rust](https://rustup.rs))
-- Status chrome: **Agent · On-device**; Coming Soon placeholders for most nav
+- Status chrome: **Agent · On-device**; Craft, Applications, Queue, Follow-ups, and Timeline are live
 - Script: [`scripts/dev-desktop.sh`](./scripts/dev-desktop.sh)
 - Vite-only (no Rust): `pnpm dev:app` → http://localhost:1420
 
@@ -126,7 +124,7 @@ A change is complete only when it meets the [Definition of Done](./DEFINITION_OF
 | `pnpm clean`                               | Remove build artifacts / node_modules      |
 | `pnpm project:status -- <n> "In Progress"` | Set issue Status on the project board      |
 
-More detail: [scripts/README.md](./scripts/README.md) · [MONOREPO.md](./MONOREPO.md) · [AI development workflow](./docs/development/AI_DEVELOPMENT_WORKFLOW.md#branching--board-status)
+More detail: [scripts/README.md](./scripts/README.md) · [docs/architecture/MONOREPO.md](./docs/architecture/MONOREPO.md) · [AI development workflow](./docs/development/AI_DEVELOPMENT_WORKFLOW.md#branching--board-status)
 
 When an agent (or you) **starts building** a story: create a feature branch from `main`, set Status **In Progress**, then after DoD **In Review**, on PR **Testing**, on merge **Done**.
 
@@ -163,7 +161,6 @@ Published docs: https://ammar-tariq.github.io/jobjitsu/
 
 | Doc                                                              | Description                    |
 | ---------------------------------------------------------------- | ------------------------------ |
-| [Manifesto](MANIFESTO.md)                                        | Project philosophy             |
 | [Product vision](docs/product/PRODUCT_VISION.md)                 | Vision & mission               |
 | [Platform specification](docs/product/PLATFORM_SPECIFICATION.md) | Functional behavior (**what**) |
 | [Terminology](docs/product/TERMINOLOGY.md)                       | Canonical names                |
@@ -185,29 +182,24 @@ Published docs: https://ammar-tariq.github.io/jobjitsu/
 
 ### Architecture
 
-| Doc                                                                    | Description                          |
-| ---------------------------------------------------------------------- | ------------------------------------ |
-| [System architecture](SYSTEM_ARCHITECTURE.md)                          | Index → system map                   |
-| [System architecture (full)](docs/architecture/SYSTEM_ARCHITECTURE.md) | C4 map, layers, runtime paths        |
-| [Architecture overview](docs/architecture/OVERVIEW.md)                 | Local-first Career OS design         |
-| [Architecture principles](ARCHITECTURE_PRINCIPLES.md)                  | Non-negotiable architectural rules   |
-| [Monorepo](docs/architecture/MONOREPO.md)                              | Repository & package map             |
-| [ADRs](docs/adr/README.md)                                             | Accepted decisions (Tauri, React, …) |
-| [Full index](docs/architecture/README.md)                              | Events, plugins, desktop, AI, tests  |
+| Doc                                                             | Description                          |
+| --------------------------------------------------------------- | ------------------------------------ |
+| [Architecture overview](docs/architecture/OVERVIEW.md)          | Local-first laws + document map      |
+| [System architecture](docs/architecture/SYSTEM_ARCHITECTURE.md) | C4 map, layers, runtime paths        |
+| [Monorepo](docs/architecture/MONOREPO.md)                       | Repository & package map             |
+| [ADRs](docs/adr/README.md)                                      | Accepted decisions (Tauri, React, …) |
+| [Full index](docs/architecture/README.md)                       | Events, plugins, desktop, AI, tests  |
 
 ### Backlog & process
 
 | Doc                                                                    | Description                                     |
 | ---------------------------------------------------------------------- | ----------------------------------------------- |
-| [Implementation roadmap](IMPLEMENTATION_ROADMAP.md)                    | Index to backlog / horizons                     |
-| [Backlog index](docs/backlog/README.md)                                | Epics → tasks                                   |
+| [User stories (PE\* catalog)](docs/backlog/USER_STORIES.md)            | Platform epics + shipped/partial/todo status    |
 | [Dependency graph](docs/backlog/DEPENDENCY_GRAPH.md)                   | Build waves & critical path                     |
-| [Engineering constitution](ENGINEERING_CONSTITUTION.md)                | How we build (process)                          |
 | [Definition of Done](DEFINITION_OF_DONE.md)                            | Completion gates                                |
 | [AI development workflow](docs/development/AI_DEVELOPMENT_WORKFLOW.md) | Plan → implement → commit (+ article detection) |
 | [Article system](docs/articles/ARTICLE_SYSTEM.md)                      | Milestone → proposal → publish                  |
-| [Docs prompts pipeline](docs/prompts/README.md)                        | Phased docs checkpoints                         |
-| [Roadmap user stories](docs/roadmap/USER_STORIES.md)                   | Platform → PE* epics                            |
+| [Project board](https://github.com/users/ammar-tariq/projects/2)       | Live story status (SSOT for AC)                 |
 
 ---
 
@@ -223,7 +215,7 @@ Published docs: https://ammar-tariq.github.io/jobjitsu/
 
 ## Contributing
 
-Follow the [Engineering constitution](ENGINEERING_CONSTITUTION.md), [Definition of Done](DEFINITION_OF_DONE.md), and [`.cursor/rules/`](.cursor/rules/).
+Follow the [Definition of Done](DEFINITION_OF_DONE.md) and [`.cursor/rules/`](.cursor/rules/).
 
 Before proposing a feature, check [Non-goals](docs/product/NON_GOALS.md), [Principles](docs/product/PRINCIPLES.md), and [Terminology](docs/product/TERMINOLOGY.md).
 

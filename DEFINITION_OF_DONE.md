@@ -83,10 +83,10 @@ pnpm check   # format:check + lint + typecheck + test + build
 
 ### Follows architecture
 
-- Respect monorepo package boundaries ([MONOREPO.md](./MONOREPO.md), ADRs).
+- Respect monorepo package boundaries ([docs/architecture/MONOREPO.md](./docs/architecture/MONOREPO.md), ADRs).
 - Local-first defaults; no ambient egress; deny-by-default IPC.
 - `@jobjitsu/agent` must not depend on `@jobjitsu/send`.
-- Align with [MANIFESTO.md](./MANIFESTO.md) and brand development rules.
+- Align with [docs/brand/PRODUCT_PHILOSOPHY.md](./docs/brand/PRODUCT_PHILOSOPHY.md) and brand development rules.
 
 ### Passes lint
 

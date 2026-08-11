@@ -68,7 +68,7 @@ The **spine** of the Career OS. One product, one voice, one privacy model. Toget
 
 ## Experimental
 
-In-tree or specified capabilities that may change. Label clearly in UI and docs. Architecture contracts: [WORKFLOW_ENGINE.md](../architecture/WORKFLOW_ENGINE.md), [DATA_MODELS.md](../architecture/DATA_MODELS.md).
+In-tree or specified capabilities that may change. Label clearly in UI and docs. Architecture contracts: [AI_ARCHITECTURE.md](../architecture/AI_ARCHITECTURE.md) (workflow engine section), [DATA_MODELS.md](../architecture/DATA_MODELS.md).
 
 | Module / capability | Why experimental | Guardrail |
 |---------------------|------------------|-----------|
