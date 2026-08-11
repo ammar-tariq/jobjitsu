@@ -29,6 +29,8 @@ import type {
   AiStatusSnapshot,
   ApplicationSnapshot,
   ApplicationTailorDraftInput,
+  CraftChatRefineInput,
+  CraftChatRefineResult,
   CraftExportResumeResult,
   CraftGenerateInput,
   CraftGenerateResult,
@@ -102,6 +104,11 @@ export type CreateHostIpcOptions = {
    * When omitted, generate returns calm unavailable.
    */
   readonly generateCraftDrafts?: (input: CraftGenerateInput) => Promise<CraftGenerateResult>;
+  /**
+   * Host-owned Craft chat refine (PE28-S03). UI never calls AI directly.
+   * When omitted, chat returns calm unavailable.
+   */
+  readonly refineCraftChat?: (input: CraftChatRefineInput) => Promise<CraftChatRefineResult>;
 };
 
 /**
@@ -131,6 +138,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const parseImportDraft = options.parseImportDraft;
   const tailorApplicationDraft = options.tailorApplicationDraft;
   const generateCraftDrafts = options.generateCraftDrafts;
+  const refineCraftChat = options.refineCraftChat;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {
@@ -944,6 +952,29 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           ...empty,
           exportStatus: "failed",
           message: "Could not export that draft. Try again.",
+        });
+      }
+    },
+    "craft.chatRefine": async (payload) => {
+      if (!refineCraftChat) {
+        return ok({
+          chatStatus: "unavailable" as const,
+          assistantMessage:
+            "Agent is not ready yet. Check Preferences for the on-device model name.",
+          clarifyingQuestions: [],
+          resumeDraft: payload.resumeDraft,
+          coverLetterDraft: payload.coverLetterDraft,
+        });
+      }
+      try {
+        return ok(await refineCraftChat(payload));
+      } catch {
+        return ok({
+          chatStatus: "failed" as const,
+          assistantMessage: "Could not refine that draft. Try again when you are ready.",
+          clarifyingQuestions: [],
+          resumeDraft: payload.resumeDraft,
+          coverLetterDraft: payload.coverLetterDraft,
         });
       }
     },

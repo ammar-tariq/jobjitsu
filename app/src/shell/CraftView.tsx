@@ -1,19 +1,29 @@
 import { useEffect, useState, type JSX } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { CraftExportFormat, CraftGenerateKind } from "../ipc/commands.js";
+import type {
+  CraftChatMessageSnapshot,
+  CraftChatTarget,
+  CraftExportFormat,
+  CraftGenerateKind,
+} from "../ipc/commands.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
 };
 
 /**
- * Craft Studio — résumé + JD → drafts (PE28-S01); HTML/PDF export on device (PE28-S02).
- * Host owns Agent and export; never sends.
+ * Craft Studio — generate, export, and chat refine (PE28-S01…S03).
+ * Host owns Agent; never sends.
  */
 export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [resumeText, setResumeText] = useState("");
@@ -25,6 +35,10 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [status, setStatus] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatTarget, setChatTarget] = useState<CraftChatTarget>("resume");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<readonly CraftChatMessageSnapshot[]>([]);
 
   useEffect(() => {
     if (!resumeDraft.trim()) {
@@ -134,6 +148,63 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       });
   };
 
+  function onChatSend(): void {
+    const message = chatInput.trim();
+    if (!message) {
+      return;
+    }
+    const history = chatMessages;
+    const nextUser: CraftChatMessageSnapshot = { role: "user", content: message };
+    setChatBusy(true);
+    setStatus(null);
+    setChatInput("");
+    setChatMessages([...history, nextUser]);
+    void bridge
+      .refineCraftChat({
+        message,
+        target: chatTarget,
+        resumeText,
+        jobDescription,
+        aboutCompany: aboutCompany.trim() || undefined,
+        resumeDraft,
+        coverLetterDraft,
+        history,
+      })
+      .then((result) => {
+        setChatBusy(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        const value = result.value;
+        setResumeDraft(value.resumeDraft);
+        setCoverLetterDraft(value.coverLetterDraft);
+        const assistantParts = [value.assistantMessage, ...value.clarifyingQuestions];
+        const assistant: CraftChatMessageSnapshot = {
+          role: "assistant",
+          content: assistantParts.filter(Boolean).join("\n\n"),
+        };
+        setChatMessages((prev) => [...prev, assistant]);
+        if (value.chatStatus === "clarify") {
+          setStatus("Agent asked a few clarifying questions. Nothing was sent.");
+          return;
+        }
+        if (value.chatStatus === "reply") {
+          setStatus(value.assistantMessage);
+          return;
+        }
+        if (value.chatStatus === "unavailable") {
+          setStatus(value.assistantMessage);
+          return;
+        }
+        setStatus(value.assistantMessage);
+      })
+      .catch(() => {
+        setChatBusy(false);
+        setStatus("Could not refine that draft. Try again when you are ready.");
+      });
+  }
+
   return (
     <Stack spacing={2} data-testid="jj-craft-view" sx={{ maxWidth: "48rem" }}>
       <Typography component="h2" variant="h2">
@@ -178,7 +249,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="contained"
-          disabled={generating || exporting}
+          disabled={generating || exporting || chatBusy}
           onClick={() => onGenerate("both")}
           data-testid="jj-craft-generate-both"
         >
@@ -186,7 +257,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         </Button>
         <Button
           variant="outlined"
-          disabled={generating || exporting}
+          disabled={generating || exporting || chatBusy}
           onClick={() => onGenerate("resume")}
           data-testid="jj-craft-generate-resume"
         >
@@ -194,7 +265,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         </Button>
         <Button
           variant="outlined"
-          disabled={generating || exporting}
+          disabled={generating || exporting || chatBusy}
           onClick={() => onGenerate("cover_letter")}
           data-testid="jj-craft-generate-cover"
         >
@@ -222,7 +293,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="outlined"
-          disabled={generating || exporting || !resumeDraft.trim()}
+          disabled={generating || exporting || chatBusy || !resumeDraft.trim()}
           onClick={() => onExport("html")}
           data-testid="jj-craft-export-html"
         >
@@ -230,7 +301,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         </Button>
         <Button
           variant="contained"
-          disabled={generating || exporting || !resumeDraft.trim()}
+          disabled={generating || exporting || chatBusy || !resumeDraft.trim()}
           onClick={() => onExport("pdf")}
           data-testid="jj-craft-export-pdf"
         >
@@ -268,6 +339,63 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         placeholder="Generated cover letter appears here. Edit freely."
         slotProps={{ htmlInput: { "data-testid": "jj-craft-cover-draft" } }}
       />
+
+      <Stack spacing={1.5} data-testid="jj-craft-chat">
+        <Typography variant="subtitle2">Refine with Agent</Typography>
+        <Typography color="text.secondary" variant="body2">
+          Ask for a focused edit. If details are thin, Agent will ask clarifying questions instead
+          of inventing facts. Nothing is sent.
+        </Typography>
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={chatTarget}
+          onChange={(_event, value: CraftChatTarget | null) => {
+            if (value) {
+              setChatTarget(value);
+            }
+          }}
+          aria-label="Draft to refine"
+        >
+          <ToggleButton value="resume" data-testid="jj-craft-chat-target-resume">
+            Résumé
+          </ToggleButton>
+          <ToggleButton value="cover_letter" data-testid="jj-craft-chat-target-cover">
+            Cover letter
+          </ToggleButton>
+        </ToggleButtonGroup>
+        {chatMessages.length > 0 ? (
+          <List dense disablePadding data-testid="jj-craft-chat-log">
+            {chatMessages.map((entry, index) => (
+              <ListItem key={`${entry.role}-${index}`} alignItems="flex-start" disableGutters>
+                <ListItemText
+                  primary={entry.role === "user" ? "You" : "Agent"}
+                  secondary={entry.content}
+                  sx={{ "& .MuiListItemText-secondary": { whiteSpace: "pre-wrap" } }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        ) : null}
+        <TextField
+          label="Ask Agent"
+          value={chatInput}
+          onChange={(event) => setChatInput(event.target.value)}
+          fullWidth
+          multiline
+          minRows={2}
+          placeholder="Example: make the summary more systems-focused"
+          slotProps={{ htmlInput: { "data-testid": "jj-craft-chat-input" } }}
+        />
+        <Button
+          variant="outlined"
+          disabled={generating || exporting || chatBusy || !chatInput.trim()}
+          onClick={onChatSend}
+          data-testid="jj-craft-chat-send"
+        >
+          {chatBusy ? "Thinking…" : "Ask Agent"}
+        </Button>
+      </Stack>
     </Stack>
   );
 }
