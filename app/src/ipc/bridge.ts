@@ -75,6 +75,9 @@ export type IpcBridge = {
   readonly updateApplicationDraft: (
     input: ApplicationDraftUpdateInput,
   ) => Promise<Result<IpcResultMap["applications.updateDraft"]>>;
+  readonly tailorApplicationDraft: (
+    input: ApplicationTailorDraftInput,
+  ) => Promise<Result<IpcResultMap["applications.tailorDraft"]>>;
 };
 
 /**
@@ -227,6 +230,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async updateApplicationDraft(input: ApplicationDraftUpdateInput) {
       return (await dispatcher.invoke("applications.updateDraft", input)) as Result<
         IpcResultMap["applications.updateDraft"]
+      >;
+    },
+    async tailorApplicationDraft(input: ApplicationTailorDraftInput) {
+      return (await dispatcher.invoke("applications.tailorDraft", input)) as Result<
+        IpcResultMap["applications.tailorDraft"]
       >;
     },
   };

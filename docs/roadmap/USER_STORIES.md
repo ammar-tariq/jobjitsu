@@ -663,6 +663,27 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Status:** done (2026-08-11)
 
+### PE05-S06 — Run real on-device Agent (local weights)
+
+**Description:** As a user, Agent runs a **real local model** (not a fake stub) so craft drafts come from on-device inference.
+
+**Acceptance criteria:**
+  - Host uses a real local adapter (Ollama on loopback) behind `AiProvider`.
+  - Preferences configures the local model name; chrome shows Agent · On-device when ready.
+  - Rejects non-loopback Ollama URLs; no silent remote fallback.
+  - Shell UI never imports `@jobjitsu/ai`.
+  - Free install guide documents where to download Ollama + models.
+
+**Dependencies:** PE05-S01, PE05-S02, PE05-S05
+
+**Priority:** P0
+
+**Technical notes:** GitHub #102 · PE28 Craft Studio (#101). GGUF-in-process runner may follow later.
+
+**Testing notes:** Mocked loopback fetch; non-loopback rejected; Vitest keeps fake host default.
+
+**Status:** in review (2026-08-11)
+
 ## PE06
 
 **Agent (preparative)** · Status: **Core · H1** · Priority: **P0**

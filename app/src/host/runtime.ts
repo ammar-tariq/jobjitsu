@@ -3,6 +3,7 @@ import {
   createAiProviderRegistry,
   createContextAssembler,
   createFakeAiProvider,
+  createOllamaAiProvider,
   createPathGatedAiProvider,
 } from "@jobjitsu/ai";
 import {
@@ -106,6 +107,11 @@ export type CreateHostRuntimeOptions = {
   readonly folderPicker?: FolderPicker;
   /** Rebind durable stores when the data folder changes. */
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
+  /**
+   * Force the in-process fake Agent (tests / offline demos without Ollama).
+   * Production desktop defaults to local Ollama (PE05-S06).
+   */
+  readonly useFakeAi?: boolean;
 };
 
 /**
@@ -120,7 +126,19 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const errors = createErrorReporter({ logger });
   const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
-  const baseAi = options.ai ?? createFakeAiProvider({ id: "fake-ai" });
+  const defaultToFakeAi =
+    options.useFakeAi === true ||
+    (options.useFakeAi !== false &&
+      typeof process !== "undefined" &&
+      process.env.VITEST === "true");
+  const baseAi =
+    options.ai ??
+    (defaultToFakeAi
+      ? createFakeAiProvider({ id: "fake-ai" })
+      : createOllamaAiProvider({
+          id: "ollama-local",
+          getModelId: () => preferences.getLocalModelPath(),
+        }));
   const ai = createPathGatedAiProvider({
     inner: baseAi,
     getLocalModelPath: () => preferences.getLocalModelPath(),

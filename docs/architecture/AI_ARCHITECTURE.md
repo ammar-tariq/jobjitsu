@@ -85,6 +85,7 @@ Avoid dumping entire Timeline history into every prompt. No hidden training expo
 4. Outputs are suggestions; user remains author of final voice.
 5. Resource failures: calm copy (“On-device model ran out of resources”).
 6. Missing/misconfigured `settings.ai.localModelPath` keeps Agent unavailable — no silent remote fallback; `health()` does not load weights.
+7. **PE05-S06:** Desktop host uses `createOllamaAiProvider` (loopback only). Prefs store an Ollama model name (e.g. `qwen2.5:3b`). Free install guide: `docs/guides/LOCAL_AGENT_MODELS.md`. Vitest keeps the fake provider.
 
 ---
 

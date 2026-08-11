@@ -21,3 +21,4 @@ export {
   createPathGatedAiProvider,
   type PathGatedAiProviderOptions,
 } from "./path-gated-provider.js";
+export { createOllamaAiProvider, type OllamaAiProviderOptions } from "./ollama-provider.js";
