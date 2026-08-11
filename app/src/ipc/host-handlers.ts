@@ -27,6 +27,7 @@ import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker
 import { buildResumeExportArtifacts, toBase64 } from "../host/resume-export.js";
 import type {
   AiStatusSnapshot,
+  ApplicationCoverLetterDraftInput,
   ApplicationSnapshot,
   ApplicationTailorDraftInput,
   CraftChatRefineInput,
@@ -53,6 +54,7 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     resumeVersionId: application.resumeVersionId,
     notes: application.notes,
     resumeDraftText: application.resumeDraftText,
+    coverLetterDraftText: application.coverLetterDraftText,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -100,6 +102,15 @@ export type CreateHostIpcOptions = {
     readonly tailorStatus: "ready" | "unavailable" | "failed";
   }>;
   /**
+   * Host-owned cover letter draft (PE08-S02). UI never calls AI directly.
+   * When omitted, generate returns calm unavailable.
+   */
+  readonly generateApplicationCoverLetter?: (input: ApplicationCoverLetterDraftInput) => Promise<{
+    readonly application: Application | null;
+    readonly draftText: string;
+    readonly coverLetterStatus: "ready" | "unavailable" | "failed";
+  }>;
+  /**
    * Host-owned Craft Studio generate (PE28-S01). UI never calls AI directly.
    * When omitted, generate returns calm unavailable.
    */
@@ -137,6 +148,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const onDataRootChanged = options.onDataRootChanged;
   const parseImportDraft = options.parseImportDraft;
   const tailorApplicationDraft = options.tailorApplicationDraft;
+  const generateApplicationCoverLetter = options.generateApplicationCoverLetter;
   const generateCraftDrafts = options.generateCraftDrafts;
   const refineCraftChat = options.refineCraftChat;
 
@@ -817,6 +829,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             resumeVersionId: payload.resumeVersionId,
             notes: payload.notes,
             resumeDraftText: payload.resumeDraftText,
+            coverLetterDraftText: payload.coverLetterDraftText,
             stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
           },
         });
@@ -862,6 +875,29 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           application: null,
           draftText: "",
           tailorStatus: "failed" as const,
+        });
+      }
+    },
+    "applications.generateCoverLetter": async (payload) => {
+      if (!generateApplicationCoverLetter) {
+        return ok({
+          application: null,
+          draftText: "",
+          coverLetterStatus: "unavailable" as const,
+        });
+      }
+      try {
+        const result = await generateApplicationCoverLetter(payload);
+        return ok({
+          application: result.application ? toApplicationSnapshot(result.application) : null,
+          draftText: result.draftText,
+          coverLetterStatus: result.coverLetterStatus,
+        });
+      } catch {
+        return ok({
+          application: null,
+          draftText: "",
+          coverLetterStatus: "failed" as const,
         });
       }
     },

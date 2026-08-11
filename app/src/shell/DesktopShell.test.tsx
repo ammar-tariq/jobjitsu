@@ -219,6 +219,32 @@ describe("DesktopShell", () => {
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
   });
 
+  it("generates an editable cover letter without sending (PE08-S02)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
+    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
+    await user.click(screen.getByTestId("jj-application-save"));
+
+    expect(
+      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+    ).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-cover-letter"));
+
+    expect(await screen.findByTestId("jj-application-status")).toHaveTextContent(
+      /Cover letter ready\. Edit freely — you remain the author\. Nothing was sent/i,
+    );
+    const coverField = screen.getByTestId("jj-application-cover-draft") as HTMLTextAreaElement;
+    expect(coverField.value).toMatch(/Cover letter draft/i);
+    expect(screen.queryByRole("button", { name: /approve send/i })).not.toBeInTheDocument();
+  });
+
   it("toggles appearance from Preferences and keeps it on the shared store", async () => {
     const user = userEvent.setup();
     const appearance = createMemoryAppearanceStore("dark");

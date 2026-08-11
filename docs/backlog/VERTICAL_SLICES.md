@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE28 Local Craft Studio |
-| **Story** | PE28-S03 — Craft chat refine + clarifying questions |
+| **Epic** | PE08 Applications & Pipeline |
+| **Story** | PE08-S02 — Cover letter draft |
 | **Status** | In progress |
-| **Note** | Chat refine; clarify before invent; no send |
+| **Note** | Applications cover letter; edit; no send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE28-S03 | 2026-08-11 | Craft chat refine + clarifying questions; PR #109 |
 | PE28-S02 | 2026-08-11 | HTML preview + local PDF export; PR #108 |
 | PE28-S01 | 2026-08-11 | Craft screen résumé + cover letter; PR #107 |
 | PE05-S06 | 2026-08-11 | Real on-device Agent via local Ollama; PR #106 |

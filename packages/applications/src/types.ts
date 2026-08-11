@@ -34,6 +34,8 @@ export type Application = {
   readonly notes?: string;
   /** Editable tailored résumé draft text — user remains author (PE03-S04). */
   readonly resumeDraftText?: string;
+  /** Editable cover letter draft text — user remains author (PE08-S02). */
+  readonly coverLetterDraftText?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -64,6 +66,7 @@ export type ApplicationDraftPatch = {
   readonly resumeVersionId?: string | null;
   readonly notes?: string | null;
   readonly resumeDraftText?: string | null;
+  readonly coverLetterDraftText?: string | null;
   readonly stage?: PipelineStage;
 };
 
