@@ -919,7 +919,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Draft-only assertion; cover letter ↛ send fence.
 
-**Status:** in progress (2026-08-11)
+**Status:** done (2026-08-11)
 
 ### PE08-S03 — Track application status post-send
 
