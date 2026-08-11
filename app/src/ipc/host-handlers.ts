@@ -1,5 +1,6 @@
 import {
   createApplicationDraft,
+  deleteApplicationDraft,
   trackingStatusForStage,
   updateApplicationDraft,
   type Application,
@@ -10,6 +11,7 @@ import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/id
 import type { PreferencesFacade } from "@jobjitsu/preferences";
 import {
   createAppError,
+  createEntityId,
   err,
   isPipelineStage,
   ok,
@@ -56,6 +58,9 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     notes: application.notes,
     resumeDraftText: application.resumeDraftText,
     coverLetterDraftText: application.coverLetterDraftText,
+    followUpAt: application.followUpAt,
+    followUpDraftText: application.followUpDraftText,
+    followUpId: application.followUpId,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -684,6 +689,42 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "preferences.getOnboardingCompleted": async () => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return ok({ completed: false });
+      }
+      return ok({ completed: await preferences.getOnboardingCompleted() });
+    },
+    "preferences.setOnboardingCompleted": async (payload) => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
+      try {
+        const completed = await preferences.setOnboardingCompleted(payload.completed);
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["onboardingCompleted"] });
+        }
+        return ok({ completed });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update onboarding", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That preference could not be saved. Try again.",
+            detail: "preferences:onboarding",
+            cause,
+          }),
+        );
+      }
+    },
     "preferences.getCraftPreferences": async () => {
       const preferences = getPreferences();
       if (!preferences) {
@@ -793,6 +834,8 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             roleId: payload.roleId ? (payload.roleId as RoleId) : undefined,
             resumeVersionId: payload.resumeVersionId,
             notes: payload.notes,
+            resumeDraftText: payload.resumeDraftText,
+            coverLetterDraftText: payload.coverLetterDraftText,
           },
         });
         return ok({
@@ -836,6 +879,22 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
       try {
+        const existing = await applications.get(payload.id as ApplicationId);
+        let followUpId: string | null | undefined;
+        let followUpAt: string | null | undefined = payload.followUpAt;
+        if (payload.followUpAt === null) {
+          followUpId = null;
+          followUpAt = null;
+        } else if (payload.followUpAt !== undefined) {
+          const trimmed = payload.followUpAt.trim();
+          if (!trimmed) {
+            followUpAt = null;
+            followUpId = null;
+          } else {
+            followUpAt = trimmed;
+            followUpId = existing?.followUpId ?? createEntityId("followup");
+          }
+        }
         const result = await updateApplicationDraft({
           repository: applications,
           bus,
@@ -855,6 +914,9 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             notes: payload.notes,
             resumeDraftText: payload.resumeDraftText,
             coverLetterDraftText: payload.coverLetterDraftText,
+            followUpAt,
+            followUpDraftText: payload.followUpDraftText,
+            followUpId,
             stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
           },
         });
@@ -875,6 +937,36 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "That application draft could not be updated. Try again.",
             detail: "applications:update",
+            cause,
+          }),
+        );
+      }
+    },
+    "applications.deleteDraft": async (payload) => {
+      const applications = getApplications();
+      if (!applications) {
+        return err(
+          createAppError("unavailable", "Applications not ready", {
+            message: "Application storage is not available yet.",
+            detail: "applications:missing",
+          }),
+        );
+      }
+      try {
+        const deleted = await deleteApplicationDraft({
+          repository: applications,
+          bus,
+          id: payload.id as ApplicationId,
+        });
+        return ok({ deleted });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not delete application", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That application draft could not be removed. Try again.",
+            detail: "applications:delete",
             cause,
           }),
         );

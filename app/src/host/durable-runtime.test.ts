@@ -99,6 +99,38 @@ describe("durable host data folder", () => {
     expect((await second.pathLibrary.getSelected())?.name).toBe("Fullstack Developer");
   });
 
+  it("persists applications under the data folder across restart", async () => {
+    const defaultDataRoot = await tempRoot("jobjitsu-apps-");
+    const io = createNodeFsIo();
+
+    const first = await createDurableHostRuntime({
+      version: "0.0.0-test",
+      io,
+      defaultDataRoot,
+    });
+    const created = await first.applications.create({
+      companyName: "Acme",
+      roleTitle: "Staff Engineer",
+      notes: "Durable draft",
+    });
+    await first.applications.update({
+      id: created.application.id,
+      resumeDraftText: "Tailored on device",
+      stage: "queue",
+    });
+
+    const second = await createDurableHostRuntime({
+      version: "0.0.0-test",
+      io,
+      defaultDataRoot,
+    });
+    const listed = await second.applications.list();
+    expect(listed).toHaveLength(1);
+    expect(listed[0]?.companyName).toBe("Acme");
+    expect(listed[0]?.resumeDraftText).toBe("Tailored on device");
+    expect(listed[0]?.stage).toBe("queue");
+  });
+
   it("writes career data into a custom folder after setDataRoot", async () => {
     const defaultDataRoot = await tempRoot("jobjitsu-default-");
     const customRoot = await tempRoot("jobjitsu-custom-");

@@ -2,9 +2,11 @@
 
 Desktop **shell** (React webview) + **Tauri host** for JobJitsu.
 
-Primary nav: **Applications**, **Queue**, **Follow-ups**, **Profile**, **Agent**, **Preferences**, **Timeline**.
-**Profile** holds identity and career Paths (with per-path resume import). **Preferences** is the on-device data folder (and appearance).
-**Agent** shows the startup cascade (listen-only). Other destinations stay **Coming Soon**.
+Primary nav: **Craft**, **Applications**, **Queue**, **Follow-ups**, **Profile**, **Agent**, **Preferences**, **Timeline**.
+**Profile** holds identity and career Paths. **Preferences** covers data folder, approval-before-send, writing voice, and on-device Agent model.
+**Agent** shows readiness and recent activity (listen-only). Queue / Follow-ups / Timeline are thin local views — never auto-send.
+
+Sellable local MVP notes: [SELLABLE_LOCAL_MVP.md](../docs/product/SELLABLE_LOCAL_MVP.md).
 
 ## Prerequisites
 
@@ -36,7 +38,7 @@ pnpm --filter @jobjitsu/app dev
 # or: pnpm dev:app
 ```
 
-Open **http://localhost:1420**.
+Open **http://localhost:1420**. Browser mode uses session memory; Tauri uses the durable data folder.
 
 ```bash
 pnpm --filter @jobjitsu/app build
@@ -45,43 +47,41 @@ pnpm --filter @jobjitsu/app test
 
 ## Layout
 
-Material UI [dashboard template](https://github.com/mui/material-ui/tree/v9.2.0/docs/data/material/getting-started/templates/dashboard) pattern (permanent side drawer + main), themed with JobJitsu **Midnight Ink** (dark default) and Soft Cloud light. Toggle appearance under **Preferences** — stored on this device. No charts or SaaS cockpit chrome.
+Material UI dashboard pattern (permanent side drawer + main), themed with JobJitsu **Midnight Ink** (dark default) and Soft Cloud light. Toggle appearance under **Preferences** — stored on this device. No charts or SaaS cockpit chrome.
 
 ```
 ┌──────────────┬─────────────────────────────┐
-│ JobJitsu     │  Applications               │
-│──────────────│  Coming Soon                │
+│ JobJitsu     │  Craft / Applications / …   │
+│──────────────│                             │
+│ Craft        │  One job per view           │
 │ Applications │                             │
-│ Queue        │  (Agent → cascade listen)   │
+│ Queue        │  Agent · On-device           │
 │ Follow-ups   │                             │
-│ Agent        │                             │
 │ Profile      │                             │
 │ Agent        │        Main content         │
 │ Preferences  │                             │
 │ Timeline     │                             │
-│ Agent · On-  │                             │
-│ device       │                             │
 └──────────────┴─────────────────────────────┘
 ```
 
 ## Architecture notes
 
-| Concern      | Choice                                                                                                                        |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                                             |
-| UI           | React + MUI (dashboard shell) in webview (ADR 0002) — subscribes only                                                         |
-| TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md))               |
-| Host runtime | `src/host` owns AI / resume / mail fakes (process-local)                                                                      |
-| Bus          | `@jobjitsu/events` — awaited async handlers                                                                                   |
-| Cascade      | `App.Started → Plugin.Loaded → Resume.Generated → Email.Synced`                                                               |
-| UI → AI      | **Forbidden** (`ui-ai-fence` test)                                                                                            |
-| IPC          | Deny-by-default allowlist (`app/src/ipc`); `ping` + theme / `ai.getStatus` stubs ([ADR 0013](../docs/adr/0013-ipc-bridge.md)) |
+| Concern      | Choice                                                                                                                     |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Native host  | Tauri 2 (ADR 0001) — `src-tauri/`                                                                                          |
+| UI           | React + MUI (dashboard shell) in webview (ADR 0002) — subscribes only                                                      |
+| TS↔Tauri     | Vite-first webview; host owns privileged work ([TAURI_TS_RUNTIME.md](../docs/architecture/TAURI_TS_RUNTIME.md))            |
+| Host runtime | `src/host` owns AI / identity / durable stores                                                                             |
+| Bus          | `@jobjitsu/events` — awaited async handlers                                                                                |
+| Startup      | `App.Started → Plugin.Loaded → Ai.LocalModelReady` (no outbound send)                                                      |
+| UI → AI      | **Forbidden** (`ui-ai-fence` test)                                                                                         |
+| IPC          | Deny-by-default allowlist (`app/src/ipc`); career egress intentionally absent ([ADR 0013](../docs/adr/0013-ipc-bridge.md)) |
 
 See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 ## Boundaries
 
-- No career egress from the renderer; launch uses an in-memory fake mailbox only.
+- No career egress from the renderer; startup never sends mail.
 - Shell must not import `@jobjitsu/ai`.
 - Webview capabilities stay deny-by-default: dialog open + scoped FS for the on-device data folder, plus `allow_data_directory` for custom folders — no shell/HTTP career egress.
 - Narrow IPC allowlist in `src/ipc` — unknown commands and `ai.complete` are denied ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).

@@ -39,6 +39,9 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [chatTarget, setChatTarget] = useState<CraftChatTarget>("resume");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<readonly CraftChatMessageSnapshot[]>([]);
+  const [savingApplication, setSavingApplication] = useState(false);
+  const [saveCompany, setSaveCompany] = useState("");
+  const [saveRole, setSaveRole] = useState("");
 
   useEffect(() => {
     if (!resumeDraft.trim()) {
@@ -145,6 +148,41 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       .catch(() => {
         setExporting(false);
         setStatus("Could not export that draft. Try again.");
+      });
+  };
+
+  const onSaveToApplication = (): void => {
+    if (!resumeDraft.trim() && !coverLetterDraft.trim()) {
+      setStatus("Generate or paste a draft before saving to an application.");
+      return;
+    }
+    if (!saveCompany.trim() || !saveRole.trim()) {
+      setStatus("Add a company and role title to save these drafts as an application.");
+      return;
+    }
+    setSavingApplication(true);
+    setStatus(null);
+    void bridge
+      .createApplicationDraft({
+        companyName: saveCompany.trim(),
+        roleTitle: saveRole.trim(),
+        resumeDraftText: resumeDraft.trim() || undefined,
+        coverLetterDraftText: coverLetterDraft.trim() || undefined,
+        notes: aboutCompany.trim() || undefined,
+      })
+      .then((result) => {
+        setSavingApplication(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setStatus(
+          `Saved to application “${result.value.application.companyName} · ${result.value.application.roleTitle}”. Nothing was sent.`,
+        );
+      })
+      .catch(() => {
+        setSavingApplication(false);
+        setStatus("Could not save that application. Try again.");
       });
   };
 
@@ -306,6 +344,48 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           data-testid="jj-craft-export-pdf"
         >
           {exporting ? "Saving…" : "Save PDF"}
+        </Button>
+      </Stack>
+
+      <Stack
+        spacing={1.5}
+        data-testid="jj-craft-save-application"
+        sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+      >
+        <Typography variant="subtitle2">Save to application</Typography>
+        <Typography color="text.secondary" variant="body2">
+          Keep these drafts on this device as an application. Nothing is sent.
+        </Typography>
+        <TextField
+          label="Company"
+          value={saveCompany}
+          onChange={(event) => setSaveCompany(event.target.value)}
+          size="small"
+          fullWidth
+          slotProps={{ htmlInput: { "data-testid": "jj-craft-save-company" } }}
+        />
+        <TextField
+          label="Role title"
+          value={saveRole}
+          onChange={(event) => setSaveRole(event.target.value)}
+          size="small"
+          fullWidth
+          slotProps={{ htmlInput: { "data-testid": "jj-craft-save-role" } }}
+        />
+        <Button
+          variant="outlined"
+          disabled={
+            generating ||
+            exporting ||
+            chatBusy ||
+            savingApplication ||
+            (!resumeDraft.trim() && !coverLetterDraft.trim())
+          }
+          onClick={onSaveToApplication}
+          data-testid="jj-craft-save-application-btn"
+          sx={{ alignSelf: "flex-start" }}
+        >
+          {savingApplication ? "Saving…" : "Save to application"}
         </Button>
       </Stack>
 

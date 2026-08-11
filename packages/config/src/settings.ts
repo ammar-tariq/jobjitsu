@@ -40,6 +40,8 @@ export type ThemePreference = "dark" | "light" | "system";
 /** Full settings document stored on-device. */
 export interface AppSettings {
   readonly requireApprovalBeforeSend: boolean;
+  /** First-run guide completed or skipped — stays on this device. */
+  readonly onboardingCompleted: boolean;
   readonly theme: ThemePreference;
   readonly ai: AiSettings;
   readonly notifications: NotificationSettings;
@@ -55,6 +57,7 @@ export interface AppSettings {
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   requireApprovalBeforeSend: true,
+  onboardingCompleted: false,
   theme: "dark",
   ai: {},
   notifications: {

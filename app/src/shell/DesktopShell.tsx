@@ -2,19 +2,22 @@ import { useEffect, useState, type JSX } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import type { AgentPrivacyState } from "@jobjitsu/ui";
-import { DEFAULT_SHELL_NAV_ID, shellPageTitle, type ShellNavId } from "../index.js";
+import { DEFAULT_SHELL_NAV_ID, type ShellNavId } from "../index.js";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ThemePreference } from "../ipc/commands.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
 import { agentPrivacyStateFromStatus } from "./agent-privacy.js";
+import { AgentView } from "./AgentView.js";
 import { ApplicationsView } from "./ApplicationsView.js";
-import { ComingSoonView } from "./ComingSoonView.js";
 import { CraftView } from "./CraftView.js";
-import { EventActivityView } from "./EventActivityView.js";
+import { FollowUpsView } from "./FollowUpsView.js";
 import { useHostActivity } from "./HostProvider.js";
+import { OnboardingView } from "./OnboardingView.js";
 import { PreferencesView } from "./PreferencesView.js";
 import { ProfileView } from "./ProfileView.js";
+import { QueueView } from "./QueueView.js";
 import { SideMenu } from "./SideMenu.js";
+import { TimelineView } from "./TimelineView.js";
 
 export type DesktopShellProps = {
   readonly theme: ThemePreference;
@@ -28,13 +31,26 @@ export type DesktopShellProps = {
  */
 export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps): JSX.Element {
   const [activeId, setActiveId] = useState<ShellNavId>(DEFAULT_SHELL_NAV_ID);
-  const title = shellPageTitle(activeId);
   const activity = useHostActivity();
   const [agentPrivacy, setAgentPrivacy] = useState<AgentPrivacyState>("unavailable");
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void bridge.getOnboardingCompleted().then((result) => {
+      if (cancelled || !result.ok) {
+        return;
+      }
+      setShowOnboarding(!result.value.completed);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [bridge]);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +64,24 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
       cancelled = true;
     };
   }, [bridge, activity]);
+
+  if (showOnboarding) {
+    return (
+      <Box
+        className="jj-shell"
+        data-theme={theme}
+        data-testid="jj-desktop-shell"
+        sx={{ minHeight: "100vh", bgcolor: "background.default" }}
+      >
+        <OnboardingView
+          bridge={bridge}
+          onFinished={() => {
+            setShowOnboarding(false);
+          }}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -82,14 +116,20 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             <CraftView bridge={bridge} />
           ) : activeId === "applications" ? (
             <ApplicationsView bridge={bridge} />
+          ) : activeId === "queue" ? (
+            <QueueView bridge={bridge} />
+          ) : activeId === "follow-ups" ? (
+            <FollowUpsView bridge={bridge} />
           ) : activeId === "agent" ? (
-            <EventActivityView />
+            <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
           ) : activeId === "profile" ? (
             <ProfileView bridge={bridge} />
           ) : activeId === "preferences" ? (
             <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
+          ) : activeId === "timeline" ? (
+            <TimelineView />
           ) : (
-            <ComingSoonView title={title} />
+            <CraftView bridge={bridge} />
           )}
         </Stack>
       </Box>

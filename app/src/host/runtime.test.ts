@@ -4,7 +4,7 @@ import { createHostRuntime } from "./runtime.js";
 import { configureStubLocalModel } from "./test-local-model.js";
 
 describe("createHostRuntime", () => {
-  it("runs the event cascade without UI calling AI", async () => {
+  it("runs Agent readiness without outbound send", async () => {
     const host = createHostRuntime({ version: "test" });
     await configureStubLocalModel(host.preferences);
     const names: string[] = [];
@@ -18,22 +18,14 @@ describe("createHostRuntime", () => {
     expect(names).toContain("Plugin.Loaded");
     expect(names).toContain("Ai.LocalModelLoading");
     expect(names).toContain("Ai.LocalModelReady");
-    expect(names).toContain("Resume.Generated");
-    expect(names).toContain("Email.Synced");
+    expect(names).not.toContain("Resume.Generated");
+    expect(names).not.toContain("Email.Synced");
 
-    const order = [
-      "App.Started",
-      "Plugin.Loaded",
-      "Ai.LocalModelReady",
-      "Resume.Generated",
-      "Email.Synced",
-    ] as const;
+    const order = ["App.Started", "Plugin.Loaded", "Ai.LocalModelReady"] as const;
     const indexes = order.map((name) => names.indexOf(name));
     expect(indexes.every((i) => i >= 0)).toBe(true);
     expect(indexes[0]).toBeLessThan(indexes[1]!);
     expect(indexes[1]).toBeLessThan(indexes[2]!);
-    expect(indexes[2]).toBeLessThan(indexes[3]!);
-    expect(indexes[3]).toBeLessThan(indexes[4]!);
   });
 
   it("fails readiness when local model path is missing — recovery points to Preferences", async () => {

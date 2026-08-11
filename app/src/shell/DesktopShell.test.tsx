@@ -68,7 +68,7 @@ describe("DesktopShell", () => {
     expect(screen.queryByRole("status", { name: "Agent · On-device" })).not.toBeInTheDocument();
   });
 
-  it("shows one primary view and Agent listens to host events", async () => {
+  it("shows Agent status without cascade theater", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
@@ -78,8 +78,8 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Agent" }));
 
     expect(screen.getByRole("heading", { level: 2, name: "Agent" })).toBeInTheDocument();
-    expect(screen.getByTestId("jj-event-activity")).toBeInTheDocument();
-    expect(await screen.findByText("Startup cascade complete.")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-agent-view")).toBeInTheDocument();
+    expect(await screen.findByTestId("jj-agent-status")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Agent" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByTestId("jj-coming-soon")).not.toBeInTheDocument();
   });
@@ -187,8 +187,36 @@ describe("DesktopShell", () => {
     await user.click(screen.getByRole("button", { name: "Queue" }));
 
     expect(screen.getByRole("heading", { level: 2, name: "Queue" })).toBeInTheDocument();
-    expect(screen.getByText("Coming Soon")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-queue-view")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Queue" })).toHaveAttribute("aria-current", "page");
+    expect(screen.queryByTestId("jj-coming-soon")).not.toBeInTheDocument();
+  });
+
+  it("reviews queue without sending and surfaces approval preference", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Engineer");
+    await user.click(screen.getByTestId("jj-application-save"));
+    expect(await screen.findByText(/Application draft saved/i)).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-ready-for-review"));
+    expect(await screen.findByText(/Marked ready for review/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Queue" }));
+    expect(screen.getByTestId("jj-queue-view")).toBeInTheDocument();
+    expect(screen.getByText(/Acme · Engineer/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+    expect(await screen.findByText(/Approved on this device/i)).toBeInTheDocument();
+    expect(screen.getByTestId("jj-queue-empty")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-approval-before-send")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Require approval before send/i)).toBeChecked();
   });
 
   it("tailors an editable résumé draft without sending (PE03-S04)", async () => {

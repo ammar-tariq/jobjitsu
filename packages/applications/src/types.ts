@@ -36,6 +36,12 @@ export type Application = {
   readonly resumeDraftText?: string;
   /** Editable cover letter draft text — user remains author (PE08-S02). */
   readonly coverLetterDraftText?: string;
+  /** ISO date (YYYY-MM-DD) when a follow-up is due — local reminder only. */
+  readonly followUpAt?: string;
+  /** Draft follow-up note — never sent automatically. */
+  readonly followUpDraftText?: string;
+  /** Stable local id for FollowUp.* events when scheduled. */
+  readonly followUpId?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -49,6 +55,8 @@ export type ApplicationDraftInput = {
   readonly roleId?: RoleId;
   readonly resumeVersionId?: string;
   readonly notes?: string;
+  readonly resumeDraftText?: string;
+  readonly coverLetterDraftText?: string;
   /**
    * When true, create even if a soft-duplicate exists.
    * Default false still creates, but callers surface `duplicateWarning`.
@@ -67,6 +75,9 @@ export type ApplicationDraftPatch = {
   readonly notes?: string | null;
   readonly resumeDraftText?: string | null;
   readonly coverLetterDraftText?: string | null;
+  readonly followUpAt?: string | null;
+  readonly followUpDraftText?: string | null;
+  readonly followUpId?: string | null;
   readonly stage?: PipelineStage;
 };
 
@@ -90,6 +101,8 @@ export type ApplicationRepository = {
   get(id: ApplicationId): Promise<Application | undefined>;
   create(input: ApplicationDraftInput): Promise<CreateDraftResult>;
   update(patch: ApplicationDraftPatch): Promise<UpdateDraftResult>;
+  /** Remove a local draft. Returns false if it was already gone. */
+  delete(id: ApplicationId): Promise<boolean>;
 };
 
 export function trackingStatusForStage(stage: PipelineStage): ApplicationTrackingStatus {

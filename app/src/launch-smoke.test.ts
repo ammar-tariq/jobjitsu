@@ -55,7 +55,7 @@ describe("PE01-S01 launch desktop host", () => {
     expect(names.some((name) => name.startsWith("http:"))).toBe(false);
   });
 
-  it("startup cascade uses local fake mail only — no career network egress", async () => {
+  it("startup checks Agent readiness without mail sync or career network egress", async () => {
     const originalFetch = globalThis.fetch;
     let fetchCalls = 0;
     globalThis.fetch = (async () => {
@@ -70,7 +70,8 @@ describe("PE01-S01 launch desktop host", () => {
 
       const names = runtime.getActivity().map((e) => e.name);
       expect(names).toContain("App.Started");
-      expect(names).toContain("Email.Synced");
+      expect(names).toContain("Ai.LocalModelReady");
+      expect(names).not.toContain("Email.Synced");
       expect(fetchCalls).toBe(0);
     } finally {
       globalThis.fetch = originalFetch;

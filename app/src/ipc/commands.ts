@@ -30,6 +30,8 @@ export const IPC_ALLOWLIST = [
   "storage.pickDataRoot",
   "preferences.getApprovalBeforeSend",
   "preferences.setApprovalBeforeSend",
+  "preferences.getOnboardingCompleted",
+  "preferences.setOnboardingCompleted",
   "preferences.getCraftPreferences",
   "preferences.setCraftPreferences",
   "preferences.getLocalModelPath",
@@ -37,6 +39,7 @@ export const IPC_ALLOWLIST = [
   "applications.list",
   "applications.createDraft",
   "applications.updateDraft",
+  "applications.deleteDraft",
   "applications.tailorDraft",
   "applications.generateCoverLetter",
   "craft.generate",
@@ -185,6 +188,9 @@ export type ApplicationSnapshot = {
   readonly notes?: string;
   readonly resumeDraftText?: string;
   readonly coverLetterDraftText?: string;
+  readonly followUpAt?: string;
+  readonly followUpDraftText?: string;
+  readonly followUpId?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -197,6 +203,8 @@ export type ApplicationDraftCreateInput = {
   readonly roleId?: string;
   readonly resumeVersionId?: string;
   readonly notes?: string;
+  readonly resumeDraftText?: string;
+  readonly coverLetterDraftText?: string;
 };
 
 export type ApplicationDraftUpdateInput = {
@@ -210,6 +218,8 @@ export type ApplicationDraftUpdateInput = {
   readonly notes?: string | null;
   readonly resumeDraftText?: string | null;
   readonly coverLetterDraftText?: string | null;
+  readonly followUpAt?: string | null;
+  readonly followUpDraftText?: string | null;
   readonly stage?: string;
 };
 
@@ -328,6 +338,8 @@ export type IpcPayloadMap = {
   readonly "storage.pickDataRoot": undefined;
   readonly "preferences.getApprovalBeforeSend": undefined;
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
+  readonly "preferences.getOnboardingCompleted": undefined;
+  readonly "preferences.setOnboardingCompleted": { readonly completed: boolean };
   readonly "preferences.getCraftPreferences": undefined;
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
   readonly "preferences.getLocalModelPath": undefined;
@@ -335,6 +347,7 @@ export type IpcPayloadMap = {
   readonly "applications.list": undefined;
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
+  readonly "applications.deleteDraft": { readonly id: string };
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
   readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftInput;
   readonly "craft.generate": CraftGenerateInput;
@@ -384,6 +397,8 @@ export type IpcResultMap = {
   };
   readonly "preferences.getApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
+  readonly "preferences.getOnboardingCompleted": { readonly completed: boolean };
+  readonly "preferences.setOnboardingCompleted": { readonly completed: boolean };
   readonly "preferences.getCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.getLocalModelPath": { readonly path: string | null };
@@ -397,6 +412,7 @@ export type IpcResultMap = {
     readonly application: ApplicationSnapshot;
     readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
   };
+  readonly "applications.deleteDraft": { readonly deleted: boolean };
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
   readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftResult;
   readonly "craft.generate": CraftGenerateResult;

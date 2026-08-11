@@ -1,4 +1,5 @@
 import { createEntityId, type ApplicationId, type PipelineStage } from "@jobjitsu/shared";
+import type { KvStore } from "@jobjitsu/storage";
 import { findDuplicateWarning } from "./duplicate.js";
 import type {
   Application,
@@ -8,6 +9,15 @@ import type {
   CreateDraftResult,
   UpdateDraftResult,
 } from "./types.js";
+
+export const APPLICATIONS_STORAGE_KEY = {
+  namespace: "applications",
+  id: "drafts",
+} as const;
+
+type ApplicationsDocument = {
+  readonly applications: readonly Application[];
+};
 
 function requireText(value: string, label: string): string {
   const trimmed = value.trim();
@@ -25,28 +35,49 @@ function optionalText(value: string | undefined | null): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function sortByUpdated(apps: readonly Application[]): Application[] {
+  return [...apps].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
 /**
- * Process-local application repository for host / UI tests.
- * On-device only — no network (browser-safe).
+ * Application drafts on local KV — survives restart under the data folder.
+ * On-device only; no network.
  */
-export function createMemoryApplicationRepository(): ApplicationRepository {
-  const apps = new Map<string, Application>();
+export function createKvApplicationRepository(kv: KvStore): ApplicationRepository {
+  async function readDoc(): Promise<ApplicationsDocument> {
+    const row = await kv.get<ApplicationsDocument>(APPLICATIONS_STORAGE_KEY);
+    if (!row.ok) {
+      throw new Error(row.error.message ?? row.error.title);
+    }
+    return { applications: row.value?.applications ?? [] };
+  }
+
+  async function writeDoc(doc: ApplicationsDocument): Promise<void> {
+    const written = await kv.set(APPLICATIONS_STORAGE_KEY, {
+      applications: doc.applications,
+    });
+    if (!written.ok) {
+      throw new Error(written.error.message ?? written.error.title);
+    }
+  }
 
   return {
     async list() {
-      return [...apps.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+      const doc = await readDoc();
+      return sortByUpdated(doc.applications);
     },
 
     async get(id) {
-      return apps.get(id);
+      const doc = await readDoc();
+      return doc.applications.find((application) => application.id === id);
     },
 
     async create(input: ApplicationDraftInput): Promise<CreateDraftResult> {
       const companyName = requireText(input.companyName, "company name");
       const roleTitle = requireText(input.roleTitle, "role title");
       const now = new Date().toISOString();
-      const listed = [...apps.values()];
-      const duplicateWarning = findDuplicateWarning(listed, {
+      const doc = await readDoc();
+      const duplicateWarning = findDuplicateWarning(doc.applications, {
         companyName,
         roleTitle,
         sourceUrl: optionalText(input.sourceUrl),
@@ -68,12 +99,13 @@ export function createMemoryApplicationRepository(): ApplicationRepository {
         createdAt: now,
         updatedAt: now,
       };
-      apps.set(application.id, application);
+      await writeDoc({ applications: [...doc.applications, application] });
       return { application, duplicateWarning };
     },
 
     async update(patch: ApplicationDraftPatch): Promise<UpdateDraftResult> {
-      const existing = apps.get(patch.id);
+      const doc = await readDoc();
+      const existing = doc.applications.find((application) => application.id === patch.id);
       if (!existing) {
         throw new Error(
           "That application draft is not on this device. Pick another and try again.",
@@ -101,9 +133,8 @@ export function createMemoryApplicationRepository(): ApplicationRepository {
             ? optionalText(patch.requisitionId)
             : existing.requisitionId;
 
-      const listed = [...apps.values()];
       const duplicateWarning = findDuplicateWarning(
-        listed,
+        doc.applications,
         { companyName, roleTitle, sourceUrl, requisitionId },
         { excludeId: existing.id },
       );
@@ -166,12 +197,23 @@ export function createMemoryApplicationRepository(): ApplicationRepository {
         stage,
         updatedAt: new Date().toISOString(),
       };
-      apps.set(next.id, next);
+      await writeDoc({
+        applications: doc.applications.map((application) =>
+          application.id === next.id ? next : application,
+        ),
+      });
       return { application: next, duplicateWarning };
     },
 
     async delete(id) {
-      return apps.delete(id);
+      const doc = await readDoc();
+      if (!doc.applications.some((application) => application.id === id)) {
+        return false;
+      }
+      await writeDoc({
+        applications: doc.applications.filter((application) => application.id !== id),
+      });
+      return true;
     },
   };
 }

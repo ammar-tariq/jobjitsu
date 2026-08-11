@@ -12,15 +12,17 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE05 Local Intelligence |
-| **Story** | PE05-S07 — List on-device Agent models from Ollama |
-| **Status** | In progress |
-| **Note** | Preferences picker from loopback `/api/tags` |
+| **Epic** | Product polish / sellable local MVP |
+| **Story** | Durable apps + Queue/Follow-ups/Timeline + honest Agent startup |
+| **Status** | In review |
+| **Note** | See [SELLABLE_LOCAL_MVP.md](../product/SELLABLE_LOCAL_MVP.md) |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| Sellable local MVP | 2026-08-11 | Durable applications; Queue/Follow-ups/Timeline; approval prefs; no fake send; onboarding |
+| PE05-S07 | 2026-08-11 | List on-device Agent models from Ollama; PR #113 |
 | PE08-S04 | 2026-08-11 | Applications list + open detail; PR #111 |
 | PE08-S02 | 2026-08-11 | Application cover letter draft; PR #110 |
 | PE28-S03 | 2026-08-11 | Craft chat refine + clarifying questions; PR #109 |

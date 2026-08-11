@@ -1,6 +1,5 @@
 import type { AiProvider } from "@jobjitsu/ai";
 import {
-  createAiProviderRegistry,
   createContextAssembler,
   createFakeAiProvider,
   createOllamaAiProvider,
@@ -25,24 +24,20 @@ import {
   type EventPayloadMap,
 } from "@jobjitsu/events";
 import {
-  createDefaultFakeResume,
-  createFakeResumeStore,
   createMemoryProfileRepository,
   createMemoryResumeLibrary,
   createMemoryPathLibrary,
   type PathLibrary,
   type ProfileRepository,
   type ResumeLibrary,
-  type ResumeStore,
 } from "@jobjitsu/identity";
 import {
   createMemorySettingsStore,
   createPreferencesFacade,
   type PreferencesFacade,
 } from "@jobjitsu/preferences";
+import { DEFAULT_APP_SETTINGS } from "@jobjitsu/config";
 import { createLogger, createMemoryLogSink, type Logger } from "@jobjitsu/logger";
-import { createFakeGmailChannel, type FakeGmailChannel } from "@jobjitsu/send";
-import type { ApplicationId } from "@jobjitsu/shared";
 import {
   createHostIpcDispatcher,
   createIpcBridge,
@@ -92,7 +87,7 @@ export type HostRuntime = {
   readonly dataRoot: DataRootStore;
   /** Preferences façade (config SSOT). */
   readonly preferences: PreferencesFacade;
-  /** Start the demo cascade: App.Started → … → Email.Synced */
+  /** Start the host: App.Started → Agent readiness (no outbound send). */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
   subscribeActivity(listener: (entries: readonly HostActivityEntry[]) => void): () => void;
@@ -121,8 +116,9 @@ export type CreateHostRuntimeOptions = {
 };
 
 /**
- * Host composition root — owns AI, identity, and send fakes.
+ * Host composition root — owns AI and identity.
  * UI must only subscribe to `bus` / activity; never import `@jobjitsu/ai`.
+ * Startup never sends mail — Agent readiness only (agent ≠ send).
  */
 export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostRuntime {
   const bus = createInMemoryEventBus();
@@ -130,14 +126,22 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const logger = createLogger(sink, { component: "host" });
   const services = createServiceRegistry();
   const errors = createErrorReporter({ logger });
-  const preferences = options.preferences ?? createPreferencesFacade(createMemorySettingsStore());
-  const folderPicker = options.folderPicker ?? createHostFolderPicker();
-  const fileSaver = options.fileSaver ?? createHostFileSaver();
   const defaultToFakeAi =
     options.useFakeAi === true ||
     (options.useFakeAi !== false &&
       typeof process !== "undefined" &&
       process.env.VITEST === "true");
+  const preferences =
+    options.preferences ??
+    createPreferencesFacade(
+      createMemorySettingsStore(
+        defaultToFakeAi
+          ? { ...DEFAULT_APP_SETTINGS, onboardingCompleted: true }
+          : DEFAULT_APP_SETTINGS,
+      ),
+    );
+  const folderPicker = options.folderPicker ?? createHostFolderPicker();
+  const fileSaver = options.fileSaver ?? createHostFileSaver();
   const baseAi =
     options.ai ??
     (defaultToFakeAi
@@ -150,10 +154,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     inner: baseAi,
     getLocalModelPath: () => preferences.getLocalModelPath(),
   });
-  const aiRegistry = createAiProviderRegistry([ai]);
   const assembler = createContextAssembler();
-  const resumes: ResumeStore = createFakeResumeStore({ resume: null });
-  const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
@@ -183,7 +184,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     pushActivity(event);
   });
 
-  // Event cascade — AI only runs inside host handlers, never from UI.
+  // Startup — Agent readiness only. Never send or sync mail on boot.
   bus.subscribe("App.Started", async () => {
     logger.info("app started — loading foundation plugin");
     await bus.publish("Plugin.Loaded", {
@@ -208,44 +209,6 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       providerId: ai.id,
       locality: health.locality,
     });
-
-    // Demo résumé prep uses complete() only after health is ready — still no weight load in stub.
-    const seed = createDefaultFakeResume();
-    const prompt = assembler.assemble({
-      role: "generic",
-      resumeExcerpts: [seed.summary ?? seed.headline ?? seed.fullName],
-    });
-    const completion = await aiRegistry.getActive()?.complete({
-      role: "generic",
-      prompt,
-    });
-
-    const generated = await resumes.saveResume({
-      ...seed,
-      summary: completion?.text ?? seed.summary,
-    });
-
-    await bus.publish("Resume.Generated", { resumeId: generated.id });
-  });
-
-  bus.subscribe("Resume.Generated", async () => {
-    logger.info("resume ready — syncing fake mailbox");
-    const result = await gmail.send({
-      applicationId: "app_bootstrap" as ApplicationId,
-      to: "inbox@example.com",
-      subject: "JobJitsu fake sync",
-      body: "Local fake mailbox handshake",
-      destinationClass: "mail",
-    });
-
-    if (result.ok) {
-      await bus.publish("Email.Synced", {
-        channelId: gmail.id,
-        messageCount: gmail.outbox.length,
-      });
-    } else {
-      errors.report(result.error, { source: "fake-gmail-sync" });
-    }
   });
 
   const appearance = options.appearance ?? createMemoryAppearanceStore("dark");
@@ -265,7 +228,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     };
   });
 
-  // Path change rechecks readiness only — does not load weights or re-run demo cascade.
+  // Path change rechecks readiness only — does not load weights.
   bus.subscribe("Preferences.Changed", async (event) => {
     const payload = event.payload as EventPayloadMap["Preferences.Changed"];
     if (!payload.keys.includes("ai.localModelPath")) {
@@ -418,12 +381,32 @@ function summarize(event: DomainEvent): string {
       const payload = event.payload as EventPayloadMap["Application.StageChanged"];
       return `Application stage → ${payload.stage} (${payload.applicationId})`;
     }
+    case "Queue.Enqueued": {
+      const payload = event.payload as EventPayloadMap["Queue.Enqueued"];
+      return `Ready for review (${payload.applicationId})`;
+    }
+    case "Queue.Approved": {
+      const payload = event.payload as EventPayloadMap["Queue.Approved"];
+      return `Approved on this device (${payload.applicationId}) — nothing was sent`;
+    }
+    case "Queue.Rejected": {
+      const payload = event.payload as EventPayloadMap["Queue.Rejected"];
+      return `Returned to drafting (${payload.applicationId})`;
+    }
+    case "FollowUp.Scheduled": {
+      const payload = event.payload as EventPayloadMap["FollowUp.Scheduled"];
+      return `Follow-up scheduled for ${payload.notBefore}`;
+    }
+    case "FollowUp.Dismissed":
+      return "Follow-up dismissed";
+    case "Preferences.Changed":
+      return "Preferences updated on this device";
     case "Ai.LocalModelReady":
-      return "Agent runtime ready (fake)";
+      return "Agent ready on this device";
     case "Ai.LocalModelLoading":
-      return "Agent runtime loading";
+      return "Agent checking readiness";
     case "Ai.LocalModelFailed":
-      return "Agent unavailable — check model path in Preferences";
+      return "Agent unavailable — choose a model in Preferences";
     default:
       return event.name;
   }
