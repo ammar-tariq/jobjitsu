@@ -661,7 +661,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Offline / no-network provider test.
 
-**Status:** proposed
+**Status:** done (2026-08-11)
 
 ## PE06
 

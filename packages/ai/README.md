@@ -22,6 +22,7 @@ const registry = createAiProviderRegistry([provider]);
 - `locality: "local"` with an honest “fake” health message
 - Deterministic `complete` / `embed`
 - Registry keeps the first/local active until `setActive` — no silent remote promotion
+- Offline / local-primary: health + complete work with `fetch` disabled; local failure never auto-calls a remote provider
 - Safe for unit tests and early shell demos
 
 ## Laws

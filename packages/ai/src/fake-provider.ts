@@ -46,7 +46,9 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
     async complete(request: AiCompleteRequest): Promise<AiCompleteResult> {
       const status = options.healthStatus ?? "ready";
       if (status !== "ready") {
-        throw new Error("Agent is not ready on this device. Check Preferences and try again.");
+        throw new Error(
+          "Agent didn’t start. Confirm the model path in Preferences. Nothing left this machine.",
+        );
       }
       const text =
         typeof options.completeText === "function"

@@ -35,28 +35,40 @@ describe("createHostRuntime", () => {
   });
 
   it("emits Ai.LocalModelFailed without silent remote fallback", async () => {
-    const host = createHostRuntime({
-      version: "test",
-      ai: createFakeAiProvider({
-        id: "fake-unavailable",
-        healthStatus: "unavailable",
-        locality: "local",
-      }),
-    });
-    const names: string[] = [];
-    host.bus.subscribeAll((e) => {
-      names.push(e.name);
-    });
+    const originalFetch = globalThis.fetch;
+    let fetchCalls = 0;
+    globalThis.fetch = (async () => {
+      fetchCalls += 1;
+      throw new Error("unexpected network during local model failure");
+    }) as typeof fetch;
 
-    await host.start();
+    try {
+      const host = createHostRuntime({
+        version: "test",
+        ai: createFakeAiProvider({
+          id: "fake-unavailable",
+          healthStatus: "unavailable",
+          locality: "local",
+        }),
+      });
+      const names: string[] = [];
+      host.bus.subscribeAll((e) => {
+        names.push(e.name);
+      });
 
-    expect(names).toContain("Ai.LocalModelLoading");
-    expect(names).toContain("Ai.LocalModelFailed");
-    expect(names).not.toContain("Ai.LocalModelReady");
-    expect(names).not.toContain("Resume.Generated");
-    expect(await host.bridge.getAiStatus()).toMatchObject({
-      ok: true,
-      value: { ready: false, locality: "unavailable" },
-    });
+      await host.start();
+
+      expect(names).toContain("Ai.LocalModelLoading");
+      expect(names).toContain("Ai.LocalModelFailed");
+      expect(names).not.toContain("Ai.LocalModelReady");
+      expect(names).not.toContain("Resume.Generated");
+      expect(fetchCalls).toBe(0);
+      expect(await host.bridge.getAiStatus()).toMatchObject({
+        ok: true,
+        value: { ready: false, locality: "unavailable" },
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

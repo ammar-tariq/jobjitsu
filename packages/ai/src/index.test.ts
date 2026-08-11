@@ -58,7 +58,7 @@ describe("@jobjitsu/ai fake provider", () => {
     const provider = createFakeAiProvider({ healthStatus: "unavailable", locality: "local" });
     await expect(
       provider.complete({ role: "generic", prompt: "should not reach a cloud" }),
-    ).rejects.toThrow(/not ready/i);
+    ).rejects.toThrow(/Preferences|model path/i);
   });
 
   it("assembles allowlisted context only", () => {

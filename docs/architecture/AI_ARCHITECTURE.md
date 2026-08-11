@@ -81,9 +81,10 @@ Avoid dumping entire Timeline history into every prompt. No hidden training expo
 
 1. Status chrome shows **Agent · On-device** only when the active provider is local.
 2. Remote providers labeled plainly (e.g. “Remote model — user configured”).
-3. Failures use plain recovery (`Ai.LocalModelFailed` → preferences path).
+3. Failures use plain recovery (`Ai.LocalModelFailed` → Preferences / model path).
 4. Outputs are suggestions; user remains author of final voice.
 5. Resource failures: calm copy (“On-device model ran out of resources”).
+6. Offline / local-primary (PE05-S05): local `health` / `complete` must work with network disabled in tests; local failure must not silently invoke a remote provider.
 
 ---
 
