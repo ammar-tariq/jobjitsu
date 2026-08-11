@@ -15,6 +15,7 @@ export const IPC_ALLOWLIST = [
   "identity.selectProfile",
   "identity.listResumeVersions",
   "identity.importResume",
+  "identity.parseImportDraft",
   "identity.getSelectedResume",
   "identity.selectResume",
   "identity.attachResume",
@@ -94,6 +95,20 @@ export type ResumeImportInputPayload = {
   readonly source?: "resume" | "linkedin-pdf";
 };
 
+/** Draft-only parse request — does not import, attach, or send. */
+export type ResumeParseImportInputPayload = {
+  readonly contentBase64: string;
+  readonly fileName?: string;
+  readonly contentType?: string;
+};
+
+export type ResumeParseImportResult = {
+  readonly contactName: string;
+  readonly contactEmail: string;
+  readonly notes: string;
+  readonly parseStatus: "prefilled" | "unavailable" | "manual";
+};
+
 export type ResumeAttachInputPayload = {
   readonly resumeId: string;
   /** Patch allowlisted identity fields from the version's review data. */
@@ -149,6 +164,7 @@ export type IpcPayloadMap = {
   readonly "identity.selectProfile": { readonly profileId: string };
   readonly "identity.listResumeVersions": undefined;
   readonly "identity.importResume": ResumeImportInputPayload;
+  readonly "identity.parseImportDraft": ResumeParseImportInputPayload;
   readonly "identity.getSelectedResume": undefined;
   readonly "identity.selectResume": { readonly resumeId: string };
   readonly "identity.attachResume": ResumeAttachInputPayload;
@@ -183,6 +199,7 @@ export type IpcResultMap = {
     readonly selectedId: string | null;
   };
   readonly "identity.importResume": { readonly version: ResumeVersionSnapshot };
+  readonly "identity.parseImportDraft": ResumeParseImportResult;
   readonly "identity.getSelectedResume": { readonly version: ResumeVersionSnapshot | null };
   readonly "identity.selectResume": { readonly version: ResumeVersionSnapshot };
   readonly "identity.attachResume": {

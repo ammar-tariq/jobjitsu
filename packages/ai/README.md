@@ -21,6 +21,7 @@ const registry = createAiProviderRegistry([provider]);
 
 - `locality: "local"` with an honest “fake” health message
 - Deterministic `complete` / `embed`
+- `parse_assist` returns JSON contact fields from markdown-ish excerpts (import pre-fill stub)
 - Registry keeps the first/local active until `setActive` — no silent remote promotion
 - Safe for unit tests and early shell demos
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createFakeAiProvider, createFakeContextAssembler } from "@jobjitsu/ai";
 import { createInMemoryEventBus, type EventPayloadMap } from "@jobjitsu/events";
 import {
   createMemoryPathLibrary,
@@ -8,6 +9,7 @@ import {
 import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/preferences";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
+import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -29,6 +31,7 @@ describe("IPC allowlist", () => {
       "identity.selectProfile",
       "identity.listResumeVersions",
       "identity.importResume",
+      "identity.parseImportDraft",
       "identity.getSelectedResume",
       "identity.selectResume",
       "identity.attachResume",
@@ -122,6 +125,7 @@ describe("typed IPC bridge", () => {
       "listPaths",
       "listProfiles",
       "listResumeVersions",
+      "parseImportDraft",
       "pickDataRoot",
       "ping",
       "resetDataRoot",
@@ -135,6 +139,40 @@ describe("typed IPC bridge", () => {
       "setTheme",
       "upsertPath",
     ]);
+  });
+
+  it("prefills import draft via host parse without exposing AI complete", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        parseImportDraft: (input) => parseImportDraftWithAi({ ai, assembler, input }),
+      }),
+    );
+
+    const parsed = await bridge.parseImportDraft({
+      contentBase64: btoa("# Sam Chen\nsam@example.com\n"),
+      fileName: "sam.md",
+      contentType: "text/markdown",
+    });
+    expect(parsed.ok && parsed.value.parseStatus).toBe("prefilled");
+    expect(parsed.ok && parsed.value.contactName).toBe("Sam Chen");
+    expect(parsed.ok && parsed.value.contactEmail).toBe("sam@example.com");
+    expect(bridge).not.toHaveProperty("complete");
+  });
+
+  it("returns calm unavailable parse when Agent is not wired", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const parsed = await bridge.parseImportDraft({
+      contentBase64: btoa("# Sam Chen\n"),
+      fileName: "sam.md",
+    });
+    expect(parsed.ok && parsed.value).toEqual({
+      contactName: "",
+      contactEmail: "",
+      notes: "",
+      parseStatus: "unavailable",
+    });
   });
 
   it("reads and writes profile through identity APIs", async () => {

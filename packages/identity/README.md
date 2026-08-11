@@ -19,8 +19,9 @@ Profile and résumé source of truth (local).
 | `ResumeStore` / `ResumeDocument` contracts | Done                                      |
 | `createFakeResumeStore`                    | Done — **no PDF/OCR/cloud**               |
 | `createLocalResumeStore`                   | Done — KV profile + resume                |
-| Tailor draft / structured parse            | Not yet (PE03-S04+)                       |
-| Attach import to path                      | Not yet (PE03-S07)                        |
+| Import review parse pre-fill (host AI)     | Done in app host (PE03-S10) — UI↛AI       |
+| Tailor draft                               | Not yet (PE03-S04)                        |
+| Attach import to path                      | Done (PE03-S07)                           |
 
 ## Profile (on-device)
 
