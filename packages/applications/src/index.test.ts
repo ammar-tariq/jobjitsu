@@ -94,6 +94,22 @@ describe("@jobjitsu/applications drafts (PE08-S01)", () => {
     expect(created.application.companyName).toBe("Local Co");
   });
 
+  it("persists editable coverLetterDraftText on update", async () => {
+    const repository = createMemoryApplicationRepository();
+    const created = await createApplicationDraft({
+      repository,
+      input: { companyName: "Acme", roleTitle: "Staff Engineer" },
+    });
+    const updated = await updateApplicationDraft({
+      repository,
+      patch: {
+        id: created.application.id,
+        coverLetterDraftText: "Edited cover letter on this device",
+      },
+    });
+    expect(updated.application.coverLetterDraftText).toBe("Edited cover letter on this device");
+  });
+
   it("persists editable resumeDraftText on update", async () => {
     const repository = createMemoryApplicationRepository();
     const created = await createApplicationDraft({

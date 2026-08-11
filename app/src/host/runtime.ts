@@ -53,6 +53,7 @@ import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-
 import { parseImportDraftWithAi } from "./parse-import-draft.js";
 import { refineCraftChatWithAi } from "./craft-chat-refine.js";
 import { generateCraftDraftsWithAi } from "./craft-generate.js";
+import { generateApplicationCoverLetterWithAi } from "./cover-letter-application-draft.js";
 import { tailorApplicationDraftWithAi } from "./tailor-application-draft.js";
 import {
   createMemoryDataRootStore,
@@ -305,6 +306,14 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       }),
     tailorApplicationDraft: (input) =>
       tailorApplicationDraftWithAi({
+        ai,
+        assembler,
+        repository: applications,
+        bus,
+        input,
+      }),
+    generateApplicationCoverLetter: (input) =>
+      generateApplicationCoverLetterWithAi({
         ai,
         assembler,
         repository: applications,

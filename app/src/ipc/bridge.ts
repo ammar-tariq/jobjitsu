@@ -1,6 +1,7 @@
 import type { Result } from "@jobjitsu/shared";
 import type {
   AiStatusSnapshot,
+  ApplicationCoverLetterDraftInput,
   ApplicationDraftCreateInput,
   ApplicationDraftUpdateInput,
   ApplicationTailorDraftInput,
@@ -81,6 +82,9 @@ export type IpcBridge = {
   readonly tailorApplicationDraft: (
     input: ApplicationTailorDraftInput,
   ) => Promise<Result<IpcResultMap["applications.tailorDraft"]>>;
+  readonly generateApplicationCoverLetter: (
+    input: ApplicationCoverLetterDraftInput,
+  ) => Promise<Result<IpcResultMap["applications.generateCoverLetter"]>>;
   readonly generateCraftDrafts: (
     input: CraftGenerateInput,
   ) => Promise<Result<IpcResultMap["craft.generate"]>>;
@@ -247,6 +251,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async tailorApplicationDraft(input: ApplicationTailorDraftInput) {
       return (await dispatcher.invoke("applications.tailorDraft", input)) as Result<
         IpcResultMap["applications.tailorDraft"]
+      >;
+    },
+    async generateApplicationCoverLetter(input: ApplicationCoverLetterDraftInput) {
+      return (await dispatcher.invoke("applications.generateCoverLetter", input)) as Result<
+        IpcResultMap["applications.generateCoverLetter"]
       >;
     },
     async generateCraftDrafts(input: CraftGenerateInput) {

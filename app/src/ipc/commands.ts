@@ -37,6 +37,7 @@ export const IPC_ALLOWLIST = [
   "applications.createDraft",
   "applications.updateDraft",
   "applications.tailorDraft",
+  "applications.generateCoverLetter",
   "craft.generate",
   "craft.exportResume",
   "craft.chatRefine",
@@ -174,6 +175,7 @@ export type ApplicationSnapshot = {
   readonly resumeVersionId?: string;
   readonly notes?: string;
   readonly resumeDraftText?: string;
+  readonly coverLetterDraftText?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -198,6 +200,7 @@ export type ApplicationDraftUpdateInput = {
   readonly resumeVersionId?: string | null;
   readonly notes?: string | null;
   readonly resumeDraftText?: string | null;
+  readonly coverLetterDraftText?: string | null;
   readonly stage?: string;
 };
 
@@ -211,6 +214,18 @@ export type ApplicationTailorDraftResult = {
   readonly application: ApplicationSnapshot | null;
   readonly draftText: string;
   readonly tailorStatus: "ready" | "unavailable" | "failed";
+};
+
+export type ApplicationCoverLetterDraftInput = {
+  readonly applicationId: string;
+  readonly resumeExcerpts?: readonly string[];
+  readonly tonePreferences?: string;
+};
+
+export type ApplicationCoverLetterDraftResult = {
+  readonly application: ApplicationSnapshot | null;
+  readonly draftText: string;
+  readonly coverLetterStatus: "ready" | "unavailable" | "failed";
 };
 
 export type CraftGenerateKind = "resume" | "cover_letter" | "both";
@@ -311,6 +326,7 @@ export type IpcPayloadMap = {
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
+  readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftInput;
   readonly "craft.generate": CraftGenerateInput;
   readonly "craft.exportResume": CraftExportResumeInput;
   readonly "craft.chatRefine": CraftChatRefineInput;
@@ -371,6 +387,7 @@ export type IpcResultMap = {
     readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
   };
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
+  readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftResult;
   readonly "craft.generate": CraftGenerateResult;
   readonly "craft.exportResume": CraftExportResumeResult;
   readonly "craft.chatRefine": CraftChatRefineResult;

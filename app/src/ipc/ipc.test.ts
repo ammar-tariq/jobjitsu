@@ -13,6 +13,7 @@ import { createStubFolderPicker } from "../host/folder-picker.js";
 import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
 import { refineCraftChatWithAi } from "../host/craft-chat-refine.js";
 import { generateCraftDraftsWithAi } from "../host/craft-generate.js";
+import { generateApplicationCoverLetterWithAi } from "../host/cover-letter-application-draft.js";
 import { tailorApplicationDraftWithAi } from "../host/tailor-application-draft.js";
 import {
   IPC_ALLOWLIST,
@@ -57,6 +58,7 @@ describe("IPC allowlist", () => {
       "applications.createDraft",
       "applications.updateDraft",
       "applications.tailorDraft",
+      "applications.generateCoverLetter",
       "craft.generate",
       "craft.exportResume",
       "craft.chatRefine",
@@ -129,6 +131,7 @@ describe("typed IPC bridge", () => {
       "attachResume",
       "createApplicationDraft",
       "exportCraftResume",
+      "generateApplicationCoverLetter",
       "generateCraftDrafts",
       "getAiStatus",
       "getApprovalBeforeSend",
@@ -308,6 +311,56 @@ describe("typed IPC bridge", () => {
       application: null,
       draftText: "",
       tailorStatus: "unavailable",
+    });
+  });
+
+  it("generates cover letter drafts via host without exposing send", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const applications = createMemoryApplicationRepository();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        applications,
+        generateApplicationCoverLetter: (input) =>
+          generateApplicationCoverLetterWithAi({
+            ai,
+            assembler,
+            repository: applications,
+            input,
+          }),
+      }),
+    );
+
+    const created = await bridge.createApplicationDraft({
+      companyName: "Acme",
+      roleTitle: "Staff Engineer",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+
+    const letter = await bridge.generateApplicationCoverLetter({
+      applicationId: created.value.application.id,
+    });
+    expect(letter.ok && letter.value.coverLetterStatus).toBe("ready");
+    expect(letter.ok && letter.value.draftText).toMatch(/Cover letter draft/i);
+    expect(letter.ok && letter.value.application?.coverLetterDraftText).toMatch(
+      /Cover letter draft/i,
+    );
+    expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("returns calm unavailable cover letter when host use-case is not wired", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const letter = await bridge.generateApplicationCoverLetter({
+      applicationId: "application_missing",
+    });
+    expect(letter.ok && letter.value).toEqual({
+      application: null,
+      draftText: "",
+      coverLetterStatus: "unavailable",
     });
   });
 

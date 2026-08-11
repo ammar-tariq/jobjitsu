@@ -16,7 +16,8 @@ export type ApplicationsViewProps = {
 
 /**
  * Create and edit application drafts on-device (PE08-S01).
- * Tailor résumé draft via host Agent (PE03-S04). Soft-duplicate warns; never sends.
+ * Tailor résumé (PE03-S04) and cover letter (PE08-S02) via host Agent.
+ * Soft-duplicate warns; never sends.
  */
 export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
@@ -26,10 +27,13 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   const [sourceUrl, setSourceUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [resumeDraftText, setResumeDraftText] = useState("");
+  const [coverLetterDraftText, setCoverLetterDraftText] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [tailoring, setTailoring] = useState(false);
+  const [covering, setCovering] = useState(false);
+  const busy = saving || tailoring || covering;
 
   const refresh = async (): Promise<void> => {
     const result = await bridge.listApplications();
@@ -49,6 +53,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setSourceUrl("");
     setNotes("");
     setResumeDraftText("");
+    setCoverLetterDraftText("");
     setDuplicateWarning(null);
   };
 
@@ -59,6 +64,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setSourceUrl(application.sourceUrl ?? "");
     setNotes(application.notes ?? "");
     setResumeDraftText(application.resumeDraftText ?? "");
+    setCoverLetterDraftText(application.coverLetterDraftText ?? "");
     setDuplicateWarning(null);
     setStatus(null);
   };
@@ -80,6 +86,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           sourceUrl: sourceUrl.trim() || null,
           notes: notes.trim() || null,
           resumeDraftText: resumeDraftText.trim() || null,
+          coverLetterDraftText: coverLetterDraftText.trim() || null,
         })
       : bridge.createApplicationDraft({
           companyName: companyName.trim(),
@@ -98,6 +105,9 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
         setDuplicateWarning(result.value.duplicateWarning?.message ?? null);
         setSelectedId(result.value.application.id);
         setResumeDraftText(result.value.application.resumeDraftText ?? resumeDraftText);
+        setCoverLetterDraftText(
+          result.value.application.coverLetterDraftText ?? coverLetterDraftText,
+        );
         setStatus(
           selectedId
             ? "Application draft updated. Nothing was sent."
@@ -147,14 +157,50 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
       });
   };
 
+  const onCoverLetterDraft = (): void => {
+    if (!selectedId) {
+      setStatus("Save the application draft first, then prepare a cover letter.");
+      return;
+    }
+    setCovering(true);
+    setStatus(null);
+    void bridge
+      .generateApplicationCoverLetter({ applicationId: selectedId })
+      .then(async (result) => {
+        setCovering(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        if (result.value.coverLetterStatus === "ready") {
+          setCoverLetterDraftText(result.value.draftText);
+          if (result.value.application) {
+            setSelectedId(result.value.application.id);
+          }
+          setStatus("Cover letter ready. Edit freely — you remain the author. Nothing was sent.");
+          await refresh();
+          return;
+        }
+        if (result.value.coverLetterStatus === "unavailable") {
+          setStatus("Agent is not ready yet. Check Preferences for the on-device model path.");
+          return;
+        }
+        setStatus("Could not prepare that cover letter. Try again when you are ready.");
+      })
+      .catch(() => {
+        setCovering(false);
+        setStatus("Could not prepare that cover letter. Try again when you are ready.");
+      });
+  };
+
   return (
     <Stack spacing={2} data-testid="jj-applications-view" sx={{ maxWidth: "40rem" }}>
       <Typography component="h2" variant="h2">
         Applications
       </Typography>
       <Typography color="text.secondary" variant="body2">
-        Create local application drafts and tailor a résumé draft on this device. Nothing leaves
-        from here.
+        Create local application drafts, then prepare a résumé draft and cover letter on this
+        device. Nothing leaves from here.
       </Typography>
 
       <Stack
@@ -204,17 +250,30 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
         />
         {selectedId ? (
-          <TextField
-            label="Résumé draft"
-            value={resumeDraftText}
-            onChange={(event) => setResumeDraftText(event.target.value)}
-            size="small"
-            fullWidth
-            multiline
-            minRows={6}
-            placeholder="Tailor a draft, then edit freely. You remain the author."
-            slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
-          />
+          <>
+            <TextField
+              label="Résumé draft"
+              value={resumeDraftText}
+              onChange={(event) => setResumeDraftText(event.target.value)}
+              size="small"
+              fullWidth
+              multiline
+              minRows={6}
+              placeholder="Tailor a draft, then edit freely. You remain the author."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
+            />
+            <TextField
+              label="Cover letter draft"
+              value={coverLetterDraftText}
+              onChange={(event) => setCoverLetterDraftText(event.target.value)}
+              size="small"
+              fullWidth
+              multiline
+              minRows={6}
+              placeholder="Prepare a cover letter, then edit freely. You remain the author."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
+            />
+          </>
         ) : null}
         {duplicateWarning ? (
           <Alert severity="info" data-testid="jj-application-duplicate-warn">
@@ -225,22 +284,32 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           <Button
             variant="contained"
             onClick={onSave}
-            disabled={saving || tailoring}
+            disabled={busy}
             data-testid="jj-application-save"
           >
             {selectedId ? "Save changes" : "Save draft"}
           </Button>
           {selectedId ? (
-            <Button
-              variant="outlined"
-              onClick={onTailorDraft}
-              disabled={saving || tailoring}
-              data-testid="jj-application-tailor"
-            >
-              {tailoring ? "Preparing draft…" : "Tailor draft"}
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                onClick={onTailorDraft}
+                disabled={busy}
+                data-testid="jj-application-tailor"
+              >
+                {tailoring ? "Preparing draft…" : "Tailor draft"}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={onCoverLetterDraft}
+                disabled={busy}
+                data-testid="jj-application-cover-letter"
+              >
+                {covering ? "Preparing letter…" : "Cover letter"}
+              </Button>
+            </>
           ) : null}
-          <Button variant="text" onClick={clearForm} disabled={saving || tailoring}>
+          <Button variant="text" onClick={clearForm} disabled={busy}>
             Clear
           </Button>
         </Stack>

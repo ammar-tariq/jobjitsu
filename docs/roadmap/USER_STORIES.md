@@ -749,7 +749,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Clarify policy unit tests; chat ↛ send fence.
 
-**Status:** in progress (2026-08-11)
+**Status:** done (2026-08-11)
 
 ## PE06
 
@@ -913,13 +913,13 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Dependencies:** PE08-S01, PE05-S01
 
-**Priority:** P1
+**Priority:** P0
 
-**Technical notes:** Cover Letter Intelligence; ownership: letter draft.
+**Technical notes:** GitHub #38 · IPC `applications.generateCoverLetter` · field `coverLetterDraftText`.
 
-**Testing notes:** Draft-only assertion.
+**Testing notes:** Draft-only assertion; cover letter ↛ send fence.
 
-**Status:** proposed
+**Status:** done (2026-08-11)
 
 ### PE08-S03 — Track application status post-send
 
