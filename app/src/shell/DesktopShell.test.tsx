@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeAiProvider } from "@jobjitsu/ai";
@@ -106,6 +106,32 @@ describe("DesktopShell", () => {
     expect(resumeDraft.value).toMatch(/Tailored résumé draft/i);
     expect(coverDraft.value).toMatch(/Cover letter draft/i);
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
+  });
+
+  it("keeps résumé and job description when both sources are edited quickly", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    const resumeInput = screen.getByTestId("jj-craft-resume-input");
+    const jdInput = screen.getByTestId("jj-craft-jd-input");
+
+    await user.click(resumeInput);
+    await user.paste("Sam Chen\nStaff engineer résumé body");
+    await user.click(jdInput);
+    await user.paste("Staff Engineer at Acme — on-device privacy");
+
+    await waitFor(() => {
+      expect(resumeInput).toHaveValue("Sam Chen\nStaff engineer résumé body");
+      expect(jdInput).toHaveValue("Staff Engineer at Acme — on-device privacy");
+    });
+
+    await waitFor(() => {
+      expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
+      expect(runtime.craftSession.get().jobDescription).toContain("Staff Engineer at Acme");
+    });
   });
 
   it("shows a Craft working view with inputs, phases, and device load while preparing", async () => {

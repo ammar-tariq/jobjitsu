@@ -5,6 +5,20 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Craft source paste race (résumé ↔ JD)
+
+### The problem
+
+Pasting into résumé cleared job description (and the reverse). Debounced `patchCraftSession` sent **only the last field**; host subscribe then overwrote local UI with that partial host snapshot.
+
+### Decision
+
+Accumulate pending field patches, flush them together, and when applying host snapshots **keep any still-pending local fields**.
+
+No new libraries.
+
+---
+
 ## 2026-08-11 — Craft working view (inputs + phases + CPU/RAM)
 
 ### The problem

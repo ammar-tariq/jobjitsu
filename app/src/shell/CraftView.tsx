@@ -18,6 +18,7 @@ import type {
   CraftChatTarget,
   CraftExportFormat,
   CraftGenerateKind,
+  CraftSessionPatchInput,
   CraftSessionSnapshot,
 } from "../ipc/commands.js";
 import { CraftWorkingView } from "./CraftWorkingView.js";
@@ -28,6 +29,34 @@ export type CraftViewProps = {
 };
 
 type DraftTab = "resume" | "cover" | "preview";
+
+/**
+ * Prefer in-flight local edits over a host snapshot so one field’s patch
+ * cannot wipe another field the user already typed.
+ */
+function mergeHostSession(
+  host: CraftSessionSnapshot,
+  local: CraftSessionSnapshot | null,
+  pending: CraftSessionPatchInput,
+): CraftSessionSnapshot {
+  const base = local ?? host;
+  return {
+    ...host,
+    resumeText: pending.resumeText !== undefined ? base.resumeText : host.resumeText,
+    jobDescription:
+      pending.jobDescription !== undefined ? base.jobDescription : host.jobDescription,
+    aboutCompany: pending.aboutCompany !== undefined ? base.aboutCompany : host.aboutCompany,
+    resumeDraft: pending.resumeDraft !== undefined ? base.resumeDraft : host.resumeDraft,
+    coverLetterDraft:
+      pending.coverLetterDraft !== undefined ? base.coverLetterDraft : host.coverLetterDraft,
+    saveCompany: pending.saveCompany !== undefined ? base.saveCompany : host.saveCompany,
+    saveRole: pending.saveRole !== undefined ? base.saveRole : host.saveRole,
+    chatTarget: pending.chatTarget !== undefined ? base.chatTarget : host.chatTarget,
+    chatInput: pending.chatInput !== undefined ? base.chatInput : host.chatInput,
+    chatMessages: pending.chatMessages !== undefined ? base.chatMessages : host.chatMessages,
+    job: host.job,
+  };
+}
 
 /**
  * Craft Studio — host-owned session so Agent prepare survives navigation.
@@ -46,20 +75,19 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [draftTab, setDraftTab] = useState<DraftTab>("resume");
   const [tick, setTick] = useState(0);
   const patchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPatch = useRef<CraftSessionPatchInput>({});
   const hydrated = useRef(false);
 
   useEffect(() => {
-    if (hostSession) {
-      setSession(hostSession);
-      if (!hydrated.current) {
-        hydrated.current = true;
-        if (hostSession.resumeDraft.trim() || hostSession.coverLetterDraft.trim()) {
-          setSourcesOpen(hostSession.job.status === "running");
-          setRefineOpen(true);
-        }
-        if (hostSession.job.status === "running") {
-          setSourcesOpen(false);
-        }
+    setSession((prev) => mergeHostSession(hostSession, prev, pendingPatch.current));
+    if (!hydrated.current) {
+      hydrated.current = true;
+      if (hostSession.resumeDraft.trim() || hostSession.coverLetterDraft.trim()) {
+        setSourcesOpen(hostSession.job.status === "running");
+        setRefineOpen(true);
+      }
+      if (hostSession.job.status === "running") {
+        setSourcesOpen(false);
       }
     }
   }, [hostSession]);
@@ -68,7 +96,9 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     let cancelled = false;
     void bridge.getCraftSession().then((result) => {
       if (!cancelled && result.ok) {
-        setSession(result.value.session);
+        setSession((prev) =>
+          mergeHostSession(result.value.session, prev, pendingPatch.current),
+        );
         hydrated.current = true;
         if (
           result.value.session.resumeDraft.trim() ||
@@ -138,28 +168,42 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     };
   }, [bridge, resumeDraft]);
 
-  const flushPatch = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
+  const applyHostResult = (next: CraftSessionSnapshot): void => {
+    setSession((prev) => mergeHostSession(next, prev, pendingPatch.current));
+  };
+
+  const flushPatch = (patch: CraftSessionPatchInput): void => {
+    pendingPatch.current = { ...pendingPatch.current, ...patch };
     if (patchTimer.current) {
       clearTimeout(patchTimer.current);
     }
     patchTimer.current = setTimeout(() => {
-      void bridge.patchCraftSession(patch).then((result) => {
+      const toSend = pendingPatch.current;
+      pendingPatch.current = {};
+      void bridge.patchCraftSession(toSend).then((result) => {
         if (result.ok) {
-          setSession(result.value.session);
+          applyHostResult(result.value.session);
+          return;
         }
+        // Keep unsent fields pending so a later keystroke / prepare can retry.
+        pendingPatch.current = { ...toSend, ...pendingPatch.current };
       });
     }, 200);
   };
 
-  const patchNow = (patch: Parameters<IpcBridge["patchCraftSession"]>[0]): void => {
+  const patchNow = (patch: CraftSessionPatchInput): void => {
     if (patchTimer.current) {
       clearTimeout(patchTimer.current);
       patchTimer.current = null;
     }
-    void bridge.patchCraftSession(patch).then((result) => {
+    const toSend = { ...pendingPatch.current, ...patch };
+    pendingPatch.current = {};
+    void bridge.patchCraftSession(toSend).then((result) => {
       if (result.ok) {
-        setSession(result.value.session);
+        applyHostResult(result.value.session);
+        return;
       }
+      pendingPatch.current = { ...toSend, ...pendingPatch.current };
     });
   };
 
@@ -173,24 +217,30 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
 
   const onGenerate = (kind: CraftGenerateKind): void => {
     setLocalStatus(null);
-    patchNow({
+    if (patchTimer.current) {
+      clearTimeout(patchTimer.current);
+      patchTimer.current = null;
+    }
+    const toSend: CraftSessionPatchInput = {
+      ...pendingPatch.current,
       resumeText,
       jobDescription,
       aboutCompany,
-    });
-    // Small delay so patch lands before prepare reads sources — patchNow is async.
-    void bridge.patchCraftSession({ resumeText, jobDescription, aboutCompany }).then((patched) => {
+    };
+    pendingPatch.current = {};
+    void bridge.patchCraftSession(toSend).then((patched) => {
       if (!patched.ok) {
+        pendingPatch.current = { ...toSend, ...pendingPatch.current };
         setLocalStatus(patched.error.message ?? patched.error.title);
         return;
       }
-      setSession(patched.value.session);
+      applyHostResult(patched.value.session);
       return bridge.prepareCraftDrafts(kind).then((result) => {
         if (!result.ok) {
           setLocalStatus(result.error.message ?? result.error.title);
           return;
         }
-        setSession(result.value.session);
+        applyHostResult(result.value.session);
         setSourcesOpen(false);
       });
     });
