@@ -12,15 +12,20 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE05 Local Intelligence |
-| **Story** | PE05-S02 — Configure local model path |
-| **Status** | In progress |
-| **Note** | Path-gated Agent readiness; Preferences model path + calm recovery; lazy (no weight load in health) |
+| **Epic** | PE03 Resume Engine |
+| **Story** | PE03-S04 — Tailor resume draft (no send) |
+| **Status** | In review |
+| **Note** | Host tailorDraft + Applications “Tailor draft”; fence tailor ↛ send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE08-S01 | 2026-08-11 | Application drafts create/edit; soft-duplicate; PR #98 |
+| PE03-S10 | 2026-08-11 | AI parse import draft; Profile prefill; PR #97 |
+| PE05-S05 | 2026-08-11 | Offline / local-primary Agent; PR #96 |
+| PE05-S03 | 2026-08-11 | Context Builder allowlist + budgets; PR #95 |
+| PE05-S02 | 2026-08-11 | Path-gated Agent readiness; Preferences model path; PR #94 |
 | PE05-S01 | 2026-07-23 | Fake provider health/complete; Ai.LocalModel*; no silent cloud fallback; PR #93 |
 | PE03-S09 | 2026-07-23 | Create Path from existing résumé; PR #92 |
 | PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |

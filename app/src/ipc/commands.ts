@@ -36,6 +36,7 @@ export const IPC_ALLOWLIST = [
   "applications.list",
   "applications.createDraft",
   "applications.updateDraft",
+  "applications.tailorDraft",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -169,6 +170,7 @@ export type ApplicationSnapshot = {
   readonly roleId?: string;
   readonly resumeVersionId?: string;
   readonly notes?: string;
+  readonly resumeDraftText?: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -192,7 +194,20 @@ export type ApplicationDraftUpdateInput = {
   readonly roleId?: string | null;
   readonly resumeVersionId?: string | null;
   readonly notes?: string | null;
+  readonly resumeDraftText?: string | null;
   readonly stage?: string;
+};
+
+export type ApplicationTailorDraftInput = {
+  readonly applicationId: string;
+  readonly resumeExcerpts?: readonly string[];
+  readonly tonePreferences?: string;
+};
+
+export type ApplicationTailorDraftResult = {
+  readonly application: ApplicationSnapshot | null;
+  readonly draftText: string;
+  readonly tailorStatus: "ready" | "unavailable" | "failed";
 };
 
 export type ApplicationDuplicateWarningSnapshot = {
@@ -232,6 +247,7 @@ export type IpcPayloadMap = {
   readonly "applications.list": undefined;
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
+  readonly "applications.tailorDraft": ApplicationTailorDraftInput;
 };
 
 export type IpcResultMap = {
@@ -288,6 +304,7 @@ export type IpcResultMap = {
     readonly application: ApplicationSnapshot;
     readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
   };
+  readonly "applications.tailorDraft": ApplicationTailorDraftResult;
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

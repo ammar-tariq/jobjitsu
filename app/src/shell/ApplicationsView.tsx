@@ -16,7 +16,7 @@ export type ApplicationsViewProps = {
 
 /**
  * Create and edit application drafts on-device (PE08-S01).
- * Soft-duplicate warns; never sends.
+ * Tailor résumé draft via host Agent (PE03-S04). Soft-duplicate warns; never sends.
  */
 export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
@@ -25,9 +25,11 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   const [roleTitle, setRoleTitle] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [notes, setNotes] = useState("");
+  const [resumeDraftText, setResumeDraftText] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [tailoring, setTailoring] = useState(false);
 
   const refresh = async (): Promise<void> => {
     const result = await bridge.listApplications();
@@ -46,6 +48,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setRoleTitle("");
     setSourceUrl("");
     setNotes("");
+    setResumeDraftText("");
     setDuplicateWarning(null);
   };
 
@@ -55,6 +58,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setRoleTitle(application.roleTitle);
     setSourceUrl(application.sourceUrl ?? "");
     setNotes(application.notes ?? "");
+    setResumeDraftText(application.resumeDraftText ?? "");
     setDuplicateWarning(null);
     setStatus(null);
   };
@@ -75,6 +79,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           roleTitle: roleTitle.trim(),
           sourceUrl: sourceUrl.trim() || null,
           notes: notes.trim() || null,
+          resumeDraftText: resumeDraftText.trim() || null,
         })
       : bridge.createApplicationDraft({
           companyName: companyName.trim(),
@@ -92,6 +97,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
         }
         setDuplicateWarning(result.value.duplicateWarning?.message ?? null);
         setSelectedId(result.value.application.id);
+        setResumeDraftText(result.value.application.resumeDraftText ?? resumeDraftText);
         setStatus(
           selectedId
             ? "Application draft updated. Nothing was sent."
@@ -105,14 +111,50 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
       });
   };
 
+  const onTailorDraft = (): void => {
+    if (!selectedId) {
+      setStatus("Save the application draft first, then tailor a résumé draft.");
+      return;
+    }
+    setTailoring(true);
+    setStatus(null);
+    void bridge
+      .tailorApplicationDraft({ applicationId: selectedId })
+      .then(async (result) => {
+        setTailoring(false);
+        if (!result.ok) {
+          setStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        if (result.value.tailorStatus === "ready") {
+          setResumeDraftText(result.value.draftText);
+          if (result.value.application) {
+            setSelectedId(result.value.application.id);
+          }
+          setStatus("Draft ready. Edit freely — you remain the author. Nothing was sent.");
+          await refresh();
+          return;
+        }
+        if (result.value.tailorStatus === "unavailable") {
+          setStatus("Agent is not ready yet. Check Preferences for the on-device model path.");
+          return;
+        }
+        setStatus("Could not prepare that draft. Try again when you are ready.");
+      })
+      .catch(() => {
+        setTailoring(false);
+        setStatus("Could not prepare that draft. Try again when you are ready.");
+      });
+  };
+
   return (
     <Stack spacing={2} data-testid="jj-applications-view" sx={{ maxWidth: "40rem" }}>
       <Typography component="h2" variant="h2">
         Applications
       </Typography>
       <Typography color="text.secondary" variant="body2">
-        Create local application drafts. Job boards are optional — nothing leaves this device from
-        here.
+        Create local application drafts and tailor a résumé draft on this device. Nothing leaves
+        from here.
       </Typography>
 
       <Stack
@@ -161,21 +203,44 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           placeholder="Optional"
           slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
         />
+        {selectedId ? (
+          <TextField
+            label="Résumé draft"
+            value={resumeDraftText}
+            onChange={(event) => setResumeDraftText(event.target.value)}
+            size="small"
+            fullWidth
+            multiline
+            minRows={6}
+            placeholder="Tailor a draft, then edit freely. You remain the author."
+            slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
+          />
+        ) : null}
         {duplicateWarning ? (
           <Alert severity="info" data-testid="jj-application-duplicate-warn">
             {duplicateWarning}
           </Alert>
         ) : null}
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
           <Button
             variant="contained"
             onClick={onSave}
-            disabled={saving}
+            disabled={saving || tailoring}
             data-testid="jj-application-save"
           >
             {selectedId ? "Save changes" : "Save draft"}
           </Button>
-          <Button variant="text" onClick={clearForm} disabled={saving}>
+          {selectedId ? (
+            <Button
+              variant="outlined"
+              onClick={onTailorDraft}
+              disabled={saving || tailoring}
+              data-testid="jj-application-tailor"
+            >
+              {tailoring ? "Preparing draft…" : "Tailor draft"}
+            </Button>
+          ) : null}
+          <Button variant="text" onClick={clearForm} disabled={saving || tailoring}>
             Clear
           </Button>
         </Stack>

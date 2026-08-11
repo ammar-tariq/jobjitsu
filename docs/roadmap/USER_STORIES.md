@@ -313,7 +313,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Fence test agent/AI ↛ send.
 
-**Status:** proposed · after PE05
+**Status:** done (2026-08-11)
 
 ### PE03-S05 — Maintain career paths under identity
 

@@ -26,6 +26,7 @@ import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker
 import type {
   AiStatusSnapshot,
   ApplicationSnapshot,
+  ApplicationTailorDraftInput,
   ResumeParseImportInputPayload,
   ResumeParseImportResult,
   ThemePreference,
@@ -44,6 +45,7 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     roleId: application.roleId,
     resumeVersionId: application.resumeVersionId,
     notes: application.notes,
+    resumeDraftText: application.resumeDraftText,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -80,6 +82,15 @@ export type CreateHostIpcOptions = {
   readonly parseImportDraft?: (
     input: ResumeParseImportInputPayload,
   ) => Promise<ResumeParseImportResult>;
+  /**
+   * Host-owned résumé tailor (PE03-S04). UI never calls AI directly.
+   * When omitted, tailor returns calm unavailable.
+   */
+  readonly tailorApplicationDraft?: (input: ApplicationTailorDraftInput) => Promise<{
+    readonly application: Application | null;
+    readonly draftText: string;
+    readonly tailorStatus: "ready" | "unavailable" | "failed";
+  }>;
 };
 
 /**
@@ -106,6 +117,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const bus = options.bus;
   const onDataRootChanged = options.onDataRootChanged;
   const parseImportDraft = options.parseImportDraft;
+  const tailorApplicationDraft = options.tailorApplicationDraft;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {
@@ -783,6 +795,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                   : undefined,
             resumeVersionId: payload.resumeVersionId,
             notes: payload.notes,
+            resumeDraftText: payload.resumeDraftText,
             stage: payload.stage && isPipelineStage(payload.stage) ? payload.stage : undefined,
           },
         });
@@ -806,6 +819,29 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             cause,
           }),
         );
+      }
+    },
+    "applications.tailorDraft": async (payload) => {
+      if (!tailorApplicationDraft) {
+        return ok({
+          application: null,
+          draftText: "",
+          tailorStatus: "unavailable" as const,
+        });
+      }
+      try {
+        const result = await tailorApplicationDraft(payload);
+        return ok({
+          application: result.application ? toApplicationSnapshot(result.application) : null,
+          draftText: result.draftText,
+          tailorStatus: result.tailorStatus,
+        });
+      } catch {
+        return ok({
+          application: null,
+          draftText: "",
+          tailorStatus: "failed" as const,
+        });
       }
     },
   };

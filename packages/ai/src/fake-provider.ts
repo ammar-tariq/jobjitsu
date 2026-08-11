@@ -72,6 +72,26 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
           modelId: "fake-model",
         };
       }
+      if (request.role === "tailor") {
+        const listing = request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ?? "this role";
+        return {
+          text: [
+            "Tailored résumé draft (on this device)",
+            "",
+            `For: ${listing}`,
+            "",
+            "Summary",
+            "Experienced builder focused on clarity, ownership, and calm delivery.",
+            "",
+            "Selected experience",
+            "- Shipped on-device tools with careful privacy boundaries",
+            "- Collaborated across product and platform without spray-and-pray volume",
+            "",
+            "Edit freely — you remain the author. Nothing was sent.",
+          ].join("\n"),
+          modelId: "fake-model",
+        };
+      }
       return {
         text: `[fake:${request.role}] ${request.prompt.slice(0, 120)}`,
         modelId: "fake-model",

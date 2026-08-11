@@ -96,6 +96,33 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("button", { name: "Queue" })).toHaveAttribute("aria-current", "page");
   });
 
+  it("tailors an editable résumé draft without sending (PE03-S04)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
+    await user.click(screen.getByTestId("jj-application-save"));
+
+    expect(
+      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+    ).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-tailor"));
+
+    expect(
+      await screen.findByText(
+        /Draft ready\. Edit freely — you remain the author\. Nothing was sent/i,
+      ),
+    ).toBeInTheDocument();
+    const draftField = screen.getByTestId("jj-application-resume-draft") as HTMLTextAreaElement;
+    expect(draftField.value).toMatch(/Tailored résumé draft/i);
+    expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
+  });
+
   it("toggles appearance from Preferences and keeps it on the shared store", async () => {
     const user = userEvent.setup();
     const appearance = createMemoryAppearanceStore("dark");

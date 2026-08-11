@@ -50,6 +50,7 @@ import {
 import type { AiStatusSnapshot } from "../ipc/commands.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
 import { parseImportDraftWithAi } from "./parse-import-draft.js";
+import { tailorApplicationDraftWithAi } from "./tailor-application-draft.js";
 import {
   createMemoryDataRootStore,
   type DataRootStore,
@@ -276,6 +277,14 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       parseImportDraftWithAi({
         ai,
         assembler,
+        input,
+      }),
+    tailorApplicationDraft: (input) =>
+      tailorApplicationDraftWithAi({
+        ai,
+        assembler,
+        repository: applications,
+        bus,
         input,
       }),
   });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFakeAiProvider, createFakeContextAssembler } from "@jobjitsu/ai";
+import { createMemoryApplicationRepository } from "@jobjitsu/applications";
 import { createInMemoryEventBus, type EventPayloadMap } from "@jobjitsu/events";
 import {
   createMemoryPathLibrary,
@@ -10,6 +11,7 @@ import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/pr
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
+import { tailorApplicationDraftWithAi } from "../host/tailor-application-draft.js";
 import {
   IPC_ALLOWLIST,
   createHostIpcDispatcher,
@@ -52,6 +54,7 @@ describe("IPC allowlist", () => {
       "applications.list",
       "applications.createDraft",
       "applications.updateDraft",
+      "applications.tailorDraft",
     ]);
   });
 
@@ -146,6 +149,7 @@ describe("typed IPC bridge", () => {
       "setLocalModelPath",
       "setProfile",
       "setTheme",
+      "tailorApplicationDraft",
       "updateApplicationDraft",
       "upsertPath",
     ]);
@@ -182,6 +186,49 @@ describe("typed IPC bridge", () => {
       contactEmail: "",
       notes: "",
       parseStatus: "unavailable",
+    });
+  });
+
+  it("tailors application résumé draft via host without exposing send", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const applications = createMemoryApplicationRepository();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        applications,
+        tailorApplicationDraft: (input) =>
+          tailorApplicationDraftWithAi({ ai, assembler, repository: applications, input }),
+      }),
+    );
+
+    const created = await bridge.createApplicationDraft({
+      companyName: "Acme",
+      roleTitle: "Staff Engineer",
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+
+    const tailored = await bridge.tailorApplicationDraft({
+      applicationId: created.value.application.id,
+    });
+    expect(tailored.ok && tailored.value.tailorStatus).toBe("ready");
+    expect(tailored.ok && tailored.value.draftText).toMatch(/Tailored résumé draft/i);
+    expect(tailored.ok && tailored.value.application?.trackingStatus).toBe("ResumePrepared");
+    expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("returns calm unavailable tailor when host use-case is not wired", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const tailored = await bridge.tailorApplicationDraft({
+      applicationId: "application_missing",
+    });
+    expect(tailored.ok && tailored.value).toEqual({
+      application: null,
+      draftText: "",
+      tailorStatus: "unavailable",
     });
   });
 
