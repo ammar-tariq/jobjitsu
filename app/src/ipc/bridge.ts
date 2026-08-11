@@ -57,6 +57,10 @@ export type IpcBridge = {
   readonly setCraftPreferences: (
     patch: CraftPreferencesPatchInput,
   ) => Promise<Result<IpcResultMap["preferences.setCraftPreferences"]>>;
+  readonly getLocalModelPath: () => Promise<Result<IpcResultMap["preferences.getLocalModelPath"]>>;
+  readonly setLocalModelPath: (
+    path: string,
+  ) => Promise<Result<IpcResultMap["preferences.setLocalModelPath"]>>;
 };
 
 /**
@@ -179,6 +183,16 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async setCraftPreferences(patch: CraftPreferencesPatchInput) {
       return (await dispatcher.invoke("preferences.setCraftPreferences", patch)) as Result<
         IpcResultMap["preferences.setCraftPreferences"]
+      >;
+    },
+    async getLocalModelPath() {
+      return (await dispatcher.invoke("preferences.getLocalModelPath")) as Result<
+        IpcResultMap["preferences.getLocalModelPath"]
+      >;
+    },
+    async setLocalModelPath(path: string) {
+      return (await dispatcher.invoke("preferences.setLocalModelPath", { path })) as Result<
+        IpcResultMap["preferences.setLocalModelPath"]
       >;
     },
   };

@@ -6,6 +6,7 @@ import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { createHostRuntime } from "../host/runtime.js";
+import { configureStubLocalModel } from "../host/test-local-model.js";
 import { App } from "../App.js";
 
 afterEach(() => {
@@ -17,6 +18,7 @@ describe("DesktopShell", () => {
   it("renders JobJitsu chrome and primary H1 nav", async () => {
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
@@ -45,6 +47,7 @@ describe("DesktopShell", () => {
 
     expect(screen.getByRole("status", { name: "Agent · Unavailable" })).toBeInTheDocument();
 
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
@@ -56,6 +59,7 @@ describe("DesktopShell", () => {
       ai: createFakeAiProvider({ id: "fake-remote", locality: "remote" }),
     });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     expect(await screen.findByRole("status", { name: "Agent · Ready" })).toBeInTheDocument();
@@ -66,6 +70,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Agent" }));
@@ -81,6 +86,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Queue" }));
@@ -95,6 +101,7 @@ describe("DesktopShell", () => {
     const appearance = createMemoryAppearanceStore("dark");
     const runtime = createHostRuntime({ appearance });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -111,6 +118,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -147,6 +155,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -173,6 +182,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -214,6 +224,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -278,6 +289,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -319,6 +331,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -344,6 +357,7 @@ describe("DesktopShell", () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -386,6 +400,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -435,6 +450,7 @@ describe("DesktopShell", () => {
     });
 
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Profile" }));
@@ -457,6 +473,7 @@ describe("DesktopShell", () => {
     });
     const runtime = createHostRuntime({ dataRoot });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -489,6 +506,7 @@ describe("DesktopShell", () => {
     const folderPicker = createStubFolderPicker(async () => "/Volumes/Vault/JobJitsu");
     const runtime = createHostRuntime({ dataRoot, folderPicker });
     render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Preferences" }));
@@ -497,5 +515,27 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Data folder updated/i)).toBeInTheDocument();
     expect((await runtime.dataRoot.get()).path).toBe("/Volumes/Vault/JobJitsu");
     expect(screen.getByDisplayValue("/Volumes/Vault/JobJitsu")).toBeInTheDocument();
+  });
+
+  it("keeps Agent unavailable when model path is missing and recovers from Preferences", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await runtime.start();
+
+    expect(await screen.findByRole("status", { name: "Agent · Unavailable" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-local-model-path")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Choose a local model path in Preferences so Agent can run/i),
+    ).toBeInTheDocument();
+
+    const pathField = screen.getByRole("textbox", { name: "Model path" });
+    await user.type(pathField, "/models/jobjitsu-stub.gguf");
+    await user.click(screen.getByRole("button", { name: "Save model path" }));
+
+    expect(await screen.findByText(/Model path saved/i)).toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
   });
 });
