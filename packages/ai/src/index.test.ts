@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   PACKAGE_NAME,
   createAiProviderRegistry,
+  createContextAssembler,
   createFakeAiProvider,
   createFakeContextAssembler,
   createPathGatedAiProvider,

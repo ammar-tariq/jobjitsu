@@ -1,6 +1,7 @@
 import type { AiProvider } from "@jobjitsu/ai";
 import {
   createAiProviderRegistry,
+  createContextAssembler,
   createFakeAiProvider,
   createFakeContextAssembler,
   createPathGatedAiProvider,
@@ -117,7 +118,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     getLocalModelPath: () => preferences.getLocalModelPath(),
   });
   const aiRegistry = createAiProviderRegistry([ai]);
-  const assembler = createFakeContextAssembler();
+  const assembler = createContextAssembler();
   const resumes: ResumeStore = createFakeResumeStore({ resume: null });
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();
