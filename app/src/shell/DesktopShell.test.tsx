@@ -219,6 +219,55 @@ describe("DesktopShell", () => {
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
   });
 
+  it("lists applications with status and opens detail (PE08-S04)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
+    expect(screen.getByTestId("jj-application-empty")).toBeInTheDocument();
+    expect(screen.getByText("No applications yet")).toBeInTheDocument();
+
+    await user.type(screen.getByTestId("jj-application-company"), "Acme");
+    await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
+    await user.type(screen.getByTestId("jj-application-notes"), "Local craft notes");
+    await user.click(screen.getByTestId("jj-application-save"));
+    expect(
+      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear" }));
+    await user.type(screen.getByTestId("jj-application-company"), "Globex");
+    await user.type(screen.getByTestId("jj-application-role"), "Platform Lead");
+    await user.click(screen.getByTestId("jj-application-save"));
+    expect(
+      await screen.findByText(/Application draft saved\. Nothing was sent/i),
+    ).toBeInTheDocument();
+
+    const list = screen.getByTestId("jj-application-list");
+    expect(within(list).getByText(/Acme · Staff Engineer/i)).toBeInTheDocument();
+    expect(within(list).getByText(/Globex · Platform Lead/i)).toBeInTheDocument();
+    expect(within(list).getAllByText("Discovered").length).toBeGreaterThanOrEqual(2);
+
+    const acmeRow = within(list)
+      .getByText(/Acme · Staff Engineer/i)
+      .closest("div[role='button']");
+    expect(acmeRow).toBeTruthy();
+    await user.click(acmeRow!);
+
+    expect(screen.getByTestId("jj-application-detail-title")).toHaveTextContent(
+      /Edit draft · Discovered/i,
+    );
+    expect(screen.getByTestId("jj-application-company")).toHaveValue("Acme");
+    expect(screen.getByTestId("jj-application-role")).toHaveValue("Staff Engineer");
+    expect(screen.getByTestId("jj-application-notes")).toHaveValue("Local craft notes");
+    expect(screen.getByTestId("jj-application-resume-draft")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-application-cover-draft")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /approve send/i })).not.toBeInTheDocument();
+  });
+
   it("generates an editable cover letter without sending (PE08-S02)", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

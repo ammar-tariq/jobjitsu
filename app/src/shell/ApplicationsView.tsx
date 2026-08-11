@@ -15,7 +15,7 @@ export type ApplicationsViewProps = {
 };
 
 /**
- * Create and edit application drafts on-device (PE08-S01).
+ * Create, list, and open application drafts on-device (PE08-S01 / PE08-S04).
  * Tailor résumé (PE03-S04) and cover letter (PE08-S02) via host Agent.
  * Soft-duplicate warns; never sends.
  */
@@ -34,6 +34,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   const [tailoring, setTailoring] = useState(false);
   const [covering, setCovering] = useState(false);
   const busy = saving || tailoring || covering;
+  const selected = applications.find((application) => application.id === selectedId);
 
   const refresh = async (): Promise<void> => {
     const result = await bridge.listApplications();
@@ -208,8 +209,10 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
         data-testid="jj-application-draft-form"
         sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
       >
-        <Typography variant="subtitle2">
-          {selectedId ? "Edit draft" : "New application draft"}
+        <Typography variant="subtitle2" data-testid="jj-application-detail-title">
+          {selectedId
+            ? `Edit draft · ${selected?.trackingStatus ?? "Discovered"}`
+            : "New application draft"}
         </Typography>
         <TextField
           label="Company"
@@ -324,11 +327,14 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
       <Stack spacing={1} data-testid="jj-application-list">
         <Typography variant="subtitle2">Drafts on this device</Typography>
         {applications.length === 0 ? (
-          <Typography color="text.secondary" variant="body2">
-            No application drafts yet. Add a company and role when you are ready.
-          </Typography>
+          <Stack spacing={0.5} data-testid="jj-application-empty">
+            <Typography variant="subtitle1">No applications yet</Typography>
+            <Typography color="text.secondary" variant="body2">
+              Add a company and role above when you are ready. Nothing leaves this device.
+            </Typography>
+          </Stack>
         ) : (
-          <List dense disablePadding>
+          <List dense disablePadding aria-label="Application drafts">
             {applications.map((application) => (
               <ListItemButton
                 key={application.id}
