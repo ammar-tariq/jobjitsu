@@ -26,6 +26,7 @@ import {
 } from "../host/data-root-store.js";
 import { createHostFileSaver, type FileSaver } from "../host/file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
+import { readResourceSnapshot } from "../host/resource-snapshot.js";
 import { buildResumeExportArtifacts, toBase64 } from "../host/resume-export.js";
 import {
   EMPTY_CRAFT_SESSION,
@@ -1204,6 +1205,9 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
       const session = craftSession.prepareDrafts(payload.kind);
       return ok({ session: toCraftSessionSnapshot(session) });
+    },
+    "system.getResources": async () => {
+      return ok({ resources: await readResourceSnapshot() });
     },
   };
 }

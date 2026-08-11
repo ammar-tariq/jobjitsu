@@ -48,6 +48,7 @@ export const IPC_ALLOWLIST = [
   "craft.getSession",
   "craft.patchSession",
   "craft.prepareDrafts",
+  "system.getResources",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -354,6 +355,16 @@ export type ApplicationDuplicateWarningSnapshot = {
   readonly message: string;
 };
 
+/** Local device load (CPU / memory) — read on this device, never sent anywhere. */
+export type ResourceSnapshotResult = {
+  readonly available: boolean;
+  readonly cpuPercent: number | null;
+  readonly memoryUsedBytes: number | null;
+  readonly memoryTotalBytes: number | null;
+  readonly memoryPercent: number | null;
+  readonly message?: string;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;
@@ -398,6 +409,7 @@ export type IpcPayloadMap = {
   readonly "craft.getSession": undefined;
   readonly "craft.patchSession": CraftSessionPatchInput;
   readonly "craft.prepareDrafts": { readonly kind: CraftGenerateKind };
+  readonly "system.getResources": undefined;
 };
 
 export type IpcResultMap = {
@@ -466,6 +478,7 @@ export type IpcResultMap = {
   readonly "craft.getSession": { readonly session: CraftSessionSnapshot };
   readonly "craft.patchSession": { readonly session: CraftSessionSnapshot };
   readonly "craft.prepareDrafts": { readonly session: CraftSessionSnapshot };
+  readonly "system.getResources": { readonly resources: ResourceSnapshotResult };
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {

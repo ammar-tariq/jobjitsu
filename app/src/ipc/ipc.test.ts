@@ -69,6 +69,7 @@ describe("IPC allowlist", () => {
       "craft.getSession",
       "craft.patchSession",
       "craft.prepareDrafts",
+      "system.getResources",
     ]);
   });
 

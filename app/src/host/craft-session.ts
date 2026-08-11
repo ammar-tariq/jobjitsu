@@ -1,4 +1,4 @@
-import type { AiProvider, ContextAssembler } from "@jobjitsu/ai";
+import type { AiProvider } from "@jobjitsu/ai";
 import type { EventBus } from "@jobjitsu/events";
 import {
   generateCraftDraftsWithAi,
@@ -104,8 +104,9 @@ function phaseMessage(phase: CraftJobPhase, kind: CraftGenerateKind): string {
  */
 export function createCraftSessionStore(options: {
   readonly ai: AiProvider;
-  readonly assembler: ContextAssembler;
   readonly bus?: EventBus;
+  /** Saved craft tone from Preferences, applied to prepared drafts. */
+  readonly getTonePreferences?: () => Promise<string | undefined>;
 }): CraftSessionStore {
   let session: CraftSessionState = EMPTY_CRAFT_SESSION;
   let prepareGeneration = 0;
@@ -130,9 +131,19 @@ export function createCraftSessionStore(options: {
     },
 
     patch(patch) {
+      // Merge field-by-field: debounced UI patches may carry undefined for
+      // untouched fields and must never erase another field's latest value.
       return update((prev) => ({
         ...prev,
-        ...patch,
+        resumeText: patch.resumeText ?? prev.resumeText,
+        jobDescription: patch.jobDescription ?? prev.jobDescription,
+        aboutCompany: patch.aboutCompany ?? prev.aboutCompany,
+        resumeDraft: patch.resumeDraft ?? prev.resumeDraft,
+        coverLetterDraft: patch.coverLetterDraft ?? prev.coverLetterDraft,
+        saveCompany: patch.saveCompany ?? prev.saveCompany,
+        saveRole: patch.saveRole ?? prev.saveRole,
+        chatTarget: patch.chatTarget ?? prev.chatTarget,
+        chatInput: patch.chatInput ?? prev.chatInput,
         chatMessages: patch.chatMessages ? [...patch.chatMessages] : prev.chatMessages,
         job: prev.job,
       }));
@@ -187,14 +198,18 @@ export function createCraftSessionStore(options: {
           }));
         };
 
+        const tonePreferences = options.getTonePreferences
+          ? await options.getTonePreferences()
+          : undefined;
+
         const result: CraftGenerateResult = await generateCraftDraftsWithAi({
           ai: options.ai,
-          assembler: options.assembler,
           input: {
             kind,
             resumeText: sources.resumeText,
             jobDescription: sources.jobDescription,
             aboutCompany: sources.aboutCompany || undefined,
+            tonePreferences,
           },
           onPhase: (phase) => {
             setPhase(phase);
