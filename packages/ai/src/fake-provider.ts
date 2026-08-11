@@ -46,7 +46,9 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
     async complete(request: AiCompleteRequest): Promise<AiCompleteResult> {
       const status = options.healthStatus ?? "ready";
       if (status !== "ready") {
-        throw new Error("Agent is not ready on this device. Check Preferences and try again.");
+        throw new Error(
+          "Agent didn’t start. Confirm the model path in Preferences. Nothing left this machine.",
+        );
       }
       if (typeof options.completeText === "function") {
         return { text: options.completeText(request), modelId: "fake-model" };
@@ -120,27 +122,47 @@ export function createAiProviderRegistry(initial: readonly AiProvider[] = []): A
   };
 }
 
-/** Minimal context assembler — concatenates allowlisted fields only. */
+/**
+ * Test/demo assembler — same allowlist as Context Builder, generous budget.
+ * Prefer `createContextAssembler` for production host wiring.
+ */
 export function createFakeContextAssembler(): ContextAssembler {
+  // Lazy import avoided: keep fake self-contained for PE05-S01 tests.
+  const partsFor = (input: ContextAssemblerInput): string[] => {
+    const parts = [`role=${input.role}`];
+    if (input.profileExcerpt) {
+      parts.push(`profile=${input.profileExcerpt}`);
+    }
+    if (input.resumeExcerpts?.length) {
+      parts.push(`resume=${input.resumeExcerpts.join(" | ")}`);
+    }
+    if (input.projectsExcerpt) {
+      parts.push(`projects=${input.projectsExcerpt}`);
+    }
+    if (input.achievementsExcerpt) {
+      parts.push(`achievements=${input.achievementsExcerpt}`);
+    }
+    if (input.currentJobExcerpt) {
+      parts.push(`currentJob=${input.currentJobExcerpt}`);
+    }
+    if (input.roleDescription) {
+      parts.push(`listing=${input.roleDescription}`);
+    }
+    if (input.tonePreferences) {
+      parts.push(`tone=${input.tonePreferences}`);
+    }
+    if (input.draftExcerpt) {
+      parts.push(`draft=${input.draftExcerpt}`);
+    }
+    if (input.priorSendMeta) {
+      parts.push(`prior=${input.priorSendMeta}`);
+    }
+    return parts;
+  };
+
   return {
     assemble(input: ContextAssemblerInput): string {
-      const parts = [`role=${input.role}`];
-      if (input.resumeExcerpts?.length) {
-        parts.push(`resume=${input.resumeExcerpts.join(" | ")}`);
-      }
-      if (input.roleDescription) {
-        parts.push(`listing=${input.roleDescription}`);
-      }
-      if (input.tonePreferences) {
-        parts.push(`tone=${input.tonePreferences}`);
-      }
-      if (input.draftExcerpt) {
-        parts.push(`draft=${input.draftExcerpt}`);
-      }
-      if (input.priorSendMeta) {
-        parts.push(`prior=${input.priorSendMeta}`);
-      }
-      return parts.join("\n");
+      return partsFor(input).join("\n");
     },
   };
 }

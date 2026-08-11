@@ -12,16 +12,15 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE03 Identity & Resume Library |
-| **Story** | PE03-S10 — AI parse import into structured fields |
-| **Status** | In review |
-| **Note** | Host-only parse pre-fills review; edit mandatory; no auto-attach/send |
+| **Epic** | PE05 Local Intelligence |
+| **Story** | PE05-S02 — Configure local model path |
+| **Status** | In progress |
+| **Note** | Path-gated Agent readiness; Preferences model path + calm recovery; lazy (no weight load in health) |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
-| PE03-S10 | 2026-08-11 | Host parseImportDraft pre-fills review; calm unavailable fallback; PR #97 |
 | PE05-S01 | 2026-07-23 | Fake provider health/complete; Ai.LocalModel*; no silent cloud fallback; PR #93 |
 | PE03-S09 | 2026-07-23 | Create Path from existing résumé; PR #92 |
 | PE03-S08 | 2026-07-23 | LinkedIn PDF import + source label; PR #91 |

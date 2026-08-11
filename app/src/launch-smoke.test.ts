@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { APP_NAME } from "./index.js";
 import { createHostRuntime } from "./host/runtime.js";
+import { configureStubLocalModel } from "./host/test-local-model.js";
 
 const appRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -64,6 +65,7 @@ describe("PE01-S01 launch desktop host", () => {
 
     try {
       const runtime = createHostRuntime({ version: "0.0.0-smoke" });
+      await configureStubLocalModel(runtime.preferences);
       await runtime.start();
 
       const names = runtime.getActivity().map((e) => e.name);

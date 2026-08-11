@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   PACKAGE_NAME,
   createAiProviderRegistry,
+  createContextAssembler,
   createFakeAiProvider,
   createFakeContextAssembler,
+  createPathGatedAiProvider,
 } from "./index.js";
 
 describe("@jobjitsu/ai fake provider", () => {
@@ -58,7 +60,7 @@ describe("@jobjitsu/ai fake provider", () => {
     const provider = createFakeAiProvider({ healthStatus: "unavailable", locality: "local" });
     await expect(
       provider.complete({ role: "generic", prompt: "should not reach a cloud" }),
-    ).rejects.toThrow(/not ready/i);
+    ).rejects.toThrow(/Preferences|model path/i);
   });
 
   it("assembles allowlisted context only", () => {
@@ -71,5 +73,44 @@ describe("@jobjitsu/ai fake provider", () => {
     });
     expect(prompt).toContain("resume=Built APIs");
     expect(prompt).not.toContain("timeline");
+  });
+});
+
+describe("@jobjitsu/ai path-gated provider", () => {
+  it("reports misconfigured when model path is missing — no weight load", async () => {
+    const inner = createFakeAiProvider({ id: "inner" });
+    const gated = createPathGatedAiProvider({
+      inner,
+      getLocalModelPath: async () => undefined,
+    });
+    const health = await gated.health();
+    expect(health.status).toBe("misconfigured");
+    expect(health.locality).toBe("local");
+    expect(health.message).toMatch(/Preferences/i);
+    await expect(gated.complete({ role: "generic", prompt: "x" })).rejects.toThrow(/Preferences/i);
+  });
+
+  it("defers to inner when a path is configured", async () => {
+    const inner = createFakeAiProvider({ id: "inner" });
+    const gated = createPathGatedAiProvider({
+      inner,
+      getLocalModelPath: async () => "/models/stub.gguf",
+    });
+    const health = await gated.health();
+    expect(health.status).toBe("ready");
+    const result = await gated.complete({ role: "generic", prompt: "hello" });
+    expect(result.text).toContain("[fake:generic]");
+  });
+
+  it("fails when pathExists reports missing", async () => {
+    const inner = createFakeAiProvider({ id: "inner" });
+    const gated = createPathGatedAiProvider({
+      inner,
+      getLocalModelPath: async () => "/missing/model.gguf",
+      pathExists: async () => false,
+    });
+    const health = await gated.health();
+    expect(health.status).toBe("misconfigured");
+    expect(health.message).toMatch(/could not be found/i);
   });
 });
