@@ -5,6 +5,25 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Craft prompts are profession-agnostic, tech is just an example
+
+### The problem
+
+The tailor and cover-letter system prompts were written from a software-engineer's viewpoint (they arrived that way and the improvement kit analyzed a dev résumé vs a dev JD): "senior technical recruiter", "write as an experienced software engineer", tech-only skill categories (Languages/Frameworks/Databases/Cloud), CI/CD seniority signals, React examples. JobJitsu serves any career — a nurse or accountant would get tech-flavored drafts.
+
+### Decision
+
+Generalize both prompts while keeping every tailoring technique:
+
+- Personas become cross-industry ("expert ATS resume writer and senior recruiter who works across industries"); both prompts state the candidate may work in any field and to read the profession from the résumé + JD, never assuming tech.
+- Tech-specific illustrations stay but are labeled "(software example)", and healthcare/sales counterparts were added (triage rephrasing example, RN/Epic skills categories, "patient-centered care" phrase mirroring, "patient safety"/"enterprise sales" spotlight themes).
+- Field-neutral wording elsewhere: "skills, tools, and technologies", "certifications, licenses, or credentials", "hands-on senior practitioner", bullet formula "Action + Skill/Tool/Method + …", PROJECTS section is omitted when the résumé has none (common outside software).
+- Export parser `KNOWN_HEADINGS` learns non-tech section names (clinical/teaching/research/volunteer experience, licenses, professional development).
+
+Locked by a test: prompts must contain "never assume a technology career" and must not say "as an experienced software engineer".
+
+---
+
 ## 2026-08-11 — Styled exports: structure parsed from plain text, not model markdown
 
 ### The problem

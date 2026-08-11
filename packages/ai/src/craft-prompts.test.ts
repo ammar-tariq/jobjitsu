@@ -42,7 +42,7 @@ describe("craft prompts", () => {
     expect(systemPromptForRole("cover_letter")).toBe(COVER_LETTER_SYSTEM_PROMPT);
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/Never fabricate experience/i);
     expect(TAILOR_SYSTEM_PROMPT).toContain("# TAILORING PROCESS");
-    expect(TAILOR_SYSTEM_PROMPT).toContain("Action + Technology/Method");
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Action + Skill/Tool/Method");
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/plain text/i);
     expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/250–400 words/i);
     expect(COVER_LETTER_SYSTEM_PROMPT).toContain("# FINAL VALIDATION");
@@ -51,7 +51,7 @@ describe("craft prompts", () => {
 
   it("tailor prompt surfaces buried evidence without re-attributing it", () => {
     expect(TAILOR_SYSTEM_PROMPT).toContain("Experience-gap positioning");
-    expect(TAILOR_SYSTEM_PROMPT).toMatch(/hands-on senior builder/i);
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/hands-on senior practitioner/i);
     expect(TAILOR_SYSTEM_PROMPT).toContain("Surface buried evidence");
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/reordering and emphasis, not re-attribution/i);
     expect(TAILOR_SYSTEM_PROMPT).toContain("Mirror JD phrasing");
@@ -61,6 +61,18 @@ describe("craft prompts", () => {
     );
     expect(TAILOR_SYSTEM_PROMPT).toContain("# ANTI-PATTERNS");
     expect(TAILOR_SYSTEM_PROMPT).toMatch(/truncate to 1–2 bullets/i);
+  });
+
+  it("prompts serve any profession, not just software", () => {
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/never assume a technology career/i);
+    expect(TAILOR_SYSTEM_PROMPT).toContain("(Healthcare example)");
+    expect(TAILOR_SYSTEM_PROMPT).toContain("Healthcare example:");
+    expect(TAILOR_SYSTEM_PROMPT).toMatch(/category names that fit the candidate's field/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(/never assume a technology career/i);
+    expect(COVER_LETTER_SYSTEM_PROMPT).toMatch(
+      /experienced professional in the candidate's own field/i,
+    );
+    expect(COVER_LETTER_SYSTEM_PROMPT).not.toMatch(/as an experienced software engineer/i);
   });
 });
 

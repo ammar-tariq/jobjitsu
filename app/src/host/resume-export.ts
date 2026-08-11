@@ -69,6 +69,10 @@ const KNOWN_HEADINGS = new Set([
   "work experience",
   "work history",
   "employment history",
+  "clinical experience",
+  "teaching experience",
+  "research experience",
+  "volunteer experience",
   "projects",
   "selected projects",
   "personal projects",
@@ -76,8 +80,10 @@ const KNOWN_HEADINGS = new Set([
   "education",
   "certifications",
   "certification",
+  "licenses",
   "awards",
   "publications",
+  "professional development",
 ]);
 
 const BULLET_RE = /^\s*[-*\u2022\u2013\u2014]\s+/;
