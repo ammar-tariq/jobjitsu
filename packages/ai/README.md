@@ -33,6 +33,7 @@ const registry = createAiProviderRegistry([provider]);
 - Deterministic `complete` / `embed`
 - `createPathGatedAiProvider` gates health/complete on a configured local model path (no weight load in `health`)
 - Registry keeps the first/local active until `setActive` — no silent remote promotion
+- Offline / local-primary: health + complete work with `fetch` disabled; local failure never auto-calls a remote provider
 - Safe for unit tests and early shell demos
 
 ## Context Builder
