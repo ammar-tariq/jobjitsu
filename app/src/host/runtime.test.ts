@@ -57,19 +57,12 @@ describe("createHostRuntime", () => {
   });
 
   it("emits Ai.LocalModelFailed without silent remote fallback", async () => {
-    const host = createHostRuntime({
-      version: "test",
-      ai: createFakeAiProvider({
-        id: "fake-unavailable",
-        healthStatus: "unavailable",
-        locality: "local",
-      }),
-    });
-    await configureStubLocalModel(host.preferences);
-    const names: string[] = [];
-    host.bus.subscribeAll((e) => {
-      names.push(e.name);
-    });
+    const originalFetch = globalThis.fetch;
+    let fetchCalls = 0;
+    globalThis.fetch = (async () => {
+      fetchCalls += 1;
+      throw new Error("unexpected network during local model failure");
+    }) as typeof fetch;
 
     try {
       const host = createHostRuntime({
@@ -80,6 +73,7 @@ describe("createHostRuntime", () => {
           locality: "local",
         }),
       });
+      await configureStubLocalModel(host.preferences);
       const names: string[] = [];
       host.bus.subscribeAll((e) => {
         names.push(e.name);

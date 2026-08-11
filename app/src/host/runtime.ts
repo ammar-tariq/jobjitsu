@@ -3,7 +3,6 @@ import {
   createAiProviderRegistry,
   createContextAssembler,
   createFakeAiProvider,
-  createFakeContextAssembler,
   createPathGatedAiProvider,
 } from "@jobjitsu/ai";
 import {
