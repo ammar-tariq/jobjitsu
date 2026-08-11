@@ -24,7 +24,7 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
-    expect(screen.getByText("Coming Soon")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 

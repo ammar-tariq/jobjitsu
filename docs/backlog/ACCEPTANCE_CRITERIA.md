@@ -60,7 +60,7 @@ This file is a checklist index for tracking — mark stories done only when all 
 - [ ] E07-F04-S01
 
 ### E08
-- [ ] E08-F01-S01
+- [x] E08-F01-S01
 - [ ] E08-F02-S01
 - [ ] E08-F03-S01
 

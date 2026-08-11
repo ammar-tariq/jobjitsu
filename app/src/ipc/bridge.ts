@@ -1,6 +1,8 @@
 import type { Result } from "@jobjitsu/shared";
 import type {
   AiStatusSnapshot,
+  ApplicationDraftCreateInput,
+  ApplicationDraftUpdateInput,
   CraftPreferencesPatchInput,
   IpcResultMap,
   PathPatchInput,

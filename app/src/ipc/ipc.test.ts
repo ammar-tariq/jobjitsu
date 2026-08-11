@@ -116,6 +116,7 @@ describe("typed IPC bridge", () => {
     expect(Object.keys(bridge).sort()).toEqual([
       "archivePath",
       "attachResume",
+      "createApplicationDraft",
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
@@ -125,6 +126,7 @@ describe("typed IPC bridge", () => {
       "getSelectedResume",
       "getTheme",
       "importResume",
+      "listApplications",
       "listPaths",
       "listProfiles",
       "listResumeVersions",
@@ -141,6 +143,7 @@ describe("typed IPC bridge", () => {
       "setLocalModelPath",
       "setProfile",
       "setTheme",
+      "updateApplicationDraft",
       "upsertPath",
     ]);
   });

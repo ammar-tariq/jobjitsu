@@ -7,6 +7,10 @@ import {
   createPathGatedAiProvider,
 } from "@jobjitsu/ai";
 import {
+  createMemoryApplicationRepository,
+  type ApplicationRepository,
+} from "@jobjitsu/applications";
+import {
   FoundationKeys,
   createErrorReporter,
   createServiceRegistry,
@@ -76,6 +80,8 @@ export type HostRuntime = {
   readonly resumeLibrary: ResumeLibrary;
   /** Career paths under identity (UI: Path). */
   readonly pathLibrary: PathLibrary;
+  /** On-device application drafts. */
+  readonly applications: ApplicationRepository;
   /** On-device data folder preference. */
   readonly dataRoot: DataRootStore;
   /** Preferences façade (config SSOT). */
@@ -94,6 +100,7 @@ export type CreateHostRuntimeOptions = {
   readonly profiles?: ProfileRepository;
   readonly resumeLibrary?: ResumeLibrary;
   readonly pathLibrary?: PathLibrary;
+  readonly applications?: ApplicationRepository;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly folderPicker?: FolderPicker;
@@ -125,6 +132,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const profiles = options.profiles ?? createMemoryProfileRepository();
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
+  const applications = options.applications ?? createMemoryApplicationRepository();
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
 
   services.register(FoundationKeys.logger, logger);
@@ -258,6 +266,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     profiles,
     resumeLibrary,
     pathLibrary,
+    applications,
     dataRoot: dataRootStore,
     preferences,
     folderPicker,
@@ -283,6 +292,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     profiles,
     resumeLibrary,
     pathLibrary,
+    applications,
     dataRoot: dataRootStore,
     preferences,
     async start() {
@@ -327,6 +337,18 @@ function summarize(event: DomainEvent): string {
     case "Email.Synced": {
       const payload = event.payload as EventPayloadMap["Email.Synced"];
       return `Email synced (${payload.messageCount} messages)`;
+    }
+    case "Application.DraftCreated": {
+      const payload = event.payload as EventPayloadMap["Application.DraftCreated"];
+      return `Application draft created (${payload.applicationId})`;
+    }
+    case "Application.Updated": {
+      const payload = event.payload as EventPayloadMap["Application.Updated"];
+      return `Application updated (${payload.applicationId})`;
+    }
+    case "Application.StageChanged": {
+      const payload = event.payload as EventPayloadMap["Application.StageChanged"];
+      return `Application stage → ${payload.stage} (${payload.applicationId})`;
     }
     case "Ai.LocalModelReady":
       return "Agent runtime ready (fake)";

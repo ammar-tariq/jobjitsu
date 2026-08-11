@@ -155,6 +155,48 @@ export type CraftPreferencesPatchInput = {
   readonly constraints?: readonly string[];
 };
 
+export type ApplicationSnapshot = {
+  readonly id: string;
+  readonly stage: string;
+  readonly trackingStatus: string;
+  readonly companyName: string;
+  readonly roleTitle: string;
+  readonly sourceUrl?: string;
+  readonly requisitionId?: string;
+  readonly roleId?: string;
+  readonly resumeVersionId?: string;
+  readonly notes?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+};
+
+export type ApplicationDraftCreateInput = {
+  readonly companyName: string;
+  readonly roleTitle: string;
+  readonly sourceUrl?: string;
+  readonly requisitionId?: string;
+  readonly roleId?: string;
+  readonly resumeVersionId?: string;
+  readonly notes?: string;
+};
+
+export type ApplicationDraftUpdateInput = {
+  readonly id: string;
+  readonly companyName?: string;
+  readonly roleTitle?: string;
+  readonly sourceUrl?: string | null;
+  readonly requisitionId?: string | null;
+  readonly roleId?: string | null;
+  readonly resumeVersionId?: string | null;
+  readonly notes?: string | null;
+  readonly stage?: string;
+};
+
+export type ApplicationDuplicateWarningSnapshot = {
+  readonly matchedApplicationId: string;
+  readonly message: string;
+};
+
 export type IpcPayloadMap = {
   readonly ping: undefined;
   readonly "theme.get": undefined;

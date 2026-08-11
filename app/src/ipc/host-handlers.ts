@@ -1,7 +1,21 @@
-import { createAppError, err, ok } from "@jobjitsu/shared";
+import {
+  createApplicationDraft,
+  trackingStatusForStage,
+  updateApplicationDraft,
+  type Application,
+  type ApplicationRepository,
+} from "@jobjitsu/applications";
+import type { EventBus } from "@jobjitsu/events";
 import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
-import type { EventBus } from "@jobjitsu/events";
+import {
+  createAppError,
+  err,
+  isPipelineStage,
+  ok,
+  type ApplicationId,
+  type RoleId,
+} from "@jobjitsu/shared";
 import { createMemoryAppearanceStore, type AppearanceStore } from "../host/appearance-store.js";
 import {
   createMemoryDataRootStore,
@@ -17,6 +31,23 @@ import type {
 } from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
+function toApplicationSnapshot(application: Application): ApplicationSnapshot {
+  return {
+    id: application.id,
+    stage: application.stage,
+    trackingStatus: trackingStatusForStage(application.stage),
+    companyName: application.companyName,
+    roleTitle: application.roleTitle,
+    sourceUrl: application.sourceUrl,
+    requisitionId: application.requisitionId,
+    roleId: application.roleId,
+    resumeVersionId: application.resumeVersionId,
+    notes: application.notes,
+    createdAt: application.createdAt,
+    updatedAt: application.updatedAt,
+  };
+}
+
 export type CreateHostIpcOptions = {
   readonly appearance?: AppearanceStore;
   readonly getAppearance?: () => AppearanceStore;
@@ -29,6 +60,8 @@ export type CreateHostIpcOptions = {
   readonly getResumeLibrary?: () => ResumeLibrary | undefined;
   readonly pathLibrary?: PathLibrary;
   readonly getPathLibrary?: () => PathLibrary | undefined;
+  readonly applications?: ApplicationRepository;
+  readonly getApplications?: () => ApplicationRepository | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly getPreferences?: () => PreferencesFacade | undefined;
@@ -65,6 +98,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const getProfiles = options.getProfiles ?? (() => options.profiles);
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const getPathLibrary = options.getPathLibrary ?? (() => options.pathLibrary);
+  const getApplications = options.getApplications ?? (() => options.applications);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const getPreferences = options.getPreferences ?? (() => options.preferences);
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
