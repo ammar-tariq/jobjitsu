@@ -311,7 +311,6 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     generateCraftDrafts: (input) =>
       generateCraftDraftsWithAi({
         ai,
-        assembler,
         input,
       }),
     craftSession,

@@ -1,3 +1,4 @@
+import { systemPromptForRole } from "./craft-prompts.js";
 import type { AiCompleteRequest, AiCompleteResult, AiHealth, AiProvider } from "./provider.js";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:11434";
@@ -209,16 +210,7 @@ export function createOllamaAiProvider(options: OllamaAiProviderOptions): AiProv
         );
       }
 
-      const system =
-        request.role === "tailor"
-          ? "You help tailor résumé drafts on the user's device. Stay factual to the provided résumé. User remains the author. Do not invent employers or dates."
-          : request.role === "cover_letter"
-            ? "You draft cover letters on the user's device from the résumé and job description. Stay factual. User remains the author. Do not invent employers or dates. Do not send anything."
-            : request.role === "parse_assist"
-              ? "Extract only facts clearly present in the text. Prefer empty fields over guessing."
-              : request.role === "follow_up_draft"
-                ? "Draft a calm follow-up the user can edit. Do not send anything."
-                : "Help with on-device career craft. Be precise and calm. User remains the author.";
+      const system = systemPromptForRole(request.role);
 
       try {
         const payload = await requestOllamaJson<OllamaGenerateResponse>(

@@ -279,7 +279,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
 
   function onChatSend(): void {
     const message = chatInput.trim();
-    if (!message) {
+    // Guard here (not only on the button) — ⌘/Ctrl+Enter bypasses disabled state.
+    if (!message || busy) {
       return;
     }
     const history = chatMessages;

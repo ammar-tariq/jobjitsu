@@ -22,6 +22,13 @@ export {
   type PathGatedAiProviderOptions,
 } from "./path-gated-provider.js";
 export {
+  buildCraftUserPrompt,
+  COVER_LETTER_SYSTEM_PROMPT,
+  systemPromptForRole,
+  TAILOR_SYSTEM_PROMPT,
+  type CraftUserPromptInput,
+} from "./craft-prompts.js";
+export {
   createOllamaAiProvider,
   listOllamaModels,
   type ListOllamaModelsOptions,

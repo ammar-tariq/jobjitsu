@@ -1,4 +1,5 @@
-import type { AiProvider, ContextAssembler } from "@jobjitsu/ai";
+import type { AiProvider } from "@jobjitsu/ai";
+import { buildCraftUserPrompt } from "@jobjitsu/ai";
 
 export type CraftGenerateKind = "resume" | "cover_letter" | "both";
 
@@ -7,6 +8,8 @@ export type CraftGenerateRequest = {
   readonly resumeText: string;
   readonly jobDescription: string;
   readonly aboutCompany?: string;
+  /** Optional writing voice from Preferences. */
+  readonly tonePreferences?: string;
 };
 
 export type CraftGenerateResult = {
@@ -21,17 +24,18 @@ export type CraftGeneratePhase = "checking" | "resume" | "cover_letter";
 /**
  * Host-only Craft Studio generate (PE28-S01).
  * Produces editable drafts from résumé + JD (+ optional about company).
- * Never sends or enqueues.
+ * Uses instruction-heavy system prompts (Ollama) + labeled INPUTS user prompts
+ * so weaker local models stay structured and truthful. Never sends or enqueues.
  */
 export async function generateCraftDraftsWithAi(options: {
   readonly ai: AiProvider;
-  readonly assembler: ContextAssembler;
   readonly input: CraftGenerateRequest;
   readonly onPhase?: (phase: CraftGeneratePhase) => void;
 }): Promise<CraftGenerateResult> {
   const resumeText = options.input.resumeText.trim();
   const jobDescription = options.input.jobDescription.trim();
   const aboutCompany = options.input.aboutCompany?.trim();
+  const tonePreferences = options.input.tonePreferences?.trim();
 
   if (!resumeText || !jobDescription) {
     return {
@@ -53,10 +57,6 @@ export async function generateCraftDraftsWithAi(options: {
         health.message ?? "Agent is not ready yet. Check Preferences for the on-device model name.",
     };
   }
-
-  const roleDescription = aboutCompany
-    ? `${jobDescription}\n\nAbout company: ${aboutCompany}`
-    : jobDescription;
 
   let resumeDraft = "";
   let coverLetterDraft = "";

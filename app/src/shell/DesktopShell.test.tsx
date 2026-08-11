@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { createFakeAiProvider } from "@jobjitsu/ai";
@@ -106,6 +106,78 @@ describe("DesktopShell", () => {
     expect(resumeDraft.value).toMatch(/Tailored résumé draft/i);
     expect(coverDraft.value).toMatch(/Cover letter draft/i);
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
+  });
+
+  it("keeps résumé and job description when both sources are edited quickly", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    const resumeInput = screen.getByTestId("jj-craft-resume-input");
+    const jdInput = screen.getByTestId("jj-craft-jd-input");
+
+    await user.click(resumeInput);
+    await user.paste("Sam Chen\nStaff engineer résumé body");
+    // Let the résumé patch flush on its own so the JD paste is a separate patch —
+    // this is the path that used to wipe the first field.
+    await waitFor(() => {
+      expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
+    });
+
+    await user.click(jdInput);
+    await user.paste("Staff Engineer at Acme — on-device privacy");
+
+    await waitFor(() => {
+      expect(runtime.craftSession.get().jobDescription).toContain("Staff Engineer at Acme");
+    });
+    expect(runtime.craftSession.get().resumeText).toContain("Sam Chen");
+    expect(resumeInput).toHaveValue("Sam Chen\nStaff engineer résumé body");
+    expect(jdInput).toHaveValue("Staff Engineer at Acme — on-device privacy");
+  });
+
+  it("shows a Craft working view with inputs, phases, and device load while preparing", async () => {
+    const user = userEvent.setup();
+    const inner = createFakeAiProvider();
+    const runtime = createHostRuntime({
+      ai: {
+        ...inner,
+        async complete(request) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          return inner.complete(request);
+        },
+      },
+    });
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen\nStaff engineer");
+    await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer at Acme");
+    await user.type(screen.getByTestId("jj-craft-about-company"), "Privacy-first tools");
+    await user.click(screen.getByTestId("jj-craft-generate-both"));
+
+    expect(await screen.findByTestId("jj-craft-working-view")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Sam Chen/);
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(
+      /Staff Engineer at Acme/,
+    );
+    expect(screen.getByTestId("jj-craft-working-inputs")).toHaveTextContent(/Privacy-first tools/);
+    expect(screen.getByTestId("jj-craft-working-phases")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-working-resources")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-resource-cpu")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-resource-memory")).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-craft-resume-input")).not.toBeInTheDocument();
+
+    expect(
+      await screen.findByText(
+        /Drafts ready\. Edit freely — you remain the author\. Nothing was sent/i,
+        {},
+        { timeout: 5000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-craft-working-view")).not.toBeInTheDocument();
   });
 
   it("previews résumé HTML and exports PDF on Craft (PE28-S02)", async () => {

@@ -73,7 +73,14 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
         };
       }
       if (request.role === "tailor") {
-        const listing = request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ?? "this role";
+        const listing =
+          request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ??
+          request.prompt
+            .match(/### JOB DESCRIPTION\n\n([\s\S]*?)(?:\n\n### |\n*$)/)?.[1]
+            ?.trim()
+            .split("\n")[0]
+            ?.trim() ??
+          "this role";
         return {
           text: [
             "Tailored résumé draft (on this device)",
@@ -93,7 +100,14 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
         };
       }
       if (request.role === "cover_letter") {
-        const listing = request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ?? "this role";
+        const listing =
+          request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ??
+          request.prompt
+            .match(/### JOB DESCRIPTION\n\n([\s\S]*?)(?:\n\n### |\n*$)/)?.[1]
+            ?.trim()
+            .split("\n")[0]
+            ?.trim() ??
+          "this role";
         return {
           text: [
             "Cover letter draft (on this device)",

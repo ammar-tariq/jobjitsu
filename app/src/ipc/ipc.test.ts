@@ -114,6 +114,17 @@ describe("typed IPC bridge", () => {
     }
   });
 
+  it("reads local resource usage without career egress", async () => {
+    const bridge = createIpcBridge(createHostIpcDispatcher());
+    const result = await bridge.getResources();
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.resources.message).toMatch(/device|Browser|desktop/i);
+      expect(typeof result.value.resources.available).toBe("boolean");
+    }
+  });
+
   it("reads and writes theme stubs", async () => {
     const bridge = createIpcBridge(createHostIpcDispatcher({ initialTheme: "dark" }));
     const before = await bridge.getTheme();
@@ -178,6 +189,7 @@ describe("typed IPC bridge", () => {
       "getLocalModelPath",
       "getOnboardingCompleted",
       "getProfile",
+      "getResources",
       "getSelectedResume",
       "getTheme",
       "importResume",
@@ -327,10 +339,9 @@ describe("typed IPC bridge", () => {
 
   it("generates craft drafts via host without exposing send", async () => {
     const ai = createFakeAiProvider();
-    const assembler = createFakeContextAssembler();
     const bridge = createIpcBridge(
       createHostIpcDispatcher({
-        generateCraftDrafts: (input) => generateCraftDraftsWithAi({ ai, assembler, input }),
+        generateCraftDrafts: (input) => generateCraftDraftsWithAi({ ai, input }),
       }),
     );
     const crafted = await bridge.generateCraftDrafts({
