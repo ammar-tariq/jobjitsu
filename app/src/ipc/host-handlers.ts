@@ -588,6 +588,42 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "preferences.getLocalModelPath": async () => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return ok({ path: null });
+      }
+      return ok({ path: (await preferences.getLocalModelPath()) ?? null });
+    },
+    "preferences.setLocalModelPath": async (payload) => {
+      const preferences = getPreferences();
+      if (!preferences) {
+        return err(
+          createAppError("unavailable", "Preferences not ready", {
+            message: "Preferences storage is not available yet.",
+            detail: "preferences:missing",
+          }),
+        );
+      }
+      try {
+        const path = (await preferences.setLocalModelPath(payload.path)) ?? null;
+        if (bus) {
+          await bus.publish("Preferences.Changed", { keys: ["ai.localModelPath"] });
+        }
+        return ok({ path });
+      } catch (cause) {
+        return err(
+          createAppError("validation", "Could not update model path", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "That model path could not be saved. Try again.",
+            detail: "preferences:localModelPath",
+            cause,
+          }),
+        );
+      }
+    },
   };
 }
 

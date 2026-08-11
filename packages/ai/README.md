@@ -15,14 +15,23 @@ Local Intelligence contracts: **AI Provider**, fake in-process provider, and **C
 ## Fake AI
 
 ```ts
-import { createFakeAiProvider, createAiProviderRegistry } from "@jobjitsu/ai";
+import {
+  createFakeAiProvider,
+  createAiProviderRegistry,
+  createPathGatedAiProvider,
+} from "@jobjitsu/ai";
 
-const provider = createFakeAiProvider();
+const inner = createFakeAiProvider();
+const provider = createPathGatedAiProvider({
+  inner,
+  getLocalModelPath: async () => "/models/local.gguf",
+});
 const registry = createAiProviderRegistry([provider]);
 ```
 
 - `locality: "local"` with an honest “fake” health message
 - Deterministic `complete` / `embed`
+- `createPathGatedAiProvider` gates health/complete on a configured local model path (no weight load in `health`)
 - Registry keeps the first/local active until `setActive` — no silent remote promotion
 - Safe for unit tests and early shell demos
 

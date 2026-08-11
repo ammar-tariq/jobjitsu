@@ -604,7 +604,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Misconfig recovery test.
 
-**Status:** proposed
+**Status:** in progress
 
 ### PE05-S03 — Context Builder minimizes prompt context
 

@@ -54,6 +54,18 @@ describe("@jobjitsu/preferences", () => {
       constraints: ["no relocate"],
     });
     expect(await prefs.getCraftPreferences()).toEqual(craft);
+    expect(await prefs.getLocalModelPath()).toBeUndefined();
+  });
+
+  it("stores local model path for on-device Agent readiness", async () => {
+    const store = createMemorySettingsStore();
+    const prefs = createPreferencesFacade(store);
+    expect(await prefs.getLocalModelPath()).toBeUndefined();
+    expect(await prefs.setLocalModelPath("  /models/agent.gguf  ")).toBe("/models/agent.gguf");
+    expect(await prefs.getLocalModelPath()).toBe("/models/agent.gguf");
+    expect((await store.get()).ai.localModelPath).toBe("/models/agent.gguf");
+    expect(await prefs.setLocalModelPath("   ")).toBeUndefined();
+    expect(await prefs.getLocalModelPath()).toBeUndefined();
   });
 
   it("seeds approval-before-send true on a fresh KV store", async () => {

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createFakeAiProvider } from "@jobjitsu/ai";
 import { createHostRuntime } from "./runtime.js";
+import { configureStubLocalModel } from "./test-local-model.js";
 
 describe("createHostRuntime", () => {
   it("runs the event cascade without UI calling AI", async () => {
     const host = createHostRuntime({ version: "test" });
+    await configureStubLocalModel(host.preferences);
     const names: string[] = [];
     host.bus.subscribeAll((e) => {
       names.push(e.name);
@@ -34,6 +36,26 @@ describe("createHostRuntime", () => {
     expect(indexes[3]).toBeLessThan(indexes[4]!);
   });
 
+  it("fails readiness when local model path is missing — recovery points to Preferences", async () => {
+    const host = createHostRuntime({ version: "test" });
+    const names: string[] = [];
+    host.bus.subscribeAll((e) => {
+      names.push(e.name);
+    });
+
+    await host.start();
+
+    expect(names).toContain("Ai.LocalModelLoading");
+    expect(names).toContain("Ai.LocalModelFailed");
+    expect(names).not.toContain("Ai.LocalModelReady");
+    expect(names).not.toContain("Resume.Generated");
+    expect(host.getActivity().some((e) => /Preferences/i.test(e.summary))).toBe(true);
+    expect(await host.bridge.getAiStatus()).toMatchObject({
+      ok: true,
+      value: { ready: false, locality: "unavailable" },
+    });
+  });
+
   it("emits Ai.LocalModelFailed without silent remote fallback", async () => {
     const host = createHostRuntime({
       version: "test",
@@ -43,6 +65,7 @@ describe("createHostRuntime", () => {
         locality: "local",
       }),
     });
+    await configureStubLocalModel(host.preferences);
     const names: string[] = [];
     host.bus.subscribeAll((e) => {
       names.push(e.name);
@@ -57,6 +80,23 @@ describe("createHostRuntime", () => {
     expect(await host.bridge.getAiStatus()).toMatchObject({
       ok: true,
       value: { ready: false, locality: "unavailable" },
+    });
+  });
+
+  it("rechecks readiness after saving a model path without loading weights at launch", async () => {
+    const host = createHostRuntime({ version: "test" });
+    await host.start();
+    expect(await host.bridge.getAiStatus()).toMatchObject({
+      ok: true,
+      value: { ready: false },
+    });
+
+    const saved = await host.bridge.setLocalModelPath("/models/jobjitsu-stub.gguf");
+    expect(saved.ok).toBe(true);
+
+    expect(await host.bridge.getAiStatus()).toMatchObject({
+      ok: true,
+      value: { ready: true, locality: "local" },
     });
   });
 });
