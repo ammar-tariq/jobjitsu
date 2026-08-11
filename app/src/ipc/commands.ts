@@ -36,7 +36,6 @@ export const IPC_ALLOWLIST = [
   "applications.list",
   "applications.createDraft",
   "applications.updateDraft",
-  "applications.tailorDraft",
 ] as const;
 
 export type IpcCommandName = (typeof IPC_ALLOWLIST)[number];
@@ -247,7 +246,6 @@ export type IpcPayloadMap = {
   readonly "applications.list": undefined;
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
-  readonly "applications.tailorDraft": ApplicationTailorDraftInput;
 };
 
 export type IpcResultMap = {
@@ -304,7 +302,6 @@ export type IpcResultMap = {
     readonly application: ApplicationSnapshot;
     readonly duplicateWarning?: ApplicationDuplicateWarningSnapshot;
   };
-  readonly "applications.tailorDraft": ApplicationTailorDraftResult;
 };
 
 export function isIpcCommandName(value: string): value is IpcCommandName {
