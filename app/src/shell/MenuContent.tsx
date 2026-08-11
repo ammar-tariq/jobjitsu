@@ -5,6 +5,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
+import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
@@ -15,6 +16,7 @@ import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { SHELL_NAV_ITEMS, type ShellNavId } from "../index.js";
 
 const NAV_ICONS: Record<ShellNavId, JSX.Element> = {
+  craft: <EditNoteRoundedIcon fontSize="small" />,
   applications: <WorkOutlineRoundedIcon fontSize="small" />,
   queue: <InboxRoundedIcon fontSize="small" />,
   "follow-ups": <EventAvailableRoundedIcon fontSize="small" />,

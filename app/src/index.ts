@@ -6,6 +6,7 @@ export const APP_NAME = "JobJitsu" as const;
  * and docs/architecture/DESKTOP_ARCHITECTURE.md.
  */
 export const SHELL_NAV_ITEMS = [
+  { id: "craft", label: "Craft" },
   { id: "applications", label: "Applications" },
   { id: "queue", label: "Queue" },
   { id: "follow-ups", label: "Follow-ups" },
@@ -17,7 +18,7 @@ export const SHELL_NAV_ITEMS = [
 
 export type ShellNavId = (typeof SHELL_NAV_ITEMS)[number]["id"];
 
-export const DEFAULT_SHELL_NAV_ID: ShellNavId = "applications";
+export const DEFAULT_SHELL_NAV_ID: ShellNavId = "craft";
 
 export function isShellNavId(value: string): value is ShellNavId {
   return SHELL_NAV_ITEMS.some((item) => item.id === value);

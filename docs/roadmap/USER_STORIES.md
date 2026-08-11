@@ -682,7 +682,31 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Mocked loopback fetch; non-loopback rejected; Vitest keeps fake host default.
 
-**Status:** in review (2026-08-11)
+**Status:** done (2026-08-11)
+
+### CS-S01 — Craft screen: tailored résumé + cover letter from JD
+
+> Board id: **PE28-S01** (#103) under Local Craft Studio epic (#101).  
+> Not the Future “Role-fit compass” PE28 below.
+
+**Description:** As a user, I can paste a résumé and job description (optional about company) and generate editable résumé and cover letter drafts on this device.
+
+**Acceptance criteria:**
+  - Dedicated Craft view with large résumé + JD inputs and optional about-company.
+  - Generate résumé draft and/or cover letter via host Agent (Context Builder).
+  - Outputs are editable; user remains author.
+  - Does not call Send; does not enqueue.
+  - Calm on-device copy; UI says Agent, not LLM.
+
+**Dependencies:** PE05-S06, PE05-S03
+
+**Priority:** P0
+
+**Technical notes:** GitHub #103 · IPC `craft.generate`.
+
+**Testing notes:** Fence generate ↛ send; DesktopShell Craft smoke.
+
+**Status:** in progress (2026-08-11)
 
 ## PE06
 

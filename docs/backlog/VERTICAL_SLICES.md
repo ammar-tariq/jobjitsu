@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | PE28 Local Craft Studio |
-| **Story** | PE05-S06 — Run real on-device Agent (Ollama) |
+| **Story** | PE28-S01 — Craft screen (résumé + JD → drafts) |
 | **Status** | In progress |
-| **Note** | Loopback Ollama provider; free model guide; unblocks Craft (#103) |
+| **Note** | Craft nav + generate résumé/cover letter; host Agent; no send |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| PE05-S06 | 2026-08-11 | Real on-device Agent via local Ollama; PR #106 |
 | PE03-S04 | 2026-08-11 | Tailor résumé draft no send; PR #100 |
 | PE08-S01 | 2026-08-11 | Application drafts create/edit; soft-duplicate; PR #98 |
 | PE03-S10 | 2026-08-11 | AI parse import draft; Profile prefill; PR #97 |

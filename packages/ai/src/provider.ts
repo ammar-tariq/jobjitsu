@@ -23,7 +23,7 @@ export interface AiCompleteRequest {
 }
 
 export type AiPromptRole =
-  "tailor" | "match_explain" | "follow_up_draft" | "parse_assist" | "generic";
+  "tailor" | "cover_letter" | "match_explain" | "follow_up_draft" | "parse_assist" | "generic";
 
 export interface AiCompleteResult {
   readonly text: string;

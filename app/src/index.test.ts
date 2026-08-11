@@ -14,6 +14,7 @@ describe("@jobjitsu/app shell navigation", () => {
 
   it("lists primary H1 destinations with TERMINOLOGY nouns", () => {
     expect(SHELL_NAV_ITEMS.map((item) => item.label)).toEqual([
+      "Craft",
       "Applications",
       "Queue",
       "Follow-ups",
@@ -24,8 +25,9 @@ describe("@jobjitsu/app shell navigation", () => {
     ]);
   });
 
-  it("defaults to Applications", () => {
-    expect(DEFAULT_SHELL_NAV_ID).toBe("applications");
+  it("defaults to Craft", () => {
+    expect(DEFAULT_SHELL_NAV_ID).toBe("craft");
+    expect(shellPageTitle("craft")).toBe("Craft");
     expect(shellPageTitle("applications")).toBe("Applications");
     expect(shellPageTitle("profile")).toBe("Profile");
     expect(shellPageTitle("preferences")).toBe("Preferences");

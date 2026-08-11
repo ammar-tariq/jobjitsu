@@ -11,6 +11,7 @@ import { createMemorySettingsStore, createPreferencesFacade } from "@jobjitsu/pr
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { parseImportDraftWithAi } from "../host/parse-import-draft.js";
+import { generateCraftDraftsWithAi } from "../host/craft-generate.js";
 import { tailorApplicationDraftWithAi } from "../host/tailor-application-draft.js";
 import {
   IPC_ALLOWLIST,
@@ -55,6 +56,7 @@ describe("IPC allowlist", () => {
       "applications.createDraft",
       "applications.updateDraft",
       "applications.tailorDraft",
+      "craft.generate",
     ]);
   });
 
@@ -123,6 +125,7 @@ describe("typed IPC bridge", () => {
       "archivePath",
       "attachResume",
       "createApplicationDraft",
+      "generateCraftDrafts",
       "getAiStatus",
       "getApprovalBeforeSend",
       "getCraftPreferences",
@@ -216,6 +219,26 @@ describe("typed IPC bridge", () => {
     expect(tailored.ok && tailored.value.tailorStatus).toBe("ready");
     expect(tailored.ok && tailored.value.draftText).toMatch(/Tailored résumé draft/i);
     expect(tailored.ok && tailored.value.application?.trackingStatus).toBe("ResumePrepared");
+    expect(bridge).not.toHaveProperty("complete");
+    expect(bridge).not.toHaveProperty("approveSend");
+  });
+
+  it("generates craft drafts via host without exposing send", async () => {
+    const ai = createFakeAiProvider();
+    const assembler = createFakeContextAssembler();
+    const bridge = createIpcBridge(
+      createHostIpcDispatcher({
+        generateCraftDrafts: (input) => generateCraftDraftsWithAi({ ai, assembler, input }),
+      }),
+    );
+    const crafted = await bridge.generateCraftDrafts({
+      kind: "both",
+      resumeText: "Sam Chen\nStaff engineer",
+      jobDescription: "Staff Engineer at Acme",
+    });
+    expect(crafted.ok && crafted.value.craftStatus).toBe("ready");
+    expect(crafted.ok && crafted.value.resumeDraft).toMatch(/Tailored résumé draft/i);
+    expect(crafted.ok && crafted.value.coverLetterDraft).toMatch(/Cover letter draft/i);
     expect(bridge).not.toHaveProperty("complete");
     expect(bridge).not.toHaveProperty("approveSend");
   });

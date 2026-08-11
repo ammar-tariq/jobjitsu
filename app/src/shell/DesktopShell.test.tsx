@@ -23,12 +23,13 @@ describe("DesktopShell", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "Applications" })).toBeInTheDocument();
-    expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Craft" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-craft-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
     for (const label of [
+      "Craft",
       "Applications",
       "Queue",
       "Follow-ups",
@@ -82,6 +83,30 @@ describe("DesktopShell", () => {
     expect(screen.queryByTestId("jj-coming-soon")).not.toBeInTheDocument();
   });
 
+  it("generates résumé and cover letter drafts on Craft without sending (PE28-S01)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    expect(screen.getByTestId("jj-craft-view")).toBeInTheDocument();
+    await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen\nStaff engineer");
+    await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer at Acme");
+    await user.click(screen.getByTestId("jj-craft-generate-both"));
+
+    expect(
+      await screen.findByText(
+        /Drafts ready\. Edit freely — you remain the author\. Nothing was sent/i,
+      ),
+    ).toBeInTheDocument();
+    const resumeDraft = screen.getByTestId("jj-craft-resume-draft") as HTMLTextAreaElement;
+    const coverDraft = screen.getByTestId("jj-craft-cover-draft") as HTMLTextAreaElement;
+    expect(resumeDraft.value).toMatch(/Tailored résumé draft/i);
+    expect(coverDraft.value).toMatch(/Cover letter draft/i);
+    expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
+  });
+
   it("switches main title when navigating", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
@@ -103,6 +128,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Applications" }));
     expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
     await user.type(screen.getByTestId("jj-application-company"), "Acme");
     await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");

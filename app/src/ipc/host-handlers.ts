@@ -27,6 +27,8 @@ import type {
   AiStatusSnapshot,
   ApplicationSnapshot,
   ApplicationTailorDraftInput,
+  CraftGenerateInput,
+  CraftGenerateResult,
   ResumeParseImportInputPayload,
   ResumeParseImportResult,
   ThemePreference,
@@ -91,6 +93,11 @@ export type CreateHostIpcOptions = {
     readonly draftText: string;
     readonly tailorStatus: "ready" | "unavailable" | "failed";
   }>;
+  /**
+   * Host-owned Craft Studio generate (PE28-S01). UI never calls AI directly.
+   * When omitted, generate returns calm unavailable.
+   */
+  readonly generateCraftDrafts?: (input: CraftGenerateInput) => Promise<CraftGenerateResult>;
 };
 
 /**
@@ -118,6 +125,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const onDataRootChanged = options.onDataRootChanged;
   const parseImportDraft = options.parseImportDraft;
   const tailorApplicationDraft = options.tailorApplicationDraft;
+  const generateCraftDrafts = options.generateCraftDrafts;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {
@@ -841,6 +849,26 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           application: null,
           draftText: "",
           tailorStatus: "failed" as const,
+        });
+      }
+    },
+    "craft.generate": async (payload) => {
+      if (!generateCraftDrafts) {
+        return ok({
+          resumeDraft: "",
+          coverLetterDraft: "",
+          craftStatus: "unavailable" as const,
+          message: "Agent is not ready yet. Check Preferences for the on-device model name.",
+        });
+      }
+      try {
+        return ok(await generateCraftDrafts(payload));
+      } catch {
+        return ok({
+          resumeDraft: "",
+          coverLetterDraft: "",
+          craftStatus: "failed" as const,
+          message: "Could not prepare those drafts. Try again when you are ready.",
         });
       }
     },

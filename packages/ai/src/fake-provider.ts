@@ -92,6 +92,22 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
           modelId: "fake-model",
         };
       }
+      if (request.role === "cover_letter") {
+        const listing = request.prompt.match(/listing=([^\n]+)/)?.[1]?.trim() ?? "this role";
+        return {
+          text: [
+            "Cover letter draft (on this device)",
+            "",
+            `Dear Hiring Team — ${listing}`,
+            "",
+            "I am writing to express interest in this role. My background aligns with the needs",
+            "described in the listing, and I would welcome the chance to contribute with care.",
+            "",
+            "Edit freely — you remain the author. Nothing was sent.",
+          ].join("\n"),
+          modelId: "fake-model",
+        };
+      }
       return {
         text: `[fake:${request.role}] ${request.prompt.slice(0, 120)}`,
         modelId: "fake-model",
