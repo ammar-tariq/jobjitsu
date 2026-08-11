@@ -50,11 +50,32 @@ export function createFakeAiProvider(options: FakeAiProviderOptions = {}): AiPro
           "Agent didn’t start. Confirm the model path in Preferences. Nothing left this machine.",
         );
       }
-      const text =
-        typeof options.completeText === "function"
-          ? options.completeText(request)
-          : (options.completeText ?? `[fake:${request.role}] ${request.prompt.slice(0, 120)}`);
-      return { text, modelId: "fake-model" };
+      if (typeof options.completeText === "function") {
+        return { text: options.completeText(request), modelId: "fake-model" };
+      }
+      if (options.completeText !== undefined) {
+        return { text: options.completeText, modelId: "fake-model" };
+      }
+      if (request.role === "parse_assist") {
+        // Deterministic import pre-fill for tests/demo — no network.
+        const email = request.prompt.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] ?? "";
+        const heading =
+          request.prompt.match(/#\s+([^\n|#]+)/)?.[1]?.trim() ??
+          request.prompt.match(/\bName:\s*([^\n]+)/i)?.[1]?.trim() ??
+          "";
+        return {
+          text: JSON.stringify({
+            contactName: heading,
+            contactEmail: email,
+            notes: "",
+          }),
+          modelId: "fake-model",
+        };
+      }
+      return {
+        text: `[fake:${request.role}] ${request.prompt.slice(0, 120)}`,
+        modelId: "fake-model",
+      };
     },
     async embed(request: AiEmbedRequest): Promise<AiEmbedResult> {
       const vectors = request.texts.map((text) => {

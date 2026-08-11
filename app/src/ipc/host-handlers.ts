@@ -9,7 +9,12 @@ import {
   type DataRootStore,
 } from "../host/data-root-store.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
-import type { AiStatusSnapshot, ThemePreference } from "./commands.js";
+import type {
+  AiStatusSnapshot,
+  ResumeParseImportInputPayload,
+  ResumeParseImportResult,
+  ThemePreference,
+} from "./commands.js";
 import { createIpcDispatcher, type IpcDispatcher, type IpcHandlerMap } from "./dispatcher.js";
 
 export type CreateHostIpcOptions = {
@@ -34,10 +39,17 @@ export type CreateHostIpcOptions = {
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
+  /**
+   * Host-owned import parse (PE03-S10). UI never calls AI directly.
+   * When omitted, parse returns calm unavailable/manual empty fields.
+   */
+  readonly parseImportDraft?: (
+    input: ResumeParseImportInputPayload,
+  ) => Promise<ResumeParseImportResult>;
 };
 
 /**
- * Host IPC handlers — allowlisted only; no AI complete.
+ * Host IPC handlers — allowlisted only; UI never gets AI complete.
  */
 export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHandlerMap {
   const getAppearance =
@@ -58,6 +70,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
   const bus = options.bus;
   const onDataRootChanged = options.onDataRootChanged;
+  const parseImportDraft = options.parseImportDraft;
 
   async function commitDataRoot(next: DataRootSnapshot) {
     if (onDataRootChanged) {
@@ -205,6 +218,27 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
             cause,
           }),
         );
+      }
+    },
+    "identity.parseImportDraft": async (payload) => {
+      if (!parseImportDraft) {
+        return ok({
+          contactName: "",
+          contactEmail: "",
+          notes: "",
+          parseStatus: "unavailable" as const,
+        });
+      }
+      try {
+        const draft = await parseImportDraft(payload);
+        return ok(draft);
+      } catch {
+        return ok({
+          contactName: "",
+          contactEmail: "",
+          notes: "",
+          parseStatus: "manual" as const,
+        });
       }
     },
     "identity.getSelectedResume": async () => {

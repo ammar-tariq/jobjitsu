@@ -46,6 +46,7 @@ import {
 } from "../ipc/index.js";
 import type { AiStatusSnapshot } from "../ipc/commands.js";
 import { createMemoryAppearanceStore, type AppearanceStore } from "./appearance-store.js";
+import { parseImportDraftWithAi } from "./parse-import-draft.js";
 import {
   createMemoryDataRootStore,
   type DataRootStore,
@@ -263,6 +264,12 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     onDataRootChanged: options.onDataRootChanged,
     getAiStatus: () => aiStatus,
     bus,
+    parseImportDraft: (input) =>
+      parseImportDraftWithAi({
+        ai,
+        assembler,
+        input,
+      }),
   });
   const bridge = createIpcBridge(ipc);
 

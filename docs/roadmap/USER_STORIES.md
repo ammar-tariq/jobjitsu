@@ -434,7 +434,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** With AI stub: fields pre-filled; without: manual path works.
 
-**Status:** deferred · after PE05
+**Status:** done (2026-08-11)
 
 ## PE04
 

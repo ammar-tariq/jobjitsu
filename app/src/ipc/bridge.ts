@@ -7,6 +7,7 @@ import type {
   ProfilePatchInput,
   ResumeAttachInputPayload,
   ResumeImportInputPayload,
+  ResumeParseImportInputPayload,
   ThemePreference,
 } from "./commands.js";
 import type { IpcDispatcher } from "./dispatcher.js";
@@ -28,6 +29,9 @@ export type IpcBridge = {
   readonly importResume: (
     input: ResumeImportInputPayload,
   ) => Promise<Result<IpcResultMap["identity.importResume"]>>;
+  readonly parseImportDraft: (
+    input: ResumeParseImportInputPayload,
+  ) => Promise<Result<IpcResultMap["identity.parseImportDraft"]>>;
   readonly getSelectedResume: () => Promise<Result<IpcResultMap["identity.getSelectedResume"]>>;
   readonly selectResume: (
     resumeId: string,
@@ -108,6 +112,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async importResume(input: ResumeImportInputPayload) {
       return (await dispatcher.invoke("identity.importResume", input)) as Result<
         IpcResultMap["identity.importResume"]
+      >;
+    },
+    async parseImportDraft(input: ResumeParseImportInputPayload) {
+      return (await dispatcher.invoke("identity.parseImportDraft", input)) as Result<
+        IpcResultMap["identity.parseImportDraft"]
       >;
     },
     async getSelectedResume() {
