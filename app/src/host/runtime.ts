@@ -1,8 +1,8 @@
 import type { AiProvider } from "@jobjitsu/ai";
 import {
   createAiProviderRegistry,
+  createContextAssembler,
   createFakeAiProvider,
-  createFakeContextAssembler,
 } from "@jobjitsu/ai";
 import {
   FoundationKeys,
@@ -110,7 +110,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const errors = createErrorReporter({ logger });
   const ai = options.ai ?? createFakeAiProvider({ id: "fake-ai" });
   const aiRegistry = createAiProviderRegistry([ai]);
-  const assembler = createFakeContextAssembler();
+  const assembler = createContextAssembler();
   const resumes: ResumeStore = createFakeResumeStore({ resume: null });
   const gmail: FakeGmailChannel = createFakeGmailChannel();
   const profiles = options.profiles ?? createMemoryProfileRepository();

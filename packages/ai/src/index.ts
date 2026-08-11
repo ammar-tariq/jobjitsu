@@ -9,3 +9,11 @@ export {
   createFakeContextAssembler,
   type FakeAiProviderOptions,
 } from "./fake-provider.js";
+export {
+  CONTEXT_INPUT_ALLOWLIST,
+  CONTEXT_SLICE_ORDER,
+  createContextAssembler,
+  createNoopKnowledgeReader,
+  type ContextAssemblerOptions,
+  type ContextSliceKey,
+} from "./context-assembler.js";
