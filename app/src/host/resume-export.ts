@@ -59,6 +59,48 @@ function pdfEscape(text: string): string {
   return text.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
 }
 
+const LATIN1_SUBSTITUTES: Record<string, string> = {
+  "\u2013": "-",
+  "\u2014": "-",
+  "\u2018": "'",
+  "\u2019": "'",
+  "\u201C": '"',
+  "\u201D": '"',
+  "\u2022": "-",
+  "\u2026": "...",
+  "\u00A0": " ",
+};
+
+/**
+ * Helvetica in this minimal PDF renders Latin-1 bytes. Map common typographic
+ * characters to ASCII and replace anything else outside Latin-1 so text stays
+ * readable instead of turning into mojibake.
+ */
+function toLatin1(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    if (ch.length === 1 && ch.charCodeAt(0) <= 0xff) {
+      out += ch;
+    } else {
+      out += LATIN1_SUBSTITUTES[ch] ?? "?";
+    }
+  }
+  return out;
+}
+
+/**
+ * PDF `/Length` and xref offsets are byte counts. After `toLatin1` every char
+ * is <= 0xFF, so a 1:1 char→byte encoding keeps string lengths and byte
+ * lengths identical (UTF-8 would drift for é and friends and corrupt the xref).
+ */
+function latin1Bytes(text: string): Uint8Array {
+  const bytes = new Uint8Array(text.length);
+  for (let i = 0; i < text.length; i += 1) {
+    bytes[i] = text.charCodeAt(i) & 0xff;
+  }
+  return bytes;
+}
+
 function wrapLine(text: string, maxChars: number): string[] {
   if (text.length <= maxChars) {
     return [text];
@@ -92,7 +134,7 @@ export function renderResumePdfBytes(draftText: string): Uint8Array {
   const left = 50;
 
   const rawLines =
-    draftText.trim().length === 0 ? [""] : draftText.replaceAll("\r\n", "\n").split("\n");
+    draftText.trim().length === 0 ? [""] : toLatin1(draftText.replaceAll("\r\n", "\n")).split("\n");
   const contentLines = rawLines.flatMap((line) => wrapLine(line, maxChars));
 
   const linesPerPage = Math.floor((top - bottom) / lineHeight);
@@ -159,7 +201,7 @@ export function renderResumePdfBytes(draftText: string): Uint8Array {
   }
   pdf += `trailer\n<< /Size ${maxId + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF\n`;
 
-  return new TextEncoder().encode(pdf);
+  return latin1Bytes(pdf);
 }
 
 export function toBase64(bytes: Uint8Array): string {

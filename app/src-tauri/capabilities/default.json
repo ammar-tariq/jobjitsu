@@ -9,6 +9,7 @@
     "allow-data-directory",
     "allow-resource-snapshot",
     "dialog:allow-open",
+    "dialog:allow-save",
     "fs:allow-mkdir",
     "fs:allow-read-dir",
     "fs:allow-read-file",

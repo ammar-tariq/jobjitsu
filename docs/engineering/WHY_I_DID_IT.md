@@ -5,6 +5,21 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Craft export failed: missing save-dialog permission (+ PDF bytes)
+
+### The problem
+
+“Could not export that draft. Try again.” on Save PDF / Save HTML in the desktop app. The file saver calls the dialog plugin’s `save()`, but our capability only granted `dialog:allow-open` — the save dialog itself was denied and threw before anything was written.
+
+### Decision
+
+1. Grant **`dialog:allow-save`** in `capabilities/default.json`. Tauri 2 automatically adds the user-picked path to the fs scope for that session, so deny-by-default holds: writes go only where the user explicitly chose. Launch-smoke asserts the permission.
+2. Fixed a latent PDF corruption in the same path: `/Length` and xref offsets were computed from UTF-16 string lengths but the file was UTF-8-encoded — any non-ASCII draft (“Résumé”, em dashes) produced a broken xref. The generator now sanitizes to Latin-1 (typographic chars → ASCII, others → `?`) and encodes 1 char = 1 byte, so offsets are exact and é renders correctly in Helvetica.
+
+No new libraries.
+
+---
+
 ## 2026-08-11 — Craft full audit: undefined-key patch wipe (real root cause)
 
 ### The problem

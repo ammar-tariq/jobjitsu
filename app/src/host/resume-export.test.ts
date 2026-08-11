@@ -23,6 +23,24 @@ describe("resume export (PE28-S02)", () => {
     expect(asText).toContain("Helvetica");
   });
 
+  it("keeps PDF byte offsets valid for non-ASCII drafts (é, em dash)", () => {
+    const bytes = renderResumePdfBytes("Résumé — Sam Chen\nCafé experience “quoted”");
+    // Latin-1 decode mirrors how the bytes were written: 1 char per byte.
+    let asText = "";
+    for (const byte of bytes) {
+      asText += String.fromCharCode(byte);
+    }
+    // é survives as Latin-1; typographic chars map to ASCII instead of mojibake.
+    expect(asText).toContain("R\u00e9sum\u00e9 - Sam Chen");
+    expect(asText).toContain('Caf\u00e9 experience "quoted"');
+    expect(asText).not.toContain("\u00c3");
+    // startxref must point at the actual xref table or viewers reject the file.
+    const startxref = /startxref\n(\d+)\n%%EOF/.exec(asText);
+    expect(startxref).not.toBeNull();
+    const xrefPos = Number(startxref![1]);
+    expect(asText.slice(xrefPos, xrefPos + 4)).toBe("xref");
+  });
+
   it("returns null artifacts for empty draft", () => {
     expect(buildResumeExportArtifacts("   ")).toBeNull();
   });
