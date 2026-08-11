@@ -706,6 +706,28 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Fence generate ↛ send; DesktopShell Craft smoke.
 
+**Status:** done (2026-08-11)
+
+### CS-S02 — Export tailored résumé HTML to PDF on device
+
+> Board id: **PE28-S02** (#104)
+
+**Description:** As a user, I can preview a tailored résumé as HTML and save a PDF on this device.
+
+**Acceptance criteria:**
+  - HTML preview from the résumé draft (escaped, print-friendly).
+  - PDF produced locally (no SaaS HTML→PDF).
+  - Save stays on device; nothing is sent.
+  - Calm recovery when save is cancelled or unavailable.
+
+**Dependencies:** CS-S01 / PE28-S01 (#103)
+
+**Priority:** P0
+
+**Technical notes:** GitHub #104 · IPC `craft.exportResume`.
+
+**Testing notes:** PDF magic header; export ↛ send.
+
 **Status:** in progress (2026-08-11)
 
 ## PE06

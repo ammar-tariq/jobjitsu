@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createFakeAiProvider } from "@jobjitsu/ai";
 import { createMemoryAppearanceStore } from "../host/appearance-store.js";
 import { createMemoryDataRootStore } from "../host/data-root-store.js";
+import { createStubFileSaver } from "../host/file-saver.js";
 import { createStubFolderPicker } from "../host/folder-picker.js";
 import { createHostRuntime } from "../host/runtime.js";
 import { configureStubLocalModel } from "../host/test-local-model.js";
@@ -104,6 +105,33 @@ describe("DesktopShell", () => {
     const coverDraft = screen.getByTestId("jj-craft-cover-draft") as HTMLTextAreaElement;
     expect(resumeDraft.value).toMatch(/Tailored résumé draft/i);
     expect(coverDraft.value).toMatch(/Cover letter draft/i);
+    expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
+  });
+
+  it("previews résumé HTML and exports PDF on Craft (PE28-S02)", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime({
+      fileSaver: createStubFileSaver(async ({ defaultPath }) => ({
+        status: "saved",
+        path: `/tmp/${defaultPath}`,
+      })),
+    });
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen");
+    await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer");
+    await user.click(screen.getByTestId("jj-craft-generate-resume"));
+    expect(
+      await screen.findByText(
+        /Drafts ready\. Edit freely — you remain the author\. Nothing was sent/i,
+      ),
+    ).toBeInTheDocument();
+    expect(await screen.findByTestId("jj-craft-html-preview")).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("jj-craft-export-pdf"));
+    expect(await screen.findByText(/Saved on this device\. Nothing was sent/i)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /send/i })).not.toBeInTheDocument();
   });
 

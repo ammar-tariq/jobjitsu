@@ -22,11 +22,14 @@ import {
   type DataRootSnapshot,
   type DataRootStore,
 } from "../host/data-root-store.js";
+import { createHostFileSaver, type FileSaver } from "../host/file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "../host/folder-picker.js";
+import { buildResumeExportArtifacts, toBase64 } from "../host/resume-export.js";
 import type {
   AiStatusSnapshot,
   ApplicationSnapshot,
   ApplicationTailorDraftInput,
+  CraftExportResumeResult,
   CraftGenerateInput,
   CraftGenerateResult,
   ResumeParseImportInputPayload,
@@ -71,6 +74,7 @@ export type CreateHostIpcOptions = {
   readonly preferences?: PreferencesFacade;
   readonly getPreferences?: () => PreferencesFacade | undefined;
   readonly folderPicker?: FolderPicker;
+  readonly fileSaver?: FileSaver;
   /**
    * After the data-folder preference changes — rebind durable stores under the new path.
    */
@@ -121,6 +125,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const getPreferences = options.getPreferences ?? (() => options.preferences);
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
+  const fileSaver = options.fileSaver ?? createHostFileSaver();
   const bus = options.bus;
   const onDataRootChanged = options.onDataRootChanged;
   const parseImportDraft = options.parseImportDraft;
@@ -869,6 +874,76 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           coverLetterDraft: "",
           craftStatus: "failed" as const,
           message: "Could not prepare those drafts. Try again when you are ready.",
+        });
+      }
+    },
+    "craft.exportResume": async (payload) => {
+      const empty: CraftExportResumeResult = {
+        html: "",
+        pdfBase64: "",
+        fileName: "",
+        savedPath: null,
+        exportStatus: "invalid",
+        message: "Add a résumé draft before exporting.",
+      };
+      try {
+        const artifacts = buildResumeExportArtifacts(payload.draftText);
+        if (!artifacts) {
+          return ok(empty);
+        }
+        const fileName =
+          payload.format === "pdf"
+            ? `${artifacts.fileNameBase}.pdf`
+            : `${artifacts.fileNameBase}.html`;
+        const base: CraftExportResumeResult = {
+          html: artifacts.html,
+          pdfBase64: toBase64(artifacts.pdfBytes),
+          fileName,
+          savedPath: null,
+          exportStatus: "ready",
+        };
+        if (!payload.save) {
+          return ok(base);
+        }
+        const saved =
+          payload.format === "pdf"
+            ? await fileSaver.saveBytes({
+                defaultPath: fileName,
+                contents: artifacts.pdfBytes,
+                title: "Save résumé PDF on this device",
+                filters: [{ name: "PDF", extensions: ["pdf"] }],
+              })
+            : await fileSaver.saveText({
+                defaultPath: fileName,
+                contents: artifacts.html,
+                title: "Save résumé HTML on this device",
+                filters: [{ name: "HTML", extensions: ["html"] }],
+              });
+        if (saved.status === "cancelled") {
+          return ok({
+            ...base,
+            exportStatus: "cancelled",
+            message: "Export cancelled. Nothing was saved.",
+          });
+        }
+        if (saved.status === "unavailable") {
+          return ok({
+            ...base,
+            exportStatus: "unavailable",
+            message: saved.message,
+          });
+        }
+        return ok({
+          ...base,
+          savedPath: saved.path,
+          exportStatus: "saved",
+          message: "Saved on this device. Nothing was sent.",
+        });
+      } catch {
+        return ok({
+          ...empty,
+          exportStatus: "failed",
+          message: "Could not export that draft. Try again.",
         });
       }
     },
