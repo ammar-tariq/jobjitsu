@@ -1,5 +1,6 @@
 import { createKvApplicationRepository, type ApplicationRepository } from "@jobjitsu/applications";
 import { createMailboxService, createMailboxStore, type MailboxService } from "@jobjitsu/mailbox";
+import { createHostOAuthLoopback } from "./oauth-loopback.js";
 import { createKvProfileRepository } from "@jobjitsu/identity";
 import { createStoragePathLibrary, createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 import { createPreferencesFacade } from "@jobjitsu/preferences";
@@ -44,6 +45,7 @@ export async function openDurableHostStores(
     mailbox: createMailboxService({
       store: createMailboxStore(provider.kv),
       applications,
+      oauth: createHostOAuthLoopback(),
     }),
     preferences,
     appearance,

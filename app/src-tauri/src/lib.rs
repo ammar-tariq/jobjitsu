@@ -3,6 +3,9 @@
 //! Privileged work stays here; the React webview is presentation-only.
 //! No career egress commands are registered — see ADR 0013.
 
+mod oauth;
+
+use oauth::{oauth_loopback_bind, oauth_loopback_wait, open_oauth_url};
 use serde::Serialize;
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 use tauri_plugin_fs::FsExt;
@@ -66,7 +69,10 @@ pub fn run() {
     .plugin(tauri_plugin_fs::init())
     .invoke_handler(tauri::generate_handler![
       allow_data_directory,
-      get_resource_snapshot
+      get_resource_snapshot,
+      oauth_loopback_bind,
+      oauth_loopback_wait,
+      open_oauth_url
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

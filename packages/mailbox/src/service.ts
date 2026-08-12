@@ -19,10 +19,21 @@ import {
   silentDays,
   summarizeApplications,
 } from "./intelligence.js";
+import { createPkcePair, type MailboxConnectResult, type MailboxOAuthLoopback } from "./oauth.js";
 import { ingestProviderMessage, processUnprocessedEmails } from "./process.js";
 import { createFakeMailboxProvider } from "./providers/fake.js";
-import { createGmailMailboxProvider } from "./providers/gmail.js";
-import { createOutlookMailboxProvider } from "./providers/outlook.js";
+import {
+  buildGmailAuthUrl,
+  createGmailMailboxProvider,
+  exchangeGmailCode,
+  readGmailAccountEmail,
+} from "./providers/gmail.js";
+import {
+  buildOutlookAuthUrl,
+  createOutlookMailboxProvider,
+  exchangeOutlookCode,
+  readOutlookAccountEmail,
+} from "./providers/outlook.js";
 import type { MailboxProvider } from "./providers/types.js";
 import { listDocs, newLocalId, readDoc, type MailboxStore } from "./store.js";
 import type {
@@ -53,10 +64,7 @@ export type MailboxService = {
     readonly emailAddress?: string;
     readonly label?: string;
   }): Promise<MailboxIntegration>;
-  beginProviderConnect(provider: "gmail" | "outlook"): Promise<{
-    readonly status: "needs_client_id" | "needs_consent";
-    readonly message: string;
-  }>;
+  beginProviderConnect(provider: "gmail" | "outlook"): Promise<MailboxConnectResult>;
   sync(integrationId: string): Promise<MailboxIntegration>;
   getIntegration(id: string): Promise<MailboxIntegration | undefined>;
   disconnect(integrationId: string): Promise<MailboxIntegration | undefined>;
@@ -94,6 +102,8 @@ export type CreateMailboxServiceOptions = {
   readonly ai?: MailboxAiPort;
   readonly now?: () => Date;
   readonly providers?: Partial<Record<MailboxProviderId, MailboxProvider>>;
+  readonly oauth?: MailboxOAuthLoopback;
+  readonly fetchImpl?: typeof fetch;
 };
 
 export function createMailboxService(options: CreateMailboxServiceOptions): MailboxService {
@@ -108,11 +118,26 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     if (integration.provider === "gmail") {
       return createGmailMailboxProvider({
         getTokens: () => store.getTokens(integration.id),
+        putTokens: (tokens) => store.putTokens(integration.id, tokens),
+        getClientCredentials: async () => {
+          const settings = await store.getSettings();
+          return {
+            clientId: settings.gmailClientId,
+            clientSecret: settings.gmailClientSecret,
+          };
+        },
+        fetchImpl: options.fetchImpl,
       });
     }
     if (integration.provider === "outlook") {
       return createOutlookMailboxProvider({
         getTokens: () => store.getTokens(integration.id),
+        putTokens: (tokens) => store.putTokens(integration.id, tokens),
+        getClientCredentials: async () => {
+          const settings = await store.getSettings();
+          return { clientId: settings.outlookClientId };
+        },
+        fetchImpl: options.fetchImpl,
       });
     }
     return createFakeMailboxProvider();
@@ -297,6 +322,142 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     return requireIntegration(integrationId);
   }
 
+  async function connectWithTokens(input: {
+    readonly provider: "gmail" | "outlook";
+    readonly tokens: MailboxOAuthTokens;
+    readonly emailAddress?: string;
+    readonly label?: string;
+  }): Promise<MailboxIntegration> {
+    const nowIso = new Date().toISOString();
+    const integration: MailboxIntegration = {
+      id: newLocalId("mbox"),
+      provider: input.provider,
+      label: input.label ?? (input.provider === "gmail" ? "Gmail" : "Outlook"),
+      emailAddress: input.emailAddress,
+      connected: true,
+      connectedAt: nowIso,
+      syncStatus: "idle",
+      lookbackDays: (await store.getSettings()).lookbackDays,
+      emailsProcessed: 0,
+      jobRelatedCount: 0,
+      applicationsFound: 0,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    await store.putTokens(integration.id, input.tokens);
+    await putIntegration(integration);
+    return startSync(integration);
+  }
+
+  async function beginProviderConnect(
+    provider: "gmail" | "outlook",
+  ): Promise<MailboxConnectResult> {
+    const settings = await store.getSettings();
+    const clientId = provider === "gmail" ? settings.gmailClientId : settings.outlookClientId;
+    const label = provider === "gmail" ? "Gmail" : "Outlook";
+    if (!clientId?.trim()) {
+      return {
+        status: "needs_client_id",
+        message:
+          provider === "gmail"
+            ? "Add a Gmail client ID in Preferences, save, then connect. JobJitsu never asks for your password."
+            : "Add an Outlook client ID in Preferences, save, then connect. JobJitsu never asks for your password.",
+      };
+    }
+    if (!options.oauth) {
+      return {
+        status: "needs_desktop",
+        message: `Open the JobJitsu desktop app to connect ${label}. Browser preview cannot finish sign-in.`,
+      };
+    }
+    try {
+      const pkce = await createPkcePair();
+      const session = await options.oauth.start();
+      const authUrl =
+        provider === "gmail"
+          ? buildGmailAuthUrl({
+              clientId: clientId.trim(),
+              redirectUri: session.redirectUri,
+              state: pkce.state,
+              codeChallenge: pkce.challenge,
+            })
+          : buildOutlookAuthUrl({
+              clientId: clientId.trim(),
+              redirectUri: session.redirectUri,
+              state: pkce.state,
+              codeChallenge: pkce.challenge,
+            });
+      await options.oauth.openUrl(authUrl);
+      const callback = await options.oauth.waitForCode();
+      if (callback.error === "access_denied" || callback.error === "cancelled") {
+        return {
+          status: "failed",
+          message: `${label} sign-in was cancelled. You can try again when you are ready.`,
+        };
+      }
+      if (callback.error || !callback.code) {
+        return {
+          status: "failed",
+          message: `${label} could not finish connecting. Try again.`,
+        };
+      }
+      if (callback.state && callback.state !== pkce.state) {
+        return {
+          status: "failed",
+          message: `${label} could not finish connecting. Try again.`,
+        };
+      }
+      const fetchImpl = options.fetchImpl;
+      const tokens =
+        provider === "gmail"
+          ? await exchangeGmailCode({
+              clientId: clientId.trim(),
+              clientSecret: settings.gmailClientSecret?.trim() || undefined,
+              code: callback.code,
+              redirectUri: session.redirectUri,
+              codeVerifier: pkce.verifier,
+              fetchImpl,
+            })
+          : await exchangeOutlookCode({
+              clientId: clientId.trim(),
+              code: callback.code,
+              redirectUri: session.redirectUri,
+              codeVerifier: pkce.verifier,
+              fetchImpl,
+            });
+      let emailAddress: string | undefined;
+      try {
+        emailAddress =
+          provider === "gmail"
+            ? await readGmailAccountEmail(tokens.accessToken, fetchImpl ?? fetch)
+            : await readOutlookAccountEmail(tokens.accessToken, fetchImpl ?? fetch);
+      } catch {
+        emailAddress = undefined;
+      }
+      await connectWithTokens({
+        provider,
+        tokens,
+        emailAddress,
+      });
+      return {
+        status: "connected",
+        message: `${label} connected. Mail stays on this device. Nothing is sent from JobJitsu.`,
+      };
+    } catch (cause) {
+      const raw = cause instanceof Error ? cause.message : "";
+      if (/timed out|timeout/i.test(raw)) {
+        return {
+          status: "failed",
+          message: `${label} sign-in timed out. You can try again when you are ready.`,
+        };
+      }
+      return {
+        status: "failed",
+        message: raw || `${label} could not finish connecting. Try again.`,
+      };
+    }
+  }
+
   return {
     async listIntegrations() {
       return listDocs(store.integrations);
@@ -329,44 +490,9 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       return startSync(integration);
     },
     async connectProvider(input) {
-      const nowIso = new Date().toISOString();
-      const integration: MailboxIntegration = {
-        id: newLocalId("mbox"),
-        provider: input.provider,
-        label: input.label ?? (input.provider === "gmail" ? "Gmail" : "Outlook"),
-        emailAddress: input.emailAddress,
-        connected: true,
-        connectedAt: nowIso,
-        syncStatus: "idle",
-        lookbackDays: (await store.getSettings()).lookbackDays,
-        emailsProcessed: 0,
-        jobRelatedCount: 0,
-        applicationsFound: 0,
-        createdAt: nowIso,
-        updatedAt: nowIso,
-      };
-      await store.putTokens(integration.id, input.tokens);
-      await putIntegration(integration);
-      return startSync(integration);
+      return connectWithTokens(input);
     },
-    async beginProviderConnect(provider) {
-      const settings = await store.getSettings();
-      const clientId = provider === "gmail" ? settings.gmailClientId : settings.outlookClientId;
-      if (!clientId) {
-        return {
-          status: "needs_client_id" as const,
-          message:
-            provider === "gmail"
-              ? "Add a Gmail client ID in Preferences, then connect. JobJitsu never asks for your password."
-              : "Add an Outlook client ID in Preferences, then connect. JobJitsu never asks for your password.",
-        };
-      }
-      return {
-        status: "needs_consent" as const,
-        message:
-          "Finish connecting in your browser. Access stays on this device. Nothing is sent from JobJitsu.",
-      };
-    },
+    beginProviderConnect,
     async sync(integrationId) {
       const integration = await requireIntegration(integrationId);
       return startSync(integration);

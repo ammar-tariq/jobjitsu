@@ -3,6 +3,10 @@ import type { MailboxProvider } from "./types.js";
 
 export type OutlookMailboxProviderOptions = {
   readonly getTokens: () => Promise<MailboxOAuthTokens | undefined>;
+  readonly putTokens?: (tokens: MailboxOAuthTokens) => Promise<void>;
+  readonly getClientCredentials?: () => Promise<{
+    readonly clientId?: string;
+  }>;
   readonly fetchImpl?: typeof fetch;
 };
 
@@ -53,7 +57,7 @@ export function createOutlookMailboxProvider(
   return {
     id: "outlook",
     async listPage(input): Promise<MailboxListPage> {
-      const tokens = await options.getTokens();
+      const tokens = await resolveOutlookTokens(options);
       if (!tokens?.accessToken) {
         throw new Error("Outlook access expired. Connect Outlook again in Preferences.");
       }
@@ -174,6 +178,86 @@ export async function exchangeOutlookCode(input: {
   if (!json.access_token) {
     throw new Error("Outlook could not finish connecting. Try again.");
   }
+  return tokensFromMicrosoftJson(json);
+}
+
+export async function refreshOutlookTokens(input: {
+  readonly clientId: string;
+  readonly refreshToken: string;
+  readonly fetchImpl?: typeof fetch;
+}): Promise<MailboxOAuthTokens> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const body = new URLSearchParams({
+    client_id: input.clientId,
+    refresh_token: input.refreshToken,
+    grant_type: "refresh_token",
+  });
+  const response = await fetchImpl("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) {
+    throw new Error("Outlook access expired. Connect Outlook again in Preferences.");
+  }
+  const json = (await response.json()) as MicrosoftTokenResponse;
+  const next = tokensFromMicrosoftJson(json);
+  return {
+    ...next,
+    refreshToken: next.refreshToken ?? input.refreshToken,
+  };
+}
+
+export async function readOutlookAccountEmail(
+  accessToken: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | undefined> {
+  const profile = (await graphJson(
+    fetchImpl,
+    accessToken,
+    "https://graph.microsoft.com/v1.0/me?$select=mail,userPrincipalName",
+  )) as {
+    readonly mail?: string;
+    readonly userPrincipalName?: string;
+  };
+  return profile.mail ?? profile.userPrincipalName;
+}
+
+async function resolveOutlookTokens(
+  options: OutlookMailboxProviderOptions,
+): Promise<MailboxOAuthTokens | undefined> {
+  const tokens = await options.getTokens();
+  if (!tokens?.accessToken) {
+    return tokens;
+  }
+  if (!isExpiringSoon(tokens.expiresAt) || !tokens.refreshToken || !options.getClientCredentials) {
+    return tokens;
+  }
+  const credentials = await options.getClientCredentials();
+  if (!credentials.clientId) {
+    return tokens;
+  }
+  const next = await refreshOutlookTokens({
+    clientId: credentials.clientId,
+    refreshToken: tokens.refreshToken,
+    fetchImpl: options.fetchImpl,
+  });
+  await options.putTokens?.(next);
+  return next;
+}
+
+type MicrosoftTokenResponse = {
+  readonly access_token?: string;
+  readonly refresh_token?: string;
+  readonly expires_in?: number;
+  readonly token_type?: string;
+  readonly scope?: string;
+};
+
+function tokensFromMicrosoftJson(json: MicrosoftTokenResponse): MailboxOAuthTokens {
+  if (!json.access_token) {
+    throw new Error("Outlook could not finish connecting. Try again.");
+  }
   return {
     accessToken: json.access_token,
     refreshToken: json.refresh_token,
@@ -184,4 +268,12 @@ export async function exchangeOutlookCode(input: {
     tokenType: json.token_type,
     scope: json.scope,
   };
+}
+
+function isExpiringSoon(expiresAt: string | undefined): boolean {
+  if (!expiresAt) {
+    return false;
+  }
+  const at = Date.parse(expiresAt);
+  return Number.isFinite(at) && at - Date.now() < 60_000;
 }

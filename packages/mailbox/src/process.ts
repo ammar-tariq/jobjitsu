@@ -126,9 +126,7 @@ export async function ingestProviderMessage(
   return { email, duplicate: false };
 }
 
-export async function processUnprocessedEmails(
-  options: ProcessMailboxOptions,
-): Promise<{
+export async function processUnprocessedEmails(options: ProcessMailboxOptions): Promise<{
   readonly processed: number;
   readonly jobRelated: number;
   readonly applicationsFound: number;

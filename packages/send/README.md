@@ -4,10 +4,10 @@ Outbound boundary — sole career-data egress.
 
 ## Status
 
-| Piece                       | State                       |
-| --------------------------- | --------------------------- |
-| `SendChannel` contract      | Done                        |
-| `createFakeGmailChannel`    | Done — **no Google / SMTP** |
+| Piece                       | State                                                                       |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `SendChannel` contract      | Done                                                                        |
+| `createFakeGmailChannel`    | Done — **no Google / SMTP**                                                 |
 | Real Gmail / board adapters | Not yet — **inbound** Gmail is `@jobjitsu/mailbox` (PE20), not this package |
 
 ## Fake Gmail

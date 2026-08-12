@@ -189,6 +189,7 @@ export type MailboxOAuthTokens = {
 
 export type MailboxSettings = {
   readonly gmailClientId?: string;
+  readonly gmailClientSecret?: string;
   readonly outlookClientId?: string;
   readonly lookbackDays: number;
   readonly noResponseAfterDays: number;

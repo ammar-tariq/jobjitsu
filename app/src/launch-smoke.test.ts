@@ -52,9 +52,20 @@ describe("PE01-S01 launch desktop host", () => {
     expect(names).toContain("dialog:allow-save");
     expect(names).toContain("allow-data-directory");
     expect(names).toContain("allow-resource-snapshot");
+    expect(names).toContain("allow-mailbox-oauth");
     expect(names).toContain("fs:scope");
     expect(names.some((name) => name.startsWith("shell:"))).toBe(false);
     expect(names.some((name) => name.startsWith("http:"))).toBe(false);
+  });
+
+  it("allows Gmail and Outlook token exchange from the desktop webview", () => {
+    const conf = JSON.parse(readFileSync(join(appRoot, "src-tauri/tauri.conf.json"), "utf8")) as {
+      app: { security: { csp: string } };
+    };
+    expect(conf.app.security.csp).toContain("https://oauth2.googleapis.com");
+    expect(conf.app.security.csp).toContain("https://gmail.googleapis.com");
+    expect(conf.app.security.csp).toContain("https://login.microsoftonline.com");
+    expect(conf.app.security.csp).toContain("https://graph.microsoft.com");
   });
 
   it("startup checks Agent readiness without mail sync or career network egress", async () => {

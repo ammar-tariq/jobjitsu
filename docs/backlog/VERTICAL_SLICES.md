@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
-| **Story** | Shell UX — calm chrome, `data-layout`, Applications list + detail |
-| **Status** | Testing · [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
-| **Note** | Presentation only. Do not change IPC, send, or Agent ownership. PE20 mailbox intelligence stays in Applications as quiet summary + attention, not a cockpit. |
+| **Epic** | [PE20 Email Integration](https://github.com/ammar-tariq/jobjitsu/issues/117) |
+| **Story** | PE20-S02 — Complete Gmail/Outlook OAuth loopback |
+| **Status** | In Progress · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) |
+| **Note** | Desktop loopback + PKCE. Tokens stay in the host. UI never receives secrets. Guide: `docs/guides/GMAIL_AND_OUTLOOK.md`. |
 
 ## Completed slices
 

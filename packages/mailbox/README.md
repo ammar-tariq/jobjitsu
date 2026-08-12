@@ -6,18 +6,21 @@ This package **never sends mail**. Outbound career mail stays in `@jobjitsu/send
 
 > Related (do not duplicate): PE20 Email Integration, PLATFORM_SPEC “Email Integration” / “Gmail Synchronization”, fake Gmail **send** channel in `@jobjitsu/send`, existing Application drafts in `@jobjitsu/applications`.
 
+How to use it on your machine: [docs/guides/GMAIL_AND_OUTLOOK.md](../../docs/guides/GMAIL_AND_OUTLOOK.md).
+
 ## Status
 
-| Piece                              | State                               |
-| ---------------------------------- | ----------------------------------- |
-| Local KV email + integration store | Done (PE20)                         |
-| Fake / sample mailbox provider     | Done — no Google/Microsoft account  |
-| Gmail + Outlook API adapters       | Done — OAuth tokens host-owned      |
-| Deterministic filter + classify    | Done                                |
-| Optional on-device Agent classify  | Done — host port; never from UI     |
-| Application matching + timeline    | Done — extends existing Application |
-| Dashboard / actions / analytics    | Done via host IPC                   |
-| Incremental sync cursors           | Done — persist across restart       |
+| Piece                              | State                                          |
+| ---------------------------------- | ---------------------------------------------- |
+| Local KV email + integration store | Done (PE20)                                    |
+| Fake / sample mailbox provider     | Done — no Google/Microsoft account             |
+| Gmail + Outlook API adapters       | Done — OAuth tokens host-owned                 |
+| Desktop OAuth loopback             | Done (PE20-S02) — Tauri bind / wait / open URL |
+| Deterministic filter + classify    | Done                                           |
+| Optional on-device Agent classify  | Done — host port; never from UI                |
+| Application matching + timeline    | Done — extends existing Application            |
+| Dashboard / actions / analytics    | Done via host IPC                              |
+| Incremental sync cursors           | Done — persist across restart                  |
 
 ## Laws
 
@@ -46,9 +49,12 @@ Disconnect removes tokens. **Delete imported mail** removes emails and the sync 
 
 ## OAuth (Gmail / Outlook)
 
-1. Create a desktop OAuth client (Google Cloud or Microsoft Entra).
-2. Paste the **client ID** in Preferences → Email. JobJitsu never asks for your mailbox password.
-3. Connect Gmail or Outlook. Browser consent is required; a loopback redirect is not fully wired yet — use **Connect sample mailbox** to try the intelligence path without a provider account.
+1. Create a **Desktop** OAuth client (Google Cloud or Microsoft Entra). See the [guide](../../docs/guides/GMAIL_AND_OUTLOOK.md).
+2. Paste the **client ID** (and Gmail **client secret**) in Preferences → Email. Save. JobJitsu never asks for your mailbox password.
+3. **Connect Gmail** or **Connect Outlook** in the **desktop app**. The host binds `127.0.0.1`, opens the system browser, exchanges the code with PKCE, and stores tokens in `mailbox.secrets`.
+4. First sync uses your lookback window. Later **Sync now** is incremental.
+
+Browser-only Vite cannot finish consent — the UI explains that the desktop app is required.
 
 Optional env (not required; Preferences fields are the source of truth):
 
@@ -65,6 +71,5 @@ The first sync walks the lookback window and writes a checkpoint after each page
 
 ## Limitations
 
-- Gmail/Outlook OAuth loopback completion is partial — Sync now + sample mailbox are the supported paths today.
 - OS push notifications are not wired; in-app **Needs your attention** and Preferences notice toggles are.
 - Split of an already-merged application is manual (un-archive is not a dedicated command); merge / keep separate are.

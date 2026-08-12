@@ -67,7 +67,7 @@ Local KV under the data root. **Never** a JobJitsu mail cloud. Tokens live in `m
 | Email | `mailbox.emails` | Subject, snippet, optional body, provider message id, classification |
 | Timeline event | `mailbox.timeline` | Linked to application + source email |
 | Action | `mailbox.actions` | Pending user work (assessment, schedule, reply) — never auto-send |
-| Settings | `mailbox.settings` | Lookback, notice prefs, OAuth client ids |
+| Settings | `mailbox.settings` | Lookback, notice prefs, OAuth client ids (and Gmail client secret) |
 | Secrets | `mailbox.secrets` | OAuth access/refresh tokens — host only |
 | Provider index | `mailbox.index` | `(provider, providerMessageId) → email id` for idempotent ingest |
 | Sync cursor | `mailbox.cursors` | Per-integration watermark, page cursor, Gmail historyId / Outlook delta link — host only; never IPC |
