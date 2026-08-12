@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | PE20 Email intelligence |
-| **Story** | Opt-in mailbox sync + application matching |
-| **Status** | In progress |
-| **Note** | `@jobjitsu/mailbox`; extends Application; do not duplicate send/Gmail fake |
+| **Epic** | [PE20 Email Integration](https://github.com/ammar-tariq/jobjitsu/issues/117) |
+| **Story** | [PE20-S01](https://github.com/ammar-tariq/jobjitsu/issues/118) — Opt-in mailbox sync + application matching |
+| **Status** | In Review |
+| **Note** | `@jobjitsu/mailbox`; extends Application; do not duplicate send/Gmail fake. Follow-up: [PE20-S02](https://github.com/ammar-tariq/jobjitsu/issues/119) OAuth loopback. |
 
 ## Completed slices
 

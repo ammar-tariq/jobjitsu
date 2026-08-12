@@ -1426,7 +1426,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 ## PE20
 
-**Email Integration** · Status: **Experimental (in progress)** · Priority: **P1**
+**Email Integration** · Status: **Experimental (in progress)** · Priority: **P1** · Issues: [#117](https://github.com/ammar-tariq/jobjitsu/issues/117)
 
 > Implementation lives in `@jobjitsu/mailbox` + Applications dashboard. Do not add a parallel JobApplication CRM or REST/SQL stack. Reuse Application drafts, local KV, host IPC, and on-device Agent.
 
@@ -1447,7 +1447,27 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Opt-in + no auto-send test.
 
-**Status:** in progress · Experimental
+**Status:** in review · Experimental · [#118](https://github.com/ammar-tariq/jobjitsu/issues/118)
+
+### PE20-S02 — Complete Gmail/Outlook OAuth loopback
+
+**Description:** As a user, I can finish connecting Gmail or Outlook in the desktop app after pasting a client ID.
+
+**Acceptance criteria:**
+  - Browser consent completes; tokens stay in `mailbox.secrets` on this device.
+  - JobJitsu never asks for a mailbox password.
+  - Sync uses the same incremental cursor as the sample mailbox path.
+  - Nothing is sent.
+
+**Dependencies:** PE20-S01
+
+**Priority:** P2
+
+**Technical notes:** mailbox README OAuth limitations.
+
+**Testing notes:** Expired token and rate-limit copy stay calm.
+
+**Status:** proposed · Experimental · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119)
 
 ---
 
