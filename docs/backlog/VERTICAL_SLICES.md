@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
 | **Story** | Quiet panels for Preferences, Craft, Queue, Follow-ups, and onboarding |
-| **Status** | In Progress |
+| **Status** | Testing · [PR #122](https://github.com/ammar-tariq/jobjitsu/pull/122) |
 | **Note** | Presentation only. Shell chrome landed in [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121). |
 
 ## Completed slices
