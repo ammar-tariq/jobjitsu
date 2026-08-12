@@ -2,7 +2,7 @@
 
 > Local Intelligence — on-device reasoning for craft, not cloud résumé farming.
 
-Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) · Terms: [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md)
+Parent: [OVERVIEW.md](./OVERVIEW.md) · Package: `packages/ai` · Terms: [../product/TERMINOLOGY.md](../product/TERMINOLOGY.md)
 
 ---
 
@@ -33,7 +33,7 @@ flowchart TD
 | **Local adapters** | Bind to on-device runners (user model path / runtime) |
 | **Remote adapters** | Optional, **explicit user config only**; never labeled Agent · On-device |
 | **Context Builder** | Assembles minimal prompts (alias: context assembler) |
-| **AI Validation** | Post-generate gates — see [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) |
+| **AI Validation** | Post-generate gates — see “Workflow engine” below |
 | **Prompt roles** | Tailor, match explain, follow-up draft, parse assist |
 | **Tool bridge** | Safe tools to Agent / Plugins via host |
 | **Status publisher** | Emits `Ai.LocalModel*` / `Ai.Started` / `Ai.Finished` for chrome |
@@ -52,7 +52,7 @@ Providers must not phone home with résumé text unless the user selected a remo
 
 ## Context Builder
 
-Canonical term: **Context Builder**. Default slice order for apply-craft: Profile → Resume → Projects → Achievements → Current Job → Prompt → Model (budgeted by task). Retrieves from Knowledge Base when available via a **`KnowledgeReader` port** (implemented by `identity`; `ai` must not own knowledge writes). Core ships `createContextAssembler` + `createNoopKnowledgeReader` in `@jobjitsu/ai` (PE05-S03). See [DATA_MODELS.md](./DATA_MODELS.md) and [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md).
+Canonical term: **Context Builder**. Default slice order for apply-craft: Profile → Resume → Projects → Achievements → Current Job → Prompt → Model (budgeted by task). Retrieves from Knowledge Base when available via a **`KnowledgeReader` port** (implemented by `identity`; `ai` must not own knowledge writes). Core ships `createContextAssembler` + `createNoopKnowledgeReader` in `@jobjitsu/ai` (PE05-S03). See [DATA_MODELS.md](./DATA_MODELS.md).
 
 | Task | Typical context |
 |------|-----------------|
@@ -74,6 +74,17 @@ Avoid dumping entire Timeline history into every prompt. No hidden training expo
 ✅ GOOD: AI produces tailored draft → validation → Queue.Enqueued
 ❌ BAD:  AI tool “submitApplication” with network socket
 ```
+
+### Workflow engine (design contract — not yet built)
+
+When agent orchestration lands (`packages/agent`), it follows this shape. A **Workflow** is a declarative step list (`validate | analyze | retrieve | generate | prepare | await_approval | egress_intent | persist | cleanup`); the **AI Task Queue** runs steps with default concurrency 1 (states: Pending / Running / Waiting / Completed / Failed / Cancelled). Laws that survive into any implementation:
+
+- `egress_intent` may only enqueue review-Queue items or emit send intents — never call `send.execute` or the network.
+- `Agent.Paused` cancels/freezes Running tasks, retains Pending, and leaves the review Queue intact.
+- Generated artifacts pass **AI Validation** (formatting → ATS → missing skills, deterministic checks preferred) before reaching the review Queue; bounded repair retries, then wait for the user.
+- Models unload after drain or idle. The AI Task Queue is never conflated with the user-facing review Queue.
+
+Events: `Workflow.Started|Completed|Failed`, `Ai.Started|Finished`, `Ai.ValidationCompleted` ([EVENT_SYSTEM.md](./EVENT_SYSTEM.md)).
 
 ---
 

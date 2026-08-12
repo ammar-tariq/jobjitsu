@@ -56,3 +56,20 @@ Never build multiple features in parallel in the same change set.
 | PE01-S03 | 2026-07-23 | IPC allowlist + typed bridge |
 | PE01-S02 | 2026-07-23 | Primary H1 nav |
 | PE01-S01 / DF-01 | 2026-07-23 | Tauri host |
+
+## Sellable local MVP bar
+
+What must be true to sell the local-first MVP (on-device Agent, no cloud résumé storage, agent ≠ send):
+
+- Career drafts survive restart — applications persist under the on-device data folder.
+- User owns outbound: approval-before-send is visible in Preferences; nothing sends without intent.
+- Primary nav destinations all work — no "Coming Soon" for core nouns.
+- Startup is honest: health-check the Agent only; never fake a send.
+- First-run onboarding guides profile + on-device Agent model, and stays skippable.
+- Agent view describes readiness calmly — status and recent activity, no cascade theater.
+- Craft output can land in an application draft ("Save to application"); nothing is sent.
+- Queue lists items ready for review: Approve (stays on device) or Keep drafting.
+- Follow-ups can be scheduled on an application, with a due list.
+- Timeline shows a calm local activity feed (durable sink still deferred).
+- Primary intelligence is Ollama on this device; chrome says Agent · On-device; UI never imports `@jobjitsu/ai`.
+- Deferred honestly: real mail/apply channels, discovery network, structured résumé studio, remote providers, durable event log, plugins.

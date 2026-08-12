@@ -6,7 +6,7 @@ Primary nav: **Craft**, **Applications**, **Queue**, **Follow-ups**, **Profile**
 **Profile** holds identity and career Paths. **Preferences** covers data folder, approval-before-send, writing voice, and on-device Agent model.
 **Agent** shows readiness and recent activity (listen-only). Queue / Follow-ups / Timeline are thin local views — never auto-send.
 
-Sellable local MVP notes: [SELLABLE_LOCAL_MVP.md](../docs/product/SELLABLE_LOCAL_MVP.md).
+Sellable local MVP bar: [VERTICAL_SLICES.md](../docs/backlog/VERTICAL_SLICES.md).
 
 ## Prerequisites
 

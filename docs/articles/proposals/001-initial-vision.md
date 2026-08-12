@@ -1,7 +1,7 @@
 # Proposal 001 — Initial vision article
 
 **Status:** Approved · Drafting  
-**Series:** [SERIES_PLAN.md](../SERIES_PLAN.md) Article 01  
+**Series:** [ARTICLE_SYSTEM.md](../ARTICLE_SYSTEM.md) (series plan) Article 01  
 **GitHub:** [#56 Write Article: Initial Vision](https://github.com/ammar-tariq/jobjitsu/issues/56) (`article-approved` · `article-draft`)  
 **Research:** [../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md](../research/JOBJITSU_MEDIUM_ARTICLE_BLUEPRINT.md)  
 **Draft:** [../drafts/001-initial-vision.md](../drafts/001-initial-vision.md)
@@ -51,7 +51,7 @@ Not tied to a shipping product wave completion yet — this is the **series open
 
 ## Required documentation
 
-- `MANIFESTO.md`  
+- `docs/brand/PRODUCT_PHILOSOPHY.md`  
 - `docs/product/PRODUCT_VISION.md`  
 - `docs/product/NON_GOALS.md`  
 - `docs/product/FEATURES.md` (status honesty)  

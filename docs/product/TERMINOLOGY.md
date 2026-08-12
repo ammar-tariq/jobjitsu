@@ -54,10 +54,9 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Brand chrome: [../brand/BRAN
 
 | Document | Owns |
 |----------|------|
-| [MANIFESTO.md](../../MANIFESTO.md) | Philosophy only |
+| [../brand/PRODUCT_PHILOSOPHY.md](../brand/PRODUCT_PHILOSOPHY.md) | Philosophy only |
 | [PLATFORM_SPECIFICATION.md](./PLATFORM_SPECIFICATION.md) | Functional **what** |
-| [ARCHITECTURE_PRINCIPLES.md](../../ARCHITECTURE_PRINCIPLES.md) | Architectural **rules** |
-| [ENGINEERING_CONSTITUTION.md](../../ENGINEERING_CONSTITUTION.md) | Engineering **process** |
-| [../architecture/](../architecture/) | Structural **how** |
+| [../architecture/](../architecture/) | Structural **how** and architectural rules |
+| [../../DEFINITION_OF_DONE.md](../../DEFINITION_OF_DONE.md) + `.cursor/rules/` | Engineering **process** |
 | [../backlog/](../backlog/) | Build order |
 | [../brand/](../brand/) | Brand and UI nouns |

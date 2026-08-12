@@ -1492,6 +1492,9 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       const settings = await mailbox.updateSettings(payload);
       return ok({ settings });
     },
+    "system.getResources": async () => {
+      return ok({ resources: await readResourceSnapshot() });
+    },
   };
 }
 

@@ -48,8 +48,8 @@ const FAQS: { q: string; a: ReactNode }[] = [
     a: (
       <>
         Start at the <Link to="/docs/backlog/">backlog</Link>, follow dependency waves, and use
-        platform stories under <Link to="/docs/roadmap/USER_STORIES">docs/roadmap</Link>.
-        Orientation: <Link to="/roadmap">Roadmap</Link>.
+        platform stories in <Link to="/docs/backlog/USER_STORIES">docs/backlog</Link>. Orientation:{" "}
+        <Link to="/roadmap">Roadmap</Link>.
       </>
     ),
   },

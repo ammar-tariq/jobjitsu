@@ -192,7 +192,18 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     return current;
   };
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
-  const craftSession = createCraftSessionStore({ ai, assembler, bus });
+  const craftSession = createCraftSessionStore({
+    ai,
+    bus,
+    getTonePreferences: async () => {
+      try {
+        const craft = await preferences.getCraftPreferences();
+        return craft.tone.trim() || undefined;
+      } catch {
+        return undefined;
+      }
+    },
+  });
 
   services.register(FoundationKeys.logger, logger);
   services.register(FoundationKeys.eventBus, bus);

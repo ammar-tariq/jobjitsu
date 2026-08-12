@@ -134,7 +134,7 @@ Naming: `Domain.Action` in past tense where possible (facts that happened).
 | `Extension.Unloaded` | Extension removed from host |
 | `Extension.Failed` | Extension load/run failure |
 
-**SSOT:** `packages/events` must match this catalog when coded. Illustrative chains in [ARCHITECTURE_PRINCIPLES.md](../../ARCHITECTURE_PRINCIPLES.md) use these names only.
+**SSOT:** `packages/events` must match this catalog when coded. Illustrative chains elsewhere (e.g. `.cursor/rules/architecture.mdc`) use these names only.
 
 ---
 

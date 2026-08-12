@@ -83,7 +83,6 @@ export type IpcBridge = {
   readonly setLocalModelPath: (
     path: string,
   ) => Promise<Result<IpcResultMap["preferences.setLocalModelPath"]>>;
-  readonly getResources: () => Promise<Result<IpcResultMap["resources.get"]>>;
   readonly listApplications: () => Promise<Result<IpcResultMap["applications.list"]>>;
   readonly createApplicationDraft: (
     input: ApplicationDraftCreateInput,
@@ -164,6 +163,7 @@ export type IpcBridge = {
   readonly prepareCraftDrafts: (
     kind: CraftGenerateKind,
   ) => Promise<Result<IpcResultMap["craft.prepareDrafts"]>>;
+  readonly getResources: () => Promise<Result<IpcResultMap["system.getResources"]>>;
 };
 
 /**
@@ -315,9 +315,6 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
       return (await dispatcher.invoke("preferences.setLocalModelPath", { path })) as Result<
         IpcResultMap["preferences.setLocalModelPath"]
       >;
-    },
-    async getResources() {
-      return (await dispatcher.invoke("resources.get")) as Result<IpcResultMap["resources.get"]>;
     },
     async listApplications() {
       return (await dispatcher.invoke("applications.list")) as Result<
@@ -483,6 +480,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async prepareCraftDrafts(kind: CraftGenerateKind) {
       return (await dispatcher.invoke("craft.prepareDrafts", { kind })) as Result<
         IpcResultMap["craft.prepareDrafts"]
+      >;
+    },
+    async getResources() {
+      return (await dispatcher.invoke("system.getResources")) as Result<
+        IpcResultMap["system.getResources"]
       >;
     },
   };

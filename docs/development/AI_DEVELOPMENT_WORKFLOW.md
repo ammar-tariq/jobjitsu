@@ -2,16 +2,9 @@
 
 Canonical path for day-to-day AI-assisted implementation.
 
-Root pointer: [AI_DEVELOPMENT_WORKFLOW.md](../../AI_DEVELOPMENT_WORKFLOW.md) (redirects here).
-
 Cursor rule: [`.cursor/rules/git-branching.mdc`](../../.cursor/rules/git-branching.mdc) (auto-branch + Project Status).
 
 Before writing any code:
-
-0. If documentation itself is incomplete or you are bootstrapping the project,
-   prefer the documentation pipeline: [docs/prompts/00_PROJECT_WORKFLOW.md](../prompts/00_PROJECT_WORKFLOW.md)
-   (execute phases with approval checkpoints). Day-to-day feature work resumes below
-   after docs phases are done (or the user waives remaining phases for a narrow slice).
 
 1. Read:
    - docs/brand/

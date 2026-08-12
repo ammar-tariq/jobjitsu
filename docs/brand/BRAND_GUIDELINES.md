@@ -167,11 +167,9 @@ A belt mark or **Agent · On-device** badge in the status bar at all times.
 
 | Document | Covers |
 |----------|--------|
-| [PRODUCT_VISION.md](./PRODUCT_VISION.md) | Pointer to `docs/product/` vision set |
 | [../product/PRODUCT_VISION.md](../product/PRODUCT_VISION.md) | Vision, mission (canonical) |
 | [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md) | Beliefs, principles, metaphor map |
-| [VOICE_AND_TONE.md](./VOICE_AND_TONE.md) | Voice pillars, tone by context |
-| [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md) | Mechanics, vocabulary, claims |
+| [VOICE_AND_TONE.md](./VOICE_AND_TONE.md) | Voice pillars, tone by context, writing mechanics |
 | [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) | UI/component naming, motion, a11y, icons, illustration |
 | [BRANDING_FOR_DEVELOPMENT.md](./BRANDING_FOR_DEVELOPMENT.md) | Brand rules that drive engineering/UI |
 | [../design-system/README.md](../design-system/README.md) | Production tokens, themes, variants |

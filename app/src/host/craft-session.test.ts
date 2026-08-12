@@ -6,9 +6,8 @@ import { createCraftSessionStore } from "./craft-session.js";
 describe("craft session store", () => {
   it("keeps prepare running and fills drafts after completion", async () => {
     const ai = createFakeAiProvider({ id: "fake-ai" });
-    const assembler = createFakeContextAssembler();
     const bus = createInMemoryEventBus();
-    const store = createCraftSessionStore({ ai, assembler, bus });
+    const store = createCraftSessionStore({ ai, bus });
 
     store.patch({
       resumeText: "Sam Chen — staff engineer",
@@ -58,10 +57,7 @@ describe("craft session store", () => {
         return { text: "Slow draft", modelId: "fake-model" };
       },
     };
-    const store = createCraftSessionStore({
-      ai,
-      assembler: createFakeContextAssembler(),
-    });
+    const store = createCraftSessionStore({ ai });
     store.patch({
       resumeText: "Résumé",
       jobDescription: "Role",
@@ -75,5 +71,32 @@ describe("craft session store", () => {
     await vi.waitFor(() => {
       expect(store.get().job.status).toBe("ready");
     });
+  });
+
+  it("applies saved tone preferences when preparing drafts", async () => {
+    const prompts: string[] = [];
+    const ai = {
+      ...createFakeAiProvider({ id: "fake-ai" }),
+      async complete(request: { role: string; prompt: string }) {
+        prompts.push(request.prompt);
+        return { text: "Draft", modelId: "fake-model" };
+      },
+    };
+    const store = createCraftSessionStore({
+      ai,
+      getTonePreferences: async () => "calm and precise",
+    });
+    store.patch({
+      resumeText: "Résumé",
+      jobDescription: "Role",
+    });
+
+    store.prepareDrafts("resume");
+    await vi.waitFor(() => {
+      expect(store.get().job.status).toBe("ready");
+    });
+
+    expect(prompts[0]).toContain("### WRITING VOICE");
+    expect(prompts[0]).toContain("calm and precise");
   });
 });

@@ -20,8 +20,8 @@ import type {
   CraftGenerateKind,
   CraftSessionSnapshot,
 } from "../ipc/commands.js";
-import { useHostCraftSession } from "./HostProvider.js";
 import { CraftWorkingView } from "./CraftWorkingView.js";
+import { useHostCraftSession } from "./HostProvider.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
@@ -44,7 +44,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const [sourcesOpen, setSourcesOpen] = useState(true);
   const [refineOpen, setRefineOpen] = useState(false);
   const [draftTab, setDraftTab] = useState<DraftTab>("resume");
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   const patchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hydrated = useRef(false);
 
@@ -103,7 +103,6 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
     preparing && job?.startedAt
       ? Math.max(1, Math.floor((Date.now() - Date.parse(job.startedAt)) / 1000))
       : 0;
-
   useEffect(() => {
     if (!preparing) {
       return;
@@ -326,6 +325,16 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         setChatBusy(false);
         setLocalStatus("Could not refine that draft. Try again when you are ready.");
       });
+  }
+
+  if (preparing && session) {
+    return (
+      <CraftWorkingView
+        bridge={bridge}
+        session={session}
+        elapsedSeconds={elapsedSeconds + tick - tick}
+      />
+    );
   }
 
   return (

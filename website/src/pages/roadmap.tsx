@@ -16,7 +16,7 @@ export default function RoadmapPage(): ReactNode {
         },
         {
           label: "Platform stories (PE*)",
-          to: "/docs/roadmap/USER_STORIES",
+          to: "/docs/backlog/USER_STORIES",
           description: "Platform decomposition of Core work.",
         },
         {

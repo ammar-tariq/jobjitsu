@@ -7,7 +7,7 @@ Do **not** invent features, timelines, or article titles that imply unshipped pr
 When the Historian / AI milestone detection (or a human) proposes a real topic:
 
 1. Create `docs/articles/proposals/<nnn>-<slug>.md` using the proposal fields in [ARTICLE_SYSTEM.md](../ARTICLE_SYSTEM.md).  
-2. Link it from [SERIES_PLAN.md](../SERIES_PLAN.md).  
+2. Link it from the series plan in [ARTICLE_SYSTEM.md](../ARTICLE_SYSTEM.md).  
 3. Open a GitHub issue with label `article-needed` if tracking on the board.  
 4. Add a one-line entry below.
 
