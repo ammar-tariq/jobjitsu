@@ -202,7 +202,7 @@ Open-source **intent** is firm; license selection may still be finalized — we 
 
 ## Sources
 
-- [`MANIFESTO.md`](../../../MANIFESTO.md)
+- [`docs/brand/PRODUCT_PHILOSOPHY.md`](../../brand/PRODUCT_PHILOSOPHY.md)
 - [`docs/product/PRODUCT_VISION.md`](../../product/PRODUCT_VISION.md)
 - [`docs/product/NON_GOALS.md`](../../product/NON_GOALS.md)
 - [`docs/product/FEATURES.md`](../../product/FEATURES.md)

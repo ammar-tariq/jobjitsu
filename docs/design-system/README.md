@@ -22,12 +22,9 @@ This folder is the **production-ready** visual and interaction system for `packa
 
 | Doc | Topic |
 |-----|--------|
-| [DESIGN_TOKENS.md](./DESIGN_TOKENS.md) | Color, semantic, and alias tokens |
-| [SPACING.md](./SPACING.md) | Spacing scale |
+| [DESIGN_TOKENS.md](./DESIGN_TOKENS.md) | Color, spacing, radius, elevation, icon, and z-index tokens |
 | [TYPOGRAPHY.md](./TYPOGRAPHY.md) | Fonts, type ramp, tracking |
-| [BORDER_RADIUS.md](./BORDER_RADIUS.md) | Radius scale |
 | [ANIMATION.md](./ANIMATION.md) | Duration, easing, approved motions |
-| [ELEVATION.md](./ELEVATION.md) | Shadows and layers |
 | [COMPONENT_VARIANTS.md](./COMPONENT_VARIANTS.md) | Core `Jj*` variants |
 | [THEME_DARK.md](./THEME_DARK.md) | Dark (default) theme map |
 | [THEME_LIGHT.md](./THEME_LIGHT.md) | Light theme map |

@@ -1,227 +1,53 @@
-# Dependency Graph
+# Dependency graph
 
-How backlog work unlocks. Prefer finishing an earlier **wave** before starting the next. Within a wave, tasks can proceed in parallel if their `Depends` are satisfied.
+How the PE epics unlock each other. Per-story status lives on the
+[JobJitsu Development board](https://github.com/users/ammar-tariq/projects/2); the story catalog is
+[USER_STORIES.md](./USER_STORIES.md). This file is ordering only.
 
-Full task deps: [TECHNICAL_TASKS.md](./TECHNICAL_TASKS.md).
+## What unlocks what
 
----
+- **PE01 Shell** unlocks everything: the window, primary navigation, and the deny-by-default IPC
+  boundary every view rides on.
+- **PE02 Storage & events** unlocks identity (PE03), preferences (PE04), discovery (PE07), the
+  follow-up scheduler (PE11), and the durable timeline (PE12) — all persistence and event flow.
+- **PE03 Identity** and **PE04 Preferences** unlock local intelligence (PE05): the Context Builder
+  reads profile and preference slices, and approval defaults must exist before anything egresses.
+- **PE05 Local intelligence** unlocks craft: tailored résumé drafts (PE03-S04/S10), cover letters
+  (PE08-S02), and the Craft Studio (board epic PE28).
+- **PE07 Discovery** feeds curated roles into application drafts (PE08). Drafts do not require it —
+  a role may be manual — so PE08 shipped first.
+- **PE08 Applications** unlocks the review Queue (PE09); PE04's approval policy gates it.
+- **PE09 Queue** unlocks **PE10 Send**: the approval policy must exist before egress executes.
+- **PE10 Send** unlocks egress audit (PE10-S02 with PE12), post-send tracking (PE08-S03), and
+  follow-up send-under-policy (PE11-S04).
+- **PE04 quiet hours** (PE04-S02) is enforced by PE11 due notifications.
+- **PE08 + PE09** unlock the preparative agent (PE06), which orchestrates drafts into the Queue.
+  PE10 is a **fence-only** edge for PE06: tests prove the agent cannot import or execute send.
+- **PE03 + PE04 + PE06** shape onboarding (PE13); empty states need only PE01 navigation.
 
-## Epic-level graph
+## Waves
 
-```mermaid
-flowchart TB
-  E01[E01 Platform]
-  E02[E02 Storage and Events]
-  E03[E03 Shell and IPC]
-  E04[E04 Identity]
-  E05[E05 Prefs and Privacy Chrome]
-  E06[E06 Local Intelligence]
-  E07[E07 Discovery]
-  E08[E08 Applications]
-  E09[E09 Queue]
-  E10[E10 Send]
-  E11[E11 Follow-ups and Scheduler]
-  E12[E12 Agent]
-  E13[E13 Timeline]
-  E14[E14 Onboarding]
-  E15[E15 Outcomes H2]
-  E16[E16 Timeline Depth H2]
-  E17[E17 Career Craft H3]
-  E18[E18 Plugins H4]
-  E19[E19 Extensions H4]
+1. **Wave 0 — Foundation (shipped):** PE01 shell, then PE02 storage & events.
+2. **Wave 1 — Trust surface (shipped):** PE03 identity, paths, résumé library ‖ PE04 preferences
+   and privacy chrome.
+3. **Wave 2 — Craft (shipped):** PE05 local intelligence through real Ollama models, the Craft
+   Studio, and PE08 drafts, cover letters, list/detail.
+4. **Wave 3 — Discovery (next):** PE07 provider registry → curation → browse and select into
+   application drafts.
+5. **Wave 4 — Sovereignty:** PE09 approve/reject with `canSend` policy → PE10 send package host
+   path → PE12 durable timeline + egress audit → PE08-S03 post-send tracking.
+6. **Wave 5 — Follow-through:** PE11 scheduler arm (persist, due nudges, quiet hours), then
+   send-under-policy once PE10 lands.
+7. **Wave 6 — Agent:** PE06 start/pause and orchestrate into the Queue — after PE08/PE09, fenced
+   from PE10.
+8. **Wave 7 — First-run polish:** PE13 onboarding and empty states; PE-QA privacy gates green.
 
-  E01 --> E02
-  E01 --> E03
-  E02 --> E04
-  E02 --> E05
-  E03 --> E05
-  E04 --> E06
-  E05 --> E06
-  E02 --> E07
-  E05 --> E07
-  E04 --> E08
-  E06 --> E08
-  E07 --> E08
-  E08 --> E09
-  E05 --> E09
-  E09 --> E10
-  E10 --> E11
-  E02 --> E11
-  E05 --> E11
-  E07 --> E12
-  E08 --> E12
-  E09 --> E12
-  E10 -.->|fence only: agent must not call send| E12
-  E02 --> E13
-  E10 --> E13
-  E09 --> E13
-  E04 --> E14
-  E05 --> E14
-  E12 --> E14
-  E08 --> E14
-  E08 --> E15
-  E13 --> E16
-  E03 --> E17
-  E06 --> E18
-  E12 --> E18
-  E07 --> E19
-  E10 --> E19
-  E04 --> E19
-```
-
-Dashed edge E10→E12 means **policy/fence dependency** (tests proving agent does not import/execute send), not a feature call edge.
-
----
-
-## Feature critical path (H1 spine)
-
-```mermaid
-flowchart LR
-  tokens[E01 tokens]
-  storage[E02 storage]
-  events[E02 events]
-  ipc[E03 IPC]
-  identity[E04 identity]
-  prefs[E05 prefs]
-  ai[E06 AI]
-  discovery[E07 discovery]
-  apps[E08 apps]
-  queue[E09 queue]
-  send[E10 send]
-  agent[E12 agent]
-  follow[E11 follow-ups]
-  timeline[E13 timeline]
-  onboard[E14 onboarding]
-
-  tokens --> ipc
-  storage --> identity
-  storage --> prefs
-  events --> ai
-  events --> queue
-  events --> send
-  ipc --> prefs
-  identity --> ai
-  prefs --> ai
-  ai --> apps
-  discovery --> apps
-  apps --> queue
-  prefs --> queue
-  queue --> send
-  send --> follow
-  send --> timeline
-  queue --> agent
-  apps --> agent
-  discovery --> agent
-  identity --> onboard
-  prefs --> onboard
-  agent --> onboard
-```
-
----
-
-## Build waves
-
-### Wave 0 — Repo boots
-**Goal:** Dev can run UI shell with tokens.  
-**Epics:** E01  
-**Exit:** Tauri window + React + dark canvas.
-
-### Wave 1 — Data & chrome spine
-**Goal:** Persist data; navigate app; talk host↔UI.  
-**Epics:** E02, E03 (parallel after E01)  
-**Exit:** Storage roundtrip; event bus test; nav + IPC ping; JjButton.
-
-### Wave 2 — User trust surface
-**Goal:** Résumé local; prefs; honest **Agent · On-device** chrome; **paths** under identity.  
-**Epics:** E04, E05  
-**Exit:** Import → review → attach to identity/path; approval default on; **Agent · On-device** chrome mounted.
-**Next (manual first):** E04 path stories (PE03-S05…S09); AI parse after Wave 3 (PE03-S10).
-
-### Wave 3 — Intelligence & craft objects
-**Goal:** Tailor drafts from local roles.  
-**Epics:** E06, E07, then E08  
-**Exit:** Fake provider tailor; CSV roles; applications list/detail.
-
-### Wave 4 — Sovereignty path
-**Goal:** Review → approve → egress audited.  
-**Epics:** E09, E10, E13 (timeline sink)  
-**Exit:** canSend enforced; file-export channel; egress on timeline; agent̸→send fence green.
-
-### Wave 5 — Agent & nudges
-**Goal:** Preparative agent + polite follow-ups.  
-**Epics:** E12, E11 (scheduler can start once E02+E05 ready; full send hook after E10)  
-**Exit:** Pause/resume; prep enqueues; follow-up due caution; no auto-send.
-
-### Wave 6 — First-run polish & must-pass
-**Goal:** Ship-quality H1 companion.  
-**Epics:** E14 + QA tasks  
-**Exit:** Three-beat onboarding; empty states; privacy must-pass tests green.
-
-### Wave 7 — H2 depth
-**Epics:** E15, E16  
-**Exit:** Outcomes + deeper timeline without guilt UX.
-
-### Wave 8 — H3 shells
-**Epics:** E17 (admission test per module before deep tasks)
-
-### Wave 9 — H4 ecosystem
-**Epics:** E18, E19  
-**Exit:** Sample plugin fail-closed; export on demand.
-
----
-
-## Parallelization tips
-
-| Parallel tracks | After |
-|-----------------|-------|
-| Storage ‖ Events ‖ UI tokens | Wave 0 |
-| Identity ‖ Preferences UI | Wave 1 |
-| AI fake provider ‖ CSV discovery | Wave 2 |
-| Applications UI ‖ Queue domain | Wave 3 (apps entity first) |
-| Timeline UI ‖ Send toasts | Wave 4 |
-| Agent UI ‖ Scheduler core | Wave 4/5 |
-
----
+Within a wave, epics can proceed in parallel once their unlocks above are satisfied.
 
 ## Hard constraints (never invert)
 
-1. **E10 before any “auto apply” idea** — and still never auto apply.  
-2. **E09 policy before E10 execute** when approval default on.  
-3. **E06 fake provider before real local runner** for unblocking UI.  
-4. **E12 must not gain a dependency on E10 execute** — only shared policy types/tests.  
-5. **No H3/H4 work that violates non-goals** to “go faster.”
-
----
-
-## PE* wave alignment
-
-Platform decomposition waves in [IMPLEMENTATION_ROADMAP.md](../../IMPLEMENTATION_ROADMAP.md) map to the `E*` waves above:
-
-| PE wave | Backlog wave | Notes |
-|---------|--------------|-------|
-| W0 Shell | 0–1 | E01 + E03 |
-| W1 Data & events | 1 | E02 |
-| W2 Trust & identity | 2 | E04 + E05 (+ empty states) |
-| W3 Local intelligence | 3 | E06 |
-| W4 Craft objects | 3 | E07 + E08 |
-| W5 Sovereignty | 4 | E09 + E10 + E13 |
-| W6 Agent & nudges | 5 | E12 + E11 |
-| W7 First-run polish | 6 | E14 + QA |
-| W8 Experimental | — | Admit via FEATURES |
-| W9 Future | 7–9 | E15–E19 + PE Future stubs |
-
-GitHub hierarchy (Milestone → Epic → Story → Task): [GITHUB_PROJECT_IMPORT.md](./GITHUB_PROJECT_IMPORT.md).  
-**Canonical task order:** [IMPLEMENTATION_ORDER.md](../../IMPLEMENTATION_ORDER.md).
-
----
-
-## Mapping to ADRs
-
-| Wave | ADRs exercised |
-|------|----------------|
-| 0 | 0001 Tauri, 0002 React, 0008 monorepo, 0011 TS |
-| 1 | 0003 events, 0006 storage, 0013 IPC |
-| 2–3 | 0005 AI |
-| 4 | 0009 send boundary, 0007 testing |
-| 5 | 0010 scheduler |
-| 9 | 0004 plugins, 0012 extensions |
+1. PE09 approval policy lands before PE10 send executes.
+2. PE06 agent never gains a dependency on PE10 send — fence tests only.
+3. PE10 exists before any "auto apply" idea — and even then, never auto-apply.
+4. PE11 nudges never bypass quiet hours (PE04-S02).
+5. No Experimental or Future work that violates the product non-goals to "go faster."

@@ -1,6 +1,6 @@
 # JobJitsu Copy Guidelines
 
-How product strings are structured and where to find patterns. Voice lives in [VOICE_AND_TONE.md](./VOICE_AND_TONE.md); mechanics in [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md).
+How product strings are structured and where to find patterns. Voice and writing mechanics live in [VOICE_AND_TONE.md](./VOICE_AND_TONE.md).
 
 ---
 

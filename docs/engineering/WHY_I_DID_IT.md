@@ -5,6 +5,26 @@ Written so a human can see **the problem**, **the options**, **what we chose**, 
 
 ---
 
+## 2026-08-11 — Docs consolidation: delete scaffolding, board becomes SSOT
+
+### The problem
+
+~19k lines of markdown for a codebase this size. Root held 15 one-shot reports/constitutions from the AI bootstrap phase; `docs/backlog` and `docs/roadmap` carried two parallel story systems (US-### vs PE*), both drifting from the GitHub board; `docs/prompts` was a finished pipeline; several brand/design docs restated each other. Docs disagreed with shipped code (README said “domain logic not implemented yet” while Craft ships drafts).
+
+### Decision
+
+- **Delete** generated reports, bootstrap prompts, root pointer stubs, import artifacts, and both constitutions (~45 files). Content stays recoverable in git history; laws live on in `.cursor/rules/`, `DEFINITION_OF_DONE.md`, and `docs/architecture/`.
+- **Merge** small satellites into their hubs: writing mechanics → `VOICE_AND_TONE.md`; series plan + template → `ARTICLE_SYSTEM.md`; spacing/radius/elevation → `DESIGN_TOKENS.md`; workflow engine sketch → `AI_ARCHITECTURE.md` (marked “not yet built”); sellable-MVP bar → `VERTICAL_SLICES.md`.
+- **One story system:** `docs/backlog/USER_STORIES.md` becomes a compact PE* catalog with shipped/partial/todo status; the GitHub project board owns acceptance-criteria detail. `docs/roadmap/` folder retired.
+- **Trim** `PLATFORM_SPECIFICATION.md` from ~2.5k lines to a functional spec of what exists vs what is planned.
+- **Issues aligned with code:** closed #15 (deny-by-default IPC) and #41 (enqueue for review) as shipped; left audit comments on the ten partially-implemented stories.
+
+### Constraint that shaped everything
+
+The Docusaurus site builds `docs/` in place with `onBrokenLinks: throw`, and the remark plugin rewrites docs→repo-root links to GitHub blob URLs. So every deletion required fixing inbound links in docs, READMEs, and `website/src/pages/*.tsx`; `pnpm check` (website build) is the safety net.
+
+---
+
 ## 2026-08-11 — Craft prepare: progress + survive navigation
 
 ### The problem

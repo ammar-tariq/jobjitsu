@@ -49,8 +49,7 @@ flowchart TB
 | [PLUGIN_ARCHITECTURE.md](./PLUGIN_ARCHITECTURE.md) | Agent skills and plugin host |
 | [EXTENSION_SYSTEM.md](./EXTENSION_SYSTEM.md) | Broader host contributions & capabilities |
 | [DESKTOP_ARCHITECTURE.md](./DESKTOP_ARCHITECTURE.md) | Shell, IPC, UI, privacy chrome |
-| [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | AI Provider, Context Builder, honest AI |
-| [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) | Workflow, Task Queue, AI Validation |
+| [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) | AI Provider, Context Builder, honest AI, workflow engine contract |
 | [DATA_MODELS.md](./DATA_MODELS.md) | Conceptual entity schemas & ownership |
 | [SCHEDULER.md](./SCHEDULER.md) | Local jobs, follow-ups, quiet automation |
 | [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) | Privacy, sovereignty, and quality bars |
@@ -79,7 +78,7 @@ Violating a [non-goal](../product/NON_GOALS.md) is an architecture defect, not a
 | Identity & Resume / Knowledge Base | `packages/identity` (+ storage); see [DATA_MODELS.md](./DATA_MODELS.md) |
 | Preferences | `packages/preferences` / `config` |
 | Local Intelligence | `packages/ai` (Provider, Model Manager, Context Builder, Validation) |
-| Agent / Workflow / Task Queue | `packages/agent` — see [WORKFLOW_ENGINE.md](./WORKFLOW_ENGINE.md) |
+| Agent / Workflow / Task Queue | `packages/agent` — see [AI_ARCHITECTURE.md](./AI_ARCHITECTURE.md) (workflow engine section) |
 | Discovery & Curation | `packages/discovery` (+ extension Job Providers) |
 | Applications | `packages/applications` |
 | Queue & Review | `packages/queue` |

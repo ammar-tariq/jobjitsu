@@ -9,11 +9,6 @@ export default function ContributingPage(): ReactNode {
       description="Contributions should stay calm, inspectable, and aligned with privacy and human-owned Send. Process lives in the engineering docs — not duplicated here."
       docs={[
         {
-          label: "Engineering constitution",
-          to: "https://github.com/ammar-tariq/jobjitsu/blob/main/ENGINEERING_CONSTITUTION.md",
-          description: "How software is built on JobJitsu.",
-        },
-        {
           label: "Definition of Done",
           to: "https://github.com/ammar-tariq/jobjitsu/blob/main/DEFINITION_OF_DONE.md",
           description: "Documented, tested, typed, reviewed, lint, build.",

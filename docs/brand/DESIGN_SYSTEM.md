@@ -107,72 +107,15 @@ Align caution with Amber and success with Jade from the brand palette.
 
 ---
 
-## 5. Motion Guidelines
+## 5. Motion (brand intent)
 
-Motion expresses **presence and hierarchy**, not celebration spam.
-
-### Intent
-- Confirm that something local and fast happened.
-- Guide attention to the next calm step.
-- Never block the user with ornamental animation.
-
-### Timing
-
-| Use | Duration | Easing |
-|-----|----------|--------|
-| Micro (hover, toggle) | 120–160 ms | ease-out |
-| Standard (panels, rows) | 180–240 ms | ease-in-out |
-| Emphasis (success toast in) | 240–320 ms | ease-out |
-| Exit | 120–200 ms | ease-in |
-
-Avoid bounce and elastic springs on productive surfaces. Soft ease only.
-
-### Approved Motions (ship 2–3 intentional patterns app-wide)
-1. **Status pulse (subtle):** Agent ready — slow opacity or soft teal breath on the badge (very low amplitude).
-2. **Row settle:** New queue item eases in from 4–8 px above with fade — no slide from off-screen across the window.
-3. **Toast rise:** Success/error toasts rise slightly and fade; auto-dismiss without drama.
-
-### Disallowed
-- Confetti, fireworks, full-screen flashes
-- Looping attention-grabbers on idle (except the quiet badge breath)
-- Parallax dashboards
-- Motion that ignores reduced-motion preferences
-
-### Reduced Motion
-When `prefers-reduced-motion: reduce` (or OS equivalent): snap to end states; keep opacity fades ≤100 ms or cut entirely; never convey meaning by motion alone.
+Motion expresses **presence and hierarchy**, not celebration spam: confirm that something local and fast happened, guide attention to the next calm step, never block with ornament. Approved patterns (status pulse, row settle, toast rise), timing/easing tables, and reduced-motion rules live in [../design-system/ANIMATION.md](../design-system/ANIMATION.md). Never confetti, parallax dashboards, or motion that ignores `prefers-reduced-motion`.
 
 ---
 
-## 6. Accessibility Guidelines
+## 6. Accessibility (brand intent)
 
-JobJitsu’s calm UI must remain usable under WCAG **AA** (AAA where brand contrast already allows).
-
-### Contrast
-- Indigo on Cloud: AAA — preferred for text.
-- Teal on Midnight: large text / UI chrome OK; for small body text on dark, prefer white/Slate or darker teal `#14B8A6`.
-- Never rely on teal alone to mean “clickable” without another cue (underline, weight, icon).
-
-### Focus
-- Visible focus ring: teal (`#2DD4BF`) or high-contrast equivalent on dark/light.
-- Never `outline: none` without a replacement.
-- Logical tab order matching visual order.
-
-### Keyboard
-- Primary workflows (queue review, approve send, preferences) fully keyboard operable.
-- Shortcuts documented in a calm shortcuts panel — no vim-only traps.
-
-### Semantics
-- Real buttons/links — not clickable `div`s.
-- Status badges expose text alternatives (“Agent ready”, “On-device”).
-- Toasts and errors use live regions (`assertive` for errors, `polite` for success).
-
-### Motion & Vestibular
-- Honor reduced motion (see Motion).
-- No rapid strobing status lights.
-
-### Inclusive copy
-- Errors say what failed and how to recover — see [ERROR_MESSAGES.md](./ERROR_MESSAGES.md).
-- Do not use color alone for success/caution/error; pair with icon + text.
+Calm UI must remain usable under WCAG **AA** (AAA where brand contrast already allows): visible teal focus rings, keyboard-operable primary workflows, real buttons/links, live regions for toasts and errors, and never color alone to convey state. Contrast pairs, focus specs, and semantics requirements live in [../design-system/ACCESSIBILITY.md](../design-system/ACCESSIBILITY.md); recovery copy in [ERROR_MESSAGES.md](./ERROR_MESSAGES.md).
 
 ---
 

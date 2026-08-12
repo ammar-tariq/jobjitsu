@@ -2,7 +2,7 @@
 
 > Calm confidence. The black belt in the corner of the room — not the shouting competitor.
 
-Companion docs: [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md) · [WRITING_STYLE_GUIDE.md](./WRITING_STYLE_GUIDE.md) · [COPY_GUIDELINES.md](./COPY_GUIDELINES.md)
+Companion docs: [PRODUCT_PHILOSOPHY.md](./PRODUCT_PHILOSOPHY.md) · [COPY_GUIDELINES.md](./COPY_GUIDELINES.md)
 
 ---
 
@@ -89,6 +89,17 @@ Celebrate technique and consistency. Treat setbacks as information.
 | review / approve | “let AI decide” |
 | preferences | “hack your funnel” |
 | queued | pending forever / stuck |
+
+## Writing mechanics
+
+- **Short by default.** One idea per sentence; cut throat-clearing (“In order to…”, “Please note that…”). Concrete over abstract: “Requires approval before send”, not “Enhanced safety controls”.
+- **Sentence case** for UI (buttons, menus, titles, toasts): “Send application”, not “Send Application”. **JobJitsu** is always one word, two capital Js.
+- **Punctuation:** periods over exclamation marks; Oxford comma; em dashes sparingly and only in marketing prose.
+- **Numbers:** digits for counts and metrics (“3 this week”, “12 queued”); UI always uses digits.
+- **Contractions** are welcome (“couldn’t”, “you’re”) — not chatty slang (“gonna”).
+- **Buttons:** verb + object (“Save preferences”, “Approve send”); destructive actions are specific (“Delete draft”, not “Delete”); toggles describe the state being enabled (“Require approval before send”).
+- **Inclusive:** no “guys”, “ninja”, “rockstar”; employers are not enemies; errors never blame the user.
+- **Claims:** “runs locally”, “open-source” — never “guarantees interviews” or “beats every ATS”. AI “helps draft / tailor / queue”, it does not “get you hired”.
 
 ## UI terminology (development)
 
