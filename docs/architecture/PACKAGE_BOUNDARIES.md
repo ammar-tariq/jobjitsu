@@ -217,9 +217,11 @@ flowchart TB
   applications --> queue
   applications --> send
   applications --> followups
+  applications --> mailbox
   queue --> send
   ai --> agent
   followups --> scheduler
+  storage --> mailbox
 ```
 
 **Normative allowed domain edges (summary):**
@@ -233,6 +235,7 @@ flowchart TB
 | `ai` | `identity` via **KnowledgeReader** port (read), `shared`, `events` |
 | `discovery` | `shared`, `events`, extension sources |
 | `timeline` | `events` / storage only — no domain writes upstream |
+| `mailbox` | `applications` (extend), `events`, `storage`, `shared`, `core` — **never** `ai` (host port) or `send` |
 
 See also [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md).
 
@@ -242,11 +245,11 @@ See also [SYSTEM_ARCHITECTURE.md](./SYSTEM_ARCHITECTURE.md).
 
 | Concern | Owner until epic |
 |---------|------------------|
-| Mail sync (`Email.Synced`) | Host + `send` channel adapter (Experimental/Future product depth) |
+| Mail sync (`Email.Synced`) | `@jobjitsu/mailbox` (PE20) — inbound only; `send` stays egress |
 | OS / in-app notifications | Desktop shell (host), calm policy from preferences |
 | Browser automation apply-assist | Experimental `send.channel` / extension — never bypass Queue→Send |
 
-No new packages required for H1 Core.
+`@jobjitsu/mailbox` is the PE20 inbound package. Do not add a second mail CRM.
 
 ---
 

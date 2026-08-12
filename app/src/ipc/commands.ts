@@ -36,12 +36,35 @@ export const IPC_ALLOWLIST = [
   "preferences.setCraftPreferences",
   "preferences.getLocalModelPath",
   "preferences.setLocalModelPath",
+  "resources.get",
   "applications.list",
   "applications.createDraft",
   "applications.updateDraft",
   "applications.deleteDraft",
   "applications.tailorDraft",
   "applications.generateCoverLetter",
+  "applications.merge",
+  "applications.archive",
+  "applications.override",
+  "mailbox.listIntegrations",
+  "mailbox.connectSample",
+  "mailbox.beginConnect",
+  "mailbox.connectProvider",
+  "mailbox.sync",
+  "mailbox.getIntegration",
+  "mailbox.disconnect",
+  "mailbox.deleteData",
+  "mailbox.getDashboard",
+  "mailbox.listActions",
+  "mailbox.completeAction",
+  "mailbox.listTimeline",
+  "mailbox.listLinkedEmails",
+  "mailbox.getEmail",
+  "mailbox.confirmMatch",
+  "mailbox.keepSeparate",
+  "mailbox.dismissDuplicate",
+  "mailbox.getSettings",
+  "mailbox.updateSettings",
   "craft.generate",
   "craft.exportResume",
   "craft.chatRefine",
@@ -179,6 +202,15 @@ export type CraftPreferencesPatchInput = {
   readonly constraints?: readonly string[];
 };
 
+export type ResourceSnapshotResult = {
+  readonly available: boolean;
+  readonly cpuPercent: number | null;
+  readonly memoryUsedBytes: number | null;
+  readonly memoryTotalBytes: number | null;
+  readonly memoryPercent: number | null;
+  readonly message?: string;
+};
+
 export type ApplicationSnapshot = {
   readonly id: string;
   readonly stage: string;
@@ -195,6 +227,18 @@ export type ApplicationSnapshot = {
   readonly followUpAt?: string;
   readonly followUpDraftText?: string;
   readonly followUpId?: string;
+  readonly source?: string;
+  readonly lifecycleStatus?: string;
+  readonly lifecycleLabel?: string;
+  readonly companyDomain?: string;
+  readonly appliedAt?: string;
+  readonly lastActivityAt?: string;
+  readonly nextAction?: string;
+  readonly nextActionDueAt?: string;
+  readonly recruiterName?: string;
+  readonly recruiterEmail?: string;
+  readonly confidence?: number;
+  readonly archived?: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -225,6 +269,8 @@ export type ApplicationDraftUpdateInput = {
   readonly followUpAt?: string | null;
   readonly followUpDraftText?: string | null;
   readonly stage?: string;
+  readonly lifecycleStatus?: string | null;
+  readonly archived?: boolean;
 };
 
 export type ApplicationTailorDraftInput = {
@@ -355,14 +401,102 @@ export type ApplicationDuplicateWarningSnapshot = {
   readonly message: string;
 };
 
-/** Local device load (CPU / memory) — read on this device, never sent anywhere. */
-export type ResourceSnapshotResult = {
-  readonly available: boolean;
-  readonly cpuPercent: number | null;
-  readonly memoryUsedBytes: number | null;
-  readonly memoryTotalBytes: number | null;
-  readonly memoryPercent: number | null;
-  readonly message?: string;
+export type MailboxIntegrationSnapshot = {
+  readonly id: string;
+  readonly provider: string;
+  readonly label: string;
+  readonly emailAddress?: string;
+  readonly connected: boolean;
+  readonly lastSyncedAt?: string;
+  readonly syncStatus: string;
+  readonly syncError?: string;
+  readonly emailsProcessed: number;
+  readonly emailsTotal?: number;
+  readonly jobRelatedCount: number;
+  readonly applicationsFound: number;
+};
+
+export type MailboxActionSnapshot = {
+  readonly id: string;
+  readonly applicationId?: string;
+  readonly emailId?: string;
+  readonly actionType: string;
+  readonly priority: string;
+  readonly description: string;
+  readonly dueAt?: string;
+  readonly completed: boolean;
+};
+
+export type MailboxTimelineSnapshot = {
+  readonly id: string;
+  readonly type: string;
+  readonly at: string;
+  readonly summary: string;
+  readonly emailId?: string;
+  readonly flagged: boolean;
+};
+
+export type MailboxEmailSnapshot = {
+  readonly id: string;
+  readonly subject: string;
+  readonly senderEmail: string;
+  readonly senderName?: string;
+  readonly snippet: string;
+  readonly bodyText?: string;
+  readonly receivedAt?: string;
+  readonly sentAt?: string;
+  readonly direction: string;
+  readonly classification?: string;
+  readonly matchUncertain?: boolean;
+};
+
+export type MailboxDashboardSnapshot = {
+  readonly summary: {
+    readonly totalApplications: number;
+    readonly activeApplications: number;
+    readonly interviews: number;
+    readonly assessments: number;
+    readonly offers: number;
+    readonly rejected: number;
+    readonly awaitingResponse: number;
+    readonly actionsRequired: number;
+  };
+  readonly funnel: {
+    readonly applied: number;
+    readonly responses: number;
+    readonly interviews: number;
+    readonly offers: number;
+  };
+  readonly actions: readonly MailboxActionSnapshot[];
+  readonly duplicates: readonly {
+    readonly leftId: string;
+    readonly rightId: string;
+    readonly companyName: string;
+    readonly leftRole: string;
+    readonly rightRole: string;
+  }[];
+  readonly analytics: {
+    readonly windowDays: number;
+    readonly applications: number;
+    readonly responses: number;
+    readonly responseRate: number;
+    readonly interviews: number;
+    readonly interviewRate: number;
+    readonly offers: number;
+    readonly offerRate: number;
+  };
+  readonly integrations: readonly MailboxIntegrationSnapshot[];
+};
+
+export type MailboxSettingsSnapshot = {
+  readonly gmailClientId?: string;
+  readonly outlookClientId?: string;
+  readonly lookbackDays: number;
+  readonly noResponseAfterDays: number;
+  readonly notifyAssessments: boolean;
+  readonly notifyInterviews: boolean;
+  readonly notifyRejections: boolean;
+  readonly notifyOffers: boolean;
 };
 
 export type IpcPayloadMap = {
@@ -397,12 +531,48 @@ export type IpcPayloadMap = {
   readonly "preferences.setCraftPreferences": CraftPreferencesPatchInput;
   readonly "preferences.getLocalModelPath": undefined;
   readonly "preferences.setLocalModelPath": { readonly path: string };
+  readonly "resources.get": undefined;
   readonly "applications.list": undefined;
   readonly "applications.createDraft": ApplicationDraftCreateInput;
   readonly "applications.updateDraft": ApplicationDraftUpdateInput;
   readonly "applications.deleteDraft": { readonly id: string };
   readonly "applications.tailorDraft": ApplicationTailorDraftInput;
   readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftInput;
+  readonly "applications.merge": { readonly targetId: string; readonly sourceId: string };
+  readonly "applications.archive": { readonly id: string };
+  readonly "applications.override": {
+    readonly id: string;
+    readonly companyName?: string;
+    readonly roleTitle?: string;
+    readonly lifecycleStatus?: string;
+    readonly appliedAt?: string;
+    readonly recruiterName?: string;
+    readonly recruiterEmail?: string;
+  };
+  readonly "mailbox.listIntegrations": undefined;
+  readonly "mailbox.connectSample": undefined;
+  readonly "mailbox.beginConnect": { readonly provider: "gmail" | "outlook" };
+  readonly "mailbox.connectProvider": {
+    readonly provider: "gmail" | "outlook";
+    readonly accessToken: string;
+    readonly refreshToken?: string;
+    readonly emailAddress?: string;
+  };
+  readonly "mailbox.sync": { readonly id: string };
+  readonly "mailbox.getIntegration": { readonly id: string };
+  readonly "mailbox.disconnect": { readonly id: string };
+  readonly "mailbox.deleteData": { readonly id: string };
+  readonly "mailbox.getDashboard": undefined;
+  readonly "mailbox.listActions": undefined;
+  readonly "mailbox.completeAction": { readonly id: string };
+  readonly "mailbox.listTimeline": { readonly applicationId: string };
+  readonly "mailbox.listLinkedEmails": { readonly applicationId: string };
+  readonly "mailbox.getEmail": { readonly id: string };
+  readonly "mailbox.confirmMatch": { readonly emailId: string; readonly applicationId: string };
+  readonly "mailbox.keepSeparate": { readonly emailId: string };
+  readonly "mailbox.dismissDuplicate": { readonly leftId: string; readonly rightId: string };
+  readonly "mailbox.getSettings": undefined;
+  readonly "mailbox.updateSettings": Partial<MailboxSettingsSnapshot>;
   readonly "craft.generate": CraftGenerateInput;
   readonly "craft.exportResume": CraftExportResumeInput;
   readonly "craft.chatRefine": CraftChatRefineInput;
@@ -460,6 +630,7 @@ export type IpcResultMap = {
   readonly "preferences.setCraftPreferences": { readonly craft: CraftPreferencesSnapshot };
   readonly "preferences.getLocalModelPath": { readonly path: string | null };
   readonly "preferences.setLocalModelPath": { readonly path: string | null };
+  readonly "resources.get": { readonly resources: ResourceSnapshotResult };
   readonly "applications.list": { readonly applications: readonly ApplicationSnapshot[] };
   readonly "applications.createDraft": {
     readonly application: ApplicationSnapshot;
@@ -472,6 +643,30 @@ export type IpcResultMap = {
   readonly "applications.deleteDraft": { readonly deleted: boolean };
   readonly "applications.tailorDraft": ApplicationTailorDraftResult;
   readonly "applications.generateCoverLetter": ApplicationCoverLetterDraftResult;
+  readonly "applications.merge": { readonly application: ApplicationSnapshot | null };
+  readonly "applications.archive": { readonly application: ApplicationSnapshot | null };
+  readonly "applications.override": { readonly application: ApplicationSnapshot | null };
+  readonly "mailbox.listIntegrations": {
+    readonly integrations: readonly MailboxIntegrationSnapshot[];
+  };
+  readonly "mailbox.connectSample": { readonly integration: MailboxIntegrationSnapshot };
+  readonly "mailbox.beginConnect": { readonly status: string; readonly message: string };
+  readonly "mailbox.connectProvider": { readonly integration: MailboxIntegrationSnapshot };
+  readonly "mailbox.sync": { readonly integration: MailboxIntegrationSnapshot };
+  readonly "mailbox.getIntegration": { readonly integration: MailboxIntegrationSnapshot | null };
+  readonly "mailbox.disconnect": { readonly integration: MailboxIntegrationSnapshot | null };
+  readonly "mailbox.deleteData": { readonly deleted: boolean };
+  readonly "mailbox.getDashboard": { readonly dashboard: MailboxDashboardSnapshot };
+  readonly "mailbox.listActions": { readonly actions: readonly MailboxActionSnapshot[] };
+  readonly "mailbox.completeAction": { readonly action: MailboxActionSnapshot | null };
+  readonly "mailbox.listTimeline": { readonly events: readonly MailboxTimelineSnapshot[] };
+  readonly "mailbox.listLinkedEmails": { readonly emails: readonly MailboxEmailSnapshot[] };
+  readonly "mailbox.getEmail": { readonly email: MailboxEmailSnapshot | null };
+  readonly "mailbox.confirmMatch": { readonly email: MailboxEmailSnapshot | null };
+  readonly "mailbox.keepSeparate": { readonly email: MailboxEmailSnapshot | null };
+  readonly "mailbox.dismissDuplicate": { readonly dismissed: boolean };
+  readonly "mailbox.getSettings": { readonly settings: MailboxSettingsSnapshot };
+  readonly "mailbox.updateSettings": { readonly settings: MailboxSettingsSnapshot };
   readonly "craft.generate": CraftGenerateResult;
   readonly "craft.exportResume": CraftExportResumeResult;
   readonly "craft.chatRefine": CraftChatRefineResult;

@@ -147,4 +147,24 @@ describe("@jobjitsu/applications drafts (PE08-S01)", () => {
     expect(await repository.delete(created.application.id)).toBe(true);
     expect(await repository.list()).toHaveLength(0);
   });
+
+  it("stores email lifecycle and preserves user overrides", async () => {
+    const repository = createMemoryApplicationRepository();
+    const created = await createApplicationDraft({
+      repository,
+      input: { companyName: "Acme", roleTitle: "Engineer" },
+    });
+    const updated = await updateApplicationDraft({
+      repository,
+      patch: {
+        id: created.application.id,
+        source: "email",
+        lifecycleStatus: "interview_scheduled",
+        userOverrides: { companyName: "Acme Inc" },
+      },
+    });
+    expect(updated.application.source).toBe("email");
+    expect(updated.application.lifecycleStatus).toBe("interview_scheduled");
+    expect(updated.application.userOverrides?.companyName).toBe("Acme Inc");
+  });
 });

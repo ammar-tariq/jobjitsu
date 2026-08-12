@@ -85,7 +85,9 @@ keep.
   between stages explicitly (for example, mark ready for review).
 - Tailor résumé and generate cover letter actions run through the host Agent against the
   selected application.
-- Nothing in this view sends anything anywhere.
+- Opt-in email intelligence can create and update drafts from a connected mailbox. Mail,
+  classifications, and sync cursors stay on this device. Later Sync now only fetches new
+  mail. Nothing in this view sends anything anywhere.
 
 ### Queue
 
@@ -128,6 +130,9 @@ keep.
   models folder is missing or empty, the listing explains what to do in plain language.
 - Approval before send: a toggle, on by default; turning it off is an explicit choice.
 - Craft tone: a saved preference applied when preparing drafts.
+- Email: connect a sample mailbox (or Gmail/Outlook with a client ID). Tokens stay in the
+  host. JobJitsu never asks for a mailbox password. Gmail/Outlook browser loopback is not
+  finished yet.
 - Appearance: dark or light theme; dark is the default.
 
 ### Timeline
@@ -164,6 +169,8 @@ shell today.
 - **Quiet-hours notifications** — local notifications that respect quiet hours and stay
   silent by default.
 - **Sanitized logs view** — an inspectable local log with career content redacted.
+- **Gmail/Outlook OAuth loopback** — finish browser consent so Connect Gmail / Outlook
+  stores tokens on this device (PE20-S02). Mailbox remains inbound-only.
 
 ---
 

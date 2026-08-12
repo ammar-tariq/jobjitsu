@@ -1,6 +1,6 @@
 # User stories — epic catalog
 
-Compact map of JobJitsu's platform epics (PE01–PE13) and their stories.
+Compact map of JobJitsu's platform epics (PE01–PE13, plus admitted PE20) and their stories.
 
 > **SSOT:** the [JobJitsu Development board](https://github.com/users/ammar-tariq/projects/2) owns
 > acceptance-criteria detail and live status. This file is the map, not the spec.
@@ -163,6 +163,15 @@ Calm first run and empty states that invite one next step.
 | PE13-S01 | Complete first-run onboarding without pressure (missing résumé import + approval steps) | Partial · [#54](https://github.com/ammar-tariq/jobjitsu/issues/54) |
 | PE13-S02 | Calm empty states for primary lists (inline empties; no shared component) | Partial · [#28](https://github.com/ammar-tariq/jobjitsu/issues/28) |
 
+## PE20 — Email Integration ([#117](https://github.com/ammar-tariq/jobjitsu/issues/117))
+
+Opt-in inbound mailbox sync. Extends existing Application drafts. Never sends.
+
+| Story | Summary | Status |
+| --- | --- | --- |
+| PE20-S01 | Opt-in mailbox sync, classify/match, incremental cursors | Partial · [#118](https://github.com/ammar-tariq/jobjitsu/issues/118) · [PR #120](https://github.com/ammar-tariq/jobjitsu/pull/120) |
+| PE20-S02 | Complete Gmail/Outlook OAuth loopback | Todo · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) |
+
 ## Cross-cutting
 
 | Story | Summary | Status |
@@ -171,7 +180,7 @@ Calm first run and empty states that invite one next step.
 
 ## Beyond H1
 
-PE14–PE20 (Experimental: knowledge base, AI validation, workflows, automation, playground, email)
+PE14–PE19 (Experimental: knowledge base, AI validation, workflows, automation, playground)
 and PE21–PE30 (Future) are roadmap bands only. Stories join this catalog when a board issue exists.
 
-**Tally:** 35 shipped · 10 partial · 11 todo — 56 tracked stories.
+**Tally:** 35 shipped · 11 partial · 12 todo — 58 tracked stories.

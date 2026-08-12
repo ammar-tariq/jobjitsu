@@ -13,6 +13,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
+import { MailboxPreferences } from "./MailboxPreferences.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -384,6 +385,8 @@ export function PreferencesView({
           </Typography>
         ) : null}
       </Stack>
+
+      <MailboxPreferences bridge={bridge} />
 
       <Stack spacing={1.5} data-testid="jj-appearance">
         <Typography component="h3" variant="body2" color="text.secondary">

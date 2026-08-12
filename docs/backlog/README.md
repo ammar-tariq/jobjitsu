@@ -6,7 +6,7 @@ these files are the compact map.
 
 | Doc | Contents |
 | --- | --- |
-| [USER_STORIES.md](./USER_STORIES.md) | Epic + story catalog (PE01–PE13) with Shipped / Partial / Todo status |
+| [USER_STORIES.md](./USER_STORIES.md) | Epic + story catalog (PE01–PE13, PE20) with Shipped / Partial / Todo status |
 | [DEPENDENCY_GRAPH.md](./DEPENDENCY_GRAPH.md) | Which epics unlock which; build waves |
 | [VERTICAL_SLICES.md](./VERTICAL_SLICES.md) | One-story-at-a-time process, completed slices, sellable MVP bar |
 

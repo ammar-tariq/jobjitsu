@@ -36,7 +36,7 @@ It is **not** a cloud push service, streak enforcer, or guilt engine.
 | `followup.due` | Scheduled instant | Emit `FollowUp.Due`; notify politely |
 | `agent.prepWindow` | User window | Offer/start preparative run if enabled |
 | `ai.healthCheck` | Periodic light | Refresh Agent · On-device chrome truth |
-| `timeline.compact` | Maintenance | Local retention policy |
+| `mailbox.incrementalSync` | After opt-in connect / Sync now | Import **new** mail from the saved cursor; classify locally; never send |
 | `extension.*` | Declared by extensions | Capability-gated |
 
 Send itself is **never** auto-fired by scheduler without going through Queue policy and user sovereignty. A job may at most enqueue “ready for review” or mark follow-up due.

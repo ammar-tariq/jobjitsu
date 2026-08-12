@@ -19,6 +19,7 @@
     { "path": "./packages/agent" },
     { "path": "./packages/discovery" },
     { "path": "./packages/applications" },
+    { "path": "./packages/mailbox" },
     { "path": "./packages/queue" },
     { "path": "./packages/send" },
     { "path": "./packages/followups" },

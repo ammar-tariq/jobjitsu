@@ -83,6 +83,9 @@ importers:
       '@jobjitsu/logger':
         specifier: workspace:*
         version: link:../packages/logger
+      '@jobjitsu/mailbox':
+        specifier: workspace:*
+        version: link:../packages/mailbox
       '@jobjitsu/preferences':
         specifier: workspace:*
         version: link:../packages/preferences
@@ -345,6 +348,31 @@ importers:
         version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)(terser@5.49.0)
 
   packages/logger:
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)(terser@5.49.0)
+
+  packages/mailbox:
+    dependencies:
+      '@jobjitsu/applications':
+        specifier: workspace:*
+        version: link:../applications
+      '@jobjitsu/core':
+        specifier: workspace:*
+        version: link:../core
+      '@jobjitsu/events':
+        specifier: workspace:*
+        version: link:../events
+      '@jobjitsu/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@jobjitsu/storage':
+        specifier: workspace:*
+        version: link:../storage
     devDependencies:
       typescript:
         specifier: ^5.7.2

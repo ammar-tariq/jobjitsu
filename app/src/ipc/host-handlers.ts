@@ -1,11 +1,15 @@
 import {
   createApplicationDraft,
   deleteApplicationDraft,
+  isApplicationLifecycleStatus,
+  lifecycleLabel,
+  resolveApplicationView,
   trackingStatusForStage,
   updateApplicationDraft,
   type Application,
   type ApplicationRepository,
 } from "@jobjitsu/applications";
+import type { MailboxService } from "@jobjitsu/mailbox";
 import type { EventBus } from "@jobjitsu/events";
 import type { PathLibrary, ProfileRepository, ResumeLibrary } from "@jobjitsu/identity";
 import type { PreferencesFacade } from "@jobjitsu/preferences";
@@ -77,12 +81,13 @@ function toCraftSessionSnapshot(session: CraftSessionState): CraftSessionSnapsho
 }
 
 function toApplicationSnapshot(application: Application): ApplicationSnapshot {
+  const resolved = resolveApplicationView(application);
   return {
     id: application.id,
     stage: application.stage,
     trackingStatus: trackingStatusForStage(application.stage),
-    companyName: application.companyName,
-    roleTitle: application.roleTitle,
+    companyName: resolved.companyName,
+    roleTitle: resolved.roleTitle,
     sourceUrl: application.sourceUrl,
     requisitionId: application.requisitionId,
     roleId: application.roleId,
@@ -93,6 +98,18 @@ function toApplicationSnapshot(application: Application): ApplicationSnapshot {
     followUpAt: application.followUpAt,
     followUpDraftText: application.followUpDraftText,
     followUpId: application.followUpId,
+    source: application.source,
+    lifecycleStatus: resolved.lifecycleStatus,
+    lifecycleLabel: resolved.lifecycleStatus ? lifecycleLabel(resolved.lifecycleStatus) : undefined,
+    companyDomain: resolved.companyDomain,
+    appliedAt: resolved.appliedAt,
+    lastActivityAt: application.lastActivityAt,
+    nextAction: application.nextAction,
+    nextActionDueAt: application.nextActionDueAt,
+    recruiterName: resolved.recruiterName,
+    recruiterEmail: resolved.recruiterEmail,
+    confidence: application.confidence,
+    archived: application.archived,
     createdAt: application.createdAt,
     updatedAt: application.updatedAt,
   };
@@ -117,6 +134,8 @@ export type CreateHostIpcOptions = {
   readonly getPathLibrary?: () => PathLibrary | undefined;
   readonly applications?: ApplicationRepository;
   readonly getApplications?: () => ApplicationRepository | undefined;
+  readonly mailbox?: MailboxService;
+  readonly getMailbox?: () => MailboxService | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly getPreferences?: () => PreferencesFacade | undefined;
@@ -186,6 +205,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
   const getResumeLibrary = options.getResumeLibrary ?? (() => options.resumeLibrary);
   const getPathLibrary = options.getPathLibrary ?? (() => options.pathLibrary);
   const getApplications = options.getApplications ?? (() => options.applications);
+  const getMailbox = options.getMailbox ?? (() => options.mailbox);
   const dataRoot = options.dataRoot ?? createMemoryDataRootStore();
   const getPreferences = options.getPreferences ?? (() => options.preferences);
   const folderPicker = options.folderPicker ?? createHostFolderPicker();
@@ -839,6 +859,10 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         );
       }
     },
+    "resources.get": async () => {
+      const resources = await readResourceSnapshot();
+      return ok({ resources });
+    },
     "applications.list": async () => {
       const applications = getApplications();
       if (!applications) {
@@ -1175,16 +1199,18 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         return ok({ session: toCraftSessionSnapshot(EMPTY_CRAFT_SESSION) });
       }
       const session = craftSession.patch({
-        resumeText: payload.resumeText,
-        jobDescription: payload.jobDescription,
-        aboutCompany: payload.aboutCompany,
-        resumeDraft: payload.resumeDraft,
-        coverLetterDraft: payload.coverLetterDraft,
-        saveCompany: payload.saveCompany,
-        saveRole: payload.saveRole,
-        chatTarget: payload.chatTarget,
-        chatInput: payload.chatInput,
-        chatMessages: payload.chatMessages,
+        ...(payload.resumeText !== undefined ? { resumeText: payload.resumeText } : {}),
+        ...(payload.jobDescription !== undefined ? { jobDescription: payload.jobDescription } : {}),
+        ...(payload.aboutCompany !== undefined ? { aboutCompany: payload.aboutCompany } : {}),
+        ...(payload.resumeDraft !== undefined ? { resumeDraft: payload.resumeDraft } : {}),
+        ...(payload.coverLetterDraft !== undefined
+          ? { coverLetterDraft: payload.coverLetterDraft }
+          : {}),
+        ...(payload.saveCompany !== undefined ? { saveCompany: payload.saveCompany } : {}),
+        ...(payload.saveRole !== undefined ? { saveRole: payload.saveRole } : {}),
+        ...(payload.chatTarget !== undefined ? { chatTarget: payload.chatTarget } : {}),
+        ...(payload.chatInput !== undefined ? { chatInput: payload.chatInput } : {}),
+        ...(payload.chatMessages !== undefined ? { chatMessages: payload.chatMessages } : {}),
       });
       return ok({ session: toCraftSessionSnapshot(session) });
     },
@@ -1205,6 +1231,266 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       }
       const session = craftSession.prepareDrafts(payload.kind);
       return ok({ session: toCraftSessionSnapshot(session) });
+    },
+    "applications.merge": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({ application: null });
+      }
+      const application = await mailbox.mergeApplications(payload.targetId, payload.sourceId);
+      return ok({ application: application ? toApplicationSnapshot(application) : null });
+    },
+    "applications.archive": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({ application: null });
+      }
+      const application = await mailbox.archiveApplication(payload.id);
+      return ok({ application: application ? toApplicationSnapshot(application) : null });
+    },
+    "applications.override": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({ application: null });
+      }
+      if (payload.lifecycleStatus && !isApplicationLifecycleStatus(payload.lifecycleStatus)) {
+        return err(
+          createAppError("validation", "Unknown application status", {
+            message: "That status is not recognized. Try again.",
+            detail: "applications:lifecycle",
+          }),
+        );
+      }
+      const application = await mailbox.overrideApplication(payload.id, {
+        companyName: payload.companyName,
+        roleTitle: payload.roleTitle,
+        lifecycleStatus: payload.lifecycleStatus
+          ? isApplicationLifecycleStatus(payload.lifecycleStatus)
+            ? payload.lifecycleStatus
+            : undefined
+          : undefined,
+        appliedAt: payload.appliedAt,
+        recruiterName: payload.recruiterName,
+        recruiterEmail: payload.recruiterEmail,
+      });
+      return ok({ application: application ? toApplicationSnapshot(application) : null });
+    },
+    "mailbox.listIntegrations": async () => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({ integrations: [] });
+      }
+      const integrations = await mailbox.listIntegrations();
+      return ok({ integrations: integrations.map(toIntegrationSnapshot) });
+    },
+    "mailbox.connectSample": async () => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return err(
+          createAppError("unavailable", "Mailbox not ready", {
+            message: "Email intelligence is not available yet.",
+            detail: "mailbox:missing",
+          }),
+        );
+      }
+      const integration = await mailbox.connectSampleMailbox();
+      return ok({ integration: toIntegrationSnapshot(integration) });
+    },
+    "mailbox.beginConnect": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({
+          status: "unavailable",
+          message: "Email intelligence is not available yet.",
+        });
+      }
+      return ok(await mailbox.beginProviderConnect(payload.provider));
+    },
+    "mailbox.connectProvider": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return err(
+          createAppError("unavailable", "Mailbox not ready", {
+            message: "Email intelligence is not available yet.",
+            detail: "mailbox:missing",
+          }),
+        );
+      }
+      const integration = await mailbox.connectProvider({
+        provider: payload.provider,
+        tokens: { accessToken: payload.accessToken, refreshToken: payload.refreshToken },
+        emailAddress: payload.emailAddress,
+      });
+      return ok({ integration: toIntegrationSnapshot(integration) });
+    },
+    "mailbox.sync": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return err(
+          createAppError("unavailable", "Mailbox not ready", {
+            message: "Email intelligence is not available yet.",
+            detail: "mailbox:missing",
+          }),
+        );
+      }
+      const integration = await mailbox.sync(payload.id);
+      return ok({ integration: toIntegrationSnapshot(integration) });
+    },
+    "mailbox.getIntegration": async (payload) => {
+      const mailbox = getMailbox();
+      const integration = mailbox ? await mailbox.getIntegration(payload.id) : undefined;
+      return ok({ integration: integration ? toIntegrationSnapshot(integration) : null });
+    },
+    "mailbox.disconnect": async (payload) => {
+      const mailbox = getMailbox();
+      const integration = mailbox ? await mailbox.disconnect(payload.id) : undefined;
+      return ok({ integration: integration ? toIntegrationSnapshot(integration) : null });
+    },
+    "mailbox.deleteData": async (payload) => {
+      const mailbox = getMailbox();
+      if (mailbox) {
+        await mailbox.deleteImportedData(payload.id);
+      }
+      return ok({ deleted: true });
+    },
+    "mailbox.getDashboard": async () => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({
+          dashboard: {
+            summary: {
+              totalApplications: 0,
+              activeApplications: 0,
+              interviews: 0,
+              assessments: 0,
+              offers: 0,
+              rejected: 0,
+              awaitingResponse: 0,
+              actionsRequired: 0,
+            },
+            funnel: { applied: 0, responses: 0, interviews: 0, offers: 0 },
+            actions: [],
+            duplicates: [],
+            analytics: {
+              windowDays: 30,
+              applications: 0,
+              responses: 0,
+              responseRate: 0,
+              interviews: 0,
+              interviewRate: 0,
+              offers: 0,
+              offerRate: 0,
+            },
+            integrations: [],
+          },
+        });
+      }
+      const dashboard = await mailbox.dashboard();
+      return ok({
+        dashboard: {
+          summary: dashboard.summary,
+          funnel: dashboard.funnel,
+          actions: dashboard.actions.map(toActionSnapshot),
+          duplicates: dashboard.duplicates,
+          analytics: {
+            windowDays: dashboard.analytics.windowDays,
+            applications: dashboard.analytics.applications,
+            responses: dashboard.analytics.responses,
+            responseRate: dashboard.analytics.responseRate,
+            interviews: dashboard.analytics.interviews,
+            interviewRate: dashboard.analytics.interviewRate,
+            offers: dashboard.analytics.offers,
+            offerRate: dashboard.analytics.offerRate,
+          },
+          integrations: dashboard.integrations.map(toIntegrationSnapshot),
+        },
+      });
+    },
+    "mailbox.listActions": async () => {
+      const mailbox = getMailbox();
+      const actions = mailbox ? await mailbox.listActions() : [];
+      return ok({ actions: actions.map(toActionSnapshot) });
+    },
+    "mailbox.completeAction": async (payload) => {
+      const mailbox = getMailbox();
+      const action = mailbox ? await mailbox.completeAction(payload.id) : undefined;
+      return ok({ action: action ? toActionSnapshot(action) : null });
+    },
+    "mailbox.listTimeline": async (payload) => {
+      const mailbox = getMailbox();
+      const events = mailbox ? await mailbox.listTimeline(payload.applicationId) : [];
+      return ok({
+        events: events.map((event) => ({
+          id: event.id,
+          type: event.type,
+          at: event.at,
+          summary: event.summary,
+          emailId: event.emailId,
+          flagged: event.flagged,
+        })),
+      });
+    },
+    "mailbox.listLinkedEmails": async (payload) => {
+      const mailbox = getMailbox();
+      const emails = mailbox ? await mailbox.listLinkedEmails(payload.applicationId) : [];
+      return ok({ emails: emails.map(toEmailSnapshot) });
+    },
+    "mailbox.getEmail": async (payload) => {
+      const mailbox = getMailbox();
+      const email = mailbox ? await mailbox.getEmail(payload.id) : undefined;
+      return ok({ email: email ? toEmailSnapshot(email) : null });
+    },
+    "mailbox.confirmMatch": async (payload) => {
+      const mailbox = getMailbox();
+      const email = mailbox
+        ? await mailbox.confirmMatch(payload.emailId, payload.applicationId)
+        : undefined;
+      return ok({ email: email ? toEmailSnapshot(email) : null });
+    },
+    "mailbox.keepSeparate": async (payload) => {
+      const mailbox = getMailbox();
+      const email = mailbox ? await mailbox.keepSeparate(payload.emailId) : undefined;
+      return ok({ email: email ? toEmailSnapshot(email) : null });
+    },
+    "mailbox.dismissDuplicate": async (payload) => {
+      const mailbox = getMailbox();
+      if (mailbox) {
+        await mailbox.dismissDuplicatePair(payload.leftId, payload.rightId);
+      }
+      return ok({ dismissed: true });
+    },
+    "mailbox.getSettings": async () => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({
+          settings: {
+            lookbackDays: 365,
+            noResponseAfterDays: 7,
+            notifyAssessments: true,
+            notifyInterviews: true,
+            notifyRejections: true,
+            notifyOffers: true,
+          },
+        });
+      }
+      return ok({ settings: await mailbox.getSettings() });
+    },
+    "mailbox.updateSettings": async (payload) => {
+      const mailbox = getMailbox();
+      if (!mailbox) {
+        return ok({
+          settings: {
+            lookbackDays: 365,
+            noResponseAfterDays: 7,
+            notifyAssessments: true,
+            notifyInterviews: true,
+            notifyRejections: true,
+            notifyOffers: true,
+          },
+        });
+      }
+      const settings = await mailbox.updateSettings(payload);
+      return ok({ settings });
     },
     "system.getResources": async () => {
       return ok({ resources: await readResourceSnapshot() });
@@ -1231,4 +1517,84 @@ function decodeBase64(value: string): Uint8Array {
   } catch {
     throw new Error("That file could not be read. Try another resume.");
   }
+}
+
+function toIntegrationSnapshot(integration: {
+  readonly id: string;
+  readonly provider: string;
+  readonly label: string;
+  readonly emailAddress?: string;
+  readonly connected: boolean;
+  readonly lastSyncedAt?: string;
+  readonly syncStatus: string;
+  readonly syncError?: string;
+  readonly emailsProcessed: number;
+  readonly emailsTotal?: number;
+  readonly jobRelatedCount: number;
+  readonly applicationsFound: number;
+}) {
+  return {
+    id: integration.id,
+    provider: integration.provider,
+    label: integration.label,
+    emailAddress: integration.emailAddress,
+    connected: integration.connected,
+    lastSyncedAt: integration.lastSyncedAt,
+    syncStatus: integration.syncStatus,
+    syncError: integration.syncError,
+    emailsProcessed: integration.emailsProcessed,
+    emailsTotal: integration.emailsTotal,
+    jobRelatedCount: integration.jobRelatedCount,
+    applicationsFound: integration.applicationsFound,
+  };
+}
+
+function toActionSnapshot(action: {
+  readonly id: string;
+  readonly applicationId?: string;
+  readonly emailId?: string;
+  readonly actionType: string;
+  readonly priority: string;
+  readonly description: string;
+  readonly dueAt?: string;
+  readonly completed: boolean;
+}) {
+  return {
+    id: action.id,
+    applicationId: action.applicationId,
+    emailId: action.emailId,
+    actionType: action.actionType,
+    priority: action.priority,
+    description: action.description,
+    dueAt: action.dueAt,
+    completed: action.completed,
+  };
+}
+
+function toEmailSnapshot(email: {
+  readonly id: string;
+  readonly subject: string;
+  readonly senderEmail: string;
+  readonly senderName?: string;
+  readonly snippet: string;
+  readonly bodyText?: string;
+  readonly receivedAt?: string;
+  readonly sentAt?: string;
+  readonly direction: string;
+  readonly classification?: string;
+  readonly matchUncertain?: boolean;
+}) {
+  return {
+    id: email.id,
+    subject: email.subject,
+    senderEmail: email.senderEmail,
+    senderName: email.senderName,
+    snippet: email.snippet,
+    bodyText: email.bodyText,
+    receivedAt: email.receivedAt,
+    sentAt: email.sentAt,
+    direction: email.direction,
+    classification: email.classification,
+    matchUncertain: email.matchUncertain,
+  };
 }

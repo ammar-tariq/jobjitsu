@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createFakeAiProvider } from "@jobjitsu/ai";
+import { createFakeAiProvider, createFakeContextAssembler } from "@jobjitsu/ai";
 import { createInMemoryEventBus } from "@jobjitsu/events";
 import { createCraftSessionStore } from "./craft-session.js";
 
@@ -32,6 +32,17 @@ describe("craft session store", () => {
     expect(done.coverLetterDraft.length).toBeGreaterThan(0);
     expect(done.job.message).toMatch(/Drafts ready/i);
     expect(snapshots.some((entry) => entry.startsWith("running:"))).toBe(true);
+  });
+
+  it("does not clear résumé when only the job description is patched", () => {
+    const store = createCraftSessionStore({
+      ai: createFakeAiProvider(),
+      assembler: createFakeContextAssembler(),
+    });
+    store.patch({ resumeText: "Sam Chen", jobDescription: "Role A" });
+    store.patch({ jobDescription: "Role B" });
+    expect(store.get().resumeText).toBe("Sam Chen");
+    expect(store.get().jobDescription).toBe("Role B");
   });
 
   it("does not start a second prepare while one is running", async () => {

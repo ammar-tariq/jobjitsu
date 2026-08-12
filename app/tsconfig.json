@@ -16,6 +16,7 @@
     { "path": "../packages/logger" },
     { "path": "../packages/ai" },
     { "path": "../packages/applications" },
+    { "path": "../packages/mailbox" },
     { "path": "../packages/identity" },
     { "path": "../packages/preferences" },
     { "path": "../packages/storage" },

@@ -349,124 +349,130 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
         </Typography>
       </Stack>
 
-      <Stack
-        spacing={1.5}
-        sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-        data-testid="jj-craft-sources"
-      >
+      {preparing && session ? (
+        <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
+      ) : null}
+
+      {preparing ? null : (
         <Stack
-          direction="row"
-          spacing={1}
-          sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
+          spacing={1.5}
+          sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+          data-testid="jj-craft-sources"
         >
-          <Typography variant="subtitle2">Sources</Typography>
-          {hasDrafts || preparing ? (
-            <Button
-              size="small"
-              variant="text"
-              onClick={() => setSourcesOpen((open) => !open)}
-              disabled={preparing}
-            >
-              {sourcesOpen ? "Hide sources" : "Edit sources"}
-            </Button>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
+          >
+            <Typography variant="subtitle2">Sources</Typography>
+            {hasDrafts || preparing ? (
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setSourcesOpen((open) => !open)}
+                disabled={preparing}
+              >
+                {sourcesOpen ? "Hide sources" : "Edit sources"}
+              </Button>
+            ) : null}
+          </Stack>
+
+          <Collapse in={sourcesOpen} timeout="auto" unmountOnExit={false}>
+            <Stack spacing={1.5}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 1.5,
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                }}
+              >
+                <TextField
+                  label="Your résumé"
+                  value={resumeText}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSession((prev) => (prev ? { ...prev, resumeText: value } : prev));
+                    flushPatch({ resumeText: value });
+                  }}
+                  fullWidth
+                  multiline
+                  minRows={5}
+                  maxRows={12}
+                  disabled={preparing}
+                  placeholder="Paste your current résumé…"
+                  slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-input" } }}
+                />
+                <TextField
+                  label="Job description"
+                  value={jobDescription}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSession((prev) => (prev ? { ...prev, jobDescription: value } : prev));
+                    flushPatch({ jobDescription: value });
+                  }}
+                  fullWidth
+                  multiline
+                  minRows={5}
+                  maxRows={12}
+                  disabled={preparing}
+                  placeholder="Paste the job description…"
+                  slotProps={{ htmlInput: { "data-testid": "jj-craft-jd-input" } }}
+                />
+              </Box>
+              <TextField
+                label="About the company"
+                value={aboutCompany}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSession((prev) => (prev ? { ...prev, aboutCompany: value } : prev));
+                  flushPatch({ aboutCompany: value });
+                }}
+                fullWidth
+                multiline
+                minRows={2}
+                maxRows={4}
+                disabled={preparing}
+                placeholder="Optional context"
+                slotProps={{ htmlInput: { "data-testid": "jj-craft-about-company" } }}
+              />
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center" }}>
+                <Button
+                  variant="contained"
+                  disabled={busy}
+                  onClick={() => onGenerate("both")}
+                  data-testid="jj-craft-generate-both"
+                >
+                  {preparing ? "Preparing…" : "Prepare drafts"}
+                </Button>
+                <Button
+                  variant="text"
+                  disabled={busy}
+                  onClick={() => onGenerate("resume")}
+                  data-testid="jj-craft-generate-resume"
+                >
+                  Résumé only
+                </Button>
+                <Button
+                  variant="text"
+                  disabled={busy}
+                  onClick={() => onGenerate("cover_letter")}
+                  data-testid="jj-craft-generate-cover"
+                >
+                  Cover letter only
+                </Button>
+              </Stack>
+            </Stack>
+          </Collapse>
+
+          {!sourcesOpen && (hasDrafts || preparing) ? (
+            <Typography color="text.secondary" variant="body2">
+              {preparing
+                ? "Sources are locked while Agent prepares drafts."
+                : "Sources are tucked away so you can focus on the draft."}
+            </Typography>
           ) : null}
         </Stack>
-
-        <Collapse in={sourcesOpen} timeout="auto" unmountOnExit={false}>
-          <Stack spacing={1.5}>
-            <Box
-              sx={{
-                display: "grid",
-                gap: 1.5,
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              }}
-            >
-              <TextField
-                label="Your résumé"
-                value={resumeText}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSession((prev) => (prev ? { ...prev, resumeText: value } : prev));
-                  flushPatch({ resumeText: value });
-                }}
-                fullWidth
-                multiline
-                minRows={5}
-                maxRows={12}
-                disabled={preparing}
-                placeholder="Paste your current résumé…"
-                slotProps={{ htmlInput: { "data-testid": "jj-craft-resume-input" } }}
-              />
-              <TextField
-                label="Job description"
-                value={jobDescription}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  setSession((prev) => (prev ? { ...prev, jobDescription: value } : prev));
-                  flushPatch({ jobDescription: value });
-                }}
-                fullWidth
-                multiline
-                minRows={5}
-                maxRows={12}
-                disabled={preparing}
-                placeholder="Paste the job description…"
-                slotProps={{ htmlInput: { "data-testid": "jj-craft-jd-input" } }}
-              />
-            </Box>
-            <TextField
-              label="About the company"
-              value={aboutCompany}
-              onChange={(event) => {
-                const value = event.target.value;
-                setSession((prev) => (prev ? { ...prev, aboutCompany: value } : prev));
-                flushPatch({ aboutCompany: value });
-              }}
-              fullWidth
-              multiline
-              minRows={2}
-              maxRows={4}
-              disabled={preparing}
-              placeholder="Optional context"
-              slotProps={{ htmlInput: { "data-testid": "jj-craft-about-company" } }}
-            />
-            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", alignItems: "center" }}>
-              <Button
-                variant="contained"
-                disabled={busy}
-                onClick={() => onGenerate("both")}
-                data-testid="jj-craft-generate-both"
-              >
-                {preparing ? "Preparing…" : "Prepare drafts"}
-              </Button>
-              <Button
-                variant="text"
-                disabled={busy}
-                onClick={() => onGenerate("resume")}
-                data-testid="jj-craft-generate-resume"
-              >
-                Résumé only
-              </Button>
-              <Button
-                variant="text"
-                disabled={busy}
-                onClick={() => onGenerate("cover_letter")}
-                data-testid="jj-craft-generate-cover"
-              >
-                Cover letter only
-              </Button>
-            </Stack>
-          </Stack>
-        </Collapse>
-
-        {!sourcesOpen && (hasDrafts || preparing) ? (
-          <Typography color="text.secondary" variant="body2">
-            {preparing
-              ? "Sources are locked while Agent prepares drafts."
-              : "Sources are tucked away so you can focus on the draft."}
-          </Typography>
-        ) : null}
-      </Stack>
+      )}
 
       {status && !preparing ? (
         <Typography

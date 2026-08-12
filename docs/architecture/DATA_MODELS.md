@@ -55,7 +55,26 @@ Optional: `technologies[]`, `metrics[]`, `sourceResumeId`
 ## Application
 
 Required: `id`, `stage` (see [Application Pipeline](#application-pipeline-stages)), `createdAt`, `updatedAt`  
-Optional: `roleId`, `companyName`, `resumeVersionId`, `coverLetterRef`, `confirmation`, `notes`
+Optional: `roleId`, `companyName`, `resumeVersionId`, `coverLetterRef`, `confirmation`, `notes`, **lifecycleStatus** (email intelligence; not a prep stage), `source` (`manual` \| `email`), `userOverrides` (manual corrections win over later sync), `companyDomain`, `appliedAt`, `lastActivityAt`, `nextAction`, `linkedEmailIds`, `archived`, `mergedIntoId`
+
+## Mailbox (PE20 — inbound only)
+
+Local KV under the data root. **Never** a JobJitsu mail cloud. Tokens live in `mailbox.secrets` and are omitted from IPC snapshots.
+
+| Document | Namespace | Notes |
+| -------- | --------- | ----- |
+| Integration | `mailbox.integrations` | Provider, sync progress, counts — no tokens |
+| Email | `mailbox.emails` | Subject, snippet, optional body, provider message id, classification |
+| Timeline event | `mailbox.timeline` | Linked to application + source email |
+| Action | `mailbox.actions` | Pending user work (assessment, schedule, reply) — never auto-send |
+| Settings | `mailbox.settings` | Lookback, notice prefs, OAuth client ids |
+| Secrets | `mailbox.secrets` | OAuth access/refresh tokens — host only |
+| Provider index | `mailbox.index` | `(provider, providerMessageId) → email id` for idempotent ingest |
+| Sync cursor | `mailbox.cursors` | Per-integration watermark, page cursor, Gmail historyId / Outlook delta link — host only; never IPC |
+
+The first mailbox sync walks the lookback window and checkpoints after each page. Later **Sync now** (including after restart) only fetches mail newer than the watermark / history pointer. **Delete imported mail** clears the cursor so the next connect starts a fresh lookback.
+
+Do not duplicate Application as a second CRM entity. Email intelligence **extends** Application.
 
 ## QueueItem
 

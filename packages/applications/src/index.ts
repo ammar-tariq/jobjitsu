@@ -9,12 +9,31 @@ export {
   type ApplicationDraftPatch,
   type ApplicationRepository,
   type ApplicationTrackingStatus,
+  type ApplicationUserOverrides,
   type CreateDraftResult,
   type DuplicateWarning,
   type UpdateDraftResult,
 } from "./types.js";
 
-export { applicationDuplicateKey, findDuplicateWarning } from "./duplicate.js";
+export {
+  APPLICATION_LIFECYCLE_STATUSES,
+  APPLICATION_SOURCES,
+  LIFECYCLE_RANK,
+  isApplicationLifecycleStatus,
+  lifecycleLabel,
+  pickLaterLifecycle,
+  type ApplicationLifecycleStatus,
+  type ApplicationSource,
+} from "./lifecycle.js";
+
+export { resolveApplicationView } from "./intelligence-fields.js";
+
+export {
+  applicationDuplicateKey,
+  findDuplicateWarning,
+  findPossibleDuplicateApplications,
+  titlesLookSimilar,
+} from "./duplicate.js";
 export { createMemoryApplicationRepository } from "./memory-repository.js";
 export {
   createApplicationDraft,

@@ -77,7 +77,7 @@ Names are architectural; **foundation spine** is implemented first.
 | `send` | **Outbound boundary** — apply/submit/mail egress |
 | `followups` | Nudge domain & reminder intents |
 | `timeline` | What happened; what left vs stayed |
-| `scheduler` | Local job runner for follow-ups & prep windows |
+| `mailbox` | Inbound email intelligence (opt-in OAuth, classify, match) — **never send** |
 | `plugin-sdk` | Manifests, capabilities, sandbox contracts for plugins |
 | `extension-sdk` | Host contribution points (UI, discovery, send channels) |
 | `ui` | Shared `Jj*` components, tokens, a11y primitives |

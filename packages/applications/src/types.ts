@@ -1,4 +1,5 @@
 import type { ApplicationId, PipelineStage, RoleId } from "@jobjitsu/shared";
+import type { ApplicationLifecycleStatus, ApplicationSource } from "./lifecycle.js";
 
 /**
  * Tracking status labels mapped from prep `PipelineStage` (DATA_MODELS).
@@ -42,8 +43,41 @@ export type Application = {
   readonly followUpDraftText?: string;
   /** Stable local id for FollowUp.* events when scheduled. */
   readonly followUpId?: string;
+  /** How this draft entered the local store. */
+  readonly source?: ApplicationSource;
+  /** Post-send lifecycle from email evidence — not a prep pipeline stage. */
+  readonly lifecycleStatus?: ApplicationLifecycleStatus;
+  readonly companyDomain?: string;
+  readonly appliedAt?: string;
+  readonly lastActivityAt?: string;
+  readonly nextAction?: string;
+  readonly nextActionDueAt?: string;
+  readonly recruiterName?: string;
+  readonly recruiterEmail?: string;
+  /** 0–1 match/classification confidence for email-sourced rows. */
+  readonly confidence?: number;
+  readonly archived?: boolean;
+  /**
+   * User corrections — later sync must not overwrite these keys.
+   * Resolved values prefer overrides over AI/extracted fields.
+   */
+  readonly userOverrides?: ApplicationUserOverrides;
+  readonly linkedEmailIds?: readonly string[];
+  readonly linkedThreadIds?: readonly string[];
+  /** When this row was merged into another application. */
+  readonly mergedIntoId?: ApplicationId;
   readonly createdAt: string;
   readonly updatedAt: string;
+};
+
+export type ApplicationUserOverrides = {
+  readonly companyName?: string;
+  readonly roleTitle?: string;
+  readonly lifecycleStatus?: ApplicationLifecycleStatus;
+  readonly appliedAt?: string;
+  readonly recruiterName?: string;
+  readonly recruiterEmail?: string;
+  readonly companyDomain?: string;
 };
 
 export type ApplicationDraftInput = {
@@ -79,6 +113,21 @@ export type ApplicationDraftPatch = {
   readonly followUpDraftText?: string | null;
   readonly followUpId?: string | null;
   readonly stage?: PipelineStage;
+  readonly source?: ApplicationSource | null;
+  readonly lifecycleStatus?: ApplicationLifecycleStatus | null;
+  readonly companyDomain?: string | null;
+  readonly appliedAt?: string | null;
+  readonly lastActivityAt?: string | null;
+  readonly nextAction?: string | null;
+  readonly nextActionDueAt?: string | null;
+  readonly recruiterName?: string | null;
+  readonly recruiterEmail?: string | null;
+  readonly confidence?: number | null;
+  readonly archived?: boolean;
+  readonly userOverrides?: ApplicationUserOverrides | null;
+  readonly linkedEmailIds?: readonly string[] | null;
+  readonly linkedThreadIds?: readonly string[] | null;
+  readonly mergedIntoId?: ApplicationId | null;
 };
 
 export type DuplicateWarning = {

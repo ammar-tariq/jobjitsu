@@ -13,6 +13,7 @@ import type {
   CraftPreferencesPatchInput,
   CraftSessionPatchInput,
   IpcResultMap,
+  IpcPayloadMap,
   PathPatchInput,
   ProfilePatchInput,
   ResumeAttachInputPayload,
@@ -98,6 +99,54 @@ export type IpcBridge = {
   readonly generateApplicationCoverLetter: (
     input: ApplicationCoverLetterDraftInput,
   ) => Promise<Result<IpcResultMap["applications.generateCoverLetter"]>>;
+  readonly mergeApplications: (
+    targetId: string,
+    sourceId: string,
+  ) => Promise<Result<IpcResultMap["applications.merge"]>>;
+  readonly archiveApplication: (
+    id: string,
+  ) => Promise<Result<IpcResultMap["applications.archive"]>>;
+  readonly overrideApplication: (
+    input: IpcPayloadMap["applications.override"],
+  ) => Promise<Result<IpcResultMap["applications.override"]>>;
+  readonly listMailboxIntegrations: () => Promise<Result<IpcResultMap["mailbox.listIntegrations"]>>;
+  readonly connectSampleMailbox: () => Promise<Result<IpcResultMap["mailbox.connectSample"]>>;
+  readonly beginMailboxConnect: (
+    provider: "gmail" | "outlook",
+  ) => Promise<Result<IpcResultMap["mailbox.beginConnect"]>>;
+  readonly syncMailbox: (id: string) => Promise<Result<IpcResultMap["mailbox.sync"]>>;
+  readonly getMailboxIntegration: (
+    id: string,
+  ) => Promise<Result<IpcResultMap["mailbox.getIntegration"]>>;
+  readonly disconnectMailbox: (id: string) => Promise<Result<IpcResultMap["mailbox.disconnect"]>>;
+  readonly deleteMailboxData: (id: string) => Promise<Result<IpcResultMap["mailbox.deleteData"]>>;
+  readonly getMailboxDashboard: () => Promise<Result<IpcResultMap["mailbox.getDashboard"]>>;
+  readonly listMailboxActions: () => Promise<Result<IpcResultMap["mailbox.listActions"]>>;
+  readonly completeMailboxAction: (
+    id: string,
+  ) => Promise<Result<IpcResultMap["mailbox.completeAction"]>>;
+  readonly listApplicationTimeline: (
+    applicationId: string,
+  ) => Promise<Result<IpcResultMap["mailbox.listTimeline"]>>;
+  readonly listApplicationEmails: (
+    applicationId: string,
+  ) => Promise<Result<IpcResultMap["mailbox.listLinkedEmails"]>>;
+  readonly getMailboxEmail: (id: string) => Promise<Result<IpcResultMap["mailbox.getEmail"]>>;
+  readonly confirmMailboxMatch: (
+    emailId: string,
+    applicationId: string,
+  ) => Promise<Result<IpcResultMap["mailbox.confirmMatch"]>>;
+  readonly keepMailboxSeparate: (
+    emailId: string,
+  ) => Promise<Result<IpcResultMap["mailbox.keepSeparate"]>>;
+  readonly dismissDuplicateApplications: (
+    leftId: string,
+    rightId: string,
+  ) => Promise<Result<IpcResultMap["mailbox.dismissDuplicate"]>>;
+  readonly getMailboxSettings: () => Promise<Result<IpcResultMap["mailbox.getSettings"]>>;
+  readonly updateMailboxSettings: (
+    patch: IpcPayloadMap["mailbox.updateSettings"],
+  ) => Promise<Result<IpcResultMap["mailbox.updateSettings"]>>;
   readonly generateCraftDrafts: (
     input: CraftGenerateInput,
   ) => Promise<Result<IpcResultMap["craft.generate"]>>;
@@ -295,6 +344,112 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async generateApplicationCoverLetter(input: ApplicationCoverLetterDraftInput) {
       return (await dispatcher.invoke("applications.generateCoverLetter", input)) as Result<
         IpcResultMap["applications.generateCoverLetter"]
+      >;
+    },
+    async mergeApplications(targetId: string, sourceId: string) {
+      return (await dispatcher.invoke("applications.merge", { targetId, sourceId })) as Result<
+        IpcResultMap["applications.merge"]
+      >;
+    },
+    async archiveApplication(id: string) {
+      return (await dispatcher.invoke("applications.archive", { id })) as Result<
+        IpcResultMap["applications.archive"]
+      >;
+    },
+    async overrideApplication(input: IpcPayloadMap["applications.override"]) {
+      return (await dispatcher.invoke("applications.override", input)) as Result<
+        IpcResultMap["applications.override"]
+      >;
+    },
+    async listMailboxIntegrations() {
+      return (await dispatcher.invoke("mailbox.listIntegrations")) as Result<
+        IpcResultMap["mailbox.listIntegrations"]
+      >;
+    },
+    async connectSampleMailbox() {
+      return (await dispatcher.invoke("mailbox.connectSample")) as Result<
+        IpcResultMap["mailbox.connectSample"]
+      >;
+    },
+    async beginMailboxConnect(provider: "gmail" | "outlook") {
+      return (await dispatcher.invoke("mailbox.beginConnect", { provider })) as Result<
+        IpcResultMap["mailbox.beginConnect"]
+      >;
+    },
+    async syncMailbox(id: string) {
+      return (await dispatcher.invoke("mailbox.sync", { id })) as Result<
+        IpcResultMap["mailbox.sync"]
+      >;
+    },
+    async getMailboxIntegration(id: string) {
+      return (await dispatcher.invoke("mailbox.getIntegration", { id })) as Result<
+        IpcResultMap["mailbox.getIntegration"]
+      >;
+    },
+    async disconnectMailbox(id: string) {
+      return (await dispatcher.invoke("mailbox.disconnect", { id })) as Result<
+        IpcResultMap["mailbox.disconnect"]
+      >;
+    },
+    async deleteMailboxData(id: string) {
+      return (await dispatcher.invoke("mailbox.deleteData", { id })) as Result<
+        IpcResultMap["mailbox.deleteData"]
+      >;
+    },
+    async getMailboxDashboard() {
+      return (await dispatcher.invoke("mailbox.getDashboard")) as Result<
+        IpcResultMap["mailbox.getDashboard"]
+      >;
+    },
+    async listMailboxActions() {
+      return (await dispatcher.invoke("mailbox.listActions")) as Result<
+        IpcResultMap["mailbox.listActions"]
+      >;
+    },
+    async completeMailboxAction(id: string) {
+      return (await dispatcher.invoke("mailbox.completeAction", { id })) as Result<
+        IpcResultMap["mailbox.completeAction"]
+      >;
+    },
+    async listApplicationTimeline(applicationId: string) {
+      return (await dispatcher.invoke("mailbox.listTimeline", { applicationId })) as Result<
+        IpcResultMap["mailbox.listTimeline"]
+      >;
+    },
+    async listApplicationEmails(applicationId: string) {
+      return (await dispatcher.invoke("mailbox.listLinkedEmails", { applicationId })) as Result<
+        IpcResultMap["mailbox.listLinkedEmails"]
+      >;
+    },
+    async getMailboxEmail(id: string) {
+      return (await dispatcher.invoke("mailbox.getEmail", { id })) as Result<
+        IpcResultMap["mailbox.getEmail"]
+      >;
+    },
+    async confirmMailboxMatch(emailId: string, applicationId: string) {
+      return (await dispatcher.invoke("mailbox.confirmMatch", {
+        emailId,
+        applicationId,
+      })) as Result<IpcResultMap["mailbox.confirmMatch"]>;
+    },
+    async keepMailboxSeparate(emailId: string) {
+      return (await dispatcher.invoke("mailbox.keepSeparate", { emailId })) as Result<
+        IpcResultMap["mailbox.keepSeparate"]
+      >;
+    },
+    async dismissDuplicateApplications(leftId: string, rightId: string) {
+      return (await dispatcher.invoke("mailbox.dismissDuplicate", { leftId, rightId })) as Result<
+        IpcResultMap["mailbox.dismissDuplicate"]
+      >;
+    },
+    async getMailboxSettings() {
+      return (await dispatcher.invoke("mailbox.getSettings")) as Result<
+        IpcResultMap["mailbox.getSettings"]
+      >;
+    },
+    async updateMailboxSettings(patch: IpcPayloadMap["mailbox.updateSettings"]) {
+      return (await dispatcher.invoke("mailbox.updateSettings", patch)) as Result<
+        IpcResultMap["mailbox.updateSettings"]
       >;
     },
     async generateCraftDrafts(input: CraftGenerateInput) {

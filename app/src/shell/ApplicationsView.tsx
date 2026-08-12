@@ -8,7 +8,13 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { ApplicationSnapshot } from "../ipc/commands.js";
+import Chip from "@mui/material/Chip";
+import type {
+  ApplicationSnapshot,
+  MailboxDashboardSnapshot,
+  MailboxEmailSnapshot,
+  MailboxTimelineSnapshot,
+} from "../ipc/commands.js";
 
 export type ApplicationsViewProps = {
   readonly bridge: IpcBridge;
@@ -20,6 +26,12 @@ export type ApplicationsViewProps = {
  */
 export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
+  const [dashboard, setDashboard] = useState<MailboxDashboardSnapshot | null>(null);
+  const [filter, setFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
+  const [timeline, setTimeline] = useState<readonly MailboxTimelineSnapshot[]>([]);
+  const [emails, setEmails] = useState<readonly MailboxEmailSnapshot[]>([]);
+  const [openEmail, setOpenEmail] = useState<MailboxEmailSnapshot | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
@@ -44,6 +56,10 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     } else {
       setStatus(result.error.message ?? result.error.title);
     }
+    const dash = await bridge.getMailboxDashboard();
+    if (dash.ok) {
+      setDashboard(dash.value.dashboard);
+    }
   };
 
   useEffect(() => {
@@ -61,6 +77,9 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setFollowUpAt("");
     setFollowUpDraftText("");
     setDuplicateWarning(null);
+    setTimeline([]);
+    setEmails([]);
+    setOpenEmail(null);
   };
 
   const onSelect = (application: ApplicationSnapshot): void => {
@@ -75,6 +94,16 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     setFollowUpDraftText(application.followUpDraftText ?? "");
     setDuplicateWarning(null);
     setStatus(null);
+    void bridge.listApplicationTimeline(application.id).then((result) => {
+      if (result.ok) {
+        setTimeline(result.value.events);
+      }
+    });
+    void bridge.listApplicationEmails(application.id).then((result) => {
+      if (result.ok) {
+        setEmails(result.value.emails);
+      }
+    });
   };
 
   const onSave = (): void => {
@@ -254,15 +283,138 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
       });
   };
 
+  const visible = applications.filter((application) => {
+    if (filter !== "archived" && application.archived) {
+      return false;
+    }
+    const status = (application.lifecycleStatus ?? "").toLowerCase();
+    if (filter === "active") {
+      if (status === "rejected" || status === "withdrawn" || status === "accepted") {
+        return false;
+      }
+    } else if (filter === "awaiting") {
+      if (status !== "applied" && status !== "no_response") {
+        return false;
+      }
+    } else if (filter === "assessment") {
+      if (!status.includes("assessment")) {
+        return false;
+      }
+    } else if (filter === "interview") {
+      if (!status.includes("interview")) {
+        return false;
+      }
+    } else if (filter === "offer") {
+      if (status !== "offer_received" && status !== "accepted") {
+        return false;
+      }
+    } else if (filter === "rejected") {
+      if (status !== "rejected") {
+        return false;
+      }
+    } else if (filter === "archived") {
+      if (!application.archived) {
+        return false;
+      }
+    }
+    const haystack = `${application.companyName} ${application.roleTitle}`.toLowerCase();
+    return query.trim().length === 0 || haystack.includes(query.trim().toLowerCase());
+  });
+
   return (
-    <Stack spacing={2} data-testid="jj-applications-view" sx={{ maxWidth: "40rem" }}>
+    <Stack spacing={2} data-testid="jj-applications-view" sx={{ maxWidth: "56rem" }}>
       <Typography component="h2" variant="h2">
         Applications
       </Typography>
       <Typography color="text.secondary" variant="body2">
-        Create local application drafts, then prepare a résumé draft and cover letter on this
-        device. Nothing leaves from here.
+        Create local application drafts, or connect email in Preferences to keep a calm job-search
+        record. Nothing leaves from here.
       </Typography>
+
+      {dashboard ? (
+        <Stack spacing={1} data-testid="jj-application-dashboard">
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Chip label={`${dashboard.summary.totalApplications} applications`} size="small" />
+            <Chip label={`${dashboard.summary.activeApplications} active`} size="small" />
+            <Chip label={`${dashboard.summary.interviews} interviews`} size="small" />
+            <Chip label={`${dashboard.summary.assessments} assessments`} size="small" />
+            <Chip label={`${dashboard.summary.offers} offers`} size="small" />
+            <Chip label={`${dashboard.summary.rejected} rejected`} size="small" />
+            <Chip label={`${dashboard.summary.awaitingResponse} awaiting response`} size="small" />
+          </Stack>
+          <Typography color="text.secondary" variant="body2">
+            Funnel · Applied {dashboard.funnel.applied} → Responses {dashboard.funnel.responses} →
+            Interviews {dashboard.funnel.interviews} → Offers {dashboard.funnel.offers}
+          </Typography>
+          {dashboard.analytics.applications > 0 ? (
+            <Typography color="text.secondary" variant="body2">
+              Last {dashboard.analytics.windowDays} days · {dashboard.analytics.applications}{" "}
+              applications · {dashboard.analytics.responseRate}% heard back ·{" "}
+              {dashboard.analytics.interviewRate}% interviews · {dashboard.analytics.offerRate}%
+              offers
+            </Typography>
+          ) : null}
+        </Stack>
+      ) : null}
+
+      {dashboard && dashboard.actions.length > 0 ? (
+        <Stack spacing={1} data-testid="jj-application-attention">
+          <Typography variant="subtitle2">Needs your attention</Typography>
+          {dashboard.actions.map((action) => (
+            <Stack
+              key={action.id}
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center", justifyContent: "space-between" }}
+            >
+              <Typography variant="body2">
+                [{action.priority.toUpperCase()}] {action.description}
+                {action.dueAt ? ` · due ${action.dueAt}` : ""}
+              </Typography>
+              <Button
+                size="small"
+                onClick={() => {
+                  void bridge.completeMailboxAction(action.id).then(() => refresh());
+                }}
+              >
+                Mark done
+              </Button>
+            </Stack>
+          ))}
+        </Stack>
+      ) : null}
+
+      {dashboard && dashboard.duplicates.length > 0 ? (
+        <Stack spacing={1} data-testid="jj-application-duplicates">
+          <Typography variant="subtitle2">Possible duplicate applications</Typography>
+          {dashboard.duplicates.map((pair) => (
+            <Stack key={`${pair.leftId}-${pair.rightId}`} direction="row" spacing={1}>
+              <Typography variant="body2">
+                {pair.companyName}: {pair.leftRole} / {pair.rightRole}
+              </Typography>
+              <Button
+                size="small"
+                onClick={() => {
+                  void bridge.mergeApplications(pair.leftId, pair.rightId).then(() => refresh());
+                }}
+              >
+                Merge
+              </Button>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => {
+                  void bridge
+                    .dismissDuplicateApplications(pair.leftId, pair.rightId)
+                    .then(() => refresh());
+                }}
+              >
+                Keep separate
+              </Button>
+            </Stack>
+          ))}
+        </Stack>
+      ) : null}
 
       <Stack
         spacing={1.5}
@@ -418,6 +570,77 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
         </Stack>
       </Stack>
 
+      {selectedId ? (
+        <Stack spacing={1} data-testid="jj-application-intelligence">
+          {selected?.lifecycleLabel ? (
+            <Typography variant="body2">Status · {selected.lifecycleLabel}</Typography>
+          ) : null}
+          {selected?.nextAction ? (
+            <Typography variant="body2">Next · {selected.nextAction}</Typography>
+          ) : null}
+          {selected?.recruiterEmail ? (
+            <Typography variant="body2">
+              Recruiter · {selected.recruiterName ?? selected.recruiterEmail}
+            </Typography>
+          ) : null}
+          <Button
+            size="small"
+            onClick={() => {
+              void bridge.archiveApplication(selectedId).then(() => {
+                clearForm();
+                void refresh();
+              });
+            }}
+          >
+            Archive
+          </Button>
+          {timeline.length > 0 ? (
+            <Stack spacing={0.5}>
+              <Typography variant="subtitle2">Timeline</Typography>
+              {timeline.map((event) => (
+                <Typography key={event.id} variant="body2">
+                  {event.at.slice(0, 10)} · {event.summary}
+                  {event.emailId ? (
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        void bridge.getMailboxEmail(event.emailId ?? "").then((result) => {
+                          if (result.ok) {
+                            setOpenEmail(result.value.email);
+                          }
+                        });
+                      }}
+                    >
+                      View email
+                    </Button>
+                  ) : null}
+                </Typography>
+              ))}
+            </Stack>
+          ) : null}
+          {emails.length > 0 ? (
+            <Stack spacing={0.5}>
+              <Typography variant="subtitle2">Emails</Typography>
+              {emails.map((email) => (
+                <Typography key={email.id} variant="body2">
+                  {email.subject} · {email.senderEmail}
+                </Typography>
+              ))}
+            </Stack>
+          ) : null}
+          {openEmail ? (
+            <Alert
+              severity="info"
+              onClose={() => setOpenEmail(null)}
+              data-testid="jj-application-source-email"
+            >
+              <Typography variant="subtitle2">{openEmail.subject}</Typography>
+              <Typography variant="body2">{openEmail.snippet}</Typography>
+            </Alert>
+          ) : null}
+        </Stack>
+      ) : null}
+
       {status ? (
         <Typography color="text.secondary" variant="body2" data-testid="jj-application-status">
           {status}
@@ -426,7 +649,36 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
 
       <Stack spacing={1} data-testid="jj-application-list">
         <Typography variant="subtitle2">Drafts on this device</Typography>
-        {applications.length === 0 ? (
+        <TextField
+          label="Search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          size="small"
+          placeholder="Company or role"
+        />
+        <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
+          {(
+            [
+              ["all", "All"],
+              ["active", "Active"],
+              ["awaiting", "Awaiting response"],
+              ["assessment", "Assessment"],
+              ["interview", "Interview"],
+              ["offer", "Offer"],
+              ["rejected", "Rejected"],
+              ["archived", "Archived"],
+            ] as const
+          ).map(([id, label]) => (
+            <Chip
+              key={id}
+              label={label}
+              size="small"
+              variant={filter === id ? "filled" : "outlined"}
+              onClick={() => setFilter(id)}
+            />
+          ))}
+        </Stack>
+        {visible.length === 0 ? (
           <Stack spacing={0.5} data-testid="jj-application-empty">
             <Typography variant="subtitle1">No applications yet</Typography>
             <Typography color="text.secondary" variant="body2">
@@ -435,7 +687,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
           </Stack>
         ) : (
           <List dense disablePadding aria-label="Application drafts">
-            {applications.map((application) => (
+            {visible.map((application) => (
               <ListItemButton
                 key={application.id}
                 selected={selectedId === application.id}
@@ -444,7 +696,11 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
               >
                 <ListItemText
                   primary={`${application.companyName} · ${application.roleTitle}`}
-                  secondary={application.trackingStatus}
+                  secondary={`${application.lifecycleLabel ?? application.trackingStatus}${
+                    application.lastActivityAt
+                      ? ` · ${application.lastActivityAt.slice(0, 10)}`
+                      : ""
+                  }`}
                 />
               </ListItemButton>
             ))}

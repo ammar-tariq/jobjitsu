@@ -8,7 +8,7 @@ Outbound boundary — sole career-data egress.
 | --------------------------- | --------------------------- |
 | `SendChannel` contract      | Done                        |
 | `createFakeGmailChannel`    | Done — **no Google / SMTP** |
-| Real Gmail / board adapters | Not yet                     |
+| Real Gmail / board adapters | Not yet — **inbound** Gmail is `@jobjitsu/mailbox` (PE20), not this package |
 
 ## Fake Gmail
 

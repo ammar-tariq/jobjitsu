@@ -1,5 +1,6 @@
 import { createEntityId, type ApplicationId, type PipelineStage } from "@jobjitsu/shared";
 import { findDuplicateWarning } from "./duplicate.js";
+import { applyIntelligencePatch } from "./intelligence-fields.js";
 import type {
   Application,
   ApplicationDraftInput,
@@ -163,6 +164,7 @@ export function createMemoryApplicationRepository(): ApplicationRepository {
             : patch.followUpId !== undefined
               ? optionalText(patch.followUpId)
               : existing.followUpId,
+        ...applyIntelligencePatch(existing, patch),
         stage,
         updatedAt: new Date().toISOString(),
       };

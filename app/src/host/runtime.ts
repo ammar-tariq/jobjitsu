@@ -61,6 +61,9 @@ import {
   type DataRootStore,
   type DataRootSnapshot,
 } from "./data-root-store.js";
+import { createMemoryKvStore } from "@jobjitsu/storage";
+import { createMailboxService, createMailboxStore, type MailboxService } from "@jobjitsu/mailbox";
+import { createMailboxAiPort } from "./mailbox-classify.js";
 import { createHostFileSaver, type FileSaver } from "./file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
@@ -111,6 +114,8 @@ export type CreateHostRuntimeOptions = {
   readonly resumeLibrary?: ResumeLibrary;
   readonly pathLibrary?: PathLibrary;
   readonly applications?: ApplicationRepository;
+  readonly mailbox?: MailboxService;
+  readonly getMailbox?: () => MailboxService | undefined;
   readonly dataRoot?: DataRootStore;
   readonly preferences?: PreferencesFacade;
   readonly folderPicker?: FolderPicker;
@@ -168,6 +173,24 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
   const resumeLibrary = options.resumeLibrary ?? createMemoryResumeLibrary();
   const pathLibrary = options.pathLibrary ?? createMemoryPathLibrary();
   const applications = options.applications ?? createMemoryApplicationRepository();
+  const mailboxAi = createMailboxAiPort(ai);
+  const mailbox =
+    options.mailbox ??
+    (options.getMailbox
+      ? undefined
+      : createMailboxService({
+          store: createMailboxStore(createMemoryKvStore()),
+          applications,
+          bus,
+          ai: mailboxAi,
+        }));
+  const resolveMailbox = (): MailboxService | undefined => {
+    const current = options.getMailbox?.() ?? mailbox;
+    if (current && typeof current.bindAi === "function") {
+      current.bindAi(mailboxAi);
+    }
+    return current;
+  };
   const dataRootStore = options.dataRoot ?? createMemoryDataRootStore();
   const craftSession = createCraftSessionStore({
     ai,
@@ -276,6 +299,8 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     resumeLibrary,
     pathLibrary,
     applications,
+    mailbox,
+    getMailbox: resolveMailbox,
     dataRoot: dataRootStore,
     preferences,
     folderPicker,
