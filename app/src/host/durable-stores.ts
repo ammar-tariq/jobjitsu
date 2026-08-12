@@ -1,4 +1,5 @@
 import { createKvApplicationRepository, type ApplicationRepository } from "@jobjitsu/applications";
+import { createMailboxService, createMailboxStore, type MailboxService } from "@jobjitsu/mailbox";
 import { createKvProfileRepository } from "@jobjitsu/identity";
 import { createStoragePathLibrary, createStorageResumeLibrary } from "@jobjitsu/identity/storage";
 import { createPreferencesFacade } from "@jobjitsu/preferences";
@@ -16,6 +17,7 @@ export type DurableHostStores = {
   readonly resumeLibrary: ResumeLibrary;
   readonly pathLibrary: PathLibrary;
   readonly applications: ApplicationRepository;
+  readonly mailbox: MailboxService;
   readonly preferences: PreferencesFacade;
   readonly appearance: AppearanceStore;
   readonly settings: SettingsStore;
@@ -32,12 +34,17 @@ export async function openDurableHostStores(
   const settings = createKvSettingsStore(provider.kv);
   const preferences = createPreferencesFacade(settings);
   const appearance = createSettingsAppearanceStore(settings);
+  const applications = createKvApplicationRepository(provider.kv);
   return {
     provider,
     profiles: createKvProfileRepository(provider.kv),
     resumeLibrary: createStorageResumeLibrary(provider.kv, provider.blobs),
     pathLibrary: createStoragePathLibrary(provider.kv),
-    applications: createKvApplicationRepository(provider.kv),
+    applications,
+    mailbox: createMailboxService({
+      store: createMailboxStore(provider.kv),
+      applications,
+    }),
     preferences,
     appearance,
     settings,

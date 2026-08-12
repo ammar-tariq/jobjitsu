@@ -1426,7 +1426,9 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 ## PE20
 
-**Email Integration** · Status: **Experimental** · Priority: **P2**
+**Email Integration** · Status: **Experimental (in progress)** · Priority: **P1**
+
+> Implementation lives in `@jobjitsu/mailbox` + Applications dashboard. Do not add a parallel JobApplication CRM or REST/SQL stack. Reuse Application drafts, local KV, host IPC, and on-device Agent.
 
 ### PE20-S01 — Sync email via channel adapter (opt-in)
 
@@ -1445,7 +1447,7 @@ Import → review/edit → attach. AI parse is **PE03-S10** (after Local Intelli
 
 **Testing notes:** Opt-in + no auto-send test.
 
-**Status:** proposed · Experimental
+**Status:** in progress · Experimental
 
 ---
 

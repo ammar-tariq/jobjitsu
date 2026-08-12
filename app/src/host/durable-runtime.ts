@@ -75,6 +75,7 @@ export async function createDurableHostRuntime(
       update: (patch) => stores.applications.update(patch),
       delete: (id) => stores.applications.delete(id),
     },
+    getMailbox: () => stores.mailbox,
     preferences: {
       getApprovalBeforeSend: () => stores.preferences.getApprovalBeforeSend(),
       setApprovalBeforeSend: (value) => stores.preferences.setApprovalBeforeSend(value),

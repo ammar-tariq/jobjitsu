@@ -13,6 +13,7 @@ Application draft lifecycle — create/edit on-device drafts linked to résumés
 | `resumeDraftText` on Application         | Done (PE03-S04) — editable tailor body |
 | `coverLetterDraftText` on Application    | Done (PE08-S02) — editable letter body |
 | List + open detail (status, empty state) | Done (PE08-S04)                        |
+| Email lifecycle + matching               | Done (PE20) — via `@jobjitsu/mailbox`  |
 | Send                                     | Later stories                          |
 
 ## Create a draft

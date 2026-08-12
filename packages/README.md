@@ -28,6 +28,7 @@ shared → events → logger → config → core → sdk → testing
 | [ai](./ai)                       | `@jobjitsu/ai`            | Local intelligence (**untouched in foundation**) |
 | [discovery](./discovery)         | `@jobjitsu/discovery`     | Role sources & curation                          |
 | [applications](./applications)   | `@jobjitsu/applications`  | Application drafts                               |
+| [mailbox](./mailbox)             | `@jobjitsu/mailbox`       | Inbound email intelligence (never send)          |
 | [queue](./queue)                 | `@jobjitsu/queue`         | Review before send                               |
 | [send](./send)                   | `@jobjitsu/send`          | **Egress boundary**                              |
 | [followups](./followups)         | `@jobjitsu/followups`     | Polite nudges                                    |

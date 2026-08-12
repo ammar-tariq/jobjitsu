@@ -660,6 +660,8 @@ export function systemPromptForRole(role: AiPromptRole): string {
       return "Extract only facts clearly present in the text. Prefer empty fields over guessing.";
     case "follow_up_draft":
       return "Draft a calm follow-up the user can edit. Do not send anything.";
+    case "email_classify":
+      return "Classify career-related email. Return JSON only. Do not send mail.";
     default:
       return GENERIC_SYSTEM;
   }

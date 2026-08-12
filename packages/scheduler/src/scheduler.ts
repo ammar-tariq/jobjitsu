@@ -10,6 +10,7 @@ export const CORE_JOB_TYPES = [
   "agent.prepWindow",
   "ai.healthCheck",
   "timeline.compact",
+  "mailbox.incrementalSync",
 ] as const;
 
 export type CoreJobType = (typeof CORE_JOB_TYPES)[number];

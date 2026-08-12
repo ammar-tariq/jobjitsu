@@ -132,7 +132,17 @@ export function createCraftSessionStore(options: {
     patch(patch) {
       return update((prev) => ({
         ...prev,
-        ...patch,
+        ...(patch.resumeText !== undefined ? { resumeText: patch.resumeText } : {}),
+        ...(patch.jobDescription !== undefined ? { jobDescription: patch.jobDescription } : {}),
+        ...(patch.aboutCompany !== undefined ? { aboutCompany: patch.aboutCompany } : {}),
+        ...(patch.resumeDraft !== undefined ? { resumeDraft: patch.resumeDraft } : {}),
+        ...(patch.coverLetterDraft !== undefined
+          ? { coverLetterDraft: patch.coverLetterDraft }
+          : {}),
+        ...(patch.saveCompany !== undefined ? { saveCompany: patch.saveCompany } : {}),
+        ...(patch.saveRole !== undefined ? { saveRole: patch.saveRole } : {}),
+        ...(patch.chatTarget !== undefined ? { chatTarget: patch.chatTarget } : {}),
+        ...(patch.chatInput !== undefined ? { chatInput: patch.chatInput } : {}),
         chatMessages: patch.chatMessages ? [...patch.chatMessages] : prev.chatMessages,
         job: prev.job,
       }));
@@ -189,7 +199,6 @@ export function createCraftSessionStore(options: {
 
         const result: CraftGenerateResult = await generateCraftDraftsWithAi({
           ai: options.ai,
-          assembler: options.assembler,
           input: {
             kind,
             resumeText: sources.resumeText,

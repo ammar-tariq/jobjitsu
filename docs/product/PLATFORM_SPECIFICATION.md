@@ -1934,6 +1934,8 @@ Users should decide whether to continue.
 
 ## Email Integration
 
+> **Related work (avoid duplication):** PE20 · `@jobjitsu/mailbox` (inbound sync/classify/match). Outbound mail remains `@jobjitsu/send`. Fake Gmail **send** is not inbox sync.
+
 JobJitsu should support optional email integration.
 
 The initial implementation should focus on Gmail.
@@ -1957,7 +1959,7 @@ Examples include:
 - Rejections
 - Follow-ups
 
-Synchronization should be incremental to avoid unnecessary processing.
+Synchronization should be incremental to avoid unnecessary processing. JobJitsu stores a local sync cursor (watermark + provider history pointer) so later Sync now, including after restart, only fetches new mail.
 
 ---
 

@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | Product polish / sellable local MVP |
-| **Story** | Durable apps + Queue/Follow-ups/Timeline + honest Agent startup |
-| **Status** | In review |
-| **Note** | See [SELLABLE_LOCAL_MVP.md](../product/SELLABLE_LOCAL_MVP.md) |
+| **Epic** | PE20 Email intelligence |
+| **Story** | Opt-in mailbox sync + application matching |
+| **Status** | In progress |
+| **Note** | `@jobjitsu/mailbox`; extends Application; do not duplicate send/Gmail fake |
 
 ## Completed slices
 

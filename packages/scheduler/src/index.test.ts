@@ -9,6 +9,7 @@ describe("@jobjitsu/scheduler", () => {
 
   it("lists core job types without inactivity shame jobs", () => {
     expect(CORE_JOB_TYPES).toContain("followup.due");
+    expect(CORE_JOB_TYPES).toContain("mailbox.incrementalSync");
     expect(CORE_JOB_TYPES).not.toContain("inactivity.nag");
   });
 

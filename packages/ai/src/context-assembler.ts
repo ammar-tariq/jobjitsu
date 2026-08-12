@@ -41,6 +41,7 @@ const DEFAULT_BUDGET_CHARS: Record<AiPromptRole, number> = {
   match_explain: 2000,
   follow_up_draft: 1500,
   parse_assist: 3000,
+  email_classify: 1500,
   generic: 2000,
 };
 

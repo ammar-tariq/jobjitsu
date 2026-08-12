@@ -103,4 +103,18 @@ describe("createHostRuntime", () => {
       value: { ready: true, locality: "local" },
     });
   });
+
+  it("does not return mailbox OAuth tokens over IPC", async () => {
+    const host = createHostRuntime({ version: "test" });
+    const result = await host.ipc.invoke("mailbox.connectProvider", {
+      provider: "gmail",
+      accessToken: "secret-token",
+      refreshToken: "refresh-secret",
+      emailAddress: "you@gmail.com",
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain("secret-token");
+    expect(serialized).not.toContain("refresh-secret");
+    expect(result.ok).toBe(true);
+  });
 });

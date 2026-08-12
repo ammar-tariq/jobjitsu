@@ -867,4 +867,33 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Model saved\. Stored on this device/i)).toBeInTheDocument();
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
   });
+
+  it("connects a sample mailbox from Preferences and shows application intelligence", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.getByTestId("jj-mailbox-preferences")).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-mailbox-connect-sample"));
+    expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(
+      /sample mailbox connected/i,
+    );
+
+    await waitFor(
+      async () => {
+        const dash = await runtime.bridge.getMailboxDashboard();
+        expect(dash.ok && dash.value.dashboard.summary.totalApplications).toBeGreaterThan(0);
+      },
+      { timeout: 12000 },
+    );
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
+    expect(screen.getByTestId("jj-application-dashboard")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-application-dashboard").textContent).toMatch(
+      /[1-9]\d* applications/,
+    );
+  }, 20000);
 });

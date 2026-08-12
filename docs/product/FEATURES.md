@@ -79,7 +79,7 @@ In-tree or specified capabilities that may change. Label clearly in UI and docs.
 | **User-configured remote AI Provider** | Opt-in cloud model endpoint | Honest chrome — never labeled Agent · On-device |
 | **Trusted Automation** | Reduced per-action approval when user enables | Default **off**; no silent irreversible egress; Timeline always records Send.*; cannot weaken Send honesty |
 | **AI Playground** | Prompt/provider experimentation | Must not silently affect production Workflows |
-| **Email / Gmail deep sync** | Spec-heavy; no H1 epic yet | Treat PLATFORM_SPEC email chapters as Experimental/Future until epic admitted |
+| **Email / Gmail deep sync** | Spec-heavy; **PE20 in progress** (`@jobjitsu/mailbox`) | Opt-in OAuth; local classify/match; never auto-send. Do not duplicate in `send`. |
 
 ---
 
