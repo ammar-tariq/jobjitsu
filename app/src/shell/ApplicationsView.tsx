@@ -1,20 +1,35 @@
 import { useEffect, useState, type JSX } from "react";
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import Chip from "@mui/material/Chip";
 import type {
   ApplicationSnapshot,
   MailboxDashboardSnapshot,
   MailboxEmailSnapshot,
   MailboxTimelineSnapshot,
 } from "../ipc/commands.js";
+import { JjEmptyState, JjPage, JjSurface, useShellLayout } from "./layout/index.js";
+
+const APPLICATION_FILTERS = [
+  ["all", "All"],
+  ["active", "Active"],
+  ["awaiting", "Awaiting response"],
+  ["assessment", "Assessment"],
+  ["interview", "Interview"],
+  ["offer", "Offer"],
+  ["rejected", "Rejected"],
+  ["archived", "Archived"],
+] as const;
 
 export type ApplicationsViewProps = {
   readonly bridge: IpcBridge;
@@ -48,6 +63,8 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   const [covering, setCovering] = useState(false);
   const busy = saving || tailoring || covering;
   const selected = applications.find((application) => application.id === selectedId);
+  const layout = useShellLayout();
+  const split = layout !== "compact";
 
   const refresh = async (): Promise<void> => {
     const result = await bridge.listApplications();
@@ -322,54 +339,27 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
   });
 
   return (
-    <Stack spacing={2} data-testid="jj-applications-view" sx={{ maxWidth: "56rem" }}>
-      <Typography component="h2" variant="h2">
-        Applications
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        Create local application drafts, or connect email in Preferences to keep a calm job-search
-        record. Nothing leaves from here.
-      </Typography>
-
-      {dashboard ? (
-        <Stack spacing={1} data-testid="jj-application-dashboard">
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-            <Chip label={`${dashboard.summary.totalApplications} applications`} size="small" />
-            <Chip label={`${dashboard.summary.activeApplications} active`} size="small" />
-            <Chip label={`${dashboard.summary.interviews} interviews`} size="small" />
-            <Chip label={`${dashboard.summary.assessments} assessments`} size="small" />
-            <Chip label={`${dashboard.summary.offers} offers`} size="small" />
-            <Chip label={`${dashboard.summary.rejected} rejected`} size="small" />
-            <Chip label={`${dashboard.summary.awaitingResponse} awaiting response`} size="small" />
-          </Stack>
-          <Typography color="text.secondary" variant="body2">
-            Funnel · Applied {dashboard.funnel.applied} → Responses {dashboard.funnel.responses} →
-            Interviews {dashboard.funnel.interviews} → Offers {dashboard.funnel.offers}
-          </Typography>
-          {dashboard.analytics.applications > 0 ? (
-            <Typography color="text.secondary" variant="body2">
-              Last {dashboard.analytics.windowDays} days · {dashboard.analytics.applications}{" "}
-              applications · {dashboard.analytics.responseRate}% heard back ·{" "}
-              {dashboard.analytics.interviewRate}% interviews · {dashboard.analytics.offerRate}%
-              offers
-            </Typography>
-          ) : null}
-        </Stack>
-      ) : null}
+    <JjPage
+      testId="jj-applications-view"
+      title="Applications"
+      subtitle="Create local drafts, or connect email in Preferences for a calm job-search record. Nothing leaves from here."
+    >
+      {dashboard ? <ApplicationSummary dashboard={dashboard} /> : null}
 
       {dashboard && dashboard.actions.length > 0 ? (
-        <Stack spacing={1} data-testid="jj-application-attention">
+        <JjSurface testId="jj-application-attention" spacing={1}>
           <Typography variant="subtitle2">Needs your attention</Typography>
           {dashboard.actions.map((action) => (
             <Stack
               key={action.id}
               direction="row"
               spacing={1}
-              sx={{ alignItems: "center", justifyContent: "space-between" }}
+              sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
             >
               <Typography variant="body2">
-                [{action.priority.toUpperCase()}] {action.description}
-                {action.dueAt ? ` · due ${action.dueAt}` : ""}
+                {action.priority === "high" ? "Due soon · " : ""}
+                {action.description}
+                {action.dueAt ? ` · ${action.dueAt.slice(0, 10)}` : ""}
               </Typography>
               <Button
                 size="small"
@@ -381,14 +371,19 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
               </Button>
             </Stack>
           ))}
-        </Stack>
+        </JjSurface>
       ) : null}
 
       {dashboard && dashboard.duplicates.length > 0 ? (
-        <Stack spacing={1} data-testid="jj-application-duplicates">
+        <JjSurface testId="jj-application-duplicates" spacing={1}>
           <Typography variant="subtitle2">Possible duplicate applications</Typography>
           {dashboard.duplicates.map((pair) => (
-            <Stack key={`${pair.leftId}-${pair.rightId}`} direction="row" spacing={1}>
+            <Stack
+              key={`${pair.leftId}-${pair.rightId}`}
+              direction="row"
+              spacing={1}
+              sx={{ flexWrap: "wrap", alignItems: "center" }}
+            >
               <Typography variant="body2">
                 {pair.companyName}: {pair.leftRole} / {pair.rightRole}
               </Typography>
@@ -413,300 +408,361 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
               </Button>
             </Stack>
           ))}
-        </Stack>
+        </JjSurface>
       ) : null}
 
-      <Stack
-        spacing={1.5}
-        data-testid="jj-application-draft-form"
-        sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: split ? "minmax(17rem, 22rem) minmax(0, 1fr)" : "1fr",
+          alignItems: "start",
+        }}
       >
-        <Typography variant="subtitle2" data-testid="jj-application-detail-title">
-          {selectedId
-            ? `Edit draft · ${selected?.trackingStatus ?? "Discovered"}`
-            : "New application draft"}
-        </Typography>
-        <TextField
-          label="Company"
-          value={companyName}
-          onChange={(event) => setCompanyName(event.target.value)}
-          size="small"
-          required
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-application-company" } }}
-        />
-        <TextField
-          label="Role title"
-          value={roleTitle}
-          onChange={(event) => setRoleTitle(event.target.value)}
-          size="small"
-          required
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-application-role" } }}
-        />
-        <TextField
-          label="Source URL"
-          value={sourceUrl}
-          onChange={(event) => setSourceUrl(event.target.value)}
-          size="small"
-          fullWidth
-          placeholder="Optional"
-          slotProps={{ htmlInput: { "data-testid": "jj-application-source-url" } }}
-        />
-        <TextField
-          label="Notes"
-          value={notes}
-          onChange={(event) => setNotes(event.target.value)}
-          size="small"
-          fullWidth
-          multiline
-          minRows={2}
-          placeholder="Optional"
-          slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
-        />
-        {selectedId ? (
-          <>
+        <JjSurface testId="jj-application-list" spacing={1.25} sx={{ position: "sticky", top: 0 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+          >
+            <Typography variant="subtitle2">On this device</Typography>
+            <Button size="small" variant="text" onClick={clearForm} disabled={busy}>
+              New draft
+            </Button>
+          </Stack>
+          <TextField
+            label="Search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            size="small"
+            placeholder="Company or role"
+            fullWidth
+          />
+          <Tabs
+            value={filter}
+            onChange={(_event, value: string) => setFilter(value)}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="Application filters"
+            sx={{ minHeight: 36, borderBottom: "1px solid", borderColor: "divider" }}
+          >
+            {APPLICATION_FILTERS.map(([id, label]) => (
+              <Tab key={id} value={id} label={label} />
+            ))}
+          </Tabs>
+          {visible.length === 0 ? (
+            <JjEmptyState
+              testId="jj-application-empty"
+              title="No applications yet"
+              body="Add a company and role when you are ready. Nothing leaves this device."
+            />
+          ) : (
+            <List
+              dense
+              disablePadding
+              aria-label="Application drafts"
+              sx={{ maxHeight: "min(70vh, 36rem)", overflow: "auto" }}
+            >
+              {visible.map((application) => (
+                <ListItemButton
+                  key={application.id}
+                  selected={selectedId === application.id}
+                  onClick={() => onSelect(application)}
+                  data-testid={`jj-application-row-${application.id}`}
+                  sx={{ borderRadius: 1, mb: 0.25 }}
+                >
+                  <ListItemText
+                    primary={`${application.companyName} · ${application.roleTitle}`}
+                    secondary={`${application.lifecycleLabel ?? application.trackingStatus}${
+                      application.lastActivityAt
+                        ? ` · ${application.lastActivityAt.slice(0, 10)}`
+                        : ""
+                    }`}
+                    slotProps={{
+                      primary: { noWrap: true },
+                      secondary: { noWrap: true },
+                    }}
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          )}
+        </JjSurface>
+
+        <Stack spacing={2} sx={{ minWidth: 0 }}>
+          <JjSurface testId="jj-application-draft-form">
+            <Typography variant="subtitle2" data-testid="jj-application-detail-title">
+              {selectedId
+                ? `Edit draft · ${selected?.trackingStatus ?? "Discovered"}`
+                : "New application draft"}
+            </Typography>
             <TextField
-              label="Résumé draft"
-              value={resumeDraftText}
-              onChange={(event) => setResumeDraftText(event.target.value)}
+              label="Company"
+              value={companyName}
+              onChange={(event) => setCompanyName(event.target.value)}
               size="small"
+              required
               fullWidth
-              multiline
-              minRows={6}
-              placeholder="Tailor a draft, then edit freely. You remain the author."
-              slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
+              slotProps={{ htmlInput: { "data-testid": "jj-application-company" } }}
             />
             <TextField
-              label="Cover letter draft"
-              value={coverLetterDraftText}
-              onChange={(event) => setCoverLetterDraftText(event.target.value)}
+              label="Role title"
+              value={roleTitle}
+              onChange={(event) => setRoleTitle(event.target.value)}
               size="small"
+              required
               fullWidth
-              multiline
-              minRows={6}
-              placeholder="Prepare a cover letter, then edit freely. You remain the author."
-              slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
+              slotProps={{ htmlInput: { "data-testid": "jj-application-role" } }}
             />
             <TextField
-              label="Follow-up date"
-              type="date"
-              value={followUpAt}
-              onChange={(event) => setFollowUpAt(event.target.value)}
+              label="Source URL"
+              value={sourceUrl}
+              onChange={(event) => setSourceUrl(event.target.value)}
               size="small"
               fullWidth
-              slotProps={{
-                inputLabel: { shrink: true },
-                htmlInput: { "data-testid": "jj-application-followup-date" },
-              }}
+              placeholder="Optional"
+              slotProps={{ htmlInput: { "data-testid": "jj-application-source-url" } }}
             />
             <TextField
-              label="Follow-up note"
-              value={followUpDraftText}
-              onChange={(event) => setFollowUpDraftText(event.target.value)}
+              label="Notes"
+              value={notes}
+              onChange={(event) => setNotes(event.target.value)}
               size="small"
               fullWidth
               multiline
               minRows={2}
-              placeholder="Optional reminder — never sent automatically."
-              slotProps={{ htmlInput: { "data-testid": "jj-application-followup-note" } }}
+              placeholder="Optional"
+              slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
             />
-          </>
-        ) : null}
-        {duplicateWarning ? (
-          <Alert severity="info" data-testid="jj-application-duplicate-warn">
-            {duplicateWarning}
-          </Alert>
-        ) : null}
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button
-            variant="contained"
-            onClick={onSave}
-            disabled={busy}
-            data-testid="jj-application-save"
-          >
-            {selectedId ? "Save changes" : "Save draft"}
-          </Button>
-          {selectedId ? (
-            <>
+            {selectedId ? (
+              <>
+                <TextField
+                  label="Résumé draft"
+                  value={resumeDraftText}
+                  onChange={(event) => setResumeDraftText(event.target.value)}
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={6}
+                  placeholder="Tailor a draft, then edit freely. You remain the author."
+                  slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
+                />
+                <TextField
+                  label="Cover letter draft"
+                  value={coverLetterDraftText}
+                  onChange={(event) => setCoverLetterDraftText(event.target.value)}
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={6}
+                  placeholder="Prepare a cover letter, then edit freely. You remain the author."
+                  slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
+                />
+                <TextField
+                  label="Follow-up date"
+                  type="date"
+                  value={followUpAt}
+                  onChange={(event) => setFollowUpAt(event.target.value)}
+                  size="small"
+                  fullWidth
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    htmlInput: { "data-testid": "jj-application-followup-date" },
+                  }}
+                />
+                <TextField
+                  label="Follow-up note"
+                  value={followUpDraftText}
+                  onChange={(event) => setFollowUpDraftText(event.target.value)}
+                  size="small"
+                  fullWidth
+                  multiline
+                  minRows={2}
+                  placeholder="Optional reminder — never sent automatically."
+                  slotProps={{ htmlInput: { "data-testid": "jj-application-followup-note" } }}
+                />
+              </>
+            ) : null}
+            {duplicateWarning ? (
+              <Alert severity="info" data-testid="jj-application-duplicate-warn">
+                {duplicateWarning}
+              </Alert>
+            ) : null}
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
               <Button
-                variant="outlined"
-                onClick={onTailorDraft}
+                variant="contained"
+                onClick={onSave}
                 disabled={busy}
-                data-testid="jj-application-tailor"
+                data-testid="jj-application-save"
               >
-                {tailoring ? "Preparing draft…" : "Tailor draft"}
+                {selectedId ? "Save changes" : "Save draft"}
               </Button>
-              <Button
-                variant="outlined"
-                onClick={onCoverLetterDraft}
-                disabled={busy}
-                data-testid="jj-application-cover-letter"
-              >
-                {covering ? "Preparing letter…" : "Cover letter"}
+              {selectedId ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    onClick={onTailorDraft}
+                    disabled={busy}
+                    data-testid="jj-application-tailor"
+                  >
+                    {tailoring ? "Preparing draft…" : "Tailor draft"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={onCoverLetterDraft}
+                    disabled={busy}
+                    data-testid="jj-application-cover-letter"
+                  >
+                    {covering ? "Preparing letter…" : "Cover letter"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={onReadyForReview}
+                    disabled={busy || selected?.stage === "queue"}
+                    data-testid="jj-application-ready-for-review"
+                  >
+                    Ready for review
+                  </Button>
+                </>
+              ) : null}
+              <Button variant="text" onClick={clearForm} disabled={busy}>
+                Clear
               </Button>
-              <Button
-                variant="outlined"
-                onClick={onReadyForReview}
-                disabled={busy || selected?.stage === "queue"}
-                data-testid="jj-application-ready-for-review"
-              >
-                Ready for review
-              </Button>
-              <Button
-                variant="text"
-                color="error"
-                onClick={onDelete}
-                disabled={busy}
-                data-testid="jj-application-delete"
-              >
-                Delete
-              </Button>
-            </>
-          ) : null}
-          <Button variant="text" onClick={clearForm} disabled={busy}>
-            Clear
-          </Button>
-        </Stack>
-      </Stack>
+              {selectedId ? (
+                <Button
+                  variant="text"
+                  color="error"
+                  onClick={onDelete}
+                  disabled={busy}
+                  data-testid="jj-application-delete"
+                >
+                  Delete
+                </Button>
+              ) : null}
+            </Stack>
+          </JjSurface>
 
-      {selectedId ? (
-        <Stack spacing={1} data-testid="jj-application-intelligence">
-          {selected?.lifecycleLabel ? (
-            <Typography variant="body2">Status · {selected.lifecycleLabel}</Typography>
+          {selectedId ? (
+            <JjSurface testId="jj-application-intelligence" spacing={1}>
+              {selected?.lifecycleLabel ? (
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Chip size="small" label={selected.lifecycleLabel} />
+                </Stack>
+              ) : null}
+              {selected?.nextAction ? (
+                <Typography variant="body2">Next · {selected.nextAction}</Typography>
+              ) : null}
+              {selected?.recruiterEmail ? (
+                <Typography variant="body2">
+                  Recruiter · {selected.recruiterName ?? selected.recruiterEmail}
+                </Typography>
+              ) : null}
+              <Button
+                size="small"
+                sx={{ alignSelf: "flex-start" }}
+                onClick={() => {
+                  void bridge.archiveApplication(selectedId).then(() => {
+                    clearForm();
+                    void refresh();
+                  });
+                }}
+              >
+                Archive
+              </Button>
+              {timeline.length > 0 ? (
+                <Stack spacing={0.5}>
+                  <Typography variant="subtitle2">Timeline</Typography>
+                  {timeline.map((event) => (
+                    <Stack
+                      key={event.id}
+                      direction="row"
+                      spacing={1}
+                      sx={{ alignItems: "center", flexWrap: "wrap" }}
+                    >
+                      <Typography variant="body2">
+                        {event.at.slice(0, 10)} · {event.summary}
+                      </Typography>
+                      {event.emailId ? (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            void bridge.getMailboxEmail(event.emailId ?? "").then((result) => {
+                              if (result.ok) {
+                                setOpenEmail(result.value.email);
+                              }
+                            });
+                          }}
+                        >
+                          View email
+                        </Button>
+                      ) : null}
+                    </Stack>
+                  ))}
+                </Stack>
+              ) : null}
+              {emails.length > 0 ? (
+                <Stack spacing={0.5}>
+                  <Typography variant="subtitle2">Emails</Typography>
+                  {emails.map((email) => (
+                    <Typography key={email.id} variant="body2">
+                      {email.subject} · {email.senderEmail}
+                    </Typography>
+                  ))}
+                </Stack>
+              ) : null}
+              {openEmail ? (
+                <Alert
+                  severity="info"
+                  onClose={() => setOpenEmail(null)}
+                  data-testid="jj-application-source-email"
+                >
+                  <Typography variant="subtitle2">{openEmail.subject}</Typography>
+                  <Typography variant="body2">{openEmail.snippet}</Typography>
+                </Alert>
+              ) : null}
+            </JjSurface>
           ) : null}
-          {selected?.nextAction ? (
-            <Typography variant="body2">Next · {selected.nextAction}</Typography>
-          ) : null}
-          {selected?.recruiterEmail ? (
-            <Typography variant="body2">
-              Recruiter · {selected.recruiterName ?? selected.recruiterEmail}
+
+          {status ? (
+            <Typography
+              color="text.secondary"
+              variant="body2"
+              role="status"
+              data-testid="jj-application-status"
+            >
+              {status}
             </Typography>
           ) : null}
-          <Button
-            size="small"
-            onClick={() => {
-              void bridge.archiveApplication(selectedId).then(() => {
-                clearForm();
-                void refresh();
-              });
-            }}
-          >
-            Archive
-          </Button>
-          {timeline.length > 0 ? (
-            <Stack spacing={0.5}>
-              <Typography variant="subtitle2">Timeline</Typography>
-              {timeline.map((event) => (
-                <Typography key={event.id} variant="body2">
-                  {event.at.slice(0, 10)} · {event.summary}
-                  {event.emailId ? (
-                    <Button
-                      size="small"
-                      onClick={() => {
-                        void bridge.getMailboxEmail(event.emailId ?? "").then((result) => {
-                          if (result.ok) {
-                            setOpenEmail(result.value.email);
-                          }
-                        });
-                      }}
-                    >
-                      View email
-                    </Button>
-                  ) : null}
-                </Typography>
-              ))}
-            </Stack>
-          ) : null}
-          {emails.length > 0 ? (
-            <Stack spacing={0.5}>
-              <Typography variant="subtitle2">Emails</Typography>
-              {emails.map((email) => (
-                <Typography key={email.id} variant="body2">
-                  {email.subject} · {email.senderEmail}
-                </Typography>
-              ))}
-            </Stack>
-          ) : null}
-          {openEmail ? (
-            <Alert
-              severity="info"
-              onClose={() => setOpenEmail(null)}
-              data-testid="jj-application-source-email"
-            >
-              <Typography variant="subtitle2">{openEmail.subject}</Typography>
-              <Typography variant="body2">{openEmail.snippet}</Typography>
-            </Alert>
-          ) : null}
         </Stack>
-      ) : null}
+      </Box>
+    </JjPage>
+  );
+}
 
-      {status ? (
-        <Typography color="text.secondary" variant="body2" data-testid="jj-application-status">
-          {status}
+function ApplicationSummary({
+  dashboard,
+}: {
+  readonly dashboard: MailboxDashboardSnapshot;
+}): JSX.Element {
+  const { summary, funnel, analytics } = dashboard;
+  return (
+    <Stack spacing={0.5} data-testid="jj-application-dashboard">
+      <Typography variant="body2" sx={{ fontVariantNumeric: "tabular-nums" }}>
+        {summary.totalApplications} applications · {summary.activeApplications} active ·{" "}
+        {summary.interviews} interviews · {summary.assessments} assessments · {summary.offers}{" "}
+        offers
+      </Typography>
+      <Typography color="text.secondary" variant="body2">
+        Funnel · Applied {funnel.applied} → Responses {funnel.responses} → Interviews{" "}
+        {funnel.interviews} → Offers {funnel.offers}
+      </Typography>
+      {analytics.applications > 0 ? (
+        <Typography color="text.secondary" variant="body2">
+          Last {analytics.windowDays} days · {analytics.applications} applications ·{" "}
+          {analytics.responseRate}% heard back · {analytics.interviewRate}% interviews ·{" "}
+          {analytics.offerRate}% offers
         </Typography>
       ) : null}
-
-      <Stack spacing={1} data-testid="jj-application-list">
-        <Typography variant="subtitle2">Drafts on this device</Typography>
-        <TextField
-          label="Search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          size="small"
-          placeholder="Company or role"
-        />
-        <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap" }}>
-          {(
-            [
-              ["all", "All"],
-              ["active", "Active"],
-              ["awaiting", "Awaiting response"],
-              ["assessment", "Assessment"],
-              ["interview", "Interview"],
-              ["offer", "Offer"],
-              ["rejected", "Rejected"],
-              ["archived", "Archived"],
-            ] as const
-          ).map(([id, label]) => (
-            <Chip
-              key={id}
-              label={label}
-              size="small"
-              variant={filter === id ? "filled" : "outlined"}
-              onClick={() => setFilter(id)}
-            />
-          ))}
-        </Stack>
-        {visible.length === 0 ? (
-          <Stack spacing={0.5} data-testid="jj-application-empty">
-            <Typography variant="subtitle1">No applications yet</Typography>
-            <Typography color="text.secondary" variant="body2">
-              Add a company and role above when you are ready. Nothing leaves this device.
-            </Typography>
-          </Stack>
-        ) : (
-          <List dense disablePadding aria-label="Application drafts">
-            {visible.map((application) => (
-              <ListItemButton
-                key={application.id}
-                selected={selectedId === application.id}
-                onClick={() => onSelect(application)}
-                data-testid={`jj-application-row-${application.id}`}
-              >
-                <ListItemText
-                  primary={`${application.companyName} · ${application.roleTitle}`}
-                  secondary={`${application.lifecycleLabel ?? application.trackingStatus}${
-                    application.lastActivityAt
-                      ? ` · ${application.lastActivityAt.slice(0, 10)}`
-                      : ""
-                  }`}
-                />
-              </ListItemButton>
-            ))}
-          </List>
-        )}
-      </Stack>
     </Stack>
   );
 }

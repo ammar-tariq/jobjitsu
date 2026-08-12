@@ -57,7 +57,8 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
 |---------|----------|
 | Navigation | Product nouns; sentence case |
 | Review ritual | Approve / reject queue items |
-| Trust chrome | **Agent · On-device** status always glanceable |
+| Trust chrome | **Agent · On-device** status always glanceable (main status bar; never hidden in compact) |
+| Layout | `data-layout=compact\|standard\|wide` from window width; one job per view; Applications uses list + detail |
 | Copy | Brand voice; errors plain; success quiet |
 | Motion | Status pulse, row settle, toast rise only |
 | A11y | Focus rings, live regions, keyboard paths |

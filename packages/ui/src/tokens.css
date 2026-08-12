@@ -110,6 +110,14 @@
 
   /* Elevation */
   --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+
+  /* Motion — presence only; honor reduced motion below */
+  --jj-motion-duration-micro: 120ms;
+  --jj-motion-duration-fast: 160ms;
+  --jj-motion-duration-standard: 200ms;
+  --jj-motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --jj-motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --jj-motion-reduce: 0;
 }
 
 [data-theme="light"] {
@@ -171,4 +179,13 @@ body {
 :focus-visible {
   outline: 2px solid var(--jj-color-focus-ring);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --jj-motion-duration-micro: 0ms;
+    --jj-motion-duration-fast: 0ms;
+    --jj-motion-duration-standard: 0ms;
+    --jj-motion-reduce: 1;
+  }
 }

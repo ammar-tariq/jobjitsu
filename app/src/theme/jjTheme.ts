@@ -41,12 +41,16 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
     typography: {
       fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
       h1: { fontSize: "1.25rem", fontWeight: 600, letterSpacing: "-0.01em" },
-      h2: { fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.015em" },
+      h2: { fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.015em", lineHeight: 1.33 },
+      h3: { fontSize: "1.25rem", fontWeight: 500, letterSpacing: "-0.01em" },
+      subtitle1: { fontSize: "1rem", fontWeight: 600, lineHeight: 1.5 },
+      subtitle2: { fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.43 },
       body1: { fontSize: "1rem", lineHeight: 1.5 },
       body2: { fontSize: "0.875rem", lineHeight: 1.43 },
+      button: { textTransform: "none", fontWeight: 500, fontSize: "0.875rem" },
     },
     shape: {
-      borderRadius: 8,
+      borderRadius: 6,
     },
     components: {
       MuiCssBaseline: {
@@ -126,6 +130,80 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
         styleOverrides: {
           root: {
             color: "inherit",
+          },
+        },
+      },
+      MuiButton: {
+        defaultProps: {
+          disableElevation: true,
+        },
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            fontWeight: 500,
+            minHeight: 32,
+            borderRadius: 6,
+          },
+          sizeSmall: {
+            minHeight: 28,
+            paddingLeft: 12,
+            paddingRight: 12,
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            borderRadius: 4,
+            backgroundColor: colors.bgMuted,
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.borderDefault,
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.accent,
+            },
+          },
+          notchedOutline: {
+            borderColor: colors.borderSubtle,
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            height: 24,
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          indicator: {
+            height: 2,
+            backgroundColor: colors.accent,
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            minHeight: 36,
+            fontWeight: 500,
+            fontSize: "0.875rem",
+          },
+        },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
           },
         },
       },

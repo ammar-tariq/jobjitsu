@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | [PE20 Email Integration](https://github.com/ammar-tariq/jobjitsu/issues/117) |
-| **Story** | [PE20-S01](https://github.com/ammar-tariq/jobjitsu/issues/118) — Opt-in mailbox sync + application matching |
-| **Status** | Testing · [PR #120](https://github.com/ammar-tariq/jobjitsu/pull/120) |
-| **Note** | `@jobjitsu/mailbox`; extends Application; do not duplicate send/Gmail fake. Follow-up: [PE20-S02](https://github.com/ammar-tariq/jobjitsu/issues/119) OAuth loopback. |
+| **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
+| **Story** | Shell UX — calm chrome, `data-layout`, Applications list + detail |
+| **Status** | Testing · [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
+| **Note** | Presentation only. Do not change IPC, send, or Agent ownership. PE20 mailbox intelligence stays in Applications as quiet summary + attention, not a cockpit. |
 
 ## Completed slices
 

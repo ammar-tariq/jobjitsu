@@ -1,4 +1,21 @@
 /**
  * Layout is MUI (dashboard template pattern + JobJitsu theme).
  * Privacy pill styles come from @jobjitsu/ui.
+ * Window layout: data-layout="compact|standard|wide" on .jj-shell.
  */
+
+.jj-shell {
+  --jj-drawer-width: 240px;
+}
+
+.jj-shell[data-layout="compact"] {
+  --jj-drawer-width: 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jj-shell * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

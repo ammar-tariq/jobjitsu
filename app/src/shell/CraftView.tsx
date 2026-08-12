@@ -22,6 +22,7 @@ import type {
 } from "../ipc/commands.js";
 import { CraftWorkingView } from "./CraftWorkingView.js";
 import { useHostCraftSession } from "./HostProvider.js";
+import { JjPage } from "./layout/index.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
@@ -338,17 +339,12 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   }
 
   return (
-    <Stack spacing={2.5} data-testid="jj-craft-view" sx={{ maxWidth: "56rem", width: "100%" }}>
-      <Stack spacing={0.75}>
-        <Typography component="h2" variant="h2">
-          Craft
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Prepare a tailored résumé and cover letter on this device. Agent keeps working if you
-          leave this screen. Nothing is sent from here.
-        </Typography>
-      </Stack>
-
+    <JjPage
+      testId="jj-craft-view"
+      title="Craft"
+      subtitle="Prepare a tailored résumé and cover letter on this device. Agent keeps working if you leave this screen. Nothing is sent from here."
+      maxWidth="56rem"
+    >
       {preparing && session ? (
         <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
       ) : null}
@@ -761,7 +757,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
           Paste a résumé and job description above, then prepare drafts when you are ready.
         </Typography>
       )}
-    </Stack>
+    </JjPage>
   );
 }
 

@@ -3,10 +3,10 @@ import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ApplicationSnapshot } from "../ipc/commands.js";
+import { JjEmptyState, JjPage } from "./layout/index.js";
 
 export type FollowUpsViewProps = {
   readonly bridge: IpcBridge;
@@ -63,22 +63,18 @@ export function FollowUpsView({ bridge }: FollowUpsViewProps): JSX.Element {
   };
 
   return (
-    <Stack spacing={2} data-testid="jj-followups-view" sx={{ maxWidth: "40rem" }}>
-      <Typography component="h2" variant="h2">
-        Follow-ups
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        Reminders stay on this device. Draft a note in Applications, then clear when you are done —
-        JobJitsu never sends for you.
-      </Typography>
-
+    <JjPage
+      testId="jj-followups-view"
+      title="Follow-ups"
+      subtitle="Reminders stay on this device. Draft a note in Applications, then clear when you are done — JobJitsu never sends for you."
+      maxWidth="40rem"
+    >
       {items.length === 0 ? (
-        <Stack spacing={0.5} data-testid="jj-followups-empty">
-          <Typography variant="subtitle1">No follow-ups scheduled</Typography>
-          <Typography color="text.secondary" variant="body2">
-            Add a follow-up date on an application when you want a gentle reminder.
-          </Typography>
-        </Stack>
+        <JjEmptyState
+          testId="jj-followups-empty"
+          title="No follow-ups scheduled"
+          body="Add a follow-up date on an application when you want a gentle reminder."
+        />
       ) : (
         <List dense disablePadding aria-label="Scheduled follow-ups">
           {items.map((application) => {
@@ -125,6 +121,6 @@ export function FollowUpsView({ bridge }: FollowUpsViewProps): JSX.Element {
           {status}
         </Typography>
       ) : null}
-    </Stack>
+    </JjPage>
   );
 }
