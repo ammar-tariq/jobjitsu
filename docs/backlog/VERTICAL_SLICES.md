@@ -14,7 +14,7 @@ Never build multiple features in parallel in the same change set.
 |-------|--------|
 | **Epic** | [PE20 Email Integration](https://github.com/ammar-tariq/jobjitsu/issues/117) |
 | **Story** | PE20-S02 — Complete Gmail/Outlook OAuth loopback |
-| **Status** | In Progress · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) |
+| **Status** | Testing · [PR #123](https://github.com/ammar-tariq/jobjitsu/pull/123) |
 | **Note** | Desktop loopback + PKCE. Tokens stay in the host. UI never receives secrets. Guide: `docs/guides/GMAIL_AND_OUTLOOK.md`. |
 
 ## Completed slices

@@ -170,7 +170,7 @@ Opt-in inbound mailbox sync. Extends existing Application drafts. Never sends.
 | Story | Summary | Status |
 | --- | --- | --- |
 | PE20-S01 | Opt-in mailbox sync, classify/match, incremental cursors | Partial · [#118](https://github.com/ammar-tariq/jobjitsu/issues/118) · [PR #120](https://github.com/ammar-tariq/jobjitsu/pull/120) |
-| PE20-S02 | Complete Gmail/Outlook OAuth loopback | Partial · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) |
+| PE20-S02 | Complete Gmail/Outlook OAuth loopback | Partial · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) · [PR #123](https://github.com/ammar-tariq/jobjitsu/pull/123) |
 
 ## Cross-cutting
 
