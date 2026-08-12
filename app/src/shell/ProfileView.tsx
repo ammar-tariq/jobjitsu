@@ -20,6 +20,7 @@ import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { PathSnapshot, ProfileSnapshot, ResumeVersionSnapshot } from "../ipc/commands.js";
+import { JjPage } from "./layout/index.js";
 
 export type ProfileViewProps = {
   readonly bridge: IpcBridge;
@@ -1047,17 +1048,12 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
   };
 
   return (
-    <Stack spacing={3} data-testid="jj-profile" sx={{ maxWidth: "44rem" }}>
-      <Stack spacing={1}>
-        <Typography component="h2" variant="h2">
-          Profile
-        </Typography>
-        <Typography color="text.secondary">
-          Create one or more profiles on this device. Paths and resumes nest under each profile.
-          Switching profiles does not send anything.
-        </Typography>
-      </Stack>
-
+    <JjPage
+      testId="jj-profile"
+      title="Profile"
+      subtitle="Create one or more profiles on this device. Paths and resumes nest under each profile. Switching profiles does not send anything."
+      maxWidth="44rem"
+    >
       <List
         dense
         disablePadding
@@ -1239,7 +1235,7 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
           {status}
         </Typography>
       ) : null}
-    </Stack>
+    </JjPage>
   );
 }
 

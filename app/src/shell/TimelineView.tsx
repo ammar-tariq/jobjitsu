@@ -1,8 +1,8 @@
 import type { JSX } from "react";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useHostActivity } from "./HostProvider.js";
+import { JjEmptyState, JjPage } from "./layout/index.js";
 
 const TIMELINE_NAMES = new Set([
   "Queue.Approved",
@@ -31,23 +31,18 @@ export function TimelineView(): JSX.Element {
     .reverse();
 
   return (
-    <Stack spacing={2} data-testid="jj-timeline-view" sx={{ maxWidth: "40rem" }}>
-      <Typography component="h2" variant="h2">
-        Timeline
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        What happened on this device this session — approvals, drafts, and Agent readiness. Nothing
-        here was sent unless you chose an outbound action elsewhere.
-      </Typography>
-
+    <JjPage
+      testId="jj-timeline-view"
+      title="Timeline"
+      subtitle="What happened on this device this session — approvals, drafts, and Agent readiness. Nothing here was sent unless you chose an outbound action elsewhere."
+      maxWidth="40rem"
+    >
       {entries.length === 0 ? (
-        <Stack spacing={0.5} data-testid="jj-timeline-empty">
-          <Typography variant="subtitle1">Quiet so far</Typography>
-          <Typography color="text.secondary" variant="body2">
-            Create a draft, mark something ready for review, or set Preferences to see activity
-            here.
-          </Typography>
-        </Stack>
+        <JjEmptyState
+          testId="jj-timeline-empty"
+          title="Quiet so far"
+          body="Create a draft, mark something ready for review, or set Preferences to see activity here."
+        />
       ) : (
         <Box
           component="ol"
@@ -75,6 +70,6 @@ export function TimelineView(): JSX.Element {
           ))}
         </Box>
       )}
-    </Stack>
+    </JjPage>
   );
 }

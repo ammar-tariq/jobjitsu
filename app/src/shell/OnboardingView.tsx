@@ -117,7 +117,7 @@ export function OnboardingView({ bridge, onFinished }: OnboardingViewProps): JSX
     <Stack
       spacing={3}
       data-testid="jj-onboarding"
-      sx={{ maxWidth: "28rem", mx: "auto", py: 6, px: 3 }}
+      sx={{ maxWidth: "28rem", mx: "auto", py: 8, px: 3 }}
     >
       <Stack spacing={1}>
         <Typography component="h1" variant="h1">

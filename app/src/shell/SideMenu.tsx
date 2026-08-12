@@ -1,62 +1,68 @@
 import type { JSX } from "react";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
-import { JjAgentPrivacyPill, type AgentPrivacyState } from "@jobjitsu/ui";
 import { APP_NAME, type ShellNavId } from "../index.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
+import { COMPACT_DRAWER_WIDTH, type ShellLayout } from "./layout/index.js";
 import { MenuContent } from "./MenuContent.js";
 
 const Drawer = styled(MuiDrawer)({
-  width: DRAWER_WIDTH,
   flexShrink: 0,
   boxSizing: "border-box",
-  [`& .${drawerClasses.paper}`]: {
-    width: DRAWER_WIDTH,
-    boxSizing: "border-box",
-  },
 });
 
 export type SideMenuProps = {
   readonly activeId: ShellNavId;
   readonly onSelect: (id: ShellNavId) => void;
-  /** Honest Agent chrome — unavailable until local ready. */
-  readonly agentPrivacy?: AgentPrivacyState;
+  readonly layout: ShellLayout;
 };
 
 /**
- * Permanent side drawer — adapted from the Material UI dashboard SideMenu.
- * Brand + nav + privacy chrome only; no fake user card or promo alert.
+ * Permanent side drawer — nav only. Privacy chrome lives in the main status bar
+ * so compact width never hides Agent · On-device.
  */
-export function SideMenu({
-  activeId,
-  onSelect,
-  agentPrivacy = "unavailable",
-}: SideMenuProps): JSX.Element {
+export function SideMenu({ activeId, onSelect, layout }: SideMenuProps): JSX.Element {
+  const compact = layout === "compact";
+  const width = compact ? COMPACT_DRAWER_WIDTH : DRAWER_WIDTH;
+
   return (
     <Drawer
       variant="permanent"
       sx={{
+        width,
         [`& .${drawerClasses.paper}`]: {
+          width,
           backgroundColor: "background.paper",
+          overflowX: "hidden",
+          transition: "width var(--jj-motion-duration-standard) var(--jj-motion-ease-in-out)",
         },
       }}
     >
       <Box
         sx={{
           display: "flex",
-          p: 1.5,
+          p: compact ? 1 : 1.5,
           alignItems: "center",
+          justifyContent: compact ? "center" : "flex-start",
+          minHeight: 52,
         }}
       >
-        <Typography component="h1" variant="h1" sx={{ px: 1 }}>
+        <Typography
+          component="h1"
+          variant="h1"
+          sx={{
+            px: compact ? 0 : 1,
+            fontSize: compact ? "0.7rem" : undefined,
+            letterSpacing: compact ? "0.02em" : undefined,
+            textAlign: compact ? "center" : "left",
+            lineHeight: 1.2,
+          }}
+        >
           {APP_NAME}
         </Typography>
       </Box>
-      <Divider />
       <Box
         sx={{
           overflow: "auto",
@@ -65,20 +71,8 @@ export function SideMenu({
           flexDirection: "column",
         }}
       >
-        <MenuContent activeId={activeId} onSelect={onSelect} />
+        <MenuContent activeId={activeId} onSelect={onSelect} compact={compact} />
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: "center",
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <JjAgentPrivacyPill state={agentPrivacy} />
-      </Stack>
     </Drawer>
   );
 }

@@ -27,6 +27,8 @@ describe("DesktopShell", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Craft" })).toBeInTheDocument();
     expect(screen.getByTestId("jj-craft-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
+    expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-layout");
+    expect(screen.getByTestId("jj-shell-status-bar")).toBeInTheDocument();
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
     for (const label of [
@@ -41,6 +43,21 @@ describe("DesktopShell", () => {
     ]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
+  });
+
+  it("keeps primary nav names when the window is compact", async () => {
+    const previous = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 800 });
+    window.dispatchEvent(new Event("resize"));
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-layout", "compact");
+    expect(screen.getByRole("button", { name: "Applications" })).toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: previous });
   });
 
   it("keeps Agent chrome unavailable until the local runtime is ready", async () => {

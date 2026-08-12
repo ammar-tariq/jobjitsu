@@ -4,11 +4,11 @@ Shared Jj* UI primitives and design tokens for the JobJitsu desktop shell.
 
 ## Exports
 
-| Export                                | Purpose                                 |
-| ------------------------------------- | --------------------------------------- |
-| `@jobjitsu/ui`                        | `JjAgentPrivacyPill`, package markers   |
-| `@jobjitsu/ui/tokens.css`             | Dark-default design tokens + base reset |
-| `@jobjitsu/ui/JjAgentPrivacyPill.css` | Privacy pill styles                     |
+| Export                                | Purpose                                                  |
+| ------------------------------------- | -------------------------------------------------------- |
+| `@jobjitsu/ui`                        | `JjAgentPrivacyPill`, package markers                    |
+| `@jobjitsu/ui/tokens.css`             | Dark-default design tokens + base reset + reduced-motion |
+| `@jobjitsu/ui/JjAgentPrivacyPill.css` | Privacy pill styles                                      |
 
 ## Scripts
 

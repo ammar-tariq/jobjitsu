@@ -10,6 +10,7 @@ import type {
   CraftSessionSnapshot,
   ResourceSnapshotResult,
 } from "../ipc/commands.js";
+import { JjPage } from "./layout/index.js";
 
 export type CraftWorkingViewProps = {
   readonly bridge: IpcBridge;
@@ -118,21 +119,12 @@ export function CraftWorkingView({
       : "—";
 
   return (
-    <Stack
-      spacing={2.5}
-      data-testid="jj-craft-working-view"
-      sx={{ maxWidth: "56rem", width: "100%" }}
+    <JjPage
+      testId="jj-craft-working-view"
+      title="Agent is preparing"
+      subtitle="Working from what you pasted below. You can leave this screen — preparation continues on this device. Nothing is sent."
+      maxWidth="56rem"
     >
-      <Stack spacing={0.75}>
-        <Typography component="h2" variant="h2">
-          Agent is preparing
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Working from what you pasted below. You can leave this screen — preparation continues on
-          this device. Nothing is sent.
-        </Typography>
-      </Stack>
-
       <Stack
         spacing={1.25}
         data-testid="jj-craft-working-status"
@@ -229,7 +221,7 @@ export function CraftWorkingView({
             "Reading device load… Open the desktop app for live processor and memory."}
         </Typography>
       </Stack>
-    </Stack>
+    </JjPage>
   );
 }
 

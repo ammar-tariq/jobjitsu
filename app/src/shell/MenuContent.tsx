@@ -5,6 +5,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
@@ -29,37 +30,56 @@ const NAV_ICONS: Record<ShellNavId, JSX.Element> = {
 export type MenuContentProps = {
   readonly activeId: ShellNavId;
   readonly onSelect: (id: ShellNavId) => void;
+  readonly compact?: boolean;
 };
 
 /** Primary nav list — Material dashboard MenuContent pattern, JobJitsu destinations. */
-export function MenuContent({ activeId, onSelect }: MenuContentProps): JSX.Element {
+export function MenuContent({
+  activeId,
+  onSelect,
+  compact = false,
+}: MenuContentProps): JSX.Element {
   return (
     <Stack
       component="nav"
       aria-label="Primary"
-      sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}
+      sx={{ flexGrow: 1, p: compact ? 0.5 : 1, justifyContent: "space-between" }}
     >
       <List dense sx={{ gap: 0.5, display: "flex", flexDirection: "column" }}>
         {SHELL_NAV_ITEMS.map((item) => {
           const selected = item.id === activeId;
+          const button = (
+            <ListItemButton
+              selected={selected}
+              aria-current={selected ? "page" : undefined}
+              aria-label={item.label}
+              onClick={() => {
+                onSelect(item.id);
+              }}
+              sx={(theme) => ({
+                justifyContent: compact ? "center" : "flex-start",
+                px: compact ? 1 : 2,
+                "&.Mui-focusVisible": {
+                  outline: `2px solid ${theme.palette.primary.main}`,
+                  outlineOffset: 2,
+                },
+              })}
+            >
+              <ListItemIcon sx={{ minWidth: compact ? 0 : 36, justifyContent: "center" }}>
+                {NAV_ICONS[item.id]}
+              </ListItemIcon>
+              {compact ? null : <ListItemText primary={item.label} />}
+            </ListItemButton>
+          );
           return (
             <ListItem key={item.id} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                selected={selected}
-                aria-current={selected ? "page" : undefined}
-                onClick={() => {
-                  onSelect(item.id);
-                }}
-                sx={(theme) => ({
-                  "&.Mui-focusVisible": {
-                    outline: `2px solid ${theme.palette.primary.main}`,
-                    outlineOffset: 2,
-                  },
-                })}
-              >
-                <ListItemIcon>{NAV_ICONS[item.id]}</ListItemIcon>
-                <ListItemText primary={item.label} />
-              </ListItemButton>
+              {compact ? (
+                <Tooltip title={item.label} placement="right">
+                  {button}
+                </Tooltip>
+              ) : (
+                button
+              )}
             </ListItem>
           );
         })}

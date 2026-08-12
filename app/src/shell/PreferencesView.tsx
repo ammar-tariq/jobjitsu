@@ -14,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
 import { MailboxPreferences } from "./MailboxPreferences.js";
+import { JjPage } from "./layout/index.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -208,16 +209,12 @@ export function PreferencesView({
   };
 
   return (
-    <Stack spacing={3} data-testid="jj-preferences" sx={{ maxWidth: "40rem" }}>
-      <Stack spacing={1}>
-        <Typography component="h2" variant="h2">
-          Preferences
-        </Typography>
-        <Typography color="text.secondary">
-          Choose where JobJitsu keeps files on this device. Profile and Paths are under Profile.
-        </Typography>
-      </Stack>
-
+    <JjPage
+      testId="jj-preferences"
+      title="Preferences"
+      subtitle="Choose where JobJitsu keeps files on this device. Profile and Paths are under Profile."
+      maxWidth="40rem"
+    >
       <Stack spacing={1.5} data-testid="jj-approval-before-send">
         <Typography component="h3" variant="body2" color="text.secondary">
           Outbound approval
@@ -407,6 +404,6 @@ export function PreferencesView({
           <ToggleButton value="light">Light</ToggleButton>
         </ToggleButtonGroup>
       </Stack>
-    </Stack>
+    </JjPage>
   );
 }

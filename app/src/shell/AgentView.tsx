@@ -7,6 +7,7 @@ import type { AgentPrivacyState } from "@jobjitsu/ui";
 import type { IpcBridge } from "../ipc/bridge.js";
 import { agentPrivacyStateFromStatus } from "./agent-privacy.js";
 import { useHostActivity } from "./HostProvider.js";
+import { JjPage, JjSurface } from "./layout/index.js";
 
 export type AgentViewProps = {
   readonly bridge: IpcBridge;
@@ -50,19 +51,13 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
   }, [bridge, activity]);
 
   return (
-    <Stack spacing={2} data-testid="jj-agent-view" sx={{ maxWidth: "40rem" }}>
-      <Typography component="h2" variant="h2">
-        Agent
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        On-device help for drafts and review. Agent prepares; you own send.
-      </Typography>
-
-      <Stack
-        spacing={1}
-        sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-        data-testid="jj-agent-status"
-      >
+    <JjPage
+      testId="jj-agent-view"
+      title="Agent"
+      subtitle="On-device help for drafts and review. Agent prepares; you own send."
+      maxWidth="40rem"
+    >
+      <JjSurface testId="jj-agent-status" spacing={1}>
         <Typography variant="subtitle1" role="status">
           {privacyLabel(privacy)}
         </Typography>
@@ -81,7 +76,7 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
         >
           Open Preferences
         </Button>
-      </Stack>
+      </JjSurface>
 
       <Stack spacing={1}>
         <Typography variant="subtitle2">Recent activity</Typography>
@@ -113,6 +108,6 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
           </Box>
         )}
       </Stack>
-    </Stack>
+    </JjPage>
   );
 }

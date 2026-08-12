@@ -7,6 +7,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ApplicationSnapshot } from "../ipc/commands.js";
+import { JjEmptyState, JjPage } from "./layout/index.js";
 
 export type QueueViewProps = {
   readonly bridge: IpcBridge;
@@ -75,23 +76,18 @@ export function QueueView({ bridge }: QueueViewProps): JSX.Element {
   };
 
   return (
-    <Stack spacing={2} data-testid="jj-queue-view" sx={{ maxWidth: "40rem" }}>
-      <Typography component="h2" variant="h2">
-        Queue
-      </Typography>
-      <Typography color="text.secondary" variant="body2">
-        Review applications marked ready. Approve keeps them on this device — JobJitsu does not send
-        for you.
-      </Typography>
-
+    <JjPage
+      testId="jj-queue-view"
+      title="Queue"
+      subtitle="Review applications marked ready. Approve keeps them on this device — JobJitsu does not send for you."
+      maxWidth="40rem"
+    >
       {items.length === 0 ? (
-        <Stack spacing={0.5} data-testid="jj-queue-empty">
-          <Typography variant="subtitle1">Nothing ready for review</Typography>
-          <Typography color="text.secondary" variant="body2">
-            Mark an application Ready for review from Applications when you want a calm check before
-            approval.
-          </Typography>
-        </Stack>
+        <JjEmptyState
+          testId="jj-queue-empty"
+          title="Nothing ready for review"
+          body="Mark an application Ready for review from Applications when you want a calm check before approval."
+        />
       ) : (
         <List dense disablePadding aria-label="Ready for review">
           {items.map((application) => (
@@ -142,6 +138,6 @@ export function QueueView({ bridge }: QueueViewProps): JSX.Element {
           {status}
         </Typography>
       ) : null}
-    </Stack>
+    </JjPage>
   );
 }

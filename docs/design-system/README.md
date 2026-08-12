@@ -3,7 +3,7 @@
 > Calm confidence, desktop density, dark mode first.  
 > Brand source: [../brand/BRAND_GUIDELINES.md](../brand/BRAND_GUIDELINES.md) · Voice: [../brand/VOICE_AND_TONE.md](../brand/VOICE_AND_TONE.md)
 
-This folder is the **production-ready** visual and interaction system for `packages/ui` and `app/ui`. Token names are implementation-ready; this documentation is the source of truth until code lands.
+This folder is the **production-ready** visual and interaction system for `packages/ui` and the desktop shell. Token names are implementation-ready. The shell applies `data-theme` and `data-layout` (`compact` / `standard` / `wide`) from [RESPONSIVE.md](./RESPONSIVE.md). Shared page chrome (`JjPage`, `JjEmptyState`, `JjSurface`) lives in `app/src/shell/layout` until more `Jj*` primitives move into `@jobjitsu/ui`.
 
 ---
 
