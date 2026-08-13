@@ -37,6 +37,7 @@ import {
   type CraftSessionState,
   type CraftSessionStore,
 } from "../host/craft-session.js";
+import { type createDataMaintenance } from "../host/data-maintenance.js";
 import type {
   AiStatusSnapshot,
   ApplicationCoverLetterDraftInput,
