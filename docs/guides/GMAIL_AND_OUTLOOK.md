@@ -98,7 +98,7 @@ Client IDs and secrets stay in `.env` only. They are never shown or pasted in th
 
 | Action | What happens |
 | ------ | ------------ |
-| First sync | Walks the lookback window. Job-related mail becomes applications, timeline, and “Needs your attention”. |
+| First sync | Walks the lookback window. Progress shows **real** Imported / Classified counts (no Gmail estimate). Job-related mail becomes applications, timeline, and “Needs your attention”. |
 | **Sync now** | Incremental only (Gmail history / Outlook delta). Already-classified mail is not sent through the Agent again. |
 | **Disconnect** | Removes tokens. Imported mail stays until you delete it. |
 | **Delete imported mail** | Removes that connection’s mail and cursor on this device. |

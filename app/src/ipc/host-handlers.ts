@@ -1657,7 +1657,8 @@ function toIntegrationSnapshot(integration: {
     syncError: integration.syncError,
     emailsProcessed: integration.emailsProcessed,
     emailsIngested: integration.emailsIngested,
-    emailsTotal: integration.emailsTotal,
+    // Never surface provider resultSizeEstimate — UI uses real ingested/classified counts only.
+    emailsTotal: undefined,
     jobRelatedCount: integration.jobRelatedCount,
     applicationsFound: integration.applicationsFound,
   };

@@ -89,7 +89,12 @@ export type MailboxIntegration = {
   readonly syncError?: string;
   readonly lookbackDays: number;
   readonly emailsProcessed: number;
+  /** Messages fetched into the local store this connection (real count, not an API estimate). */
   readonly emailsIngested?: number;
+  /**
+   * Legacy provider estimate field. Cleared on sync; never shown in the UI.
+   * Prefer emailsIngested / emailsProcessed.
+   */
   readonly emailsTotal?: number;
   readonly jobRelatedCount: number;
   readonly applicationsFound: number;

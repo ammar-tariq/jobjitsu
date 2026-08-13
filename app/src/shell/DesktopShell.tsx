@@ -44,9 +44,13 @@ function JobMailImportBanner(props: {
   const primary = session.primary;
   const imported = primary?.emailsIngested ?? 0;
   const classified = primary?.emailsProcessed ?? 0;
-  const total = primary?.emailsTotal;
   const phase = primary?.syncStatus === "processing" ? "Classifying" : "Importing";
-  const count = primary?.syncStatus === "processing" ? classified : imported;
+  const countLabel =
+    primary?.syncStatus === "processing"
+      ? ` · Classified ${classified} · Imported ${imported}`
+      : imported > 0
+        ? ` · Imported ${imported}`
+        : "";
   return (
     <Alert
       severity="info"
@@ -57,8 +61,7 @@ function JobMailImportBanner(props: {
         </Button>
       }
     >
-      {phase} Job Mail on this device
-      {total ? ` · ${count} / ~${total}` : count > 0 ? ` · ${count}` : ""}. You can keep browsing.
+      {phase} Job Mail on this device{countLabel}. You can keep browsing.
     </Alert>
   );
 }
