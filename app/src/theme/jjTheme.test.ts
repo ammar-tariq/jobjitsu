@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { jjDark, jjLight, jjPrimitive } from "./jjColors.js";
+import { jjDark, jjLight } from "./jjColors.js";
 import { createJjTheme, jjTheme } from "./jjTheme.js";
 import { contrastRatio } from "./contrast.js";
 
 describe("jjTheme palette", () => {
   it("defaults to Midnight Ink dark canvas", () => {
     expect(jjTheme.palette.mode).toBe("dark");
-    expect(jjTheme.palette.background.default).toBe(jjPrimitive.indigo950);
-    expect(jjTheme.palette.background.paper).toBe(jjPrimitive.indigo900);
     expect(jjTheme.palette.background.default).toBe(jjDark.bgCanvas);
+    expect(jjTheme.palette.background.paper).toBe(jjDark.bgSurface);
     expect(jjTheme.palette.primary.main).toBe(jjDark.accent);
   });
 

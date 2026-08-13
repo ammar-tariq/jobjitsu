@@ -1,4 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -8,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
+import { JjStepFade, JjStepper, JjSurface } from "./layout/index.js";
 
 export type OnboardingViewProps = {
   readonly bridge: IpcBridge;
@@ -114,90 +116,101 @@ export function OnboardingView({ bridge, onFinished }: OnboardingViewProps): JSX
     modelPath.trim() && !models.includes(modelPath.trim()) ? [modelPath.trim(), ...models] : models;
 
   return (
-    <Stack
-      spacing={3}
-      data-testid="jj-onboarding"
-      sx={{ maxWidth: "28rem", mx: "auto", py: 8, px: 3 }}
+    <Box
+      sx={{
+        display: "grid",
+        placeItems: "center",
+        minHeight: "100%",
+        px: 2,
+        py: 6,
+      }}
     >
-      <Stack spacing={1}>
-        <Typography component="h1" variant="h1">
-          JobJitsu
-        </Typography>
-        <Typography color="text.secondary">
-          Local-first career OS. Your drafts stay on this device. Agent prepares; you own send.
-        </Typography>
-      </Stack>
-
-      {step === 0 ? (
-        <Stack spacing={1.5} data-testid="jj-onboarding-profile">
-          <Typography component="h2" variant="h2">
-            Your profile
+      <JjSurface testId="jj-onboarding" spacing={3} sx={{ width: "100%", maxWidth: "28rem" }}>
+        <Stack spacing={1}>
+          <Typography component="h1" variant="h1">
+            JobJitsu
           </Typography>
-          <Typography color="text.secondary" variant="body2">
-            A display name is enough to start. You can refine Paths and résumés later under Profile.
+          <Typography color="text.secondary">
+            Local-first career OS. Your drafts stay on this device. Agent prepares; you own send.
           </Typography>
-          <TextField
-            label="Display name"
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            size="small"
-            fullWidth
-            slotProps={{ htmlInput: { "data-testid": "jj-onboarding-name" } }}
-          />
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-            <Button variant="contained" onClick={onSaveProfile} disabled={busy}>
-              Continue
-            </Button>
-            <Button variant="text" onClick={onSkip} disabled={busy}>
-              Skip for now
-            </Button>
-          </Stack>
         </Stack>
-      ) : (
-        <Stack spacing={1.5} data-testid="jj-onboarding-model">
-          <Typography component="h2" variant="h2">
-            On-device Agent
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            Choose a local Ollama model so Agent can draft on this device. You can change this later
-            in Preferences.
-          </Typography>
-          <FormControl size="small" fullWidth>
-            <InputLabel id="jj-onboarding-model-label">Installed model</InputLabel>
-            <Select
-              labelId="jj-onboarding-model-label"
-              label="Installed model"
-              value={modelPath}
-              onChange={(event) => setModelPath(String(event.target.value))}
-              displayEmpty
-              data-testid="jj-onboarding-model-select"
-            >
-              <MenuItem value="">
-                <em>None selected</em>
-              </MenuItem>
-              {selectOptions.map((name) => (
-                <MenuItem key={name} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-            <Button variant="contained" onClick={onSaveModel} disabled={busy}>
-              Finish
-            </Button>
-            <Button variant="text" onClick={onSkip} disabled={busy}>
-              Skip for now
-            </Button>
-          </Stack>
-        </Stack>
-      )}
 
-      {status ? (
-        <Typography role="status" color="text.secondary" variant="body2">
-          {status}
-        </Typography>
-      ) : null}
-    </Stack>
+        <JjStepper steps={["Profile", "Agent"]} active={step} />
+
+        <JjStepFade stepKey={step}>
+          {step === 0 ? (
+            <Stack spacing={1.5} data-testid="jj-onboarding-profile">
+              <Typography component="h2" variant="h2">
+                Your profile
+              </Typography>
+              <Typography color="text.secondary" variant="body2">
+                A display name is enough to start. You can refine Paths and résumés later under
+                Profile.
+              </Typography>
+              <TextField
+                label="Display name"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                size="small"
+                fullWidth
+                slotProps={{ htmlInput: { "data-testid": "jj-onboarding-name" } }}
+              />
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                <Button variant="contained" onClick={onSaveProfile} disabled={busy}>
+                  Continue
+                </Button>
+                <Button variant="text" onClick={onSkip} disabled={busy}>
+                  Skip for now
+                </Button>
+              </Stack>
+            </Stack>
+          ) : (
+            <Stack spacing={1.5} data-testid="jj-onboarding-model">
+              <Typography component="h2" variant="h2">
+                On-device Agent
+              </Typography>
+              <Typography color="text.secondary" variant="body2">
+                Choose a local Ollama model so Agent can draft on this device. You can change this
+                later in Preferences.
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <InputLabel id="jj-onboarding-model-label">Installed model</InputLabel>
+                <Select
+                  labelId="jj-onboarding-model-label"
+                  label="Installed model"
+                  value={modelPath}
+                  onChange={(event) => setModelPath(String(event.target.value))}
+                  displayEmpty
+                  data-testid="jj-onboarding-model-select"
+                >
+                  <MenuItem value="">
+                    <em>None selected</em>
+                  </MenuItem>
+                  {selectOptions.map((name) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                <Button variant="contained" onClick={onSaveModel} disabled={busy}>
+                  Finish
+                </Button>
+                <Button variant="text" onClick={onSkip} disabled={busy}>
+                  Skip for now
+                </Button>
+              </Stack>
+            </Stack>
+          )}
+        </JjStepFade>
+
+        {status ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {status}
+          </Typography>
+        ) : null}
+      </JjSurface>
+    </Box>
   );
 }

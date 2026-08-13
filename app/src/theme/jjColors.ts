@@ -28,13 +28,13 @@ export const jjPrimitive = {
 
 /** Dark-theme semantic map — THEME_DARK.md */
 export const jjDark = {
-  bgCanvas: jjPrimitive.indigo950,
-  bgSurface: jjPrimitive.indigo900,
-  bgElevated: jjPrimitive.elevated,
-  bgMuted: "rgba(255, 255, 255, 0.06)",
+  bgCanvas: "#0A0C16",
+  bgSurface: "#1A1F3D",
+  bgElevated: "#252A4A",
+  bgMuted: "rgba(255, 255, 255, 0.07)",
   textPrimary: jjPrimitive.white,
-  textSecondary: jjPrimitive.slate500,
-  textTertiary: jjPrimitive.slate400,
+  textSecondary: "#A8B4C8",
+  textTertiary: "#8B97AB",
   textOnAccent: jjPrimitive.indigo950,
   borderSubtle: "rgba(255, 255, 255, 0.06)",
   borderDefault: "rgba(255, 255, 255, 0.12)",

@@ -1,12 +1,11 @@
 import { useEffect, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ApplicationSnapshot } from "../ipc/commands.js";
-import { JjEmptyState, JjPage } from "./layout/index.js";
+import { JjEmptyState, JjPage, JjSurface } from "./layout/index.js";
 
 export type FollowUpsViewProps = {
   readonly bridge: IpcBridge;
@@ -70,28 +69,22 @@ export function FollowUpsView({ bridge }: FollowUpsViewProps): JSX.Element {
       maxWidth="40rem"
     >
       {items.length === 0 ? (
-        <JjEmptyState
-          testId="jj-followups-empty"
-          title="No follow-ups scheduled"
-          body="Add a follow-up date on an application when you want a gentle reminder."
-        />
+        <JjSurface>
+          <JjEmptyState
+            testId="jj-followups-empty"
+            title="No follow-ups scheduled"
+            body="Add a follow-up date on an application when you want a gentle reminder."
+          />
+        </JjSurface>
       ) : (
-        <List dense disablePadding aria-label="Scheduled follow-ups">
+        <Stack spacing={1.5} aria-label="Scheduled follow-ups">
           {items.map((application) => {
             const due = (application.followUpAt ?? "") <= today;
             return (
-              <ListItem
+              <JjSurface
                 key={application.id}
-                alignItems="flex-start"
-                sx={{
-                  flexDirection: "column",
-                  alignItems: "stretch",
-                  gap: 1,
-                  py: 1.5,
-                  borderBottom: "1px solid",
-                  borderColor: "divider",
-                }}
-                data-testid={`jj-followup-row-${application.id}`}
+                testId={`jj-followup-row-${application.id}`}
+                spacing={1}
               >
                 <ListItemText
                   primary={`${application.companyName} · ${application.roleTitle}`}
@@ -107,13 +100,14 @@ export function FollowUpsView({ bridge }: FollowUpsViewProps): JSX.Element {
                   disabled={busyId === application.id}
                   onClick={() => onDismiss(application.id)}
                   data-testid={`jj-followup-dismiss-${application.id}`}
+                  sx={{ alignSelf: "flex-start" }}
                 >
                   Clear reminder
                 </Button>
-              </ListItem>
+              </JjSurface>
             );
           })}
-        </List>
+        </Stack>
       )}
 
       {status ? (

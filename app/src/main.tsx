@@ -6,6 +6,7 @@ import "./shell/shell.css";
 import { App } from "./App.js";
 import { createAppHostRuntime } from "./host/durable-runtime.js";
 import { createHostRuntime } from "./host/runtime.js";
+import { applyNativeWindowChrome } from "./host/window-chrome.js";
 
 document.documentElement.setAttribute("data-theme", "dark");
 
@@ -15,6 +16,7 @@ if (!rootEl) {
 }
 
 void (async () => {
+  await applyNativeWindowChrome();
   let runtime;
   try {
     runtime = await createAppHostRuntime({ version: "0.0.0" });

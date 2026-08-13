@@ -20,7 +20,7 @@ export type SideMenuProps = {
 };
 
 /**
- * Permanent side drawer — nav only. Privacy chrome lives in the main status bar
+ * Permanent side drawer — nav only. Privacy chrome lives in the title bar
  * so compact width never hides Agent · On-device.
  */
 export function SideMenu({ activeId, onSelect, layout }: SideMenuProps): JSX.Element {
@@ -34,8 +34,10 @@ export function SideMenu({ activeId, onSelect, layout }: SideMenuProps): JSX.Ele
         width,
         [`& .${drawerClasses.paper}`]: {
           width,
-          backgroundColor: "background.paper",
+          position: "relative",
+          height: "100%",
           overflowX: "hidden",
+          backgroundImage: "none",
           transition: "width var(--jj-motion-duration-standard) var(--jj-motion-ease-in-out)",
         },
       }}

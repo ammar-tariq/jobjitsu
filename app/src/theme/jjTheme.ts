@@ -50,7 +50,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
       button: { textTransform: "none", fontWeight: 500, fontSize: "0.875rem" },
     },
     shape: {
-      borderRadius: 6,
+      borderRadius: 10,
     },
     components: {
       MuiCssBaseline: {
@@ -59,7 +59,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
           body: {
             height: "100%",
             margin: 0,
-            backgroundColor: colors.bgCanvas,
+            backgroundColor: "transparent",
             color: colors.textPrimary,
             WebkitFontSmoothing: "antialiased",
           },
@@ -73,7 +73,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
         styleOverrides: {
           paper: {
             backgroundImage: "none",
-            backgroundColor: colors.bgSurface,
+            backgroundColor: "transparent",
             borderRight: `1px solid ${colors.borderSubtle}`,
             color: colors.textPrimary,
           },
@@ -99,7 +99,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
       MuiListItemButton: {
         styleOverrides: {
           root: {
-            borderRadius: 6,
+            borderRadius: 10,
             color: colors.textSecondary,
             "&:hover": {
               backgroundColor: colors.bgMuted,
@@ -142,7 +142,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
             textTransform: "none",
             fontWeight: 500,
             minHeight: 32,
-            borderRadius: 6,
+            borderRadius: 10,
           },
           sizeSmall: {
             minHeight: 28,
@@ -159,7 +159,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            borderRadius: 4,
+            borderRadius: 10,
             backgroundColor: colors.bgMuted,
             "&:hover .MuiOutlinedInput-notchedOutline": {
               borderColor: colors.borderDefault,
@@ -203,7 +203,7 @@ function buildTheme(mode: AppearanceMode, colors: JjSemanticColors): Theme {
       MuiAlert: {
         styleOverrides: {
           root: {
-            borderRadius: 6,
+            borderRadius: 10,
           },
         },
       },

@@ -37,16 +37,17 @@
   --jj-alpha-white-06: color-mix(in srgb, white 6%, transparent);
 
   /* Semantic — surfaces (dark) */
-  --jj-color-bg-canvas: var(--jj-color-indigo-950);
-  --jj-color-bg-surface: var(--jj-color-indigo-900);
-  --jj-color-bg-elevated: #25224f;
-  --jj-color-bg-muted: color-mix(in srgb, white 6%, var(--jj-color-indigo-950));
+  --jj-color-bg-canvas: #0a0c16;
+  --jj-color-bg-surface: color-mix(in srgb, #1a1f3d 88%, black);
+  --jj-color-bg-elevated: #252a4a;
+  --jj-color-bg-muted: color-mix(in srgb, white 7%, var(--jj-color-bg-canvas));
+  --jj-color-bg-card: color-mix(in srgb, #1c2244 72%, transparent);
   --jj-color-bg-inverse: var(--jj-color-cloud-50);
 
   /* Semantic — text */
   --jj-color-text-primary: var(--jj-color-white);
-  --jj-color-text-secondary: var(--jj-color-slate-500);
-  --jj-color-text-tertiary: #94a3b8;
+  --jj-color-text-secondary: #a8b4c8;
+  --jj-color-text-tertiary: #8b97ab;
   --jj-color-text-inverse: var(--jj-color-slate-800);
   --jj-color-text-link: var(--jj-color-teal-400);
   --jj-color-text-on-accent: var(--jj-color-indigo-950);
@@ -89,9 +90,9 @@
 
   /* Radius */
   --jj-radius-none: 0;
-  --jj-radius-sm: 4px;
-  --jj-radius-md: 6px;
-  --jj-radius-lg: 8px;
+  --jj-radius-sm: 6px;
+  --jj-radius-md: 10px;
+  --jj-radius-lg: 14px;
   --jj-radius-pill: 999px;
 
   /* Type */
@@ -109,7 +110,8 @@
   --jj-text-tiny-line: 16px;
 
   /* Elevation */
-  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 8px 24px rgba(0, 0, 0, 0.18);
+  --jj-card-blur: blur(18px);
 
   /* Motion — presence only; honor reduced motion below */
   --jj-motion-duration-micro: 120ms;
@@ -125,6 +127,7 @@
   --jj-color-bg-surface: var(--jj-color-white);
   --jj-color-bg-elevated: var(--jj-color-white);
   --jj-color-bg-muted: var(--jj-color-slate-100);
+  --jj-color-bg-card: color-mix(in srgb, white 78%, transparent);
   --jj-color-bg-inverse: var(--jj-color-indigo-900);
 
   --jj-color-text-primary: var(--jj-color-slate-800);
@@ -151,7 +154,8 @@
   --jj-color-privacy-pill-fg: var(--jj-color-indigo-900);
   --jj-color-privacy-pill-border: color-mix(in srgb, #14b8a6 40%, transparent);
 
-  --jj-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --jj-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --jj-card-blur: blur(16px);
 }
 
 *,

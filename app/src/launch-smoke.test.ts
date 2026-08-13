@@ -53,6 +53,7 @@ describe("PE01-S01 launch desktop host", () => {
     expect(names).toContain("allow-data-directory");
     expect(names).toContain("allow-resource-snapshot");
     expect(names).toContain("allow-mailbox-oauth");
+    expect(names).toContain("core:window:allow-set-effects");
     expect(names).toContain("fs:scope");
     expect(names.some((name) => name.startsWith("shell:"))).toBe(false);
     expect(names.some((name) => name.startsWith("http:"))).toBe(false);

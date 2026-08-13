@@ -1,5 +1,7 @@
 export { JjEmptyState, type JjEmptyStateProps } from "./JjEmptyState.js";
 export { JjPage, JjPageHeader, type JjPageHeaderProps, type JjPageProps } from "./JjPage.js";
+export { JjStepFade, type JjStepFadeProps } from "./JjStepFade.js";
+export { JjStepper, type JjStepperProps } from "./JjStepper.js";
 export { JjSurface, type JjSurfaceProps } from "./JjSurface.js";
 export {
   COMPACT_DRAWER_WIDTH,

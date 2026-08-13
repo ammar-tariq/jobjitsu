@@ -29,6 +29,7 @@ describe("DesktopShell", () => {
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-layout");
     expect(screen.getByTestId("jj-shell-status-bar")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-titlebar-profile")).toBeInTheDocument();
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
     for (const label of [
@@ -43,6 +44,28 @@ describe("DesktopShell", () => {
     ]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
+  });
+
+  it("opens add profile from the title bar as a two-step form", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByTestId("jj-titlebar-profile"));
+    expect(screen.getByRole("menuitem", { name: "Add profile" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Switch profile" })).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+
+    await user.click(screen.getByTestId("jj-titlebar-add-profile"));
+    expect(screen.getByRole("dialog", { name: "Add profile" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-titlebar-create-name")).toBeInTheDocument();
+    await user.type(screen.getByTestId("jj-titlebar-create-name"), "Sam Chen");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create profile" }));
+    expect(await screen.findByTestId("jj-profile-tree")).toBeInTheDocument();
   });
 
   it("keeps primary nav names when the window is compact", async () => {

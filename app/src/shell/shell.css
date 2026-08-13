@@ -6,10 +6,114 @@
 
 .jj-shell {
   --jj-drawer-width: 240px;
+  background: var(--jj-color-bg-canvas);
 }
 
 .jj-shell[data-layout="compact"] {
   --jj-drawer-width: 64px;
+}
+
+@keyframes jj-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jj-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jj-step-enter {
+  animation: jj-step-enter var(--jj-motion-duration-standard) var(--jj-motion-ease-out);
+}
+
+.jj-view-enter {
+  animation: jj-view-enter var(--jj-motion-duration-standard) var(--jj-motion-ease-out);
+}
+
+.jj-titlebar {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.jj-titlebar-controls,
+.jj-titlebar-controls * {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+html[data-platform="macos"],
+html[data-platform="macos"] body,
+html[data-platform="macos"] #root,
+html[data-platform="windows"],
+html[data-platform="windows"] body,
+html[data-platform="windows"] #root {
+  background: transparent;
+}
+
+html[data-platform="macos"] .jj-shell,
+html[data-platform="windows"] .jj-shell {
+  background: transparent;
+}
+
+html[data-platform="linux"] .jj-shell,
+html[data-platform="web"] .jj-shell {
+  background: var(--jj-color-bg-canvas);
+}
+
+html[data-platform="macos"] .jj-titlebar {
+  background: color-mix(in srgb, var(--jj-color-bg-surface) 38%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+}
+
+html[data-platform="windows"] .jj-titlebar {
+  background: color-mix(in srgb, var(--jj-color-bg-surface) 72%, transparent);
+}
+
+html[data-platform="linux"] .jj-titlebar,
+html[data-platform="web"] .jj-titlebar {
+  background: var(--jj-color-bg-surface);
+}
+
+html[data-platform="macos"] .MuiDrawer-paper {
+  background-color: color-mix(in srgb, var(--jj-color-bg-surface) 42%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(22px);
+}
+
+html[data-platform="windows"] .MuiDrawer-paper {
+  background-color: color-mix(in srgb, var(--jj-color-bg-surface) 78%, transparent) !important;
+}
+
+html[data-platform="linux"] .MuiDrawer-paper,
+html[data-platform="web"] .MuiDrawer-paper {
+  background-color: var(--jj-color-bg-surface) !important;
+}
+
+html[data-platform="linux"] {
+  --jj-card-blur: none;
+  --jj-color-bg-card: var(--jj-color-bg-surface);
+}
+
+html[data-platform="web"] {
+  --jj-card-blur: none;
+  --jj-color-bg-card: var(--jj-color-bg-surface);
+}
+
+.MuiDialog-paper {
+  backdrop-filter: var(--jj-card-blur);
+  background-color: var(--jj-color-bg-elevated) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -17,5 +121,27 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  @keyframes jj-step-enter {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes jj-view-enter {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }

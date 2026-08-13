@@ -1,13 +1,11 @@
 import { useEffect, useState, type JSX } from "react";
 import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ApplicationSnapshot } from "../ipc/commands.js";
-import { JjEmptyState, JjPage } from "./layout/index.js";
+import { JjEmptyState, JjPage, JjSurface } from "./layout/index.js";
 
 export type QueueViewProps = {
   readonly bridge: IpcBridge;
@@ -83,26 +81,20 @@ export function QueueView({ bridge }: QueueViewProps): JSX.Element {
       maxWidth="40rem"
     >
       {items.length === 0 ? (
-        <JjEmptyState
-          testId="jj-queue-empty"
-          title="Nothing ready for review"
-          body="Mark an application Ready for review from Applications when you want a calm check before approval."
-        />
+        <JjSurface>
+          <JjEmptyState
+            testId="jj-queue-empty"
+            title="Nothing ready for review"
+            body="Mark an application Ready for review from Applications when you want a calm check before approval."
+          />
+        </JjSurface>
       ) : (
-        <List dense disablePadding aria-label="Ready for review">
+        <Stack spacing={1.5} aria-label="Ready for review">
           {items.map((application) => (
-            <ListItem
+            <JjSurface
               key={application.id}
-              alignItems="flex-start"
-              sx={{
-                flexDirection: "column",
-                alignItems: "stretch",
-                gap: 1,
-                py: 1.5,
-                borderBottom: "1px solid",
-                borderColor: "divider",
-              }}
-              data-testid={`jj-queue-row-${application.id}`}
+              testId={`jj-queue-row-${application.id}`}
+              spacing={1}
             >
               <ListItemText
                 primary={`${application.companyName} · ${application.roleTitle}`}
@@ -128,9 +120,9 @@ export function QueueView({ bridge }: QueueViewProps): JSX.Element {
                   Keep drafting
                 </Button>
               </Stack>
-            </ListItem>
+            </JjSurface>
           ))}
-        </List>
+        </Stack>
       )}
 
       {status ? (

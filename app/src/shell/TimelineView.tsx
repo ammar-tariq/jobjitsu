@@ -1,8 +1,8 @@
 import type { JSX } from "react";
-import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useHostActivity } from "./HostProvider.js";
-import { JjEmptyState, JjPage } from "./layout/index.js";
+import { JjEmptyState, JjPage, JjSurface } from "./layout/index.js";
 
 const TIMELINE_NAMES = new Set([
   "Queue.Approved",
@@ -38,37 +38,29 @@ export function TimelineView(): JSX.Element {
       maxWidth="40rem"
     >
       {entries.length === 0 ? (
-        <JjEmptyState
-          testId="jj-timeline-empty"
-          title="Quiet so far"
-          body="Create a draft, mark something ready for review, or set Preferences to see activity here."
-        />
+        <JjSurface>
+          <JjEmptyState
+            testId="jj-timeline-empty"
+            title="Quiet so far"
+            body="Create a draft, mark something ready for review, or set Preferences to see activity here."
+          />
+        </JjSurface>
       ) : (
-        <Box
+        <Stack
           component="ol"
           aria-label="Session timeline"
-          sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1 }}
+          spacing={1.5}
+          sx={{ listStyle: "none", m: 0, p: 0 }}
         >
           {entries.map((entry, index) => (
-            <Box
-              component="li"
-              key={`${entry.name}-${entry.occurredAt}-${index}`}
-              sx={(theme) => ({
-                px: 2,
-                py: 1.5,
-                borderRadius: 1,
-                border: "1px solid",
-                borderColor: theme.palette.divider,
-                bgcolor: theme.palette.action.hover,
-              })}
-            >
+            <JjSurface key={`${entry.name}-${entry.occurredAt}-${index}`} spacing={0.75}>
               <Typography variant="body2">{entry.summary}</Typography>
               <Typography variant="caption" color="text.secondary">
                 {new Date(entry.occurredAt).toLocaleString()}
               </Typography>
-            </Box>
+            </JjSurface>
           ))}
-        </Box>
+        </Stack>
       )}
     </JjPage>
   );

@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
 import { MailboxPreferences } from "./MailboxPreferences.js";
-import { JjPage } from "./layout/index.js";
+import { JjPage, JjStepper, JjSurface } from "./layout/index.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -208,6 +208,25 @@ export function PreferencesView({
     });
   };
 
+  const scrollToPref = (id: string): void => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(id)?.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    });
+  };
+
+  const prefSteps = [
+    { id: "jj-pref-approval", label: "Approval" },
+    { id: "jj-pref-voice", label: "Voice" },
+    { id: "jj-pref-data", label: "Data" },
+    { id: "jj-pref-agent", label: "Agent" },
+    { id: "jj-pref-email", label: "Email" },
+    { id: "jj-pref-appearance", label: "Appearance" },
+  ] as const;
+
   return (
     <JjPage
       testId="jj-preferences"
@@ -215,195 +234,220 @@ export function PreferencesView({
       subtitle="Choose where JobJitsu keeps files on this device. Profile and Paths are under Profile."
       maxWidth="40rem"
     >
-      <Stack spacing={1.5} data-testid="jj-approval-before-send">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Outbound approval
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          When this is on, JobJitsu asks before anything leaves this device. Agent never sends on
-          its own.
-        </Typography>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={requireApproval}
-              onChange={onToggleApproval}
-              data-testid="jj-approval-switch"
-            />
+      <JjStepper
+        steps={prefSteps.map((step) => step.label)}
+        active={-1}
+        onSelect={(index) => {
+          const target = prefSteps[index];
+          if (target) {
+            scrollToPref(target.id);
           }
-          label="Require approval before send"
-        />
-        {approvalStatus ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {approvalStatus}
-          </Typography>
-        ) : null}
-      </Stack>
+        }}
+      />
 
-      <Stack spacing={1.5} data-testid="jj-craft-preferences">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Writing voice
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Optional tone for drafts (for example: calm and precise). Stored on this device.
-        </Typography>
-        <TextField
-          label="Tone"
-          value={toneDraft}
-          onChange={(event) => setToneDraft(event.target.value)}
-          size="small"
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-craft-tone-input" } }}
-        />
-        <Button
-          variant="outlined"
-          onClick={onSaveCraft}
-          disabled={savingCraft}
-          sx={{ alignSelf: "flex-start" }}
-        >
-          Save writing voice
-        </Button>
-        {craftStatus ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {craftStatus}
+      <JjSurface testId="jj-approval-before-send" sx={{ scrollMarginTop: 16 }}>
+        <Stack spacing={1.5} id="jj-pref-approval">
+          <Typography component="h3" variant="body2" color="text.secondary">
+            Outbound approval
           </Typography>
-        ) : null}
-      </Stack>
-
-      <Stack spacing={1.5} data-testid="jj-data-folder">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Data folder
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Profile, paths, résumés, applications, and preferences are saved as files in this folder
-          on this device. Choose a folder you can back up.
-        </Typography>
-        <TextField
-          label="Folder path"
-          value={dataPathDraft}
-          onChange={(event) => setDataPathDraft(event.target.value)}
-          size="small"
-          fullWidth
-          slotProps={{ htmlInput: { "data-testid": "jj-data-folder-input" } }}
-        />
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button variant="contained" onClick={onPickDataRoot} disabled={savingDataRoot}>
-            Choose folder
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={onSaveDataRoot}
-            disabled={savingDataRoot || dataPathDraft.trim().length === 0}
-          >
-            Save path
-          </Button>
-          <Button
-            variant="text"
-            onClick={onResetDataRoot}
-            disabled={savingDataRoot || !(dataRoot?.isCustom ?? false)}
-          >
-            Use default
-          </Button>
-        </Stack>
-        {dataStatus ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {dataStatus}
-          </Typography>
-        ) : null}
-        {dataRoot ? (
           <Typography color="text.secondary" variant="body2">
-            {dataRoot.isCustom ? "Custom folder" : "Default folder"} · {dataRoot.path}
+            When this is on, JobJitsu asks before anything leaves this device. Agent never sends on
+            its own.
           </Typography>
-        ) : null}
-      </Stack>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={requireApproval}
+                onChange={onToggleApproval}
+                data-testid="jj-approval-switch"
+              />
+            }
+            label="Require approval before send"
+          />
+          {approvalStatus ? (
+            <Typography role="status" color="text.secondary" variant="body2">
+              {approvalStatus}
+            </Typography>
+          ) : null}
+        </Stack>
+      </JjSurface>
 
-      <Stack spacing={1.5} data-testid="jj-local-model-path">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          On-device Agent model
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Agent runs through local Ollama on this device. Choose an installed model from the list —
-          nothing leaves this device until Agent is ready.
-        </Typography>
-        <FormControl size="small" fullWidth>
-          <InputLabel id="jj-local-model-select-label">Installed model</InputLabel>
-          <Select
-            labelId="jj-local-model-select-label"
-            label="Installed model"
-            value={modelPathDraft}
-            onChange={(event) => setModelPathDraft(String(event.target.value))}
-            displayEmpty
-            data-testid="jj-local-model-select"
-            inputProps={{ "data-testid": "jj-local-model-path-input" }}
-          >
-            <MenuItem value="">
-              <em>None selected</em>
-            </MenuItem>
-            {selectOptions.map((name) => (
-              <MenuItem key={name} value={name}>
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Button
-            variant="contained"
-            onClick={onSaveModelPath}
-            disabled={savingModelPath || listingModels}
-          >
-            Save model
-          </Button>
+      <JjSurface testId="jj-craft-preferences">
+        <Stack spacing={1.5} id="jj-pref-voice">
+          <Typography component="h3" variant="body2" color="text.secondary">
+            Writing voice
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            Optional tone for drafts (for example: calm and precise). Stored on this device.
+          </Typography>
+          <TextField
+            label="Tone"
+            value={toneDraft}
+            onChange={(event) => setToneDraft(event.target.value)}
+            size="small"
+            fullWidth
+            slotProps={{ htmlInput: { "data-testid": "jj-craft-tone-input" } }}
+          />
           <Button
             variant="outlined"
-            onClick={refreshLocalModels}
-            disabled={listingModels || savingModelPath}
-            data-testid="jj-local-model-refresh"
+            onClick={onSaveCraft}
+            disabled={savingCraft}
+            sx={{ alignSelf: "flex-start" }}
           >
-            {listingModels ? "Refreshing…" : "Refresh list"}
+            Save writing voice
           </Button>
+          {craftStatus ? (
+            <Typography role="status" color="text.secondary" variant="body2">
+              {craftStatus}
+            </Typography>
+          ) : null}
         </Stack>
-        {modelStatus ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            {modelStatus}
+      </JjSurface>
+
+      <JjSurface testId="jj-data-folder">
+        <Stack spacing={1.5} id="jj-pref-data">
+          <Typography component="h3" variant="body2" color="text.secondary">
+            Data folder
           </Typography>
-        ) : listMessage ? (
-          <Typography
-            role="status"
-            color="text.secondary"
-            variant="body2"
-            data-testid="jj-local-model-list-status"
+          <Typography color="text.secondary" variant="body2">
+            Profile, paths, résumés, applications, and preferences are saved as files in this folder
+            on this device. Choose a folder you can back up.
+          </Typography>
+          <TextField
+            label="Folder path"
+            value={dataPathDraft}
+            onChange={(event) => setDataPathDraft(event.target.value)}
+            size="small"
+            fullWidth
+            slotProps={{ htmlInput: { "data-testid": "jj-data-folder-input" } }}
+          />
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Button variant="contained" onClick={onPickDataRoot} disabled={savingDataRoot}>
+              Choose folder
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onSaveDataRoot}
+              disabled={savingDataRoot || dataPathDraft.trim().length === 0}
+            >
+              Save path
+            </Button>
+            <Button
+              variant="text"
+              onClick={onResetDataRoot}
+              disabled={savingDataRoot || !(dataRoot?.isCustom ?? false)}
+            >
+              Use default
+            </Button>
+          </Stack>
+          {dataStatus ? (
+            <Typography role="status" color="text.secondary" variant="body2">
+              {dataStatus}
+            </Typography>
+          ) : null}
+          {dataRoot ? (
+            <Typography color="text.secondary" variant="body2">
+              {dataRoot.isCustom ? "Custom folder" : "Default folder"} · {dataRoot.path}
+            </Typography>
+          ) : null}
+        </Stack>
+      </JjSurface>
+
+      <JjSurface testId="jj-local-model-path">
+        <Stack spacing={1.5} id="jj-pref-agent">
+          <Typography component="h3" variant="body2" color="text.secondary">
+            On-device Agent model
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            Agent runs through local Ollama on this device. Choose an installed model from the list —
+            nothing leaves this device until Agent is ready.
+          </Typography>
+          <FormControl size="small" fullWidth>
+            <InputLabel id="jj-local-model-select-label">Installed model</InputLabel>
+            <Select
+              labelId="jj-local-model-select-label"
+              label="Installed model"
+              value={modelPathDraft}
+              onChange={(event) => setModelPathDraft(String(event.target.value))}
+              displayEmpty
+              data-testid="jj-local-model-select"
+              inputProps={{ "data-testid": "jj-local-model-path-input" }}
+            >
+              <MenuItem value="">
+                <em>None selected</em>
+              </MenuItem>
+              {selectOptions.map((name) => (
+                <MenuItem key={name} value={name}>
+                  {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              onClick={onSaveModelPath}
+              disabled={savingModelPath || listingModels}
+            >
+              Save model
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={refreshLocalModels}
+              disabled={listingModels || savingModelPath}
+              data-testid="jj-local-model-refresh"
+            >
+              {listingModels ? "Refreshing…" : "Refresh list"}
+            </Button>
+          </Stack>
+          {modelStatus ? (
+            <Typography role="status" color="text.secondary" variant="body2">
+              {modelStatus}
+            </Typography>
+          ) : listMessage ? (
+            <Typography
+              role="status"
+              color="text.secondary"
+              variant="body2"
+              data-testid="jj-local-model-list-status"
+            >
+              {listMessage}
+            </Typography>
+          ) : listStatus === "ready" && modelPathDraft.trim().length === 0 ? (
+            <Typography role="status" color="text.secondary" variant="body2">
+              Choose a local model so Agent can run on this device.
+            </Typography>
+          ) : null}
+        </Stack>
+      </JjSurface>
+
+      <JjSurface>
+        <Stack spacing={1.5} id="jj-pref-email">
+          <MailboxPreferences bridge={bridge} />
+        </Stack>
+      </JjSurface>
+
+      <JjSurface testId="jj-appearance">
+        <Stack spacing={1.5} id="jj-pref-appearance">
+          <Typography component="h3" variant="body2" color="text.secondary">
+            Appearance
+          </Typography>
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={theme}
+            onChange={(_event, value: ThemePreference | null) => {
+              if (value) {
+                onThemeChange(value);
+              }
+            }}
+            aria-label="Appearance"
           >
-            {listMessage}
-          </Typography>
-        ) : listStatus === "ready" && modelPathDraft.trim().length === 0 ? (
-          <Typography role="status" color="text.secondary" variant="body2">
-            Choose a local model so Agent can run on this device.
-          </Typography>
-        ) : null}
-      </Stack>
-
-      <MailboxPreferences bridge={bridge} />
-
-      <Stack spacing={1.5} data-testid="jj-appearance">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Appearance
-        </Typography>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={theme}
-          onChange={(_event, value: ThemePreference | null) => {
-            if (value) {
-              onThemeChange(value);
-            }
-          }}
-          aria-label="Appearance"
-        >
-          <ToggleButton value="dark">Dark</ToggleButton>
-          <ToggleButton value="light">Light</ToggleButton>
-        </ToggleButtonGroup>
-      </Stack>
+            <ToggleButton value="dark">Dark</ToggleButton>
+            <ToggleButton value="light">Light</ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
+      </JjSurface>
     </JjPage>
   );
 }

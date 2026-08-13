@@ -1,5 +1,4 @@
 import { useEffect, useState, type JSX } from "react";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -58,7 +57,7 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
       maxWidth="40rem"
     >
       <JjSurface testId="jj-agent-status" spacing={1}>
-        <Typography variant="subtitle1" role="status">
+        <Typography variant="subtitle1">
           {privacyLabel(privacy)}
         </Typography>
         <Typography color="text.secondary" variant="body2">
@@ -85,27 +84,13 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
             Waiting for host activity…
           </Typography>
         ) : (
-          <Box
-            component="ul"
-            aria-label="Recent Agent activity"
-            sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 1 }}
-          >
+          <Stack spacing={1} component="ul" aria-label="Recent Agent activity" sx={{ listStyle: "none", m: 0, p: 0 }}>
             {recent.map((entry, index) => (
-              <Box
-                component="li"
-                key={`${entry.name}-${entry.occurredAt}-${index}`}
-                sx={(theme) => ({
-                  px: 2,
-                  py: 1.25,
-                  borderRadius: 1,
-                  border: "1px solid",
-                  borderColor: theme.palette.divider,
-                })}
-              >
+              <JjSurface key={`${entry.name}-${entry.occurredAt}-${index}`} spacing={0.75}>
                 <Typography variant="body2">{entry.summary}</Typography>
-              </Box>
+              </JjSurface>
             ))}
-          </Box>
+          </Stack>
         )}
       </Stack>
     </JjPage>

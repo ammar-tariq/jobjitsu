@@ -22,7 +22,7 @@ import type {
 } from "../ipc/commands.js";
 import { CraftWorkingView } from "./CraftWorkingView.js";
 import { useHostCraftSession } from "./HostProvider.js";
-import { JjPage } from "./layout/index.js";
+import { JjPage, JjStepper, JjSurface } from "./layout/index.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
@@ -98,6 +98,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const job = session?.job;
   const preparing = job?.status === "running";
   const hasDrafts = Boolean(resumeDraft.trim() || coverLetterDraft.trim());
+  const craftStep = preparing ? 1 : hasDrafts ? 2 : 0;
   const busy = preparing || exporting || chatBusy || savingApplication;
   const status = localStatus ?? job?.message ?? null;
   const elapsedSeconds =
@@ -345,15 +346,31 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       subtitle="Prepare a tailored résumé and cover letter on this device. Agent keeps working if you leave this screen. Nothing is sent from here."
       maxWidth="56rem"
     >
+      <JjStepper
+        steps={["Sources", "Prepare", "Drafts"]}
+        active={craftStep}
+        onSelect={(index) => {
+          if (index === 0) {
+            setSourcesOpen(true);
+            document.getElementById("jj-craft-sources")?.scrollIntoView({ block: "start" });
+            return;
+          }
+          if (index === 2) {
+            document.getElementById("jj-craft-workspace")?.scrollIntoView({ block: "start" });
+          }
+        }}
+      />
+
       {preparing && session ? (
         <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
       ) : null}
 
       {preparing ? null : (
-        <Stack
+        <JjSurface
+          id="jj-craft-sources"
           spacing={1.5}
-          sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-          data-testid="jj-craft-sources"
+          testId="jj-craft-sources"
+          sx={{ scrollMarginTop: 16 }}
         >
           <Stack
             direction="row"
@@ -467,7 +484,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 : "Sources are tucked away so you can focus on the draft."}
             </Typography>
           ) : null}
-        </Stack>
+        </JjSurface>
       )}
 
       {status && !preparing ? (
@@ -493,7 +510,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       ) : null}
 
       {hasDrafts || preparing ? (
-        <Stack spacing={1.5} data-testid="jj-craft-workspace">
+        <JjSurface spacing={1.5} testId="jj-craft-workspace" id="jj-craft-workspace">
           <Tabs
             value={draftTab}
             onChange={(_event, value: DraftTab) => {
@@ -704,11 +721,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
             </Stack>
           </Collapse>
 
-          <Stack
-            spacing={1.5}
-            data-testid="jj-craft-save-application"
-            sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-          >
+          <JjSurface spacing={1.5} testId="jj-craft-save-application">
             <Typography variant="subtitle2">Keep as an application</Typography>
             <Typography color="text.secondary" variant="body2">
               Save these drafts on this device. Nothing is sent.
@@ -750,8 +763,8 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 {savingApplication ? "Saving…" : "Save"}
               </Button>
             </Stack>
-          </Stack>
-        </Stack>
+          </JjSurface>
+        </JjSurface>
       ) : (
         <Typography color="text.secondary" variant="body2" data-testid="jj-craft-empty">
           Paste a résumé and job description above, then prepare drafts when you are ready.

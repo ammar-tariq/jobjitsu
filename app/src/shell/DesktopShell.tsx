@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { AgentPrivacyState } from "@jobjitsu/ui";
-import { JjAgentPrivacyPill } from "@jobjitsu/ui";
 import { DEFAULT_SHELL_NAV_ID, type ShellNavId } from "../index.js";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ThemePreference } from "../ipc/commands.js";
@@ -17,11 +16,13 @@ import { FollowUpsView } from "./FollowUpsView.js";
 import { useHostActivity, useHostCraftSession } from "./HostProvider.js";
 import { COMPACT_DRAWER_WIDTH, useShellLayout } from "./layout/index.js";
 import { OnboardingView } from "./OnboardingView.js";
+import { detectShellPlatform } from "./platform.js";
 import { PreferencesView } from "./PreferencesView.js";
 import { ProfileView } from "./ProfileView.js";
 import { QueueView } from "./QueueView.js";
 import { SideMenu } from "./SideMenu.js";
 import { TimelineView } from "./TimelineView.js";
+import { TitleBar } from "./TitleBar.js";
 
 export type DesktopShellProps = {
   readonly theme: ThemePreference;
@@ -30,7 +31,7 @@ export type DesktopShellProps = {
 };
 
 /**
- * Desktop shell — side nav + main + always-visible Agent privacy bar.
+ * Desktop shell — title bar, side nav, main. Agent privacy lives in the title bar.
  * Subscribes to host activity / craft session; must never import `@jobjitsu/ai`.
  */
 export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps): JSX.Element {
@@ -40,12 +41,17 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
   const [agentPrivacy, setAgentPrivacy] = useState<AgentPrivacyState>("unavailable");
   const [showOnboarding, setShowOnboarding] = useState(false);
   const layout = useShellLayout();
+  const platform = detectShellPlatform();
   const craftRunning = craftSession.job.status === "running";
   const drawerWidth = layout === "compact" ? COMPACT_DRAWER_WIDTH : DRAWER_WIDTH;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-platform", platform);
+  }, [platform]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,21 +79,42 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
     };
   }, [bridge, activity]);
 
+  const titleBar = (
+    <TitleBar
+      bridge={bridge}
+      theme={theme}
+      onThemeChange={onThemeChange}
+      agentPrivacy={agentPrivacy}
+      onOpenProfile={() => {
+        setShowOnboarding(false);
+        setActiveId("profile");
+      }}
+    />
+  );
+
   if (showOnboarding) {
     return (
       <Box
         className="jj-shell"
         data-theme={theme}
         data-layout={layout}
+        data-platform={platform}
         data-testid="jj-desktop-shell"
-        sx={{ minHeight: "100vh", bgcolor: "background.default" }}
+        sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
       >
-        <OnboardingView
-          bridge={bridge}
-          onFinished={() => {
-            setShowOnboarding(false);
-          }}
-        />
+        {titleBar}
+        <Box
+          component="main"
+          id="main-content"
+          sx={{ flexGrow: 1, overflow: "auto", minHeight: 0 }}
+        >
+          <OnboardingView
+            bridge={bridge}
+            onFinished={() => {
+              setShowOnboarding(false);
+            }}
+          />
+        </Box>
       </Box>
     );
   }
@@ -97,95 +124,83 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
       className="jj-shell"
       data-theme={theme}
       data-layout={layout}
+      data-platform={platform}
       data-testid="jj-desktop-shell"
-      sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}
+      sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
-      <SideMenu activeId={activeId} onSelect={setActiveId} layout={layout} />
+      {titleBar}
+      <Box sx={{ display: "flex", flexGrow: 1, minHeight: 0, minWidth: 0 }}>
+        <SideMenu activeId={activeId} onSelect={setActiveId} layout={layout} />
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          width: `calc(100% - ${drawerWidth}px)`,
-          minHeight: "100vh",
-        }}
-      >
         <Box
-          component="main"
-          id="main-content"
-          sx={(muiTheme) => ({
-            flexGrow: 1,
-            backgroundColor: muiTheme.palette.background.default,
-            overflow: "auto",
-            minHeight: 0,
-          })}
-        >
-          <Stack
-            spacing={2.5}
-            sx={{
-              alignItems: "stretch",
-              px: layout === "compact" ? 2 : 3,
-              pb: 4,
-              pt: 3,
-              minHeight: "100%",
-            }}
-          >
-            {craftRunning && activeId !== "craft" ? (
-              <Alert
-                severity="info"
-                data-testid="jj-craft-running-banner"
-                action={
-                  <Button color="inherit" size="small" onClick={() => setActiveId("craft")}>
-                    Open Craft
-                  </Button>
-                }
-              >
-                {craftSession.job.message ??
-                  "Agent is preparing Craft drafts on this device. You can keep browsing."}
-              </Alert>
-            ) : null}
-            {activeId === "craft" ? (
-              <CraftView bridge={bridge} />
-            ) : activeId === "applications" ? (
-              <ApplicationsView
-                bridge={bridge}
-                onOpenPreferences={() => setActiveId("preferences")}
-              />
-            ) : activeId === "queue" ? (
-              <QueueView bridge={bridge} />
-            ) : activeId === "follow-ups" ? (
-              <FollowUpsView bridge={bridge} />
-            ) : activeId === "agent" ? (
-              <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
-            ) : activeId === "profile" ? (
-              <ProfileView bridge={bridge} />
-            ) : activeId === "preferences" ? (
-              <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
-            ) : activeId === "timeline" ? (
-              <TimelineView />
-            ) : (
-              <CraftView bridge={bridge} />
-            )}
-          </Stack>
-        </Box>
-        <Box
-          component="footer"
-          data-testid="jj-shell-status-bar"
           sx={{
+            flexGrow: 1,
             display: "flex",
-            alignItems: "center",
-            gap: 1,
-            px: 2,
-            py: 1,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            flexShrink: 0,
+            flexDirection: "column",
+            minWidth: 0,
+            width: `calc(100% - ${drawerWidth}px)`,
+            minHeight: 0,
           }}
         >
-          <JjAgentPrivacyPill state={agentPrivacy} />
+          <Box
+            component="main"
+            id="main-content"
+            sx={{
+              flexGrow: 1,
+              overflow: "auto",
+              minHeight: 0,
+            }}
+          >
+            <Stack
+              key={activeId}
+              className="jj-view-enter"
+              spacing={2.5}
+              sx={{
+                alignItems: "stretch",
+                px: layout === "compact" ? 2 : 3,
+                pb: 4,
+                pt: 3,
+                minHeight: "100%",
+              }}
+            >
+              {craftRunning && activeId !== "craft" ? (
+                <Alert
+                  severity="info"
+                  data-testid="jj-craft-running-banner"
+                  action={
+                    <Button color="inherit" size="small" onClick={() => setActiveId("craft")}>
+                      Open Craft
+                    </Button>
+                  }
+                >
+                  {craftSession.job.message ??
+                    "Agent is preparing Craft drafts on this device. You can keep browsing."}
+                </Alert>
+              ) : null}
+              {activeId === "craft" ? (
+                <CraftView bridge={bridge} />
+              ) : activeId === "applications" ? (
+                <ApplicationsView
+                  bridge={bridge}
+                  onOpenPreferences={() => setActiveId("preferences")}
+                />
+              ) : activeId === "queue" ? (
+                <QueueView bridge={bridge} />
+              ) : activeId === "follow-ups" ? (
+                <FollowUpsView bridge={bridge} />
+              ) : activeId === "agent" ? (
+                <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
+              ) : activeId === "profile" ? (
+                <ProfileView bridge={bridge} />
+              ) : activeId === "preferences" ? (
+                <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
+              ) : activeId === "timeline" ? (
+                <TimelineView />
+              ) : (
+                <CraftView bridge={bridge} />
+              )}
+            </Stack>
+          </Box>
         </Box>
       </Box>
     </Box>

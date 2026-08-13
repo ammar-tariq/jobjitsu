@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "core:path:default",
+    "core:window:allow-set-effects",
     "allow-data-directory",
     "allow-resource-snapshot",
     "allow-mailbox-oauth",
