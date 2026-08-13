@@ -75,6 +75,8 @@ export const EMPTY_CRAFT_SESSION: CraftSessionState = {
 export type CraftSessionStore = {
   get(): CraftSessionState;
   patch(patch: CraftSessionPatch): CraftSessionState;
+  /** Clear session drafts on this device (PE21 Reset). */
+  reset(): CraftSessionState;
   /**
    * Start on-device prepare. Continues even if the Craft view unmounts.
    * Returns the running session immediately.
@@ -147,6 +149,11 @@ export function createCraftSessionStore(options: {
         chatMessages: patch.chatMessages ? [...patch.chatMessages] : prev.chatMessages,
         job: prev.job,
       }));
+    },
+
+    reset() {
+      prepareGeneration += 1;
+      return update(() => EMPTY_CRAFT_SESSION);
     },
 
     prepareDrafts(kind) {

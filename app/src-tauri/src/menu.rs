@@ -26,6 +26,9 @@ pub fn install_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     .text("nav-follow-ups", "Follow-ups")
     .separator()
     .text("nav-profile", "Profile")
+    .text("nav-job-mail", "Job Mail")
+    .text("nav-sources", "Sources")
+    .separator()
     .text("nav-agent", "Agent")
     .text("nav-timeline", "Timeline")
     .separator()
@@ -67,6 +70,8 @@ pub fn install_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
       "nav-queue" => Some("queue"),
       "nav-follow-ups" => Some("follow-ups"),
       "nav-profile" => Some("profile"),
+      "nav-job-mail" => Some("job-mail"),
+      "nav-sources" => Some("sources"),
       "nav-agent" => Some("agent"),
       "nav-timeline" => Some("timeline"),
       _ => None,

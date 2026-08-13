@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
-| **Story** | Quiet panels for Preferences, Craft, Queue, Follow-ups, and onboarding |
-| **Status** | Testing · [PR #122](https://github.com/ammar-tariq/jobjitsu/pull/122) |
-| **Note** | Presentation only. Shell chrome landed in [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121). |
+| **Epic** | [PE21 Shell IA](https://github.com/ammar-tariq/jobjitsu/issues/128) |
+| **Story** | PE21-S02–S05 — Job Mail, Reset, Sources, icon accents |
+| **Status** | In Progress · branch `feat/pe21-shell-restructure` |
+| **Note** | Single-pass IA restructure. Plan: `docs/product/SHELL_IA.md`. |
 
 ## Completed slices
 

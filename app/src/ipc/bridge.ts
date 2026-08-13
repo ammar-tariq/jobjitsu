@@ -61,6 +61,13 @@ export type IpcBridge = {
   readonly setDataRoot: (path: string) => Promise<Result<IpcResultMap["storage.setDataRoot"]>>;
   readonly resetDataRoot: () => Promise<Result<IpcResultMap["storage.resetDataRoot"]>>;
   readonly pickDataRoot: () => Promise<Result<IpcResultMap["storage.pickDataRoot"]>>;
+  readonly resetSelectedData: (
+    selection: IpcPayloadMap["storage.resetSelected"],
+  ) => Promise<Result<IpcResultMap["storage.resetSelected"]>>;
+  readonly backupSelectedData: (
+    selection: IpcPayloadMap["storage.backupSelected"],
+  ) => Promise<Result<IpcResultMap["storage.backupSelected"]>>;
+  readonly restoreSelectedData: () => Promise<Result<IpcResultMap["storage.restoreBackup"]>>;
   readonly getApprovalBeforeSend: () => Promise<
     Result<IpcResultMap["preferences.getApprovalBeforeSend"]>
   >;
@@ -274,6 +281,21 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async pickDataRoot() {
       return (await dispatcher.invoke("storage.pickDataRoot")) as Result<
         IpcResultMap["storage.pickDataRoot"]
+      >;
+    },
+    async resetSelectedData(selection: IpcPayloadMap["storage.resetSelected"]) {
+      return (await dispatcher.invoke("storage.resetSelected", selection)) as Result<
+        IpcResultMap["storage.resetSelected"]
+      >;
+    },
+    async backupSelectedData(selection: IpcPayloadMap["storage.backupSelected"]) {
+      return (await dispatcher.invoke("storage.backupSelected", selection)) as Result<
+        IpcResultMap["storage.backupSelected"]
+      >;
+    },
+    async restoreSelectedData() {
+      return (await dispatcher.invoke("storage.restoreBackup")) as Result<
+        IpcResultMap["storage.restoreBackup"]
       >;
     },
     async getApprovalBeforeSend() {

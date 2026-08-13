@@ -13,8 +13,9 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
-import { MailboxPreferences } from "./MailboxPreferences.js";
 import { JjPage, JjSection } from "./layout/index.js";
+import Checkbox from "@mui/material/Checkbox";
+import FormGroup from "@mui/material/FormGroup";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -46,6 +47,15 @@ export function PreferencesView({
   const [toneDraft, setToneDraft] = useState("");
   const [craftStatus, setCraftStatus] = useState<string | null>(null);
   const [savingCraft, setSavingCraft] = useState(false);
+  const [resetProfiles, setResetProfiles] = useState(false);
+  const [resetJobMail, setResetJobMail] = useState(false);
+  const [resetApplications, setResetApplications] = useState(false);
+  const [resetCraft, setResetCraft] = useState(false);
+  const [resetTimeline, setResetTimeline] = useState(false);
+  const [resetAgentModel, setResetAgentModel] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState("");
+  const [resetStatus, setResetStatus] = useState<string | null>(null);
+  const [resetBusy, setResetBusy] = useState(false);
 
   const refreshLocalModels = (): void => {
     setListingModels(true);
@@ -208,11 +218,105 @@ export function PreferencesView({
     });
   };
 
+  const anyResetSelected =
+    resetProfiles ||
+    resetJobMail ||
+    resetApplications ||
+    resetCraft ||
+    resetTimeline ||
+    resetAgentModel;
+
+  const onResetSelected = (): void => {
+    if (!anyResetSelected || resetConfirm.trim().toLowerCase() !== "reset") {
+      setResetStatus("Select what to clear, then type “reset” to confirm.");
+      return;
+    }
+    setResetBusy(true);
+    setResetStatus(null);
+    void bridge
+      .resetSelectedData({
+        profiles: resetProfiles,
+        jobMail: resetJobMail,
+        applications: resetApplications,
+        craft: resetCraft,
+        timeline: resetTimeline,
+        agentModelPath: resetAgentModel,
+      })
+      .then((result) => {
+        setResetBusy(false);
+        if (!result.ok) {
+          setResetStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setResetConfirm("");
+        setResetStatus(
+          result.value.cleared.length > 0
+            ? `Cleared on this device: ${result.value.cleared.join(", ")}. .env was not touched.`
+            : "Nothing was selected to clear.",
+        );
+      })
+      .catch(() => {
+        setResetBusy(false);
+        setResetStatus("Could not reset. Try again.");
+      });
+  };
+
+  const onBackupSelected = (): void => {
+    if (!anyResetSelected) {
+      setResetStatus("Select what to include in the backup.");
+      return;
+    }
+    setResetBusy(true);
+    setResetStatus(null);
+    void bridge
+      .backupSelectedData({
+        profiles: resetProfiles,
+        jobMail: resetJobMail,
+        applications: resetApplications,
+        craft: resetCraft,
+        timeline: resetTimeline,
+        agentModelPath: resetAgentModel,
+      })
+      .then((result) => {
+        setResetBusy(false);
+        if (!result.ok) {
+          setResetStatus(result.error.message ?? result.error.title);
+          return;
+        }
+        setResetStatus(
+          result.value.backupPath
+            ? `Backup saved on this device: ${result.value.backupPath}`
+            : "Backup cancelled.",
+        );
+      })
+      .catch(() => {
+        setResetBusy(false);
+        setResetStatus("Could not create a backup. Try again.");
+      });
+  };
+
+  const onRestoreBackup = (): void => {
+    setResetBusy(true);
+    setResetStatus(null);
+    void bridge.restoreSelectedData().then((result) => {
+      setResetBusy(false);
+      if (!result.ok) {
+        setResetStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setResetStatus(
+        result.value.restored.length > 0
+          ? `Restored on this device: ${result.value.restored.join(", ")}.`
+          : "Restore cancelled.",
+      );
+    });
+  };
+
   return (
     <JjPage
       testId="jj-preferences"
       title="Preferences"
-      subtitle="Choose where JobJitsu keeps files on this device. Profile and Paths are under Profile."
+      subtitle="Device folder, Agent model, approval, appearance, and Reset. Job Mail and Profile live in their own views."
       maxWidth="40rem"
     >
       <JjSection
@@ -372,7 +476,106 @@ export function PreferencesView({
         ) : null}
       </JjSection>
 
-      <MailboxPreferences bridge={bridge} />
+      <JjSection
+        testId="jj-preferences-reset"
+        title="Reset"
+        description="Clear selected on-device data, or back it up first. Developer .env OAuth client ids are never deleted."
+      >
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={resetProfiles}
+                onChange={(_, checked) => setResetProfiles(checked)}
+              />
+            }
+            label="Profiles, Paths, and résumés"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={resetJobMail}
+                onChange={(_, checked) => setResetJobMail(checked)}
+              />
+            }
+            label="Job Mail (tokens, imported mail, cursors)"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={resetApplications}
+                onChange={(_, checked) => setResetApplications(checked)}
+              />
+            }
+            label="Applications, Queue, and Follow-ups"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={resetCraft} onChange={(_, checked) => setResetCraft(checked)} />
+            }
+            label="Craft session drafts"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={resetTimeline}
+                onChange={(_, checked) => setResetTimeline(checked)}
+              />
+            }
+            label="Timeline / activity"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={resetAgentModel}
+                onChange={(_, checked) => setResetAgentModel(checked)}
+              />
+            }
+            label="Agent model path preference"
+          />
+        </FormGroup>
+        <TextField
+          label="Type “reset” to confirm wipe"
+          value={resetConfirm}
+          onChange={(event) => setResetConfirm(event.target.value)}
+          size="small"
+          fullWidth
+          autoComplete="off"
+          data-testid="jj-reset-confirm"
+        />
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          <Button
+            variant="outlined"
+            onClick={onBackupSelected}
+            disabled={resetBusy || !anyResetSelected}
+            data-testid="jj-reset-backup"
+          >
+            Backup selected
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={onRestoreBackup}
+            disabled={resetBusy}
+            data-testid="jj-reset-restore"
+          >
+            Restore backup…
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onResetSelected}
+            disabled={resetBusy || !anyResetSelected}
+            data-testid="jj-reset-wipe"
+          >
+            Clear selected
+          </Button>
+        </Stack>
+        {resetStatus ? (
+          <Typography role="status" color="text.secondary" variant="body2">
+            {resetStatus}
+          </Typography>
+        ) : null}
+      </JjSection>
 
       <JjSection testId="jj-appearance" title="Appearance">
         <ToggleButtonGroup

@@ -14,6 +14,9 @@
   --jj-color-teal-400: #2dd4bf;
   --jj-color-teal-500: #14b8a6;
   --jj-color-teal-600: #0d9488;
+  /* App icon accents — cyan + marigold (PE21-S05) */
+  --jj-color-cyan-400: #22d3ee;
+  --jj-color-marigold-400: #f5a524;
 
   /* Primitives — neutrals */
   --jj-color-white: #ffffff;
@@ -48,20 +51,21 @@
   --jj-color-text-secondary: var(--jj-color-slate-500);
   --jj-color-text-tertiary: #94a3b8;
   --jj-color-text-inverse: var(--jj-color-slate-800);
-  --jj-color-text-link: var(--jj-color-teal-400);
+  --jj-color-text-link: var(--jj-color-cyan-400);
   --jj-color-text-on-accent: var(--jj-color-indigo-950);
 
   /* Semantic — borders & focus */
   --jj-color-border-subtle: var(--jj-alpha-white-06);
   --jj-color-border-default: color-mix(in srgb, white 12%, transparent);
   --jj-color-border-strong: color-mix(in srgb, white 18%, transparent);
-  --jj-color-focus-ring: var(--jj-color-teal-400);
+  --jj-color-focus-ring: var(--jj-color-cyan-400);
 
   /* Semantic — actions */
-  --jj-color-accent: var(--jj-color-teal-400);
-  --jj-color-accent-hover: #5eead4;
-  --jj-color-accent-pressed: var(--jj-color-teal-500);
-  --jj-color-accent-muted: var(--jj-alpha-teal-15);
+  --jj-color-accent: var(--jj-color-cyan-400);
+  --jj-color-accent-hover: #67e8f9;
+  --jj-color-accent-pressed: #06b6d4;
+  --jj-color-accent-muted: color-mix(in srgb, var(--jj-color-cyan-400) 15%, transparent);
+  --jj-color-accent-secondary: var(--jj-color-marigold-400);
   --jj-color-success: var(--jj-color-jade-500);
   --jj-color-caution: var(--jj-color-amber-500);
   --jj-color-danger: var(--jj-color-rose-500);

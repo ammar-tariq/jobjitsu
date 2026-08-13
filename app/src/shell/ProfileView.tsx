@@ -24,6 +24,7 @@ import { JjPage } from "./layout/index.js";
 
 export type ProfileViewProps = {
   readonly bridge: IpcBridge;
+  readonly onOpenJobMail?: () => void;
 };
 
 type DraftProfile = {
@@ -41,7 +42,7 @@ const emptyDraft = (): DraftProfile => ({
 /**
  * Profile tree: multiple local identities → Paths under each → resumes under each Path.
  */
-export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
+export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.Element {
   const [profiles, setProfiles] = useState<readonly ProfileSnapshot[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
@@ -1051,9 +1052,24 @@ export function ProfileView({ bridge }: ProfileViewProps): JSX.Element {
     <JjPage
       testId="jj-profile"
       title="Profile"
-      subtitle="Create one or more profiles on this device. Paths and resumes nest under each profile. Switching profiles does not send anything."
+      subtitle="Create one or more profiles on this device. Paths and resumes nest under each profile. Connect Job Mail when you are ready — nothing is sent from here."
       maxWidth="44rem"
     >
+      {onOpenJobMail ? (
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
+          data-testid="jj-profile-job-mail-cta"
+        >
+          <Button variant="contained" onClick={onOpenJobMail}>
+            Connect Gmail
+          </Button>
+          <Typography color="text.secondary" variant="body2">
+            Opens Job Mail. Paths (Fullstack, React Native, …) stay under this profile.
+          </Typography>
+        </Stack>
+      ) : null}
       <List
         dense
         disablePadding

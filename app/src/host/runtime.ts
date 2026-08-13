@@ -61,6 +61,8 @@ import {
   type DataRootStore,
   type DataRootSnapshot,
 } from "./data-root-store.js";
+import { createDataMaintenance } from "./data-maintenance.js";
+import type { LocalFsIo } from "@jobjitsu/storage";
 import { createMemoryKvStore } from "@jobjitsu/storage";
 import { createMailboxService, createMailboxStore, type MailboxService } from "@jobjitsu/mailbox";
 import { createMailboxAiPort } from "./mailbox-classify.js";
@@ -101,6 +103,7 @@ export type HostRuntime = {
   /** Start the host: App.Started → Agent readiness (no outbound send). */
   start(): Promise<void>;
   getActivity(): readonly HostActivityEntry[];
+  clearActivity(): void;
   subscribeActivity(listener: (entries: readonly HostActivityEntry[]) => void): () => void;
   getCraftSession(): CraftSessionState;
   subscribeCraftSession(listener: (session: CraftSessionState) => void): () => void;
@@ -123,6 +126,8 @@ export type CreateHostRuntimeOptions = {
   readonly fileSaver?: FileSaver;
   /** Rebind durable stores when the data folder changes. */
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
+  /** Optional FS for PE21 wipe/backup (durable desktop). */
+  readonly maintenanceIo?: LocalFsIo;
   /**
    * Force the in-process fake Agent (tests / offline demos without Ollama).
    * Production desktop defaults to local Ollama (PE05-S06).
@@ -308,6 +313,29 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
     folderPicker,
     fileSaver,
     onDataRootChanged: options.onDataRootChanged,
+    dataMaintenance: createDataMaintenance({
+      io: options.maintenanceIo,
+      mailbox: resolveMailbox,
+      applications: () => applications,
+      preferences: () => preferences,
+      craftSession: () => craftSession,
+      clearActivity: () => {
+        activity.length = 0;
+        const snapshot = [...activity];
+        for (const listener of listeners) {
+          listener(snapshot);
+        }
+      },
+      getDataRootPath: async () => (await dataRootStore.get()).path,
+      pickDirectory: async () =>
+        (await folderPicker.pickDirectory({ title: "Choose a folder" })) ?? undefined,
+      rebindStores: options.onDataRootChanged
+        ? async () => {
+            const active = await dataRootStore.get();
+            await options.onDataRootChanged?.(active);
+          }
+        : undefined,
+    }),
     getAiStatus: () => aiStatus,
     listLocalModels: async () => {
       if (defaultToFakeAi) {
@@ -381,6 +409,13 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
       });
     },
     getActivity: () => [...activity],
+    clearActivity() {
+      activity.length = 0;
+      const snapshot = [...activity];
+      for (const listener of listeners) {
+        listener(snapshot);
+      }
+    },
     subscribeActivity(listener) {
       listeners.add(listener);
       listener([...activity]);
