@@ -3,6 +3,8 @@
 //! Privileged work stays here; the React webview is presentation-only.
 //! No career egress commands are registered — see ADR 0013.
 
+mod menu;
+
 use serde::Serialize;
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 use tauri_plugin_fs::FsExt;
@@ -76,6 +78,7 @@ pub fn run() {
             .build(),
         )?;
       }
+      menu::install_app_menu(app.handle())?;
       Ok(())
     })
     .run(tauri::generate_context!())

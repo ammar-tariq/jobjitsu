@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { AgentPrivacyState } from "@jobjitsu/ui";
 import { JjAgentPrivacyPill } from "@jobjitsu/ui";
-import { DEFAULT_SHELL_NAV_ID, type ShellNavId } from "../index.js";
+import { DEFAULT_SHELL_NAV_ID, isShellNavId, type ShellNavId } from "../index.js";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ThemePreference } from "../ipc/commands.js";
 import { DRAWER_WIDTH } from "../theme/jjTheme.js";
@@ -72,6 +72,26 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
       cancelled = true;
     };
   }, [bridge, activity]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void (async () => {
+      try {
+        const { listen } = await import("@tauri-apps/api/event");
+        unlisten = await listen<string>("shell:navigate", (event) => {
+          if (isShellNavId(event.payload)) {
+            setShowOnboarding(false);
+            setActiveId(event.payload);
+          }
+        });
+      } catch {
+        // Browser preview and unit tests have no native menu.
+      }
+    })();
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   if (showOnboarding) {
     return (
