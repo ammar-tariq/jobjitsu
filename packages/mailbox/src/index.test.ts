@@ -557,6 +557,38 @@ describe("@jobjitsu/mailbox", () => {
     ).toBe(false);
   });
 
+  it("classifies already-imported mail when a later page fails", async () => {
+    const applications = createMemoryApplicationRepository();
+    const store = createMailboxStore(createMemoryKvStore());
+    const bus = createInMemoryEventBus();
+    let attempts = 0;
+    const flaky = {
+      id: "fake" as const,
+      async listPage() {
+        attempts += 1;
+        if (attempts === 1) {
+          return {
+            messages: SAMPLE_MAILBOX_MESSAGES.slice(0, 3),
+            nextCursor: "page-2",
+          };
+        }
+        throw new Error("Load failed");
+      },
+    };
+    const service = createMailboxService({
+      store,
+      applications,
+      bus,
+      providers: { fake: flaky },
+    });
+    const connected = await service.connectSampleMailbox();
+    const failed = await service.waitForSync(connected.id);
+    expect(failed.syncStatus).toBe("failed");
+    expect(failed.syncError).toMatch(/connection dropped|Try Sync now/i);
+    expect(failed.emailsIngested).toBeGreaterThan(0);
+    expect(failed.emailsProcessed).toBeGreaterThan(0);
+  });
+
   it("resumes sync after a provider failure and surfaces Gmail rate limits", async () => {
     const applications = createMemoryApplicationRepository();
     const store = createMailboxStore(createMemoryKvStore());

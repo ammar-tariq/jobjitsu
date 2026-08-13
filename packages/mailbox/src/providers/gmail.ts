@@ -130,12 +130,14 @@ export function createGmailMailboxProvider(options: GmailMailboxProviderOptions)
       )) as GmailListResponse;
       const messages: MailboxProviderMessage[] = [];
       for (const row of listed.messages ?? []) {
+        // metadata is enough for classify (headers + snippet) and much lighter than format=full.
         const full = (await gmailJson(
           fetchImpl,
           tokens.accessToken,
-          `/users/me/messages/${encodeURIComponent(row.id)}?format=full`,
+          `/users/me/messages/${encodeURIComponent(row.id)}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
         )) as GmailMessageResponse;
         messages.push(toProviderMessage(full));
+        await sleep(40);
       }
       const historyId = await readGmailHistoryId(fetchImpl, tokens.accessToken);
       return {
@@ -206,9 +208,10 @@ async function listGmailHistory(
     const full = (await gmailJson(
       fetchImpl,
       accessToken,
-      `/users/me/messages/${encodeURIComponent(id)}?format=full`,
+      `/users/me/messages/${encodeURIComponent(id)}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
     )) as GmailMessageResponse;
     messages.push(toProviderMessage(full));
+    await sleep(40);
   }
   return {
     messages,
@@ -228,24 +231,73 @@ async function readGmailHistoryId(
   return profile.historyId;
 }
 
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function isTransientNetworkError(cause: unknown): boolean {
+  if (!(cause instanceof Error)) {
+    return false;
+  }
+  return /load failed|failed to fetch|networkerror|network request failed|fetch failed|aborted/i.test(
+    cause.message,
+  );
+}
+
+function humanizeGmailNetworkError(cause: unknown): Error {
+  if (isTransientNetworkError(cause)) {
+    return new Error(
+      "Mail import paused — the connection dropped. Imported mail stays on this device. Try Sync now in a minute.",
+    );
+  }
+  if (cause instanceof Error) {
+    return cause;
+  }
+  return new Error("Gmail could not list mail right now. Try again.");
+}
+
 async function gmailJson(
   fetchImpl: typeof fetch,
   accessToken: string,
   path: string,
 ): Promise<unknown> {
-  const response = await fetchImpl(`https://gmail.googleapis.com/gmail/v1${path}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (response.status === 401) {
-    throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
+  let lastError: unknown;
+  let sawRateLimit = false;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const response = await fetchImpl(`https://gmail.googleapis.com/gmail/v1${path}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (response.status === 401) {
+        throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
+      }
+      if (response.status === 429 || response.status === 503) {
+        sawRateLimit = true;
+        await sleep(150 * 2 ** attempt);
+        continue;
+      }
+      if (!response.ok) {
+        throw new Error("Gmail could not list mail right now. Try again.");
+      }
+      return await response.json();
+    } catch (cause) {
+      lastError = cause;
+      if (cause instanceof Error && /expired|could not list/i.test(cause.message)) {
+        throw cause;
+      }
+      if (isTransientNetworkError(cause) && attempt < 3) {
+        await sleep(150 * 2 ** attempt);
+        continue;
+      }
+      throw humanizeGmailNetworkError(cause);
+    }
   }
-  if (response.status === 429) {
+  if (sawRateLimit) {
     throw new Error("Gmail asked us to slow down. Try sync again in a few minutes.");
   }
-  if (!response.ok) {
-    throw new Error("Gmail could not list mail right now. Try again.");
-  }
-  return response.json();
+  throw humanizeGmailNetworkError(lastError);
 }
 
 export function buildGmailAuthUrl(input: {

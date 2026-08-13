@@ -31,6 +31,9 @@ function wizardStepFor(
   if (syncStatus === "processing") {
     return 2;
   }
+  if (syncStatus === "failed" || syncStatus === "token_expired") {
+    return 1;
+  }
   return 3;
 }
 
