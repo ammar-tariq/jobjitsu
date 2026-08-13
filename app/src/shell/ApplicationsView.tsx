@@ -19,6 +19,7 @@ import type {
   MailboxTimelineSnapshot,
 } from "../ipc/commands.js";
 import { JjEmptyState, JjPage, JjSurface, useShellLayout } from "./layout/index.js";
+import { MailboxImportFeed } from "./MailboxImportFeed.js";
 
 const APPLICATION_FILTERS = [
   ["all", "All"],
@@ -46,6 +47,8 @@ export function ApplicationsView({
 }: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
   const [dashboard, setDashboard] = useState<MailboxDashboardSnapshot | null>(null);
+  const [recentEmails, setRecentEmails] = useState<readonly MailboxEmailSnapshot[]>([]);
+  const [mailboxSyncing, setMailboxSyncing] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [timeline, setTimeline] = useState<readonly MailboxTimelineSnapshot[]>([]);
@@ -81,11 +84,33 @@ export function ApplicationsView({
     if (dash.ok) {
       setDashboard(dash.value.dashboard);
     }
+    const recent = await bridge.listRecentMailboxEmails(40);
+    if (recent.ok) {
+      setRecentEmails(recent.value.emails);
+    }
+    const integrations = await bridge.listMailboxIntegrations();
+    if (integrations.ok) {
+      setMailboxSyncing(
+        integrations.value.integrations.some(
+          (row) => row.syncStatus === "syncing" || row.syncStatus === "processing",
+        ),
+      );
+    }
   };
 
   useEffect(() => {
     void refresh();
   }, [bridge]);
+
+  useEffect(() => {
+    if (!mailboxSyncing) {
+      return;
+    }
+    const id = window.setInterval(() => {
+      void refresh();
+    }, 2000);
+    return () => window.clearInterval(id);
+  }, [mailboxSyncing, bridge]);
 
   const clearForm = (): void => {
     setSelectedId(null);
@@ -346,9 +371,26 @@ export function ApplicationsView({
     <JjPage
       testId="jj-applications-view"
       title="Applications"
-      subtitle="Create local drafts, or connect Gmail in Preferences to import job mail. Nothing leaves from here."
+      subtitle="Job mail from Gmail becomes drafts here. Create your own, or connect mail in Preferences. Nothing leaves from here."
     >
       {dashboard ? <ApplicationSummary dashboard={dashboard} /> : null}
+
+      {mailboxSyncing ? (
+        <Alert severity="info" role="status">
+          Importing and classifying mail on this device. New applications appear as job mail is
+          recognized.
+        </Alert>
+      ) : null}
+
+      <MailboxImportFeed
+        emails={recentEmails}
+        onOpenApplication={(applicationId) => {
+          const match = applications.find((row) => row.id === applicationId);
+          if (match) {
+            onSelect(match);
+          }
+        }}
+      />
 
       {dashboard && dashboard.actions.length > 0 ? (
         <JjSurface testId="jj-application-attention" spacing={1}>

@@ -87,6 +87,7 @@ export type MailboxService = {
   completeAction(id: string): Promise<MailboxAction | undefined>;
   listTimeline(applicationId: string): Promise<readonly MailboxTimelineEvent[]>;
   listLinkedEmails(applicationId: string): Promise<readonly MailboxEmail[]>;
+  listRecentEmails(limit?: number): Promise<readonly MailboxEmail[]>;
   getEmail(id: string): Promise<MailboxEmail | undefined>;
   mergeApplications(targetId: string, sourceId: string): Promise<Application | undefined>;
   archiveApplication(id: string): Promise<Application | undefined>;
@@ -158,20 +159,26 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
   async function runSync(integration: MailboxIntegration): Promise<void> {
     const settings = await store.getSettings();
     const checkpoint = await store.getCheckpoint(integration.id);
-    const lookback = lookbackCutoff(
-      integration.lookbackDays || settings.lookbackDays,
-      now?.() ?? new Date(),
-    );
+    const lookbackDays = settings.lookbackDays;
+    const priorDays = integration.lookbackDays;
+    const lookbackExpanded =
+      lookbackDays <= 0 ? priorDays > 0 : lookbackDays > (priorDays || 0);
+    const lookback = lookbackCutoff(lookbackDays, now?.() ?? new Date());
     // A prior "successful" sync with zero mail (bad query / empty window) must not
     // lock us into history-only mode — redo the lookback listing.
+    // Expanding lookback (or switching to “all mail”) also restarts listing.
     const initialComplete =
-      Boolean(checkpoint?.initialComplete) && integration.emailsProcessed > 0;
+      Boolean(checkpoint?.initialComplete) &&
+      integration.emailsProcessed > 0 &&
+      !lookbackExpanded;
     const exclusiveSince = initialComplete;
-    const since = initialComplete && checkpoint?.watermark ? checkpoint.watermark : lookback;
-    let cursor = checkpoint?.pageCursor;
-    let historyCursor = checkpoint?.historyCursor;
+    const since =
+      initialComplete && checkpoint?.watermark ? checkpoint.watermark : lookback;
+    let cursor = lookbackExpanded ? undefined : checkpoint?.pageCursor;
+    let historyCursor = lookbackExpanded ? undefined : checkpoint?.historyCursor;
     let watermark = checkpoint?.watermark;
-    let processedTotal = integration.emailsProcessed;
+    let importedCount = 0;
+    let processedTotal = 0;
     let jobRelated = integration.jobRelatedCount;
     let applicationsFound = integration.applicationsFound;
     let totalEstimate = integration.emailsTotal;
@@ -194,9 +201,19 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         totalEstimate = page.totalEstimate ?? totalEstimate;
         for (const message of page.messages) {
           await ingestProviderMessage(store, integration.id, integration.provider, message);
+          importedCount += 1;
           const stamp = messageTimestamp(message);
           if (stamp && (!watermark || stamp > watermark)) {
             watermark = stamp;
+          }
+          if (importedCount === 1 || importedCount % 5 === 0) {
+            await putIntegration({
+              ...(await requireIntegration(integration.id)),
+              emailsProcessed: importedCount,
+              emailsTotal: totalEstimate,
+              syncStatus: "syncing",
+              updatedAt: new Date().toISOString(),
+            });
           }
         }
         cursor = page.nextCursor;
@@ -213,6 +230,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         });
         await putIntegration({
           ...(await requireIntegration(integration.id)),
+          emailsProcessed: importedCount,
           emailsTotal: totalEstimate,
           syncStatus: "syncing",
           updatedAt: new Date().toISOString(),
@@ -221,6 +239,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
 
       await putIntegration({
         ...(await requireIntegration(integration.id)),
+        emailsProcessed: importedCount,
+        emailsTotal: totalEstimate ?? importedCount,
         syncStatus: "processing",
         updatedAt: new Date().toISOString(),
       });
@@ -235,7 +255,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         applicationsFound += batch.applicationsFound;
         await putIntegration({
           ...(await requireIntegration(integration.id)),
-          emailsProcessed: processedTotal,
+          emailsProcessed: Math.max(importedCount, processedTotal),
+          emailsTotal: totalEstimate ?? importedCount,
           jobRelatedCount: jobRelated,
           applicationsFound,
           syncStatus: "processing",
@@ -256,7 +277,9 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       });
       await putIntegration({
         ...(await requireIntegration(integration.id)),
-        emailsProcessed: processedTotal,
+        lookbackDays,
+        emailsProcessed: Math.max(importedCount, processedTotal),
+        emailsTotal: totalEstimate ?? importedCount,
         jobRelatedCount: jobRelated,
         applicationsFound,
         lastSyncedAt: new Date().toISOString(),
@@ -271,10 +294,13 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         });
       }
     } catch (cause) {
-      const message =
+      const raw =
         cause instanceof Error
           ? cause.message
           : "Mail sync paused. You can try again from Preferences.";
+      const message = /load failed|failed to fetch|networkerror/i.test(raw)
+        ? "Could not reach Gmail from this device. Check the network, then Sync now again."
+        : raw;
       const tokenExpired = /expired/i.test(message);
       await putIntegration({
         ...(await requireIntegration(integration.id)),
@@ -600,6 +626,17 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     async listLinkedEmails(applicationId) {
       const listed = await listDocs(store.emails);
       return listed.filter((email) => email.applicationId === applicationId);
+    },
+    async listRecentEmails(limit = 40) {
+      const listed = await listDocs(store.emails);
+      const cap = Math.min(Math.max(limit, 1), 200);
+      return [...listed]
+        .sort((a, b) => {
+          const left = a.receivedAt ?? a.sentAt ?? a.createdAt;
+          const right = b.receivedAt ?? b.sentAt ?? b.createdAt;
+          return right.localeCompare(left);
+        })
+        .slice(0, cap);
     },
     getEmail: (id) => readDoc(store.emails, id),
     async mergeApplications(targetId, sourceId) {

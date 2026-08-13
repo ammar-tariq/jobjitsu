@@ -1437,6 +1437,14 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
       const emails = mailbox ? await mailbox.listLinkedEmails(payload.applicationId) : [];
       return ok({ emails: emails.map(toEmailSnapshot) });
     },
+    "mailbox.listRecentEmails": async (payload) => {
+      const mailbox = getMailbox();
+      const emails =
+        mailbox && "listRecentEmails" in mailbox
+          ? await mailbox.listRecentEmails(payload?.limit)
+          : [];
+      return ok({ emails: emails.map(toEmailSnapshot) });
+    },
     "mailbox.getEmail": async (payload) => {
       const mailbox = getMailbox();
       const email = mailbox ? await mailbox.getEmail(payload.id) : undefined;
@@ -1609,6 +1617,11 @@ function toEmailSnapshot(email: {
   readonly direction: string;
   readonly classification?: string;
   readonly matchUncertain?: boolean;
+  readonly processed?: boolean;
+  readonly isJobRelated?: boolean;
+  readonly company?: string;
+  readonly jobTitle?: string;
+  readonly applicationId?: string;
 }) {
   return {
     id: email.id,
@@ -1622,5 +1635,10 @@ function toEmailSnapshot(email: {
     direction: email.direction,
     classification: email.classification,
     matchUncertain: email.matchUncertain,
+    processed: email.processed,
+    isJobRelated: email.isJobRelated,
+    company: email.company,
+    jobTitle: email.jobTitle,
+    applicationId: email.applicationId,
   };
 }

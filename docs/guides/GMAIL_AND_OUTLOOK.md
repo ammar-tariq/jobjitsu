@@ -98,7 +98,7 @@ If `.env` is empty, paste the client ID and secret under Preferences → Email, 
 
 | Action | What happens |
 | ------ | ------------ |
-| First sync | Walks the lookback window. Job-related mail becomes applications, timeline, and “Needs your attention”. |
+| First sync | Walks the lookback window (default **365 days**). Set lookback to **0** under Preferences → Email → Advanced to import the whole mailbox. Job-related mail becomes applications, timeline, and “Needs your attention”. Preferences and Applications show imported subjects grouped by company. |
 | **Sync now** | Incremental only (Gmail history / Outlook delta). Already-classified mail is not sent through the Agent again. |
 | **Disconnect** | Removes tokens. Imported mail stays until you delete it. |
 | **Delete imported mail** | Removes that connection’s mail and cursor on this device. |

@@ -921,6 +921,12 @@ describe("DesktopShell", () => {
     expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(
       /sample mailbox connected/i,
     );
+    await waitFor(
+      () => {
+        expect(screen.getByTestId("jj-mailbox-import-feed")).toBeInTheDocument();
+      },
+      { timeout: 12000 },
+    );
 
     await waitFor(
       async () => {

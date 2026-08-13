@@ -10,6 +10,7 @@ import { createMailboxStore, listDocs } from "./store.js";
 import { createMailboxService } from "./service.js";
 import { PACKAGE_NAME, createPkcePair } from "./index.js";
 import { SAMPLE_MAILBOX_MESSAGES } from "./fingerprint.js";
+import { lookbackCutoff } from "./fixtures.js";
 import { createGmailMailboxProvider } from "./providers/gmail.js";
 import { paginateMessages } from "./providers/types.js";
 import type { Application } from "@jobjitsu/applications";
@@ -25,6 +26,14 @@ describe("@jobjitsu/mailbox", () => {
     expect(pair.challenge).toMatch(/^[A-Za-z0-9_-]+$/);
     expect(pair.state).toMatch(/^[A-Za-z0-9_-]+$/);
     expect(pair.verifier).not.toEqual(pair.challenge);
+  });
+
+  it("treats lookback 0 as the entire mailbox (no date cutoff)", () => {
+    expect(lookbackCutoff(0)).toBeUndefined();
+    expect(lookbackCutoff(-1)).toBeUndefined();
+    expect(lookbackCutoff(365, new Date("2026-08-13T00:00:00.000Z"))).toBe(
+      "2025-08-13T00:00:00.000Z",
+    );
   });
 
   it("ignores newsletters and receipts before Agent classification", () => {
@@ -204,6 +213,9 @@ describe("@jobjitsu/mailbox", () => {
 
     expect(finished.syncStatus).toBe("idle");
     expect(finished.emailsProcessed).toBeGreaterThan(0);
+    const recent = await service.listRecentEmails(10);
+    expect(recent.length).toBeGreaterThan(0);
+    expect(recent.some((email) => email.isJobRelated)).toBe(true);
 
     const listed = await applications.list();
     const acmeRn = listed.filter(

@@ -59,6 +59,7 @@ export const IPC_ALLOWLIST = [
   "mailbox.completeAction",
   "mailbox.listTimeline",
   "mailbox.listLinkedEmails",
+  "mailbox.listRecentEmails",
   "mailbox.getEmail",
   "mailbox.confirmMatch",
   "mailbox.keepSeparate",
@@ -448,6 +449,11 @@ export type MailboxEmailSnapshot = {
   readonly direction: string;
   readonly classification?: string;
   readonly matchUncertain?: boolean;
+  readonly processed?: boolean;
+  readonly isJobRelated?: boolean;
+  readonly company?: string;
+  readonly jobTitle?: string;
+  readonly applicationId?: string;
 };
 
 export type MailboxDashboardSnapshot = {
@@ -568,6 +574,7 @@ export type IpcPayloadMap = {
   readonly "mailbox.completeAction": { readonly id: string };
   readonly "mailbox.listTimeline": { readonly applicationId: string };
   readonly "mailbox.listLinkedEmails": { readonly applicationId: string };
+  readonly "mailbox.listRecentEmails": { readonly limit?: number };
   readonly "mailbox.getEmail": { readonly id: string };
   readonly "mailbox.confirmMatch": { readonly emailId: string; readonly applicationId: string };
   readonly "mailbox.keepSeparate": { readonly emailId: string };
@@ -662,6 +669,7 @@ export type IpcResultMap = {
   readonly "mailbox.completeAction": { readonly action: MailboxActionSnapshot | null };
   readonly "mailbox.listTimeline": { readonly events: readonly MailboxTimelineSnapshot[] };
   readonly "mailbox.listLinkedEmails": { readonly emails: readonly MailboxEmailSnapshot[] };
+  readonly "mailbox.listRecentEmails": { readonly emails: readonly MailboxEmailSnapshot[] };
   readonly "mailbox.getEmail": { readonly email: MailboxEmailSnapshot | null };
   readonly "mailbox.confirmMatch": { readonly email: MailboxEmailSnapshot | null };
   readonly "mailbox.keepSeparate": { readonly email: MailboxEmailSnapshot | null };

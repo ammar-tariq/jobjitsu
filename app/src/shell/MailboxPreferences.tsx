@@ -1,26 +1,63 @@
 import { useEffect, useState, type JSX } from "react";
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import LinearProgress from "@mui/material/LinearProgress";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
-import type { MailboxIntegrationSnapshot, MailboxSettingsSnapshot } from "../ipc/commands.js";
+import type {
+  MailboxEmailSnapshot,
+  MailboxIntegrationSnapshot,
+  MailboxSettingsSnapshot,
+} from "../ipc/commands.js";
+import { JjStepFade, JjStepper } from "./layout/index.js";
+import { MailboxImportFeed } from "./MailboxImportFeed.js";
+
+const SETUP_STEPS = ["Connect", "Import", "Classify", "Ready"] as const;
 
 export type MailboxPreferencesProps = {
   readonly bridge: IpcBridge;
 };
 
+function wizardStepFor(
+  integration: MailboxIntegrationSnapshot | undefined,
+  connecting: boolean,
+): number {
+  if (connecting || !integration?.connected) {
+    return 0;
+  }
+  if (integration.syncStatus === "syncing") {
+    return 1;
+  }
+  if (integration.syncStatus === "processing") {
+    return 2;
+  }
+  return 3;
+}
+
+function progressValue(integration: MailboxIntegrationSnapshot): number | undefined {
+  const total = integration.emailsTotal;
+  if (!total || total <= 0) {
+    return undefined;
+  }
+  return Math.min(100, Math.round((integration.emailsProcessed / total) * 100));
+}
+
 /**
  * Opt-in email intelligence — OAuth only, tokens stay in the host.
+ * Setup reads like a short install wizard: connect → import → classify → ready.
  */
 export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Element {
   const [integrations, setIntegrations] = useState<readonly MailboxIntegrationSnapshot[]>([]);
   const [settings, setSettings] = useState<MailboxSettingsSnapshot | null>(null);
+  const [recentEmails, setRecentEmails] = useState<readonly MailboxEmailSnapshot[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   const refresh = async (): Promise<void> => {
     const listed = await bridge.listMailboxIntegrations();
@@ -31,15 +68,21 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
     if (current.ok) {
       setSettings(current.value.settings);
     }
+    const recent = await bridge.listRecentMailboxEmails(50);
+    if (recent.ok) {
+      setRecentEmails(recent.value.emails);
+    }
   };
 
   useEffect(() => {
     void refresh();
   }, [bridge]);
 
-  const syncing = integrations.some(
-    (row) => row.syncStatus === "syncing" || row.syncStatus === "processing",
-  );
+  const primary = integrations[0];
+  const syncing =
+    primary?.syncStatus === "syncing" ||
+    primary?.syncStatus === "processing" ||
+    integrations.some((row) => row.syncStatus === "syncing" || row.syncStatus === "processing");
 
   useEffect(() => {
     if (!syncing) {
@@ -51,13 +94,18 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
     return () => window.clearInterval(id);
   }, [syncing, bridge]);
 
+  const activeStep = wizardStepFor(primary, connecting);
+  const pct = primary ? progressValue(primary) : undefined;
+
   const onConnectSample = (): void => {
     setBusy(true);
+    setConnecting(true);
     setStatus(null);
     void bridge
       .connectSampleMailbox()
       .then(async (result) => {
         setBusy(false);
+        setConnecting(false);
         if (!result.ok) {
           setStatus(result.error.message ?? result.error.title);
           return;
@@ -67,12 +115,14 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
       })
       .catch(() => {
         setBusy(false);
+        setConnecting(false);
         setStatus("Could not connect the sample mailbox. Try again.");
       });
   };
 
   const onBeginConnect = (provider: "gmail" | "outlook"): void => {
     setBusy(true);
+    setConnecting(true);
     setStatus(
       provider === "gmail"
         ? "A browser window will open. Finish Gmail sign-in there. Access stays on this device."
@@ -82,6 +132,7 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
       .beginMailboxConnect(provider)
       .then(async (result) => {
         setBusy(false);
+        setConnecting(false);
         if (!result.ok) {
           setStatus(result.error.message ?? result.error.title);
           return;
@@ -91,13 +142,14 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
       })
       .catch(() => {
         setBusy(false);
+        setConnecting(false);
         setStatus("Could not start that connection. Try again.");
       });
   };
 
   const onSync = (id: string): void => {
     setBusy(true);
-    setStatus("Syncing mail on this device…");
+    setStatus("Importing mail on this device…");
     void bridge.syncMailbox(id).then(async (result) => {
       setBusy(false);
       if (!result.ok) {
@@ -109,11 +161,11 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
         setStatus(row.syncError);
       } else if (row.emailsProcessed === 0) {
         setStatus(
-          "Sync finished. No job-related mail in the lookback window yet — or enable Gmail API if sync keeps failing.",
+          "Import finished. No job-related mail in the lookback window yet — or enable Gmail API if sync keeps failing.",
         );
       } else {
         setStatus(
-          `Sync finished. Processed ${row.emailsProcessed} · Job-related ${row.jobRelatedCount}.`,
+          `Ready. Processed ${row.emailsProcessed} · Job-related ${row.jobRelatedCount}.`,
         );
       }
       await refresh();
@@ -152,18 +204,225 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
     });
   };
 
+  const stepTitle =
+    activeStep === 0
+      ? "Connect a mailbox"
+      : activeStep === 1
+        ? "Importing mail"
+        : activeStep === 2
+          ? "Classifying on this device"
+          : "Mailbox ready";
+
+  const stepBody =
+    activeStep === 0
+      ? "Connect Gmail or Outlook. JobJitsu never asks for your mailbox password. Use the desktop app (not the browser preview)."
+      : activeStep === 1
+        ? "Pulling messages into local storage for your lookback window (or the whole mailbox if lookback is 0). Progress uses Gmail’s estimate — not your total account size."
+        : activeStep === 2
+          ? "Sorting job-related mail on this device. Nothing leaves the machine during classify."
+          : "Open Applications to work on drafts from job mail. Later Sync now only imports new messages.";
+
   return (
-    <Stack spacing={1.5} data-testid="jj-mailbox-preferences">
-      <Typography variant="h3">Email</Typography>
-      <Typography color="text.secondary" variant="body2">
-        Connect Gmail or Outlook to import job mail on this device. Use the desktop app (not the
-        browser preview). If this clone has a local .env, Connect Gmail works without pasting client
-        ids. JobJitsu never asks for your mailbox password, and nothing is sent unless you choose
-        to.
-      </Typography>
+    <Stack spacing={2} data-testid="jj-mailbox-preferences">
+      <Stack spacing={0.75}>
+        <Typography variant="h3">Email</Typography>
+        <Typography color="text.secondary" variant="body2">
+          Import job mail on this device. Agent can help you review it; you still own every send.
+        </Typography>
+      </Stack>
+
+      <Stack
+        spacing={2}
+        data-testid="jj-mailbox-setup-wizard"
+        sx={{
+          p: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: "var(--jj-radius-lg)",
+          bgcolor: "var(--jj-color-bg-elevated)",
+        }}
+      >
+        <Stack spacing={0.5}>
+          <Typography component="h4" variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Email setup
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            A short path: connect, import, classify, then you’re ready.
+          </Typography>
+        </Stack>
+
+        <JjStepper steps={[...SETUP_STEPS]} active={activeStep} />
+
+        <JjStepFade stepKey={activeStep}>
+          <Stack spacing={1.5}>
+            <Typography component="h5" variant="subtitle2">
+              {stepTitle}
+            </Typography>
+            <Typography color="text.secondary" variant="body2">
+              {stepBody}
+            </Typography>
+
+            {primary && (primary.syncStatus === "syncing" || primary.syncStatus === "processing") ? (
+              <Stack spacing={1} data-testid="jj-mailbox-import-progress">
+                <LinearProgress
+                  variant={pct === undefined ? "indeterminate" : "determinate"}
+                  value={pct}
+                  aria-label={
+                    primary.syncStatus === "syncing"
+                      ? "Importing mail"
+                      : "Classifying mail on this device"
+                  }
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {primary.syncStatus === "syncing" ? "Importing" : "Classifying"}…{" "}
+                  {primary.emailsProcessed}
+                  {primary.emailsTotal
+                    ? ` / ~${primary.emailsTotal} in this sync window`
+                    : ""}
+                  {pct !== undefined ? ` · ${pct}%` : ""}
+                </Typography>
+              </Stack>
+            ) : null}
+
+            {!primary?.connected ? (
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                <Button
+                  variant="contained"
+                  onClick={() => onBeginConnect("gmail")}
+                  disabled={busy}
+                  data-testid="jj-mailbox-connect-gmail"
+                >
+                  Connect Gmail
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => onBeginConnect("outlook")}
+                  disabled={busy}
+                  data-testid="jj-mailbox-connect-outlook"
+                >
+                  Connect Outlook
+                </Button>
+                <Button
+                  variant="text"
+                  onClick={onConnectSample}
+                  disabled={busy}
+                  data-testid="jj-mailbox-connect-sample"
+                >
+                  Connect sample mailbox
+                </Button>
+              </Stack>
+            ) : null}
+
+            {primary ? (
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: "background.paper",
+                }}
+                data-testid={`jj-mailbox-integration-${primary.id}`}
+              >
+                <Stack spacing={0.75}>
+                  <Typography variant="body2">
+                    {primary.label}
+                    {primary.emailAddress ? ` · ${primary.emailAddress}` : ""}
+                    {primary.connected ? " · Connected" : " · Disconnected"}
+                  </Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    Last synced: {primary.lastSyncedAt ?? "not yet"}
+                  </Typography>
+                  <Typography color="text.secondary" variant="body2">
+                    Processed {primary.emailsProcessed} · Job-related {primary.jobRelatedCount} ·
+                    Applications {primary.applicationsFound}
+                  </Typography>
+                  {primary.syncError ? <Alert severity="info">{primary.syncError}</Alert> : null}
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", pt: 0.5 }}>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => onSync(primary.id)}
+                      disabled={busy || syncing || !primary.connected}
+                    >
+                      Sync now
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => onDisconnect(primary.id)}
+                      disabled={busy || syncing || !primary.connected}
+                    >
+                      Disconnect
+                    </Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => onDelete(primary.id)}
+                      disabled={busy || syncing}
+                    >
+                      Delete imported mail
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            ) : null}
+
+            {status ? (
+              <Alert
+                severity={
+                  /could not|fail|error|client id/i.test(status) ? "warning" : "info"
+                }
+                role="status"
+                data-testid="jj-mailbox-status"
+              >
+                {status}
+              </Alert>
+            ) : null}
+
+            <MailboxImportFeed emails={recentEmails} />
+          </Stack>
+        </JjStepFade>
+      </Stack>
+
+      {integrations.slice(1).map((integration) => (
+        <Stack
+          key={integration.id}
+          spacing={0.5}
+          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
+          data-testid={`jj-mailbox-integration-${integration.id}`}
+        >
+          <Typography variant="subtitle2">
+            {integration.label}
+            {integration.emailAddress ? ` · ${integration.emailAddress}` : ""}
+            {integration.connected ? " · Connected" : " · Disconnected"}
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            Processed {integration.emailsProcessed} · Job-related {integration.jobRelatedCount}
+          </Typography>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+            <Button size="small" onClick={() => onSync(integration.id)} disabled={busy}>
+              Sync now
+            </Button>
+            <Button size="small" onClick={() => onDisconnect(integration.id)} disabled={busy}>
+              Disconnect
+            </Button>
+            <Button
+              size="small"
+              color="error"
+              onClick={() => onDelete(integration.id)}
+              disabled={busy}
+            >
+              Delete imported mail
+            </Button>
+          </Stack>
+        </Stack>
+      ))}
 
       {settings ? (
         <Stack spacing={1}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Advanced (optional)
+          </Typography>
           <TextField
             label="Gmail client ID"
             value={settings.gmailClientId ?? ""}
@@ -197,10 +456,10 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
             type="number"
             value={settings.lookbackDays}
             onChange={(event) =>
-              setSettings({ ...settings, lookbackDays: Number(event.target.value) || 365 })
+              setSettings({ ...settings, lookbackDays: Number(event.target.value) || 0 })
             }
             size="small"
-            helperText="How far back to import on the first sync. Later Sync now only fetches new mail. Stored on this device."
+            helperText="First sync only imports mail in this window (default 365). Set 0 to import the whole mailbox. Save, then Sync now. A large inbox can take a while."
           />
           <FormControlLabel
             control={
@@ -224,85 +483,6 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
             Save email settings
           </Button>
         </Stack>
-      ) : null}
-
-      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-        <Button
-          variant="contained"
-          onClick={() => onBeginConnect("gmail")}
-          disabled={busy}
-          data-testid="jj-mailbox-connect-gmail"
-        >
-          Connect Gmail
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => onBeginConnect("outlook")}
-          disabled={busy}
-          data-testid="jj-mailbox-connect-outlook"
-        >
-          Connect Outlook
-        </Button>
-        <Button
-          variant="text"
-          onClick={onConnectSample}
-          disabled={busy}
-          data-testid="jj-mailbox-connect-sample"
-        >
-          Connect sample mailbox
-        </Button>
-      </Stack>
-
-      {integrations.map((integration) => (
-        <Stack
-          key={integration.id}
-          spacing={0.5}
-          sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-          data-testid={`jj-mailbox-integration-${integration.id}`}
-        >
-          <Typography variant="subtitle2">
-            {integration.label}
-            {integration.emailAddress ? ` · ${integration.emailAddress}` : ""}
-            {integration.connected ? " · Connected" : " · Disconnected"}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            {integration.syncStatus === "syncing" || integration.syncStatus === "processing"
-              ? `Syncing… ${integration.emailsProcessed}${
-                  integration.emailsTotal ? ` / ${integration.emailsTotal}` : ""
-                }`
-              : `Last synced: ${integration.lastSyncedAt ?? "not yet"}`}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            Processed {integration.emailsProcessed} · Job-related {integration.jobRelatedCount} ·
-            Applications {integration.applicationsFound}
-          </Typography>
-          <Typography color="text.secondary" variant="body2">
-            Later syncs only import new mail. Results stay on this device.
-          </Typography>
-          {integration.syncError ? <Alert severity="info">{integration.syncError}</Alert> : null}
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-            <Button size="small" onClick={() => onSync(integration.id)} disabled={busy}>
-              Sync now
-            </Button>
-            <Button size="small" onClick={() => onDisconnect(integration.id)} disabled={busy}>
-              Disconnect
-            </Button>
-            <Button
-              size="small"
-              color="error"
-              onClick={() => onDelete(integration.id)}
-              disabled={busy}
-            >
-              Delete imported mail
-            </Button>
-          </Stack>
-        </Stack>
-      ))}
-
-      {status ? (
-        <Typography color="text.secondary" variant="body2" data-testid="jj-mailbox-status">
-          {status}
-        </Typography>
       ) : null}
     </Stack>
   );

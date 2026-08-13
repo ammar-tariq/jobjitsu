@@ -131,6 +131,9 @@ export type IpcBridge = {
   readonly listApplicationEmails: (
     applicationId: string,
   ) => Promise<Result<IpcResultMap["mailbox.listLinkedEmails"]>>;
+  readonly listRecentMailboxEmails: (
+    limit?: number,
+  ) => Promise<Result<IpcResultMap["mailbox.listRecentEmails"]>>;
   readonly getMailboxEmail: (id: string) => Promise<Result<IpcResultMap["mailbox.getEmail"]>>;
   readonly confirmMailboxMatch: (
     emailId: string,
@@ -419,6 +422,11 @@ export function createIpcBridge(dispatcher: IpcDispatcher): IpcBridge {
     async listApplicationEmails(applicationId: string) {
       return (await dispatcher.invoke("mailbox.listLinkedEmails", { applicationId })) as Result<
         IpcResultMap["mailbox.listLinkedEmails"]
+      >;
+    },
+    async listRecentMailboxEmails(limit?: number) {
+      return (await dispatcher.invoke("mailbox.listRecentEmails", { limit })) as Result<
+        IpcResultMap["mailbox.listRecentEmails"]
       >;
     },
     async getMailboxEmail(id: string) {

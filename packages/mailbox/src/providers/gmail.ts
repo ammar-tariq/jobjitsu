@@ -127,15 +127,15 @@ export function createGmailMailboxProvider(options: GmailMailboxProviderOptions)
         tokens.accessToken,
         `/users/me/messages?${params.toString()}`,
       )) as GmailListResponse;
-      const messages: MailboxProviderMessage[] = [];
-      for (const row of listed.messages ?? []) {
+      const rows = listed.messages ?? [];
+      const messages = await mapPool(rows, 5, async (row) => {
         const full = (await gmailJson(
           fetchImpl,
           tokens.accessToken,
           `/users/me/messages/${encodeURIComponent(row.id)}?format=full`,
         )) as GmailMessageResponse;
-        messages.push(toProviderMessage(full));
-      }
+        return toProviderMessage(full);
+      });
       const historyId = await readGmailHistoryId(fetchImpl, tokens.accessToken);
       return {
         messages,
@@ -145,6 +145,28 @@ export function createGmailMailboxProvider(options: GmailMailboxProviderOptions)
       };
     },
   };
+}
+
+/** Run async work over items with a fixed concurrency limit. */
+async function mapPool<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  worker: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) {
+    return [];
+  }
+  const results = new Array<R>(items.length);
+  let next = 0;
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (next < items.length) {
+      const index = next;
+      next += 1;
+      results[index] = await worker(items[index] as T, index);
+    }
+  });
+  await Promise.all(runners);
+  return results;
 }
 
 type GmailHistoryResponse = {
@@ -231,10 +253,25 @@ async function gmailJson(
   fetchImpl: typeof fetch,
   accessToken: string,
   path: string,
+  attempt = 0,
 ): Promise<unknown> {
-  const response = await fetchImpl(`https://gmail.googleapis.com/gmail/v1${path}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
+  let response: Response;
+  try {
+    response = await fetchImpl(`https://gmail.googleapis.com/gmail/v1${path}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  } catch (cause) {
+    const raw = cause instanceof Error ? cause.message : String(cause);
+    if (attempt < 3 && /load failed|failed to fetch|networkerror/i.test(raw)) {
+      await delay(400 * (attempt + 1));
+      return gmailJson(fetchImpl, accessToken, path, attempt + 1);
+    }
+    throw new Error(
+      /load failed|failed to fetch|networkerror/i.test(raw)
+        ? "Could not reach Gmail from this device. Check the network, then Sync now again."
+        : raw,
+    );
+  }
   if (response.status === 401) {
     throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
   }
@@ -244,6 +281,10 @@ async function gmailJson(
     );
   }
   if (response.status === 429) {
+    if (attempt < 3) {
+      await delay(800 * (attempt + 1));
+      return gmailJson(fetchImpl, accessToken, path, attempt + 1);
+    }
     throw new Error("Gmail asked us to slow down. Try sync again in a few minutes.");
   }
   if (!response.ok) {
@@ -263,6 +304,12 @@ async function gmailJson(
     );
   }
   return response.json();
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 export function buildGmailAuthUrl(input: {
