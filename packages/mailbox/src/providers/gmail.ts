@@ -116,12 +116,10 @@ export function createGmailMailboxProvider(options: GmailMailboxProviderOptions)
         params.set("pageToken", input.cursor);
       }
       if (input.since) {
-        const epoch = Math.floor(Date.parse(input.since) / 1000);
-        if (Number.isFinite(epoch)) {
-          params.set("q", `after:${epoch}`);
-        } else {
-          const after = input.since.slice(0, 10).replaceAll("-", "/");
-          params.set("q", `after:${after}`);
+        // Gmail search `after:` expects YYYY/MM/DD — not a Unix timestamp.
+        const day = input.since.slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+          params.set("q", `after:${day.replaceAll("-", "/")}`);
         }
       }
       const listed = (await gmailJson(
@@ -240,11 +238,29 @@ async function gmailJson(
   if (response.status === 401) {
     throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
   }
+  if (response.status === 403) {
+    throw new Error(
+      "Gmail denied access. Enable the Gmail API on your Google Cloud project, then Sync now.",
+    );
+  }
   if (response.status === 429) {
     throw new Error("Gmail asked us to slow down. Try sync again in a few minutes.");
   }
   if (!response.ok) {
-    throw new Error("Gmail could not list mail right now. Try again.");
+    let detail = "";
+    try {
+      const body = (await response.json()) as {
+        readonly error?: { readonly message?: string };
+      };
+      detail = body.error?.message?.trim() ?? "";
+    } catch {
+      detail = "";
+    }
+    throw new Error(
+      detail
+        ? `Gmail could not list mail (${detail}). Try Sync now again.`
+        : "Gmail could not list mail right now. Try again.",
+    );
   }
   return response.json();
 }
@@ -294,7 +310,21 @@ export async function exchangeGmailCode(input: {
     body,
   });
   if (!response.ok) {
-    throw new Error("Gmail could not finish connecting. Try again.");
+    let detail = "";
+    try {
+      const errJson = (await response.json()) as {
+        readonly error?: string;
+        readonly error_description?: string;
+      };
+      detail = [errJson.error, errJson.error_description].filter(Boolean).join(": ");
+    } catch {
+      detail = "";
+    }
+    throw new Error(
+      detail
+        ? `Gmail could not finish connecting (${detail}). Check the Desktop client ID/secret and try again.`
+        : "Gmail could not finish connecting. Try again.",
+    );
   }
   const json = (await response.json()) as {
     readonly access_token?: string;

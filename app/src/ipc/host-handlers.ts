@@ -1334,7 +1334,8 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           }),
         );
       }
-      const integration = await mailbox.sync(payload.id);
+      const started = await mailbox.sync(payload.id);
+      const integration = await mailbox.waitForSync(started.id);
       return ok({ integration: toIntegrationSnapshot(integration) });
     },
     "mailbox.getIntegration": async (payload) => {

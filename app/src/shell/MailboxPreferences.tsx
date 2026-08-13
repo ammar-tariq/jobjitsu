@@ -97,8 +97,25 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
 
   const onSync = (id: string): void => {
     setBusy(true);
-    void bridge.syncMailbox(id).then(async () => {
+    setStatus("Syncing mail on this device…");
+    void bridge.syncMailbox(id).then(async (result) => {
       setBusy(false);
+      if (!result.ok) {
+        setStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      const row = result.value.integration;
+      if (row.syncError) {
+        setStatus(row.syncError);
+      } else if (row.emailsProcessed === 0) {
+        setStatus(
+          "Sync finished. No job-related mail in the lookback window yet — or enable Gmail API if sync keeps failing.",
+        );
+      } else {
+        setStatus(
+          `Sync finished. Processed ${row.emailsProcessed} · Job-related ${row.jobRelatedCount}.`,
+        );
+      }
       await refresh();
     });
   };

@@ -736,7 +736,9 @@ describe("@jobjitsu/mailbox", () => {
     });
     expect(urls.some((url) => url.includes("/history"))).toBe(true);
     expect(urls.some((url) => url.includes("/messages?"))).toBe(true);
-    expect(urls.some((url) => /after%3A|after:/.test(url))).toBe(true);
+    expect(urls.some((url) => url.includes("after%3A2026%2F08%2F03") || url.includes("after:2026/08/03"))).toBe(
+      true,
+    );
   });
 });
 

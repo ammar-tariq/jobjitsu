@@ -162,7 +162,10 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       integration.lookbackDays || settings.lookbackDays,
       now?.() ?? new Date(),
     );
-    const initialComplete = checkpoint?.initialComplete ?? false;
+    // A prior "successful" sync with zero mail (bad query / empty window) must not
+    // lock us into history-only mode — redo the lookback listing.
+    const initialComplete =
+      Boolean(checkpoint?.initialComplete) && integration.emailsProcessed > 0;
     const exclusiveSince = initialComplete;
     const since = initialComplete && checkpoint?.watermark ? checkpoint.watermark : lookback;
     let cursor = checkpoint?.pageCursor;
@@ -399,13 +402,16 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       if (callback.error === "access_denied" || callback.error === "cancelled") {
         return {
           status: "failed",
-          message: `${label} sign-in was cancelled. You can try again when you are ready.`,
+          message:
+            `${label} sign-in was blocked or cancelled. Keep OAuth consent on Testing, add this exact Gmail as a test user, then on Google’s “Access blocked” page open Advanced → Go to JobJitsu (unsafe).`,
         };
       }
       if (callback.error || !callback.code) {
         return {
           status: "failed",
-          message: `${label} could not finish connecting. Try again.`,
+          message: callback.error
+            ? `${label} could not finish connecting (${callback.error}). If Google said access blocked, keep Publishing status on Testing, add this exact account as a test user, then use Advanced → Continue.`
+            : `${label} could not finish connecting. Try again.`,
         };
       }
       if (callback.state && callback.state !== pkce.state) {
