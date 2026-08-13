@@ -24,14 +24,15 @@ describe("DesktopShell", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "JobJitsu" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "Craft" })).toBeInTheDocument();
-    expect(screen.getByTestId("jj-craft-view")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Overview" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-dashboard-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-theme", "dark");
     expect(screen.getByTestId("jj-desktop-shell")).toHaveAttribute("data-layout");
     expect(screen.getByTestId("jj-shell-status-bar")).toBeInTheDocument();
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
 
     for (const label of [
+      "Overview",
       "Craft",
       "Applications",
       "Queue",
@@ -108,6 +109,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Craft" }));
     expect(screen.getByTestId("jj-craft-view")).toBeInTheDocument();
     await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen\nStaff engineer");
     await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer at Acme");
@@ -132,6 +134,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Craft" }));
     const resumeInput = screen.getByTestId("jj-craft-resume-input");
     const jdInput = screen.getByTestId("jj-craft-jd-input");
 
@@ -170,6 +173,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Craft" }));
     await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen\nStaff engineer");
     await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer at Acme");
     await user.type(screen.getByTestId("jj-craft-about-company"), "Privacy-first tools");
@@ -209,6 +213,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Craft" }));
     await user.type(screen.getByTestId("jj-craft-resume-input"), "Sam Chen");
     await user.type(screen.getByTestId("jj-craft-jd-input"), "Staff Engineer");
     await user.click(screen.getByTestId("jj-craft-generate-resume"));
@@ -231,6 +236,7 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Craft" }));
     await user.type(
       screen.getByTestId("jj-craft-resume-input"),
       "Sam Chen\nStaff Engineer 2019-present\n- Shipped on-device privacy tools\n- Led platform delivery",

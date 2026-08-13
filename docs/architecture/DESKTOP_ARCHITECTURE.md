@@ -27,7 +27,7 @@ Parent: [OVERVIEW.md](./OVERVIEW.md) · Brand UI: [../brand/DESIGN_SYSTEM.md](..
                   │ narrow IPC / bridge
 ┌─────────────────▼────────────────────────┐
 │ UI (renderer)                            │
-│  Applications · Queue · Follow-ups       │
+│  Overview · Craft · Applications · Queue · Follow-ups │
 │  Preferences · Agent · Timeline · Logs   │
 │  Jj* components · a11y · reduced motion  │
 └──────────────────────────────────────────┘
@@ -104,12 +104,13 @@ Bridge: no generic `eval`, no raw `fs` from UI.
 
 Primary areas (Horizon 1):
 
-1. **Applications** — craft list & drafts  
-2. **Queue** — review before leave  
-3. **Follow-ups** — polite calendar  
-4. **Agent** — status, pause, recent preparative activity  
-5. **Preferences** — model path, approval gates, quiet hours  
-6. **Timeline / Logs** — inspectability  
+1. **Overview** — calm local charts (funnel, pipeline mix, rates)
+2. **Applications** — craft list & drafts  
+3. **Queue** — review before leave  
+4. **Follow-ups** — polite calendar  
+5. **Agent** — status, pause, recent preparative activity  
+6. **Preferences** — model path, approval gates, quiet hours  
+7. **Timeline / Logs** — inspectability  
 
 Avoid multi-dashboard “mission control.” Deep links open one purpose.
 
