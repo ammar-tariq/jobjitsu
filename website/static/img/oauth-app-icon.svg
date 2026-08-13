@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="JobJitsu">
+  <!-- Square app icon for Google OAuth consent (120×120). Unique JobJitsu mark + wordmark. -->
+  <rect width="120" height="120" rx="24" fill="#0B0A1A"/>
+  <path
+    d="M28 26c18 0 23 5.5 23 18V78h-10V45c0-6.5-3-9.5-11-9.5H28V26z"
+    fill="#F8FAFC"
+  />
+  <path
+    d="M58 76h18c4 0 7.5-3 7.5-7 0-5-3.5-7.5-8.5-7.5H66V54h7c4 0 6.5-2 6.5-5.5S76 43 72 43H58v33z"
+    fill="#2DD4BF"
+  />
+  <text
+    x="60"
+    y="108"
+    text-anchor="middle"
+    fill="#F8FAFC"
+    font-family="Inter, system-ui, -apple-system, sans-serif"
+    font-size="14"
+    font-weight="700"
+    letter-spacing="-0.02em"
+  >JobJitsu</text>
+</svg>
