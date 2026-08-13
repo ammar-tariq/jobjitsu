@@ -8,7 +8,7 @@ import { parseClassificationJson } from "./schema.js";
 import { scoreApplicationMatch } from "./match.js";
 import { createMailboxStore, listDocs } from "./store.js";
 import { createMailboxService } from "./service.js";
-import { PACKAGE_NAME } from "./index.js";
+import { PACKAGE_NAME, createPkcePair } from "./index.js";
 import { SAMPLE_MAILBOX_MESSAGES } from "./fingerprint.js";
 import { createGmailMailboxProvider } from "./providers/gmail.js";
 import { paginateMessages } from "./providers/types.js";
@@ -17,6 +17,14 @@ import type { Application } from "@jobjitsu/applications";
 describe("@jobjitsu/mailbox", () => {
   it("exports package identity", () => {
     expect(PACKAGE_NAME).toBe("@jobjitsu/mailbox");
+  });
+
+  it("builds PKCE without Node Buffer (webview-safe)", async () => {
+    const pair = await createPkcePair();
+    expect(pair.verifier).toMatch(/^[A-Za-z0-9_-]+$/);
+    expect(pair.challenge).toMatch(/^[A-Za-z0-9_-]+$/);
+    expect(pair.state).toMatch(/^[A-Za-z0-9_-]+$/);
+    expect(pair.verifier).not.toEqual(pair.challenge);
   });
 
   it("ignores newsletters and receipts before Agent classification", () => {

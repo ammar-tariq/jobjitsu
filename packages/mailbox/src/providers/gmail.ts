@@ -37,12 +37,17 @@ function header(
   return headers?.find((entry) => entry.name.toLowerCase() === name.toLowerCase())?.value ?? "";
 }
 
+/** Webview-safe base64url decode — Tauri has no Node `Buffer`. */
 function decodeBody(data: string | undefined): string | undefined {
   if (!data) {
     return undefined;
   }
   try {
-    return Buffer.from(data.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    const padded = data.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
+    const binary = atob(`${padded}${pad}`);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder("utf-8", { fatal: false }).decode(bytes);
   } catch {
     return undefined;
   }
