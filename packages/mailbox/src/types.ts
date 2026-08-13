@@ -89,6 +89,7 @@ export type MailboxIntegration = {
   readonly syncError?: string;
   readonly lookbackDays: number;
   readonly emailsProcessed: number;
+  readonly emailsIngested?: number;
   readonly emailsTotal?: number;
   readonly jobRelatedCount: number;
   readonly applicationsFound: number;

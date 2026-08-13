@@ -120,11 +120,22 @@ describe("createHostRuntime", () => {
 
   it("does not return mailbox OAuth tokens when Gmail connect starts", async () => {
     const host = createHostRuntime({ version: "test" });
+    await host.profiles.upsert({ displayName: "Sam" });
     const started = await host.bridge.beginMailboxConnect("gmail");
     expect(started.ok).toBe(true);
     if (started.ok) {
       expect(started.value.status).toBe("needs_client_id");
       expect(JSON.stringify(started.value)).not.toMatch(/access_token|refresh_token/i);
+    }
+  });
+
+  it("refuses Gmail connect until a profile exists", async () => {
+    const host = createHostRuntime({ version: "test" });
+    const started = await host.bridge.beginMailboxConnect("gmail");
+    expect(started.ok).toBe(true);
+    if (started.ok) {
+      expect(started.value.status).toBe("failed");
+      expect(started.value.message).toMatch(/profile first/i);
     }
   });
 });

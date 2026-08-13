@@ -59,6 +59,14 @@ import type {
 
 const PAGE_SIZE = 25;
 
+function mailboxLog(message: string, detail?: Record<string, unknown>): void {
+  if (detail) {
+    console.info(`[mailbox] ${message}`, detail);
+  } else {
+    console.info(`[mailbox] ${message}`);
+  }
+}
+
 export type MailboxService = {
   listIntegrations(): Promise<readonly MailboxIntegration[]>;
   getSettings(): Promise<MailboxSettings>;
@@ -172,7 +180,16 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     let jobRelated = integration.jobRelatedCount;
     let applicationsFound = integration.applicationsFound;
     let totalEstimate = integration.emailsTotal;
+    let ingestedTotal = integration.emailsIngested ?? 0;
+    let pageIndex = 0;
     const provider = providerFor(integration);
+    mailboxLog("sync start", {
+      integrationId: integration.id,
+      provider: integration.provider,
+      since,
+      initialComplete,
+      exclusiveSince,
+    });
     try {
       await putIntegration({
         ...integration,
@@ -181,6 +198,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         updatedAt: new Date().toISOString(),
       });
       do {
+        pageIndex += 1;
         const page = await provider.listPage({
           cursor,
           since,
@@ -189,17 +207,35 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
           exclusiveSince,
         });
         totalEstimate = page.totalEstimate ?? totalEstimate;
+        let pageIngested = 0;
         for (const message of page.messages) {
-          await ingestProviderMessage(store, integration.id, integration.provider, message);
+          const result = await ingestProviderMessage(
+            store,
+            integration.id,
+            integration.provider,
+            message,
+          );
+          if (!result.duplicate || !result.email.processed) {
+            pageIngested += 1;
+          }
           const stamp = messageTimestamp(message);
           if (stamp && (!watermark || stamp > watermark)) {
             watermark = stamp;
           }
         }
+        ingestedTotal += page.messages.length;
         cursor = page.nextCursor;
         if (page.historyCursor) {
           historyCursor = page.historyCursor;
         }
+        mailboxLog("sync page", {
+          page: pageIndex,
+          fetched: page.messages.length,
+          pageIngested,
+          ingestedTotal,
+          estimate: totalEstimate,
+          hasNext: Boolean(cursor),
+        });
         await store.putCheckpoint({
           id: integration.id,
           initialComplete,
@@ -211,6 +247,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         await putIntegration({
           ...(await requireIntegration(integration.id)),
           emailsTotal: totalEstimate,
+          emailsIngested: ingestedTotal,
           syncStatus: "syncing",
           updatedAt: new Date().toISOString(),
         });
@@ -218,9 +255,11 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
 
       await putIntegration({
         ...(await requireIntegration(integration.id)),
+        emailsIngested: ingestedTotal,
         syncStatus: "processing",
         updatedAt: new Date().toISOString(),
       });
+      mailboxLog("sync classify start", { ingestedTotal, estimate: totalEstimate });
 
       let pending = (await store.unprocessedEmails()).filter(
         (email) => email.integrationId === integration.id,
@@ -230,9 +269,17 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         processedTotal += batch.processed;
         jobRelated += batch.jobRelated;
         applicationsFound += batch.applicationsFound;
+        mailboxLog("sync classify batch", {
+          processed: batch.processed,
+          processedTotal,
+          jobRelated,
+          applicationsFound,
+          pendingLeft: Math.max(0, pending.length - batch.processed),
+        });
         await putIntegration({
           ...(await requireIntegration(integration.id)),
           emailsProcessed: processedTotal,
+          emailsIngested: ingestedTotal,
           jobRelatedCount: jobRelated,
           applicationsFound,
           syncStatus: "processing",
@@ -254,12 +301,19 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       await putIntegration({
         ...(await requireIntegration(integration.id)),
         emailsProcessed: processedTotal,
+        emailsIngested: ingestedTotal,
         jobRelatedCount: jobRelated,
         applicationsFound,
         lastSyncedAt: new Date().toISOString(),
         syncStatus: "idle",
         syncError: undefined,
         updatedAt: new Date().toISOString(),
+      });
+      mailboxLog("sync complete", {
+        ingestedTotal,
+        processedTotal,
+        jobRelated,
+        applicationsFound,
       });
       if (bus) {
         await bus.publish("Email.Synced", {
@@ -272,6 +326,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         cause instanceof Error
           ? cause.message
           : "Mail sync paused. You can try again from Preferences.";
+      mailboxLog("sync failed", { message });
       const tokenExpired = /expired/i.test(message);
       await putIntegration({
         ...(await requireIntegration(integration.id)),
@@ -312,6 +367,12 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
   }
 
   async function startSync(integration: MailboxIntegration): Promise<MailboxIntegration> {
+    await putIntegration({
+      ...integration,
+      syncStatus: "syncing",
+      syncError: undefined,
+      updatedAt: new Date().toISOString(),
+    });
     if (!running.has(integration.id)) {
       const work = runSync(integration).finally(() => {
         running.delete(integration.id);
@@ -346,6 +407,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       syncStatus: "idle",
       lookbackDays: (await store.getSettings()).lookbackDays,
       emailsProcessed: 0,
+      emailsIngested: 0,
       jobRelatedCount: 0,
       applicationsFound: 0,
       createdAt: nowIso,
@@ -367,8 +429,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         status: "needs_client_id",
         message:
           provider === "gmail"
-            ? "Add a Gmail client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password."
-            : "Add an Outlook client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password.",
+            ? "Add a Gmail client ID in a local .env, then reconnect. JobJitsu never asks for your password."
+            : "Add an Outlook client ID in a local .env, then reconnect. JobJitsu never asks for your password.",
       };
     }
     if (!options.oauth) {
@@ -448,7 +510,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       });
       return {
         status: "connected",
-        message: `${label} connected. Mail stays on this device. Nothing is sent from JobJitsu.`,
+        message: `${label} connected. Importing mail on this device — watch the progress below. Nothing is sent.`,
       };
     } catch (cause) {
       const raw = cause instanceof Error ? cause.message : "";
@@ -470,26 +532,14 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       return listDocs(store.integrations);
     },
     async getSettings() {
-      const current = await store.getSettings();
-      const merged = mergeMailboxOAuthClients(current, options.oauthClients);
-      return {
-        ...current,
-        gmailClientId: merged.gmailClientId,
-        gmailClientSecret: merged.gmailClientSecret,
-        outlookClientId: merged.outlookClientId,
-      };
+      // Return store-only settings. Never surface .env OAuth clients/secrets to the UI.
+      return store.getSettings();
     },
     async updateSettings(patch) {
       const current = await store.getSettings();
       const next = { ...current, ...patch };
       await store.putSettings(next);
-      const merged = mergeMailboxOAuthClients(next, options.oauthClients);
-      return {
-        ...next,
-        gmailClientId: merged.gmailClientId,
-        gmailClientSecret: merged.gmailClientSecret,
-        outlookClientId: merged.outlookClientId,
-      };
+      return next;
     },
     async connectSampleMailbox() {
       const nowIso = new Date().toISOString();
@@ -503,13 +553,15 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         syncStatus: "idle",
         lookbackDays: (await store.getSettings()).lookbackDays,
         emailsProcessed: 0,
+        emailsIngested: 0,
         jobRelatedCount: 0,
         applicationsFound: 0,
         createdAt: nowIso,
         updatedAt: nowIso,
       };
       await putIntegration(integration);
-      return startSync(integration);
+      await startSync(integration);
+      return waitForSync(integration.id);
     },
     async connectProvider(input) {
       return connectWithTokens(input);
@@ -517,7 +569,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     beginProviderConnect,
     async sync(integrationId) {
       const integration = await requireIntegration(integrationId);
-      return startSync(integration);
+      await startSync(integration);
+      return waitForSync(integrationId);
     },
     waitForSync,
     getIntegration: (id) => readDoc(store.integrations, id),

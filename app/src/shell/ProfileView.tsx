@@ -16,7 +16,6 @@ import Typography from "@mui/material/Typography";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { PathSnapshot, ProfileSnapshot, ResumeVersionSnapshot } from "../ipc/commands.js";
@@ -40,7 +39,7 @@ const emptyDraft = (): DraftProfile => ({
 });
 
 /**
- * Profile tree: multiple local identities → Paths under each → resumes under each Path.
+ * Active profile full screen — switch identities, edit one form, Paths for that profile.
  */
 export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.Element {
   const [profiles, setProfiles] = useState<readonly ProfileSnapshot[]>([]);
@@ -216,6 +215,7 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
         setCreateDraft(emptyDraft());
         setCreateOpen(false);
         setOpenProfileId(result.value.profile.id);
+        setSelectedProfileId(result.value.profile.id);
         setPathsOpenByProfile((prev) => ({ ...prev, [result.value.profile.id]: true }));
         setAddPathForProfileId(result.value.profile.id);
         await refreshProfiles();
@@ -1048,14 +1048,37 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
     );
   };
 
+  const onSelectActiveProfile = (profileId: string): void => {
+    setSelectingProfileId(profileId);
+    setStatus(null);
+    void bridge.selectProfile(profileId).then(async (result) => {
+      setSelectingProfileId(null);
+      if (!result.ok) {
+        setStatus(result.error.message ?? result.error.title);
+        return;
+      }
+      setSelectedProfileId(profileId);
+      setOpenProfileId(profileId);
+      setPathsOpenByProfile((prev) => ({ ...prev, [profileId]: true }));
+      setStatus("Profile selected. Nothing was sent.");
+      await refreshProfiles();
+      await refreshPaths();
+    });
+  };
+
+  const activeDraft =
+    selectedProfileId != null
+      ? (draftByProfileId[selectedProfileId] ?? emptyDraft())
+      : emptyDraft();
+
   return (
     <JjPage
       testId="jj-profile"
       title="Profile"
-      subtitle="Create one or more profiles on this device. Paths and resumes nest under each profile. Connect Job Mail when you are ready — nothing is sent from here."
+      subtitle="One identity on this screen. Switch profiles when you need another. Paths and résumés stay under the active profile — nothing is sent from here."
       maxWidth="44rem"
     >
-      {onOpenJobMail ? (
+      {onOpenJobMail && profiles.length > 0 ? (
         <Stack
           direction="row"
           spacing={1}
@@ -1070,145 +1093,62 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
           </Typography>
         </Stack>
       ) : null}
-      <List
-        dense
-        disablePadding
-        data-testid="jj-profile-tree"
-        aria-label="Profile tree"
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 1,
-          overflow: "hidden",
-        }}
-      >
-        {profiles.map((profile) => {
-          const isOpen = openProfileId === profile.id;
-          const isSelected = selectedProfileId === profile.id;
-          const draft = draftByProfileId[profile.id] ?? {
-            displayName: profile.displayName,
-            email: profile.email ?? "",
-            location: profile.location ?? "",
-          };
-          return (
-            <Stack key={profile.id}>
-              <TreeRow
-                depth={0}
-                open={isOpen}
-                onToggle={() => setOpenProfileId(isOpen ? null : profile.id)}
-                icon={<PersonOutlineRoundedIcon fontSize="small" />}
-                primary={`${profile.displayName}${isSelected ? " · Active" : ""}`}
-                secondary="Profile"
-                testId={`jj-tree-profile-${profile.id}`}
-                actions={
-                  <Button
-                    size="small"
-                    variant={isSelected ? "contained" : "text"}
-                    disabled={selectingProfileId === profile.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setSelectingProfileId(profile.id);
-                      setStatus(null);
-                      void bridge.selectProfile(profile.id).then(async (result) => {
-                        setSelectingProfileId(null);
-                        if (!result.ok) {
-                          setStatus(result.error.message ?? result.error.title);
-                          return;
-                        }
-                        setStatus("Profile selected. Nothing was sent.");
-                        setOpenProfileId(profile.id);
-                        await refreshProfiles();
-                      });
-                    }}
-                  >
-                    {isSelected ? "Selected" : "Select"}
-                  </Button>
-                }
-              />
-              <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                <Stack
-                  spacing={1.5}
-                  component="form"
-                  data-testid={isSelected ? "jj-profile-form" : `jj-profile-form-${profile.id}`}
-                  onSubmit={(e) => e.preventDefault()}
-                  sx={{ px: 2, py: 1.5, pl: 5, bgcolor: "action.hover" }}
-                >
-                  <TextField
-                    label="Display name"
-                    value={draft.displayName}
-                    onChange={(event) =>
-                      setDraftByProfileId((prev) => ({
-                        ...prev,
-                        [profile.id]: { ...draft, displayName: event.target.value },
-                      }))
-                    }
-                    size="small"
-                    required
-                    fullWidth
-                    autoComplete="name"
-                  />
-                  <TextField
-                    label="Email"
-                    value={draft.email}
-                    onChange={(event) =>
-                      setDraftByProfileId((prev) => ({
-                        ...prev,
-                        [profile.id]: { ...draft, email: event.target.value },
-                      }))
-                    }
-                    size="small"
-                    fullWidth
-                    autoComplete="email"
-                  />
-                  <TextField
-                    label="Location"
-                    value={draft.location}
-                    onChange={(event) =>
-                      setDraftByProfileId((prev) => ({
-                        ...prev,
-                        [profile.id]: { ...draft, location: event.target.value },
-                      }))
-                    }
-                    size="small"
-                    fullWidth
-                    autoComplete="address-level2"
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={() => onSaveProfile(profile.id)}
-                    disabled={saving || draft.displayName.trim().length === 0}
-                  >
-                    Save profile
-                  </Button>
-                </Stack>
-                {renderPathTree(profile.id)}
-              </Collapse>
-            </Stack>
-          );
-        })}
+      {profiles.length === 0 ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          data-testid="jj-profile-connect-requires-profile"
+        >
+          Create a profile first. Then you can connect Gmail in Job Mail.
+        </Typography>
+      ) : null}
 
-        <TreeRow
-          depth={0}
-          open={createOpen}
-          onToggle={() => setCreateOpen((value) => !value)}
-          icon={<PersonOutlineRoundedIcon fontSize="small" />}
-          primary="Create profile"
-          secondary="New identity on this device"
-          testId="jj-tree-create-profile"
-        />
-        <Collapse in={createOpen} timeout="auto" unmountOnExit>
+      <Stack spacing={2} data-testid="jj-profile-tree">
+        {profiles.length > 0 ? (
+          <FormControl size="small" fullWidth>
+            <InputLabel id="jj-profile-switcher-label">Active profile</InputLabel>
+            <Select
+              labelId="jj-profile-switcher-label"
+              label="Active profile"
+              value={selectedProfileId ?? ""}
+              disabled={selectingProfileId !== null}
+              onChange={(event) => {
+                const nextId = String(event.target.value);
+                if (nextId) {
+                  onSelectActiveProfile(nextId);
+                }
+              }}
+              data-testid="jj-profile-switcher"
+            >
+              {profiles.map((profile) => (
+                <MenuItem key={profile.id} value={profile.id}>
+                  {profile.displayName}
+                  {profile.id === selectedProfileId ? " · Active" : ""}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : null}
+
+        {selectedProfileId ? (
           <Stack
             spacing={1.5}
             component="form"
-            data-testid="jj-profile-create-form"
+            data-testid="jj-profile-form"
             onSubmit={(e) => e.preventDefault()}
-            sx={{ px: 2, py: 1.5, pl: 5, bgcolor: "action.hover" }}
           >
+            <Typography variant="subtitle2">Identity</Typography>
             <TextField
               label="Display name"
-              value={createDraft.displayName}
+              value={activeDraft.displayName}
               onChange={(event) =>
-                setCreateDraft((prev) => ({ ...prev, displayName: event.target.value }))
+                setDraftByProfileId((prev) => ({
+                  ...prev,
+                  [selectedProfileId]: {
+                    ...(prev[selectedProfileId] ?? emptyDraft()),
+                    displayName: event.target.value,
+                  },
+                }))
               }
               size="small"
               required
@@ -1217,9 +1157,15 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
             />
             <TextField
               label="Email"
-              value={createDraft.email}
+              value={activeDraft.email}
               onChange={(event) =>
-                setCreateDraft((prev) => ({ ...prev, email: event.target.value }))
+                setDraftByProfileId((prev) => ({
+                  ...prev,
+                  [selectedProfileId]: {
+                    ...(prev[selectedProfileId] ?? emptyDraft()),
+                    email: event.target.value,
+                  },
+                }))
               }
               size="small"
               fullWidth
@@ -1227,9 +1173,15 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
             />
             <TextField
               label="Location"
-              value={createDraft.location}
+              value={activeDraft.location}
               onChange={(event) =>
-                setCreateDraft((prev) => ({ ...prev, location: event.target.value }))
+                setDraftByProfileId((prev) => ({
+                  ...prev,
+                  [selectedProfileId]: {
+                    ...(prev[selectedProfileId] ?? emptyDraft()),
+                    location: event.target.value,
+                  },
+                }))
               }
               size="small"
               fullWidth
@@ -1237,14 +1189,73 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
             />
             <Button
               variant="contained"
-              onClick={onCreateProfile}
-              disabled={saving || createDraft.displayName.trim().length === 0}
+              onClick={() => onSaveProfile(selectedProfileId)}
+              disabled={saving || activeDraft.displayName.trim().length === 0}
             >
-              Create profile
+              Save profile
             </Button>
+            {renderPathTree(selectedProfileId)}
           </Stack>
-        </Collapse>
-      </List>
+        ) : null}
+
+        <Stack spacing={1}>
+          <Button
+            variant={createOpen || profiles.length === 0 ? "outlined" : "text"}
+            onClick={() => setCreateOpen((value) => !value)}
+            data-testid="jj-tree-create-profile"
+            sx={{ alignSelf: "flex-start" }}
+          >
+            Create profile
+          </Button>
+          {createOpen || profiles.length === 0 ? (
+            <Stack
+              spacing={1.5}
+              component="form"
+              data-testid="jj-profile-create-form"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <TextField
+                label="Display name"
+                value={createDraft.displayName}
+                onChange={(event) =>
+                  setCreateDraft((prev) => ({ ...prev, displayName: event.target.value }))
+                }
+                size="small"
+                required
+                fullWidth
+                autoComplete="name"
+              />
+              <TextField
+                label="Email"
+                value={createDraft.email}
+                onChange={(event) =>
+                  setCreateDraft((prev) => ({ ...prev, email: event.target.value }))
+                }
+                size="small"
+                fullWidth
+                autoComplete="email"
+              />
+              <TextField
+                label="Location"
+                value={createDraft.location}
+                onChange={(event) =>
+                  setCreateDraft((prev) => ({ ...prev, location: event.target.value }))
+                }
+                size="small"
+                fullWidth
+                autoComplete="address-level2"
+              />
+              <Button
+                variant="contained"
+                onClick={onCreateProfile}
+                disabled={saving || createDraft.displayName.trim().length === 0}
+              >
+                Create profile
+              </Button>
+            </Stack>
+          ) : null}
+        </Stack>
+      </Stack>
 
       {status ? (
         <Typography role="status" color="text.secondary" variant="body2">

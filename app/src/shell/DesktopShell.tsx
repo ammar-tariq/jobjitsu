@@ -23,6 +23,7 @@ import { QueueView } from "./QueueView.js";
 import { SideMenu } from "./SideMenu.js";
 import { SourcesView } from "./SourcesView.js";
 import { JobMailView } from "./JobMailView.js";
+import { MailboxSessionProvider, useMailboxSession } from "./MailboxSessionProvider.js";
 import { TimelineView } from "./TimelineView.js";
 
 export type DesktopShellProps = {
@@ -30,6 +31,36 @@ export type DesktopShellProps = {
   readonly onThemeChange: (theme: ThemePreference) => void;
   readonly bridge: IpcBridge;
 };
+
+function JobMailImportBanner(props: {
+  readonly activeId: ShellNavId;
+  readonly onOpenJobMail: () => void;
+}): JSX.Element | null {
+  const session = useMailboxSession();
+  if (!session.syncing || props.activeId === "job-mail") {
+    return null;
+  }
+  const primary = session.primary;
+  const imported = primary?.emailsIngested ?? 0;
+  const classified = primary?.emailsProcessed ?? 0;
+  const total = primary?.emailsTotal;
+  const phase = primary?.syncStatus === "processing" ? "Classifying" : "Importing";
+  const count = primary?.syncStatus === "processing" ? classified : imported;
+  return (
+    <Alert
+      severity="info"
+      data-testid="jj-mailbox-running-banner"
+      action={
+        <Button color="inherit" size="small" onClick={props.onOpenJobMail}>
+          Open Job Mail
+        </Button>
+      }
+    >
+      {phase} Job Mail on this device
+      {total ? ` · ${count} / ~${total}` : count > 0 ? ` · ${count}` : ""}. You can keep browsing.
+    </Alert>
+  );
+}
 
 /**
  * Desktop shell — side nav + main + always-visible Agent privacy bar.
@@ -115,105 +146,118 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
   }
 
   return (
-    <Box
-      className="jj-shell"
-      data-theme={theme}
-      data-layout={layout}
-      data-testid="jj-desktop-shell"
-      sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}
-    >
-      <SideMenu activeId={activeId} onSelect={setActiveId} layout={layout} />
-
+    <MailboxSessionProvider bridge={bridge}>
       <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          width: `calc(100% - ${drawerWidth}px)`,
-          minHeight: "100vh",
-        }}
+        className="jj-shell"
+        data-theme={theme}
+        data-layout={layout}
+        data-testid="jj-desktop-shell"
+        sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}
       >
+        <SideMenu activeId={activeId} onSelect={setActiveId} layout={layout} />
+
         <Box
-          component="main"
-          id="main-content"
-          sx={(muiTheme) => ({
-            flexGrow: 1,
-            backgroundColor: muiTheme.palette.background.default,
-            overflow: "auto",
-            minHeight: 0,
-          })}
-        >
-          <Stack
-            spacing={2.5}
-            sx={{
-              alignItems: "stretch",
-              px: layout === "compact" ? 2 : 3,
-              pb: 4,
-              pt: 3,
-              minHeight: "100%",
-            }}
-          >
-            {craftRunning && activeId !== "craft" ? (
-              <Alert
-                severity="info"
-                data-testid="jj-craft-running-banner"
-                action={
-                  <Button color="inherit" size="small" onClick={() => setActiveId("craft")}>
-                    Open Craft
-                  </Button>
-                }
-              >
-                {craftSession.job.message ??
-                  "Agent is preparing Craft drafts on this device. You can keep browsing."}
-              </Alert>
-            ) : null}
-            {activeId === "craft" ? (
-              <CraftView bridge={bridge} />
-            ) : activeId === "applications" ? (
-              <ApplicationsView bridge={bridge} onOpenPreferences={() => setActiveId("job-mail")} />
-            ) : activeId === "queue" ? (
-              <QueueView bridge={bridge} />
-            ) : activeId === "follow-ups" ? (
-              <FollowUpsView bridge={bridge} />
-            ) : activeId === "agent" ? (
-              <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
-            ) : activeId === "profile" ? (
-              <ProfileView bridge={bridge} onOpenJobMail={() => setActiveId("job-mail")} />
-            ) : activeId === "job-mail" ? (
-              <JobMailView bridge={bridge} onOpenApplications={() => setActiveId("applications")} />
-            ) : activeId === "sources" ? (
-              <SourcesView
-                onOpenCraft={() => setActiveId("craft")}
-                onOpenJobMail={() => setActiveId("job-mail")}
-              />
-            ) : activeId === "preferences" ? (
-              <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
-            ) : activeId === "timeline" ? (
-              <TimelineView />
-            ) : (
-              <CraftView bridge={bridge} />
-            )}
-          </Stack>
-        </Box>
-        <Box
-          component="footer"
-          data-testid="jj-shell-status-bar"
           sx={{
+            flexGrow: 1,
             display: "flex",
-            alignItems: "center",
-            gap: 1,
-            px: 2,
-            py: 1,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            flexShrink: 0,
+            flexDirection: "column",
+            minWidth: 0,
+            width: `calc(100% - ${drawerWidth}px)`,
+            minHeight: "100vh",
           }}
         >
-          <JjAgentPrivacyPill state={agentPrivacy} />
+          <Box
+            component="main"
+            id="main-content"
+            sx={(muiTheme) => ({
+              flexGrow: 1,
+              backgroundColor: muiTheme.palette.background.default,
+              overflow: "auto",
+              minHeight: 0,
+            })}
+          >
+            <Stack
+              spacing={2.5}
+              sx={{
+                alignItems: "stretch",
+                px: layout === "compact" ? 2 : 3,
+                pb: 4,
+                pt: 3,
+                minHeight: "100%",
+              }}
+            >
+              {craftRunning && activeId !== "craft" ? (
+                <Alert
+                  severity="info"
+                  data-testid="jj-craft-running-banner"
+                  action={
+                    <Button color="inherit" size="small" onClick={() => setActiveId("craft")}>
+                      Open Craft
+                    </Button>
+                  }
+                >
+                  {craftSession.job.message ??
+                    "Agent is preparing Craft drafts on this device. You can keep browsing."}
+                </Alert>
+              ) : null}
+              <JobMailImportBanner
+                activeId={activeId}
+                onOpenJobMail={() => setActiveId("job-mail")}
+              />
+              {activeId === "craft" ? (
+                <CraftView bridge={bridge} />
+              ) : activeId === "applications" ? (
+                <ApplicationsView
+                  bridge={bridge}
+                  onOpenJobMail={() => setActiveId("job-mail")}
+                  onOpenProfile={() => setActiveId("profile")}
+                />
+              ) : activeId === "queue" ? (
+                <QueueView bridge={bridge} />
+              ) : activeId === "follow-ups" ? (
+                <FollowUpsView bridge={bridge} />
+              ) : activeId === "agent" ? (
+                <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
+              ) : activeId === "profile" ? (
+                <ProfileView bridge={bridge} onOpenJobMail={() => setActiveId("job-mail")} />
+              ) : activeId === "job-mail" ? (
+                <JobMailView
+                  onOpenApplications={() => setActiveId("applications")}
+                  onOpenProfile={() => setActiveId("profile")}
+                />
+              ) : activeId === "sources" ? (
+                <SourcesView
+                  onOpenCraft={() => setActiveId("craft")}
+                  onOpenJobMail={() => setActiveId("job-mail")}
+                />
+              ) : activeId === "preferences" ? (
+                <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
+              ) : activeId === "timeline" ? (
+                <TimelineView />
+              ) : (
+                <CraftView bridge={bridge} />
+              )}
+            </Stack>
+          </Box>
+          <Box
+            component="footer"
+            data-testid="jj-shell-status-bar"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 1,
+              borderTop: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              flexShrink: 0,
+            }}
+          >
+            <JjAgentPrivacyPill state={agentPrivacy} />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </MailboxSessionProvider>
   );
 }

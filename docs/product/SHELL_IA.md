@@ -55,7 +55,8 @@ Cross-links (connect where possible):
 
 - Profile → “Open Job Mail” after connect  
 - Job Mail → “Open Applications” when job-related mail appears  
-- Applications → “Connect in Profile / Job Mail” when empty  
+- Applications → “Create a profile” when empty and no identity yet; “Connect in Job Mail” once a profile exists  
+- **Connect Gmail / Outlook requires at least one profile** (UI + host gate)  
 - Agent unavailable → Preferences model  
 - Sources stub → link to Craft (prepare from résumé + JD) as the interim path  
 
@@ -67,7 +68,7 @@ Cross-links (connect where possible):
 | --- | --- | --- |
 | Connect Gmail / Outlook | Profile (CTA) + Job Mail (full) | Preferences (remove dump) |
 | Sync / import feed / lookback | Job Mail | Preferences |
-| OAuth client id fields | Job Mail → Advanced (or env-only) | Prefer `.env`; Preferences only if still needed as override |
+| OAuth client ids | Local `.env` only (never shown in UI) | Job Mail Advanced / Preferences fields |
 | Paths + résumé versions | Profile | Preferences |
 | Clean slate / backup / restore | Preferences → Reset | Hidden destructive menus |
 | Agent model path | Preferences | — |
@@ -119,6 +120,8 @@ For Work list destinations (**Applications**, and later similar editors):
 1. **List is primary** — search, filters, and rows fill the page (reading width).
 2. **Create / edit in a dialog** — `New draft` or a row opens `JjEditorDialog`; the form is not a permanent second column.
 3. **Queue / Follow-ups** stay list + inline actions (no create form).
+4. **Profile** — full screen for the **active** identity; switch profiles via a select (no accordion tree).
+5. **Job Mail** — session state lives in `MailboxSessionProvider` (survives nav); shell shows an import banner when syncing elsewhere.
 
 One job per view; avoid permanent split panes for create/edit.
 

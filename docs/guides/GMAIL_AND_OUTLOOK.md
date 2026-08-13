@@ -73,11 +73,11 @@ Restart the desktop app so Vite can load the file (`pnpm dev:desktop`).
 ## 3. Connect in JobJitsu
 
 1. Open the **JobJitsu** native window.
-2. **Applications** → **Connect Gmail**, or **Preferences** → **Email** → **Connect Gmail**.
+2. Create a **Profile**, then open **Job Mail** → **Connect Gmail** (or Applications after you have a profile).
 3. In the browser: choose your account → Allow (readonly). Close the tab when it says you can return to JobJitsu.
 4. Wait until the connection shows **Connected**. Open **Applications**.
 
-If `.env` is empty, paste the client ID and secret under Preferences → Email, **Save email settings**, then Connect Gmail. Saved Preferences values override `.env`.
+Client IDs and secrets stay in `.env` only. They are never shown or pasted in the UI.
 
 ---
 
@@ -89,7 +89,7 @@ If `.env` is empty, paste the client ID and secret under Preferences → Email, 
    - Redirect URI: `http://127.0.0.1:17342/oauth`
    - Enable **Allow public client flows**
 4. **API permissions** (delegated): `Mail.Read`, `offline_access`. Grant admin consent only if your tenant requires it.
-5. Copy the **Application (client) ID** into `.env` as `JOBJITSU_OUTLOOK_CLIENT_ID` (or Preferences → Outlook client ID).
+5. Copy the **Application (client) ID** into `.env` as `JOBJITSU_OUTLOOK_CLIENT_ID`.
 6. Restart the desktop app → **Connect Outlook**.
 
 ---
@@ -113,7 +113,7 @@ To try the intelligence path without Google: **Connect sample mailbox** (fixture
 
 | Message | What to do |
 | ------- | ---------- |
-| Add a Gmail client ID in a local .env… | Copy `.env.example` → `.env`, fill the Desktop client ID **and secret**, restart `pnpm dev:desktop`. Or paste them in Preferences and save. |
+| Add a Gmail client ID in a local .env… | Copy `.env.example` → `.env`, fill the Desktop client ID **and secret**, restart `pnpm dev:desktop`. |
 | Open the JobJitsu desktop app… | You are in the browser preview. Quit it and run `pnpm dev:desktop`. |
 | Sign-in was cancelled / timed out | Connect Gmail again. Finish the browser prompt within a few minutes. |
 | Gmail access expired | Connect Gmail again. Tokens stay on this device; they are not recovered from the cloud. |

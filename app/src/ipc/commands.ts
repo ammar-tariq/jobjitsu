@@ -424,6 +424,7 @@ export type MailboxIntegrationSnapshot = {
   readonly syncStatus: string;
   readonly syncError?: string;
   readonly emailsProcessed: number;
+  readonly emailsIngested?: number;
   readonly emailsTotal?: number;
   readonly jobRelatedCount: number;
   readonly applicationsFound: number;
@@ -502,9 +503,6 @@ export type MailboxDashboardSnapshot = {
 };
 
 export type MailboxSettingsSnapshot = {
-  readonly gmailClientId?: string;
-  readonly gmailClientSecret?: string;
-  readonly outlookClientId?: string;
   readonly lookbackDays: number;
   readonly noResponseAfterDays: number;
   readonly notifyAssessments: boolean;

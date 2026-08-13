@@ -1386,6 +1386,14 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           message: "Email intelligence is not available yet.",
         });
       }
+      const profiles = getProfiles();
+      const listed = profiles ? await profiles.list() : [];
+      if (listed.length === 0) {
+        return ok({
+          status: "failed",
+          message: "Create a profile first, then connect Gmail or Outlook in Job Mail.",
+        });
+      }
       return ok(await mailbox.beginProviderConnect(payload.provider));
     },
     "mailbox.connectProvider": async (payload) => {
@@ -1613,9 +1621,7 @@ function toSettingsSnapshot(settings: {
   readonly notifyOffers: boolean;
 }): MailboxSettingsSnapshot {
   return {
-    gmailClientId: settings.gmailClientId,
-    gmailClientSecret: settings.gmailClientSecret,
-    outlookClientId: settings.outlookClientId,
+    // OAuth client ids/secrets stay host-side (.env / store). Never send them to the UI.
     lookbackDays: settings.lookbackDays,
     noResponseAfterDays: settings.noResponseAfterDays,
     notifyAssessments: settings.notifyAssessments,
@@ -1635,6 +1641,7 @@ function toIntegrationSnapshot(integration: {
   readonly syncStatus: string;
   readonly syncError?: string;
   readonly emailsProcessed: number;
+  readonly emailsIngested?: number;
   readonly emailsTotal?: number;
   readonly jobRelatedCount: number;
   readonly applicationsFound: number;
@@ -1649,6 +1656,7 @@ function toIntegrationSnapshot(integration: {
     syncStatus: integration.syncStatus,
     syncError: integration.syncError,
     emailsProcessed: integration.emailsProcessed,
+    emailsIngested: integration.emailsIngested,
     emailsTotal: integration.emailsTotal,
     jobRelatedCount: integration.jobRelatedCount,
     applicationsFound: integration.applicationsFound,
