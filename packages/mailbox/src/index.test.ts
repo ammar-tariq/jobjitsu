@@ -10,6 +10,7 @@ import { createMailboxStore, listDocs } from "./store.js";
 import { createMailboxService } from "./service.js";
 import { PACKAGE_NAME } from "./index.js";
 import { SAMPLE_MAILBOX_MESSAGES } from "./fingerprint.js";
+import { createPkcePair } from "./oauth.js";
 import { createGmailMailboxProvider } from "./providers/gmail.js";
 import { paginateMessages } from "./providers/types.js";
 import type { Application } from "@jobjitsu/applications";
@@ -17,6 +18,24 @@ import type { Application } from "@jobjitsu/applications";
 describe("@jobjitsu/mailbox", () => {
   it("exports package identity", () => {
     expect(PACKAGE_NAME).toBe("@jobjitsu/mailbox");
+  });
+
+  it("builds PKCE without Node Buffer (webview-safe)", async () => {
+    const globalRecord = globalThis as typeof globalThis & { Buffer?: unknown };
+    const originalBuffer = globalRecord.Buffer;
+    Reflect.deleteProperty(globalRecord, "Buffer");
+    try {
+      const pair = await createPkcePair();
+      expect(pair.verifier.length).toBeGreaterThan(20);
+      expect(pair.challenge.length).toBeGreaterThan(20);
+      expect(pair.state.length).toBeGreaterThan(10);
+      expect(pair.verifier).not.toMatch(/[+/=]/);
+      expect(pair.challenge).not.toMatch(/[+/=]/);
+    } finally {
+      if (originalBuffer !== undefined) {
+        globalRecord.Buffer = originalBuffer;
+      }
+    }
   });
 
   it("ignores newsletters and receipts before Agent classification", () => {

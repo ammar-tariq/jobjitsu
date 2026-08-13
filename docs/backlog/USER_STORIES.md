@@ -171,6 +171,7 @@ Opt-in inbound mailbox sync. Extends existing Application drafts. Never sends.
 | --- | --- | --- |
 | PE20-S01 | Opt-in mailbox sync, classify/match, incremental cursors | Partial · [#118](https://github.com/ammar-tariq/jobjitsu/issues/118) · [PR #120](https://github.com/ammar-tariq/jobjitsu/pull/120) |
 | PE20-S02 | Complete Gmail/Outlook OAuth loopback | Partial · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) · [PR #123](https://github.com/ammar-tariq/jobjitsu/pull/123) |
+| PE20-S03 | Fix Buffer crash on Connect Gmail (webview-safe PKCE) | In Progress · [#139](https://github.com/ammar-tariq/jobjitsu/issues/139) |
 
 ## PE21 — Shell information architecture ([#128](https://github.com/ammar-tariq/jobjitsu/issues/128))
 
@@ -179,10 +180,11 @@ Untangle Preferences; Profile → Job Mail → Paths → Applications; Sources s
 | Story | Summary | Status |
 | --- | --- | --- |
 | PE21-S01 | Document shell IA, platform spec, terminology, backlog | Shipped · [#129](https://github.com/ammar-tariq/jobjitsu/issues/129) · [PR #134](https://github.com/ammar-tariq/jobjitsu/pull/134) |
-| PE21-S02 | Nav groups + Job Mail view; move mailbox out of Preferences; Profile connect CTA | In Progress · [#130](https://github.com/ammar-tariq/jobjitsu/issues/130) |
-| PE21-S03 | Preferences Reset: selective wipe, backup, restore; keep `.env` | In Progress · [#131](https://github.com/ammar-tariq/jobjitsu/issues/131) |
-| PE21-S04 | Sources Coming soon stub + cross-links to Craft / Job Mail | In Progress · [#132](https://github.com/ammar-tariq/jobjitsu/issues/132) |
-| PE21-S05 | Icon accent tokens (cyan + marigold) + calm motion polish | In Progress · [#133](https://github.com/ammar-tariq/jobjitsu/issues/133) |
+| PE21-S02 | Nav groups + Job Mail view; move mailbox out of Preferences; Profile connect CTA | Shipped · [#130](https://github.com/ammar-tariq/jobjitsu/issues/130) · [PR #135](https://github.com/ammar-tariq/jobjitsu/pull/135) |
+| PE21-S03 | Preferences Reset: selective wipe, backup, restore; keep `.env` | Shipped · [#131](https://github.com/ammar-tariq/jobjitsu/issues/131) · [PR #135](https://github.com/ammar-tariq/jobjitsu/pull/135) |
+| PE21-S04 | Sources Coming soon stub + cross-links to Craft / Job Mail | Shipped · [#132](https://github.com/ammar-tariq/jobjitsu/issues/132) · [PR #135](https://github.com/ammar-tariq/jobjitsu/pull/135) |
+| PE21-S05 | Icon accent tokens (cyan + marigold) + calm motion polish | Shipped · [#133](https://github.com/ammar-tariq/jobjitsu/issues/133) · [PR #135](https://github.com/ammar-tariq/jobjitsu/pull/135) |
+| PE21-S06 | Applications list-first editor dialog | Shipped · [#138](https://github.com/ammar-tariq/jobjitsu/issues/138) · [PR #136](https://github.com/ammar-tariq/jobjitsu/pull/136) |
 
 ## Cross-cutting
 
