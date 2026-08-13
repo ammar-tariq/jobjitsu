@@ -16,6 +16,7 @@ describe("@jobjitsu/app shell navigation", () => {
   it("groups destinations as Work / You / System per SHELL_IA", () => {
     expect(SHELL_NAV_GROUPS.map((group) => group.label)).toEqual(["Work", "You", "System"]);
     expect(SHELL_NAV_ITEMS.map((item) => item.label)).toEqual([
+      "Overview",
       "Craft",
       "Applications",
       "Queue",
@@ -29,8 +30,9 @@ describe("@jobjitsu/app shell navigation", () => {
     ]);
   });
 
-  it("defaults to Craft", () => {
-    expect(DEFAULT_SHELL_NAV_ID).toBe("craft");
+  it("defaults to Overview", () => {
+    expect(DEFAULT_SHELL_NAV_ID).toBe("overview");
+    expect(shellPageTitle("overview")).toBe("Overview");
     expect(shellPageTitle("craft")).toBe("Craft");
     expect(shellPageTitle("job-mail")).toBe("Job Mail");
     expect(shellPageTitle("sources")).toBe("Sources");
@@ -38,6 +40,7 @@ describe("@jobjitsu/app shell navigation", () => {
   });
 
   it("narrows known nav ids", () => {
+    expect(isShellNavId("overview")).toBe(true);
     expect(isShellNavId("queue")).toBe(true);
     expect(isShellNavId("job-mail")).toBe(true);
     expect(isShellNavId("sources")).toBe(true);

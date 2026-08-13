@@ -38,7 +38,8 @@ Grouped, one job per view:
 
 | Group | Item | Role |
 | --- | --- | --- |
-| **Work** | Craft | Résumé / cover from paste |
+| **Work** | **Overview** | Calm charts from on-device applications (funnel, mix, rates) |
+| | Craft | Résumé / cover from paste |
 | | Applications | Drafts, attention, duplicates |
 | | Queue | Ready-for-review gate |
 | | Follow-ups | Local reminders |
@@ -110,6 +111,18 @@ Stub screen with calm empty state:
 - Until then: point to **Craft** and **Job Mail**  
 
 No scrapers or network discovery in the first PE21 slices.
+
+---
+
+## Overview (local charts)
+
+Default Work landing after onboarding. Reads `mailbox.getDashboard` only — no Agent calls, no send.
+
+- **Funnel** — applied → responses → interviews → offers  
+- **Pipeline mix** — active / awaiting / assessments / interviews / offers / rejected  
+- **Recent rates** — response / interview / offer shares for the analytics window  
+
+Empty state when there are no applications. Copy stays calm (not a score, not streaks).
 
 ---
 

@@ -13,6 +13,7 @@ import { agentPrivacyStateFromStatus } from "./agent-privacy.js";
 import { AgentView } from "./AgentView.js";
 import { ApplicationsView } from "./ApplicationsView.js";
 import { CraftView } from "./CraftView.js";
+import { DashboardView } from "./DashboardView.js";
 import { FollowUpsView } from "./FollowUpsView.js";
 import { useHostActivity, useHostCraftSession } from "./HostProvider.js";
 import { COMPACT_DRAWER_WIDTH, useShellLayout } from "./layout/index.js";
@@ -204,7 +205,9 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
                 activeId={activeId}
                 onOpenJobMail={() => setActiveId("job-mail")}
               />
-              {activeId === "craft" ? (
+              {activeId === "overview" ? (
+                <DashboardView bridge={bridge} />
+              ) : activeId === "craft" ? (
                 <CraftView bridge={bridge} />
               ) : activeId === "applications" ? (
                 <ApplicationsView
@@ -235,7 +238,7 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
               ) : activeId === "timeline" ? (
                 <TimelineView />
               ) : (
-                <CraftView bridge={bridge} />
+                <DashboardView bridge={bridge} />
               )}
             </Stack>
           </Box>

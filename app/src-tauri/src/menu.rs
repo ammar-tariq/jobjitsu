@@ -20,6 +20,7 @@ pub fn install_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     .build()?;
 
   let go = SubmenuBuilder::new(app, "Go")
+    .text("nav-overview", "Overview")
     .text("nav-craft", "Craft")
     .text("nav-applications", "Applications")
     .text("nav-queue", "Queue")
@@ -65,6 +66,7 @@ pub fn install_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let id = event.id().as_ref();
     let destination = match id {
       "nav-preferences" | "nav-preferences-go" => Some("preferences"),
+      "nav-overview" => Some("overview"),
       "nav-craft" => Some("craft"),
       "nav-applications" => Some("applications"),
       "nav-queue" => Some("queue"),

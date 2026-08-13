@@ -3,6 +3,7 @@ export const APP_NAME = "JobJitsu" as const;
 
 export type ShellNavItem = {
   readonly id:
+    | "overview"
     | "craft"
     | "applications"
     | "queue"
@@ -31,6 +32,7 @@ export const SHELL_NAV_GROUPS: readonly ShellNavGroup[] = [
     id: "work",
     label: "Work",
     items: [
+      { id: "overview", label: "Overview" },
       { id: "craft", label: "Craft" },
       { id: "applications", label: "Applications" },
       { id: "queue", label: "Queue" },
@@ -63,7 +65,7 @@ export const SHELL_NAV_ITEMS: readonly ShellNavItem[] = SHELL_NAV_GROUPS.flatMap
 
 export type ShellNavId = ShellNavItem["id"];
 
-export const DEFAULT_SHELL_NAV_ID: ShellNavId = "craft";
+export const DEFAULT_SHELL_NAV_ID: ShellNavId = "overview";
 
 export function isShellNavId(value: string): value is ShellNavId {
   return SHELL_NAV_ITEMS.some((item) => item.id === value);
@@ -71,5 +73,5 @@ export function isShellNavId(value: string): value is ShellNavId {
 
 export function shellPageTitle(id: ShellNavId): string {
   const item = SHELL_NAV_ITEMS.find((entry) => entry.id === id);
-  return item?.label ?? "Applications";
+  return item?.label ?? "Overview";
 }

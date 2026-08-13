@@ -7,6 +7,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import InboxRoundedIcon from "@mui/icons-material/InboxRounded";
@@ -20,6 +21,7 @@ import TravelExploreRoundedIcon from "@mui/icons-material/TravelExploreRounded";
 import { SHELL_NAV_GROUPS, type ShellNavId } from "../index.js";
 
 const NAV_ICONS: Record<ShellNavId, JSX.Element> = {
+  overview: <InsightsRoundedIcon fontSize="small" />,
   craft: <EditNoteRoundedIcon fontSize="small" />,
   applications: <WorkOutlineRoundedIcon fontSize="small" />,
   queue: <InboxRoundedIcon fontSize="small" />,
