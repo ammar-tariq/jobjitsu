@@ -269,6 +269,82 @@ describe("@jobjitsu/mailbox", () => {
     expect(result.message).toMatch(/desktop app/i);
   });
 
+  it("connects Gmail from env clients without pasting Preferences fields", async () => {
+    const applications = createMemoryApplicationRepository();
+    const store = createMailboxStore(createMemoryKvStore());
+    const opened: string[] = [];
+    const service = createMailboxService({
+      store,
+      applications,
+      oauthClients: {
+        gmailClientId: "env.apps.googleusercontent.com",
+        gmailClientSecret: "env-secret",
+      },
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          const state = new URL(opened[0] ?? "http://127.0.0.1").searchParams.get("state") ?? "";
+          return { code: "auth-code", state };
+        },
+      },
+      fetchImpl: async (input, init) => {
+        const url = String(input);
+        if (url.includes("oauth2.googleapis.com/token")) {
+          expect(String(init?.body ?? "")).toContain("client_secret=env-secret");
+          return jsonResponse({
+            access_token: "access-from-google",
+            refresh_token: "refresh-from-google",
+            expires_in: 3600,
+          });
+        }
+        if (url.includes("/users/me/profile")) {
+          return jsonResponse({ emailAddress: "you@gmail.com" });
+        }
+        if (url.includes("/messages?")) {
+          return jsonResponse({ messages: [], resultSizeEstimate: 0 });
+        }
+        return jsonResponse({});
+      },
+    });
+    const shown = await service.getSettings();
+    expect(shown.gmailClientId).toBe("env.apps.googleusercontent.com");
+    expect((await store.getSettings()).gmailClientId).toBeUndefined();
+    const result = await service.beginProviderConnect("gmail");
+    expect(result.status).toBe("connected");
+    expect(opened[0]).toContain("env.apps.googleusercontent.com");
+    expect(JSON.stringify(result)).not.toContain("env-secret");
+    expect(JSON.stringify(result)).not.toContain("access-from-google");
+  });
+
+  it("prefers saved Preferences client ids over env", async () => {
+    const opened: string[] = [];
+    const withOauth = createMailboxService({
+      store: createMailboxStore(createMemoryKvStore()),
+      applications: createMemoryApplicationRepository(),
+      oauthClients: { gmailClientId: "env.apps.googleusercontent.com" },
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          return { error: "cancelled" };
+        },
+      },
+    });
+    await withOauth.updateSettings({ gmailClientId: "prefs.apps.googleusercontent.com" });
+    await withOauth.beginProviderConnect("gmail");
+    expect(opened[0]).toContain("prefs.apps.googleusercontent.com");
+    expect(opened[0]).not.toContain("env.apps.googleusercontent.com");
+  });
+
   it("completes Gmail connect through a fake loopback without exposing tokens", async () => {
     const applications = createMemoryApplicationRepository();
     const store = createMailboxStore(createMemoryKvStore());

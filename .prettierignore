@@ -11,6 +11,8 @@ docs
 assets
 .git
 .changeset/**
+.env
+.env.*
 app/src-tauri/gen
 *.md
 !README.md

@@ -130,9 +130,9 @@ keep.
   models folder is missing or empty, the listing explains what to do in plain language.
 - Approval before send: a toggle, on by default; turning it off is an explicit choice.
 - Craft tone: a saved preference applied when preparing drafts.
-- Email: connect Gmail or Outlook from Preferences (desktop app) with a client ID.
-  Tokens stay in the host. JobJitsu never asks for a mailbox password. See
-  [GMAIL_AND_OUTLOOK.md](../guides/GMAIL_AND_OUTLOOK.md).
+- Email: connect Gmail or Outlook from Preferences (desktop app). Client ids come from a
+  local `.env` or Preferences fields. Tokens stay in the host. JobJitsu never asks for a
+  mailbox password. See [GMAIL_AND_OUTLOOK.md](../guides/GMAIL_AND_OUTLOOK.md).
 - Appearance: dark or light theme; dark is the default.
 
 ### Timeline

@@ -18,6 +18,38 @@ export type MailboxConnectResult = {
   readonly message: string;
 };
 
+/** Desktop OAuth app credentials — never a mailbox password. */
+export type MailboxOAuthClientEnv = {
+  readonly gmailClientId?: string;
+  readonly gmailClientSecret?: string;
+  readonly outlookClientId?: string;
+};
+
+export function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
+  for (const value of values) {
+    const trimmed = value?.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+  }
+  return undefined;
+}
+
+export function mergeMailboxOAuthClients(
+  settings: {
+    readonly gmailClientId?: string;
+    readonly gmailClientSecret?: string;
+    readonly outlookClientId?: string;
+  },
+  env?: MailboxOAuthClientEnv,
+): MailboxOAuthClientEnv {
+  return {
+    gmailClientId: firstNonEmpty(settings.gmailClientId, env?.gmailClientId),
+    gmailClientSecret: firstNonEmpty(settings.gmailClientSecret, env?.gmailClientSecret),
+    outlookClientId: firstNonEmpty(settings.outlookClientId, env?.outlookClientId),
+  };
+}
+
 export type PkcePair = {
   readonly verifier: string;
   readonly challenge: string;

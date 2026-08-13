@@ -64,6 +64,7 @@ import {
 import { createMemoryKvStore } from "@jobjitsu/storage";
 import { createMailboxService, createMailboxStore, type MailboxService } from "@jobjitsu/mailbox";
 import { createMailboxAiPort } from "./mailbox-classify.js";
+import { readMailboxOAuthClientsFromEnv } from "./mailbox-oauth-env.js";
 import { createHostFileSaver, type FileSaver } from "./file-saver.js";
 import { createHostFolderPicker, type FolderPicker } from "./folder-picker.js";
 
@@ -183,6 +184,7 @@ export function createHostRuntime(options: CreateHostRuntimeOptions = {}): HostR
           applications,
           bus,
           ai: mailboxAi,
+          oauthClients: readMailboxOAuthClientsFromEnv(),
         }));
   const resolveMailbox = (): MailboxService | undefined => {
     const current = options.getMailbox?.() ?? mailbox;

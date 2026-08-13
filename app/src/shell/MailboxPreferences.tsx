@@ -140,8 +140,9 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
       <Typography variant="h3">Email</Typography>
       <Typography color="text.secondary" variant="body2">
         Connect Gmail or Outlook to import job mail on this device. Use the desktop app (not the
-        browser preview). JobJitsu never asks for your mailbox password, and nothing is sent unless
-        you choose to.
+        browser preview). If this clone has a local .env, Connect Gmail works without pasting client
+        ids. JobJitsu never asks for your mailbox password, and nothing is sent unless you choose
+        to.
       </Typography>
 
       {settings ? (
@@ -152,7 +153,7 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
             onChange={(event) => setSettings({ ...settings, gmailClientId: event.target.value })}
             size="small"
             fullWidth
-            helperText="Google Cloud → APIs & Services → Credentials → Desktop app. Stored on this device. Never your Gmail password."
+            helperText="Optional when set in a local .env. Google Cloud Desktop client ID. Never your Gmail password."
           />
           <TextField
             label="Gmail client secret"
@@ -164,7 +165,7 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
             fullWidth
             type="password"
             autoComplete="off"
-            helperText="From the same Desktop client. Stored on this device. Google still requires it for token exchange."
+            helperText="Optional when set in a local .env. From the same Desktop client. Stored on this device."
           />
           <TextField
             label="Outlook client ID"
@@ -172,7 +173,7 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
             onChange={(event) => setSettings({ ...settings, outlookClientId: event.target.value })}
             size="small"
             fullWidth
-            helperText="Microsoft Entra app ID. Stored on this device."
+            helperText="Optional when set in a local .env. Microsoft Entra application (client) ID."
           />
           <TextField
             label="Look back (days)"

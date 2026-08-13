@@ -14,43 +14,70 @@ Or: `pnpm --filter @jobjitsu/app dev:tauri`.
 
 ---
 
-## Find the controls
+## How credentials work
 
-1. Open **JobJitsu** (native window).
-2. Either:
-   - **Applications** → **Connect Gmail** (empty list), or
-   - **Preferences** → scroll to **Email**.
-3. Paste your client ID (and Gmail client secret), click **Save email settings**, then **Connect Gmail**.
+JobJitsu does **not** ship a shared Google Cloud or Microsoft app. A Testing-mode OAuth client only allows listed test users, so one project cannot serve every clone.
 
-A system browser window opens. Finish consent there. The app captures the redirect on `127.0.0.1` and keeps tokens in `mailbox.secrets` on this device.
+| Who | What you do |
+| --- | --- |
+| You, on this machine | Put **your** Desktop client id/secret in a gitignored `.env`. Then **Connect Gmail** is one click. |
+| Someone who cloned the repo | Create **their own** Google Cloud / Entra app (steps below), copy `.env.example` → `.env`, fill it in, then Connect. |
+
+`.env` is gitignored. Never commit it. Preferences fields still work as an override if you prefer not to use `.env`.
+
+A future packaged JobJitsu.app could ship a verified JobJitsu-owned OAuth client. That is a Google/Microsoft verification process — not this open-source clone path.
 
 ---
 
-## Gmail (Google Cloud)
+## 1. Create a Google Desktop OAuth client (once per clone)
 
-Do this once. It is a **Desktop** OAuth client for your own use — not a JobJitsu cloud.
+This is **your** Google Cloud project — not a JobJitsu cloud.
 
 1. Open [Google Cloud Console](https://console.cloud.google.com/) and create a project (or pick one you already own).
 2. **APIs & Services → Library** → enable **Gmail API**.
 3. **APIs & Services → OAuth consent screen**
    - User type: **External**
    - App name: `JobJitsu` (or any name you like)
-   - Add your Gmail address as a **test user**
+   - Add **your Gmail address** as a **test user**
    - Publishing status can stay **Testing**
 4. **APIs & Services → Credentials → Create credentials → OAuth client ID**
    - Application type: **Desktop app**
    - Copy **Client ID** and **Client secret**
-5. In JobJitsu **Preferences → Email**:
-   - Paste **Gmail client ID** and **Gmail client secret**
-   - Set **Look back (days)** if you want a shorter first import (default 365)
-   - **Save email settings**
-   - **Connect Gmail**
-6. In the browser: choose your account → Allow (readonly Gmail). Close the tab when it says you can return to JobJitsu.
-7. Wait until the connection shows **Connected** and sync finishes. Open **Applications**.
-
-Scopes requested: `gmail.readonly` only. JobJitsu cannot send as you from this connection.
 
 Desktop clients allow loopback redirects (`http://127.0.0.1:…/oauth`) automatically. You do not add a redirect URI by hand.
+
+Scopes requested later: `gmail.readonly` only. JobJitsu cannot send as you from this connection.
+
+---
+
+## 2. Put the keys in `.env` (recommended)
+
+From the repo root:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` (never commit this file):
+
+```
+JOBJITSU_GMAIL_CLIENT_ID=your-desktop-client-id.apps.googleusercontent.com
+JOBJITSU_GMAIL_CLIENT_SECRET=your-desktop-client-secret
+JOBJITSU_OUTLOOK_CLIENT_ID=
+```
+
+Restart the desktop app so Vite can load the file (`pnpm dev:desktop`).
+
+---
+
+## 3. Connect in JobJitsu
+
+1. Open the **JobJitsu** native window.
+2. **Applications** → **Connect Gmail**, or **Preferences** → **Email** → **Connect Gmail**.
+3. In the browser: choose your account → Allow (readonly). Close the tab when it says you can return to JobJitsu.
+4. Wait until the connection shows **Connected**. Open **Applications**.
+
+If `.env` is empty, paste the client ID and secret under Preferences → Email, **Save email settings**, then Connect Gmail. Saved Preferences values override `.env`.
 
 ---
 
@@ -62,7 +89,8 @@ Desktop clients allow loopback redirects (`http://127.0.0.1:…/oauth`) automati
    - Redirect URI: `http://127.0.0.1:17342/oauth`
    - Enable **Allow public client flows**
 4. **API permissions** (delegated): `Mail.Read`, `offline_access`. Grant admin consent only if your tenant requires it.
-5. Copy the **Application (client) ID** into JobJitsu **Outlook client ID** → **Save email settings** → **Connect Outlook**.
+5. Copy the **Application (client) ID** into `.env` as `JOBJITSU_OUTLOOK_CLIENT_ID` (or Preferences → Outlook client ID).
+6. Restart the desktop app → **Connect Outlook**.
 
 ---
 
@@ -85,17 +113,18 @@ To try the intelligence path without Google: **Connect sample mailbox** (fixture
 
 | Message | What to do |
 | ------- | ---------- |
-| Add a Gmail client ID… | Paste the Desktop client ID **and secret**, then **Save email settings**, then Connect Gmail. |
+| Add a Gmail client ID in a local .env… | Copy `.env.example` → `.env`, fill the Desktop client ID **and secret**, restart `pnpm dev:desktop`. Or paste them in Preferences and save. |
 | Open the JobJitsu desktop app… | You are in the browser preview. Quit it and run `pnpm dev:desktop`. |
 | Sign-in was cancelled / timed out | Connect Gmail again. Finish the browser prompt within a few minutes. |
 | Gmail access expired | Connect Gmail again. Tokens stay on this device; they are not recovered from the cloud. |
-| Google “app not verified” / access blocked | Add your Gmail as a **test user** on the OAuth consent screen. |
-| Token exchange failed | Confirm the client secret matches the Desktop client. Save settings, then connect again. |
+| Google “app not verified” / access blocked | Add your Gmail as a **test user** on **your** OAuth consent screen. |
+| Token exchange failed | Confirm the client secret matches the Desktop client. Restart after editing `.env`. |
 
 ---
 
 ## Privacy
 
+- `.env` holds **your** OAuth app credentials. It is gitignored. Desktop client secrets are not mailbox passwords.
 - Tokens live in `mailbox.secrets` on this device. They are never returned over IPC.
 - JobJitsu does not receive your Gmail password.
 - Classification runs on this device (deterministic first; on-device Agent if it is ready).

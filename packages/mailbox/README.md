@@ -50,16 +50,19 @@ Disconnect removes tokens. **Delete imported mail** removes emails and the sync 
 ## OAuth (Gmail / Outlook)
 
 1. Create a **Desktop** OAuth client (Google Cloud or Microsoft Entra). See the [guide](../../docs/guides/GMAIL_AND_OUTLOOK.md).
-2. Paste the **client ID** (and Gmail **client secret**) in Preferences → Email. Save. JobJitsu never asks for your mailbox password.
+2. Put the client ID (and Gmail client secret) in a gitignored `.env`, or paste them in Preferences → Email. JobJitsu never asks for your mailbox password.
 3. **Connect Gmail** or **Connect Outlook** in the **desktop app**. The host binds `127.0.0.1`, opens the system browser, exchanges the code with PKCE, and stores tokens in `mailbox.secrets`.
 4. First sync uses your lookback window. Later **Sync now** is incremental.
 
 Browser-only Vite cannot finish consent — the UI explains that the desktop app is required.
 
-Optional env (not required; Preferences fields are the source of truth):
+Local `.env` (copy `.env.example`; never commit):
 
 - `JOBJITSU_GMAIL_CLIENT_ID`
+- `JOBJITSU_GMAIL_CLIENT_SECRET`
 - `JOBJITSU_OUTLOOK_CLIENT_ID`
+
+Preferences fields override `.env` when set. Each clone uses its own Google/Microsoft app — JobJitsu does not ship a shared cloud client.
 
 ## Agent
 

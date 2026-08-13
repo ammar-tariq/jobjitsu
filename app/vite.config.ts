@@ -1,7 +1,10 @@
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 const host = process.env.TAURI_DEV_HOST;
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 /**
  * UI shell for the Tauri webview (ADR 0001).
@@ -11,7 +14,8 @@ export default defineConfig({
   plugins: [react()],
   clearScreen: false,
   root: ".",
-  envPrefix: ["VITE_", "TAURI_ENV_*"],
+  envDir: repoRoot,
+  envPrefix: ["VITE_", "TAURI_ENV_*", "JOBJITSU_"],
   server: {
     port: 1420,
     strictPort: true,

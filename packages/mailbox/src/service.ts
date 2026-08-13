@@ -19,7 +19,13 @@ import {
   silentDays,
   summarizeApplications,
 } from "./intelligence.js";
-import { createPkcePair, type MailboxConnectResult, type MailboxOAuthLoopback } from "./oauth.js";
+import {
+  createPkcePair,
+  mergeMailboxOAuthClients,
+  type MailboxConnectResult,
+  type MailboxOAuthClientEnv,
+  type MailboxOAuthLoopback,
+} from "./oauth.js";
 import { ingestProviderMessage, processUnprocessedEmails } from "./process.js";
 import { createFakeMailboxProvider } from "./providers/fake.js";
 import {
@@ -103,6 +109,7 @@ export type CreateMailboxServiceOptions = {
   readonly now?: () => Date;
   readonly providers?: Partial<Record<MailboxProviderId, MailboxProvider>>;
   readonly oauth?: MailboxOAuthLoopback;
+  readonly oauthClients?: MailboxOAuthClientEnv;
   readonly fetchImpl?: typeof fetch;
 };
 
@@ -120,10 +127,10 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         getTokens: () => store.getTokens(integration.id),
         putTokens: (tokens) => store.putTokens(integration.id, tokens),
         getClientCredentials: async () => {
-          const settings = await store.getSettings();
+          const merged = mergeMailboxOAuthClients(await store.getSettings(), options.oauthClients);
           return {
-            clientId: settings.gmailClientId,
-            clientSecret: settings.gmailClientSecret,
+            clientId: merged.gmailClientId,
+            clientSecret: merged.gmailClientSecret,
           };
         },
         fetchImpl: options.fetchImpl,
@@ -134,8 +141,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         getTokens: () => store.getTokens(integration.id),
         putTokens: (tokens) => store.putTokens(integration.id, tokens),
         getClientCredentials: async () => {
-          const settings = await store.getSettings();
-          return { clientId: settings.outlookClientId };
+          const merged = mergeMailboxOAuthClients(await store.getSettings(), options.oauthClients);
+          return { clientId: merged.outlookClientId };
         },
         fetchImpl: options.fetchImpl,
       });
@@ -352,7 +359,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
   async function beginProviderConnect(
     provider: "gmail" | "outlook",
   ): Promise<MailboxConnectResult> {
-    const settings = await store.getSettings();
+    const settings = mergeMailboxOAuthClients(await store.getSettings(), options.oauthClients);
     const clientId = provider === "gmail" ? settings.gmailClientId : settings.outlookClientId;
     const label = provider === "gmail" ? "Gmail" : "Outlook";
     if (!clientId?.trim()) {
@@ -360,8 +367,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         status: "needs_client_id",
         message:
           provider === "gmail"
-            ? "Add a Gmail client ID in Preferences, save, then connect. JobJitsu never asks for your password."
-            : "Add an Outlook client ID in Preferences, save, then connect. JobJitsu never asks for your password.",
+            ? "Add a Gmail client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password."
+            : "Add an Outlook client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password.",
       };
     }
     if (!options.oauth) {
@@ -412,7 +419,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         provider === "gmail"
           ? await exchangeGmailCode({
               clientId: clientId.trim(),
-              clientSecret: settings.gmailClientSecret?.trim() || undefined,
+              clientSecret: settings.gmailClientSecret,
               code: callback.code,
               redirectUri: session.redirectUri,
               codeVerifier: pkce.verifier,
@@ -462,12 +469,27 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     async listIntegrations() {
       return listDocs(store.integrations);
     },
-    getSettings: () => store.getSettings(),
+    async getSettings() {
+      const current = await store.getSettings();
+      const merged = mergeMailboxOAuthClients(current, options.oauthClients);
+      return {
+        ...current,
+        gmailClientId: merged.gmailClientId,
+        gmailClientSecret: merged.gmailClientSecret,
+        outlookClientId: merged.outlookClientId,
+      };
+    },
     async updateSettings(patch) {
       const current = await store.getSettings();
       const next = { ...current, ...patch };
       await store.putSettings(next);
-      return next;
+      const merged = mergeMailboxOAuthClients(next, options.oauthClients);
+      return {
+        ...next,
+        gmailClientId: merged.gmailClientId,
+        gmailClientSecret: merged.gmailClientSecret,
+        outlookClientId: merged.outlookClientId,
+      };
     },
     async connectSampleMailbox() {
       const nowIso = new Date().toISOString();
