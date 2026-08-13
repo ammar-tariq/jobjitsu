@@ -177,6 +177,8 @@ const config: Config = {
             { label: "Roadmap", to: "/roadmap" },
             { label: "Changelog", to: "/changelog" },
             { label: "Contributing", to: "/contributing" },
+            { label: "Privacy", to: "/privacy" },
+            { label: "Terms", to: "/terms" },
             {
               label: "Discussions",
               href: "https://github.com/ammar-tariq/jobjitsu/discussions",
