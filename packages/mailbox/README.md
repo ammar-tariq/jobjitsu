@@ -51,7 +51,7 @@ Disconnect removes tokens. **Delete imported mail** removes emails and the sync 
 
 1. Create a **Desktop** OAuth client (Google Cloud or Microsoft Entra). See the [guide](../../docs/guides/GMAIL_AND_OUTLOOK.md).
 2. Put the client ID (and Gmail client secret) in a gitignored `.env`, or paste them in Preferences → Email. JobJitsu never asks for your mailbox password.
-3. **Connect Gmail** or **Connect Outlook** in the **desktop app**. The host binds `127.0.0.1`, opens the system browser, exchanges the code with PKCE, and stores tokens in `mailbox.secrets`.
+3. **Connect Gmail** or **Connect Outlook** in the **desktop app**. The host binds `127.0.0.1`, opens the system browser, exchanges the code with PKCE, and stores tokens in `mailbox.secrets`. PKCE helpers use Web Crypto + `btoa`/`atob` (webview-safe; no Node `Buffer`).
 4. First sync uses your lookback window. Later **Sync now** is incremental.
 
 Browser-only Vite cannot finish consent — the UI explains that the desktop app is required.
