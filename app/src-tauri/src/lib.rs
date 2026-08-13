@@ -3,6 +3,7 @@
 //! Privileged work stays here; the React webview is presentation-only.
 //! No career egress commands are registered — see ADR 0013.
 
+mod menu;
 mod oauth;
 
 use oauth::{oauth_loopback_bind, oauth_loopback_wait, open_oauth_url};
