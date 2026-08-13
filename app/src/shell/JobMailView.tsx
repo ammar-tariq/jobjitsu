@@ -310,9 +310,19 @@ export function JobMailView({
                 {integration.label}
                 {integration.emailAddress ? ` · ${integration.emailAddress}` : ""}
                 {integration.connected ? " · Connected" : " · Disconnected"}
+                {integration.syncStatus === "syncing" || integration.syncStatus === "processing"
+                  ? ` · ${integration.syncStatus === "processing" ? "Classifying" : "Importing"}…`
+                  : ""}
               </Typography>
               <Typography color="text.secondary" variant="body2">
-                Last synced: {integration.lastSyncedAt ?? "not yet"}
+                Last synced:{" "}
+                {integration.lastSyncedAt
+                  ? integration.lastSyncedAt.slice(0, 19).replace("T", " ")
+                  : integration.syncStatus === "syncing" || integration.syncStatus === "processing"
+                    ? "import in progress"
+                    : integration.syncError
+                      ? "paused — try Sync now"
+                      : "not yet"}
               </Typography>
               <Typography color="text.secondary" variant="body2">
                 Processed {integration.emailsProcessed} · Job-related {integration.jobRelatedCount}{" "}

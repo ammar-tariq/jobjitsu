@@ -312,6 +312,12 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
   }
 
   async function startSync(integration: MailboxIntegration): Promise<MailboxIntegration> {
+    await putIntegration({
+      ...integration,
+      syncStatus: "syncing",
+      syncError: undefined,
+      updatedAt: new Date().toISOString(),
+    });
     if (!running.has(integration.id)) {
       const work = runSync(integration).finally(() => {
         running.delete(integration.id);
@@ -448,7 +454,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       });
       return {
         status: "connected",
-        message: `${label} connected. Mail stays on this device. Nothing is sent from JobJitsu.`,
+        message: `${label} connected. Importing mail on this device — watch the progress below. Nothing is sent.`,
       };
     } catch (cause) {
       const raw = cause instanceof Error ? cause.message : "";
@@ -497,7 +503,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         updatedAt: nowIso,
       };
       await putIntegration(integration);
-      return startSync(integration);
+      await startSync(integration);
+      return waitForSync(integration.id);
     },
     async connectProvider(input) {
       return connectWithTokens(input);
@@ -505,7 +512,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     beginProviderConnect,
     async sync(integrationId) {
       const integration = await requireIntegration(integrationId);
-      return startSync(integration);
+      await startSync(integration);
+      return waitForSync(integrationId);
     },
     waitForSync,
     getIntegration: (id) => readDoc(store.integrations, id),
