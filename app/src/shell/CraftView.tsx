@@ -22,7 +22,7 @@ import type {
 } from "../ipc/commands.js";
 import { CraftWorkingView } from "./CraftWorkingView.js";
 import { useHostCraftSession } from "./HostProvider.js";
-import { JjPage } from "./layout/index.js";
+import { JjPage, JjSurface, useShellLayout } from "./layout/index.js";
 
 export type CraftViewProps = {
   readonly bridge: IpcBridge;
@@ -36,6 +36,7 @@ type DraftTab = "resume" | "cover" | "preview";
  */
 export function CraftView({ bridge }: CraftViewProps): JSX.Element {
   const hostSession = useHostCraftSession();
+  const layout = useShellLayout();
   const [session, setSession] = useState<CraftSessionSnapshot | null>(hostSession);
   const [previewHtml, setPreviewHtml] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -343,18 +344,14 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       testId="jj-craft-view"
       title="Craft"
       subtitle="Prepare a tailored résumé and cover letter on this device. Agent keeps working if you leave this screen. Nothing is sent from here."
-      maxWidth="56rem"
+      maxWidth={layout === "wide" ? "72rem" : "56rem"}
     >
       {preparing && session ? (
         <CraftWorkingView bridge={bridge} session={session} elapsedSeconds={elapsedSeconds} />
       ) : null}
 
       {preparing ? null : (
-        <Stack
-          spacing={1.5}
-          sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}
-          data-testid="jj-craft-sources"
-        >
+        <JjSurface testId="jj-craft-sources">
           <Stack
             direction="row"
             spacing={1}
@@ -467,7 +464,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
                 : "Sources are tucked away so you can focus on the draft."}
             </Typography>
           ) : null}
-        </Stack>
+        </JjSurface>
       )}
 
       {status && !preparing ? (
@@ -493,7 +490,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
       ) : null}
 
       {hasDrafts || preparing ? (
-        <Stack spacing={1.5} data-testid="jj-craft-workspace">
+        <JjSurface testId="jj-craft-workspace" spacing={1.5}>
           <Tabs
             value={draftTab}
             onChange={(_event, value: DraftTab) => {
@@ -751,7 +748,7 @@ export function CraftView({ bridge }: CraftViewProps): JSX.Element {
               </Button>
             </Stack>
           </Stack>
-        </Stack>
+        </JjSurface>
       ) : (
         <Typography color="text.secondary" variant="body2" data-testid="jj-craft-empty">
           Paste a résumé and job description above, then prepare drafts when you are ready.

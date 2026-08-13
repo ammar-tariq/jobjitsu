@@ -53,14 +53,14 @@ export function TimelineView(): JSX.Element {
             <Box
               component="li"
               key={`${entry.name}-${entry.occurredAt}-${index}`}
-              sx={(theme) => ({
+              sx={{
                 px: 2,
                 py: 1.5,
                 borderRadius: 1,
                 border: "1px solid",
-                borderColor: theme.palette.divider,
-                bgcolor: theme.palette.action.hover,
-              })}
+                borderColor: "divider",
+                "&:hover": { bgcolor: "action.hover" },
+              }}
             >
               <Typography variant="body2">{entry.summary}</Typography>
               <Typography variant="caption" color="text.secondary">

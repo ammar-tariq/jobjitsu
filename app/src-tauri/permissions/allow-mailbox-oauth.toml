@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-mailbox-oauth"
+description = "Loopback OAuth for Gmail/Outlook. Opens an allowlisted sign-in URL in the system browser and captures the redirect on this device. Tokens stay in the host. Never sends mail."
+commands.allow = ["oauth_loopback_bind", "oauth_loopback_wait", "open_oauth_url"]

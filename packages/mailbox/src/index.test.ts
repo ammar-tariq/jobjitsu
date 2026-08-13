@@ -253,6 +253,209 @@ describe("@jobjitsu/mailbox", () => {
     expect(connected.provider).toBe("gmail");
   });
 
+  it("asks for a Gmail client ID before opening a browser", async () => {
+    const { service } = createHarness();
+    const result = await service.beginProviderConnect("gmail");
+    expect(result.status).toBe("needs_client_id");
+    expect(result.message).toMatch(/client ID/i);
+    expect(result.message).toMatch(/never asks for your password/i);
+  });
+
+  it("explains the desktop app is required when loopback is missing", async () => {
+    const { service } = createHarness();
+    await service.updateSettings({ gmailClientId: "desktop.apps.googleusercontent.com" });
+    const result = await service.beginProviderConnect("gmail");
+    expect(result.status).toBe("needs_desktop");
+    expect(result.message).toMatch(/desktop app/i);
+  });
+
+  it("connects Gmail from env clients without pasting Preferences fields", async () => {
+    const applications = createMemoryApplicationRepository();
+    const store = createMailboxStore(createMemoryKvStore());
+    const opened: string[] = [];
+    const service = createMailboxService({
+      store,
+      applications,
+      oauthClients: {
+        gmailClientId: "env.apps.googleusercontent.com",
+        gmailClientSecret: "env-secret",
+      },
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          const state = new URL(opened[0] ?? "http://127.0.0.1").searchParams.get("state") ?? "";
+          return { code: "auth-code", state };
+        },
+      },
+      fetchImpl: async (input, init) => {
+        const url = String(input);
+        if (url.includes("oauth2.googleapis.com/token")) {
+          expect(String(init?.body ?? "")).toContain("client_secret=env-secret");
+          return jsonResponse({
+            access_token: "access-from-google",
+            refresh_token: "refresh-from-google",
+            expires_in: 3600,
+          });
+        }
+        if (url.includes("/users/me/profile")) {
+          return jsonResponse({ emailAddress: "you@gmail.com" });
+        }
+        if (url.includes("/messages?")) {
+          return jsonResponse({ messages: [], resultSizeEstimate: 0 });
+        }
+        return jsonResponse({});
+      },
+    });
+    const shown = await service.getSettings();
+    expect(shown.gmailClientId).toBe("env.apps.googleusercontent.com");
+    expect((await store.getSettings()).gmailClientId).toBeUndefined();
+    const result = await service.beginProviderConnect("gmail");
+    expect(result.status).toBe("connected");
+    expect(opened[0]).toContain("env.apps.googleusercontent.com");
+    expect(JSON.stringify(result)).not.toContain("env-secret");
+    expect(JSON.stringify(result)).not.toContain("access-from-google");
+  });
+
+  it("prefers saved Preferences client ids over env", async () => {
+    const opened: string[] = [];
+    const withOauth = createMailboxService({
+      store: createMailboxStore(createMemoryKvStore()),
+      applications: createMemoryApplicationRepository(),
+      oauthClients: { gmailClientId: "env.apps.googleusercontent.com" },
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          return { error: "cancelled" };
+        },
+      },
+    });
+    await withOauth.updateSettings({ gmailClientId: "prefs.apps.googleusercontent.com" });
+    await withOauth.beginProviderConnect("gmail");
+    expect(opened[0]).toContain("prefs.apps.googleusercontent.com");
+    expect(opened[0]).not.toContain("env.apps.googleusercontent.com");
+  });
+
+  it("completes Gmail connect through a fake loopback without exposing tokens", async () => {
+    const applications = createMemoryApplicationRepository();
+    const store = createMailboxStore(createMemoryKvStore());
+    const bus = createInMemoryEventBus();
+    const opened: string[] = [];
+    const service = createMailboxService({
+      store,
+      applications,
+      bus,
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          const state = new URL(opened[0] ?? "http://127.0.0.1").searchParams.get("state") ?? "";
+          return { code: "auth-code", state };
+        },
+      },
+      fetchImpl: async (input, init) => {
+        const url = String(input);
+        if (url.includes("oauth2.googleapis.com/token")) {
+          const body = String(init?.body ?? "");
+          expect(body).toContain("code=auth-code");
+          expect(body).toContain("client_secret=desktop-secret");
+          return jsonResponse({
+            access_token: "access-from-google",
+            refresh_token: "refresh-from-google",
+            expires_in: 3600,
+            token_type: "Bearer",
+            scope: "https://www.googleapis.com/auth/gmail.readonly",
+          });
+        }
+        if (url.includes("/users/me/profile")) {
+          return jsonResponse({ emailAddress: "you@gmail.com", historyId: "1" });
+        }
+        if (url.includes("/messages?")) {
+          return jsonResponse({ messages: [], resultSizeEstimate: 0 });
+        }
+        return jsonResponse({});
+      },
+    });
+    await service.updateSettings({
+      gmailClientId: "desktop.apps.googleusercontent.com",
+      gmailClientSecret: "desktop-secret",
+    });
+    const result = await service.beginProviderConnect("gmail");
+    expect(result.status).toBe("connected");
+    expect(opened[0]).toContain("accounts.google.com/o/oauth2");
+    expect(opened[0]).toContain("code_challenge");
+    expect(opened[0]).toContain("gmail.readonly");
+    const listed = await service.listIntegrations();
+    const snapshot = JSON.stringify({ result, listed });
+    expect(snapshot).not.toContain("access-from-google");
+    expect(snapshot).not.toContain("refresh-from-google");
+    expect(snapshot).not.toContain("desktop-secret");
+    expect(listed[0]?.emailAddress).toBe("you@gmail.com");
+    const tokens = await store.getTokens(listed[0]!.id);
+    expect(tokens?.accessToken).toBe("access-from-google");
+    expect(tokens?.refreshToken).toBe("refresh-from-google");
+  });
+
+  it("completes Outlook connect through a fake loopback without exposing tokens", async () => {
+    const applications = createMemoryApplicationRepository();
+    const store = createMailboxStore(createMemoryKvStore());
+    const opened: string[] = [];
+    const service = createMailboxService({
+      store,
+      applications,
+      oauth: {
+        async start() {
+          return { redirectUri: "http://127.0.0.1:17342/oauth" };
+        },
+        async openUrl(url) {
+          opened.push(url);
+        },
+        async waitForCode() {
+          const state = new URL(opened[0] ?? "http://127.0.0.1").searchParams.get("state") ?? "";
+          return { code: "ms-code", state };
+        },
+      },
+      fetchImpl: async (input) => {
+        const url = String(input);
+        if (url.includes("login.microsoftonline.com") && url.includes("/token")) {
+          return jsonResponse({
+            access_token: "ms-access",
+            refresh_token: "ms-refresh",
+            expires_in: 3600,
+          });
+        }
+        if (url.includes("graph.microsoft.com/v1.0/me")) {
+          return jsonResponse({ mail: "you@outlook.com" });
+        }
+        if (url.includes("/messages")) {
+          return jsonResponse({ value: [] });
+        }
+        return jsonResponse({});
+      },
+    });
+    await service.updateSettings({ outlookClientId: "ms-desktop-client" });
+    const result = await service.beginProviderConnect("outlook");
+    expect(result.status).toBe("connected");
+    expect(opened[0]).toContain("login.microsoftonline.com");
+    expect(JSON.stringify(result)).not.toContain("ms-access");
+    const listed = await service.listIntegrations();
+    expect(listed[0]?.emailAddress).toBe("you@outlook.com");
+    expect(await store.getTokens(listed[0]!.id)).toMatchObject({ accessToken: "ms-access" });
+  });
+
   it("identifies no-response applications without sending mail", async () => {
     const applications = createMemoryApplicationRepository();
     const created = await applications.create({

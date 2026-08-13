@@ -12,15 +12,16 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | [PE21 Shell IA](https://github.com/ammar-tariq/jobjitsu/issues/128) |
-| **Story** | [PE21-S01](https://github.com/ammar-tariq/jobjitsu/issues/129) — Document shell IA + backlog |
-| **Status** | In Progress · branch `feat/pe21-shell-ia` |
-| **Note** | Plan: `docs/product/SHELL_IA.md`. Next: [#130](https://github.com/ammar-tariq/jobjitsu/issues/130) Job Mail nav. |
+| **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
+| **Story** | Quiet panels for Preferences, Craft, Queue, Follow-ups, and onboarding |
+| **Status** | Testing · [PR #122](https://github.com/ammar-tariq/jobjitsu/pull/122) |
+| **Note** | Presentation only. Shell chrome landed in [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121). |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| Shell UX chrome | 2026-08-13 | `data-layout`; Applications list + detail; Agent status bar; [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
 | Sellable local MVP | 2026-08-11 | Durable applications; Queue/Follow-ups/Timeline; approval prefs; no fake send; onboarding |
 | PE05-S07 | 2026-08-11 | List on-device Agent models from Ollama; PR #113 |
 | PE08-S04 | 2026-08-11 | Applications list + open detail; PR #111 |

@@ -151,6 +151,9 @@ keep.
   models folder is missing or empty, the listing explains what to do in plain language.
 - Approval before send: a toggle, on by default; turning it off is an explicit choice.
 - Craft tone: a saved preference applied when preparing drafts.
+- Email: connect Gmail or Outlook from Preferences (desktop app). Client ids come from a
+  local `.env` or Preferences fields. Tokens stay in the host. JobJitsu never asks for a
+  mailbox password. See [GMAIL_AND_OUTLOOK.md](../guides/GMAIL_AND_OUTLOOK.md).
 - Appearance: dark or light theme; dark is the default.
 - **Reset**: selective clean slate (checkboxes), local backup, and restore. Never deletes
   developer `.env` OAuth client ids. Typed confirm for destructive wipe.
@@ -190,8 +193,6 @@ shell today.
 - **Quiet-hours notifications** — local notifications that respect quiet hours and stay
   silent by default.
 - **Sanitized logs view** — an inspectable local log with career content redacted.
-- **Gmail/Outlook OAuth loopback** — finish browser consent so Connect Gmail / Outlook
-  stores tokens on this device (PE20-S02). Mailbox remains inbound-only.
 
 ---
 

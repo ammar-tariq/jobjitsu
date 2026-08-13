@@ -169,7 +169,10 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             {activeId === "craft" ? (
               <CraftView bridge={bridge} />
             ) : activeId === "applications" ? (
-              <ApplicationsView bridge={bridge} />
+              <ApplicationsView
+                bridge={bridge}
+                onOpenPreferences={() => setActiveId("preferences")}
+              />
             ) : activeId === "queue" ? (
               <QueueView bridge={bridge} />
             ) : activeId === "follow-ups" ? (

@@ -170,7 +170,7 @@ Opt-in inbound mailbox sync. Extends existing Application drafts. Never sends.
 | Story | Summary | Status |
 | --- | --- | --- |
 | PE20-S01 | Opt-in mailbox sync, classify/match, incremental cursors | Partial · [#118](https://github.com/ammar-tariq/jobjitsu/issues/118) · [PR #120](https://github.com/ammar-tariq/jobjitsu/pull/120) |
-| PE20-S02 | Complete Gmail/Outlook OAuth loopback | Todo · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) |
+| PE20-S02 | Complete Gmail/Outlook OAuth loopback | Partial · [#119](https://github.com/ammar-tariq/jobjitsu/issues/119) · [PR #123](https://github.com/ammar-tariq/jobjitsu/pull/123) |
 
 ## PE21 — Shell information architecture ([#128](https://github.com/ammar-tariq/jobjitsu/issues/128))
 
@@ -196,4 +196,4 @@ PE14–PE19 (Experimental: knowledge base, AI validation, workflows, automation,
 and PE22–PE30 (Future) are roadmap bands only. **PE21** (Shell IA) is admitted above.
 Stories join this catalog when a board issue exists.
 
-**Tally:** 35 shipped · 11 partial · 17 todo — 63 tracked stories (PE21 admitted).
+**Tally:** 35 shipped · 12 partial · 11 todo — 58 tracked stories.

@@ -8,6 +8,7 @@
     "core:path:default",
     "allow-data-directory",
     "allow-resource-snapshot",
+    "allow-mailbox-oauth",
     "dialog:allow-open",
     "dialog:allow-save",
     "fs:allow-mkdir",

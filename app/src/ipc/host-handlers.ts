@@ -49,6 +49,7 @@ import type {
   CraftGenerateInput,
   CraftGenerateResult,
   CraftSessionSnapshot,
+  MailboxSettingsSnapshot,
   ResumeParseImportInputPayload,
   ResumeParseImportResult,
   ThemePreference,
@@ -1473,7 +1474,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           },
         });
       }
-      return ok({ settings: await mailbox.getSettings() });
+      return ok({ settings: toSettingsSnapshot(await mailbox.getSettings()) });
     },
     "mailbox.updateSettings": async (payload) => {
       const mailbox = getMailbox();
@@ -1490,7 +1491,7 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
         });
       }
       const settings = await mailbox.updateSettings(payload);
-      return ok({ settings });
+      return ok({ settings: toSettingsSnapshot(settings) });
     },
     "system.getResources": async () => {
       return ok({ resources: await readResourceSnapshot() });
@@ -1517,6 +1518,30 @@ function decodeBase64(value: string): Uint8Array {
   } catch {
     throw new Error("That file could not be read. Try another resume.");
   }
+}
+
+function toSettingsSnapshot(settings: {
+  readonly gmailClientId?: string;
+  readonly gmailClientSecret?: string;
+  readonly outlookClientId?: string;
+  readonly lookbackDays: number;
+  readonly noResponseAfterDays: number;
+  readonly notifyAssessments: boolean;
+  readonly notifyInterviews: boolean;
+  readonly notifyRejections: boolean;
+  readonly notifyOffers: boolean;
+}): MailboxSettingsSnapshot {
+  return {
+    gmailClientId: settings.gmailClientId,
+    gmailClientSecret: settings.gmailClientSecret,
+    outlookClientId: settings.outlookClientId,
+    lookbackDays: settings.lookbackDays,
+    noResponseAfterDays: settings.noResponseAfterDays,
+    notifyAssessments: settings.notifyAssessments,
+    notifyInterviews: settings.notifyInterviews,
+    notifyRejections: settings.notifyRejections,
+    notifyOffers: settings.notifyOffers,
+  };
 }
 
 function toIntegrationSnapshot(integration: {
