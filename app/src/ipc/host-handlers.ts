@@ -1621,9 +1621,7 @@ function toSettingsSnapshot(settings: {
   readonly notifyOffers: boolean;
 }): MailboxSettingsSnapshot {
   return {
-    gmailClientId: settings.gmailClientId,
-    gmailClientSecret: settings.gmailClientSecret,
-    outlookClientId: settings.outlookClientId,
+    // OAuth client ids/secrets stay host-side (.env / store). Never send them to the UI.
     lookbackDays: settings.lookbackDays,
     noResponseAfterDays: settings.noResponseAfterDays,
     notifyAssessments: settings.notifyAssessments,

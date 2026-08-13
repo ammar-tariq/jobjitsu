@@ -68,7 +68,7 @@ Cross-links (connect where possible):
 | --- | --- | --- |
 | Connect Gmail / Outlook | Profile (CTA) + Job Mail (full) | Preferences (remove dump) |
 | Sync / import feed / lookback | Job Mail | Preferences |
-| OAuth client id fields | Job Mail → Advanced (or env-only) | Prefer `.env`; Preferences only if still needed as override |
+| OAuth client ids | Local `.env` only (never shown in UI) | Job Mail Advanced / Preferences fields |
 | Paths + résumé versions | Profile | Preferences |
 | Clean slate / backup / restore | Preferences → Reset | Hidden destructive menus |
 | Agent model path | Preferences | — |

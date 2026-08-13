@@ -187,13 +187,22 @@ export function JobMailView({
       return;
     }
     setBusy(true);
-    void bridge.updateMailboxSettings(settings).then((result) => {
-      setBusy(false);
-      if (result.ok) {
-        setSettings(result.value.settings);
-        setStatus("Job Mail settings saved on this device.");
-      }
-    });
+    void bridge
+      .updateMailboxSettings({
+        lookbackDays: settings.lookbackDays,
+        noResponseAfterDays: settings.noResponseAfterDays,
+        notifyAssessments: settings.notifyAssessments,
+        notifyInterviews: settings.notifyInterviews,
+        notifyRejections: settings.notifyRejections,
+        notifyOffers: settings.notifyOffers,
+      })
+      .then((result) => {
+        setBusy(false);
+        if (result.ok) {
+          setSettings(result.value.settings);
+          setStatus("Job Mail settings saved on this device.");
+        }
+      });
   };
 
   return (
@@ -355,7 +364,7 @@ export function JobMailView({
       {settings ? (
         <JjSection
           title="Advanced"
-          description="Optional lookback and client ids. Prefer a local .env when you can."
+          description="Lookback and calm notices. OAuth client ids stay in a local .env — they are never shown here."
         >
           <TextField
             label="Look back (days)"
@@ -366,31 +375,6 @@ export function JobMailView({
             }
             size="small"
             helperText="First sync window. Set 0 for the whole mailbox. Save, then Sync now."
-          />
-          <TextField
-            label="Gmail client ID"
-            value={settings.gmailClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, gmailClientId: event.target.value })}
-            size="small"
-            fullWidth
-          />
-          <TextField
-            label="Gmail client secret"
-            value={settings.gmailClientSecret ?? ""}
-            onChange={(event) =>
-              setSettings({ ...settings, gmailClientSecret: event.target.value })
-            }
-            size="small"
-            fullWidth
-            type="password"
-            autoComplete="off"
-          />
-          <TextField
-            label="Outlook client ID"
-            value={settings.outlookClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, outlookClientId: event.target.value })}
-            size="small"
-            fullWidth
           />
           <FormControlLabel
             control={

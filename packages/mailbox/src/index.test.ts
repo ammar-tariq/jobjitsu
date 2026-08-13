@@ -331,7 +331,7 @@ describe("@jobjitsu/mailbox", () => {
       },
     });
     const shown = await service.getSettings();
-    expect(shown.gmailClientId).toBe("env.apps.googleusercontent.com");
+    expect(shown.gmailClientId).toBeUndefined();
     expect((await store.getSettings()).gmailClientId).toBeUndefined();
     const result = await service.beginProviderConnect("gmail");
     expect(result.status).toBe("connected");
@@ -340,7 +340,7 @@ describe("@jobjitsu/mailbox", () => {
     expect(JSON.stringify(result)).not.toContain("access-from-google");
   });
 
-  it("prefers saved Preferences client ids over env", async () => {
+  it("prefers saved store client ids over env for connect (not shown in getSettings)", async () => {
     const opened: string[] = [];
     const withOauth = createMailboxService({
       store: createMailboxStore(createMemoryKvStore()),

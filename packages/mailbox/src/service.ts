@@ -367,8 +367,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         status: "needs_client_id",
         message:
           provider === "gmail"
-            ? "Add a Gmail client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password."
-            : "Add an Outlook client ID in a local .env or in Preferences, then connect. JobJitsu never asks for your password.",
+            ? "Add a Gmail client ID in a local .env, then reconnect. JobJitsu never asks for your password."
+            : "Add an Outlook client ID in a local .env, then reconnect. JobJitsu never asks for your password.",
       };
     }
     if (!options.oauth) {
@@ -470,26 +470,14 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       return listDocs(store.integrations);
     },
     async getSettings() {
-      const current = await store.getSettings();
-      const merged = mergeMailboxOAuthClients(current, options.oauthClients);
-      return {
-        ...current,
-        gmailClientId: merged.gmailClientId,
-        gmailClientSecret: merged.gmailClientSecret,
-        outlookClientId: merged.outlookClientId,
-      };
+      // Return store-only settings. Never surface .env OAuth clients/secrets to the UI.
+      return store.getSettings();
     },
     async updateSettings(patch) {
       const current = await store.getSettings();
       const next = { ...current, ...patch };
       await store.putSettings(next);
-      const merged = mergeMailboxOAuthClients(next, options.oauthClients);
-      return {
-        ...next,
-        gmailClientId: merged.gmailClientId,
-        gmailClientSecret: merged.gmailClientSecret,
-        outlookClientId: merged.outlookClientId,
-      };
+      return next;
     },
     async connectSampleMailbox() {
       const nowIso = new Date().toISOString();
