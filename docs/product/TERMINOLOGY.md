@@ -16,7 +16,9 @@ Parent: [PRODUCT_VISION.md](./PRODUCT_VISION.md) · Brand chrome: [../brand/BRAN
 | **Path** | Job-facing variant under a Profile (e.g. Fullstack, Mobile) | “Sub-profile”; separate accounts for every role |
 | **Queue** | Approval holding area before send | Inbox (unless Sprint-1 shell label is explicitly noted) |
 | **Applications** | Draft / tailor / track units of craft | Pipeline (in navigation) |
-| **Preferences** | User rules and approval gates | Settings (prefer Preferences in product IA; Settings OK as shell label for the same surface) |
+| **Job Mail** | Opt-in inbound mailbox sync + import feed (not a full inbox) | Mail, Inbox, Email as primary nav labels |
+| **Sources** | Discovery / crawler entry (Coming soon until adapters ship) | Scraper as the user-facing label |
+| **Preferences** | User rules, device folder, Agent model, appearance, Reset | Settings (prefer Preferences in product IA; Settings OK as shell label for the same surface) |
 | **Send** | Explicit outbound egress | Auto-apply as the default story |
 
 ## AI and knowledge

@@ -82,6 +82,7 @@ pub fn run() {
             .build(),
         )?;
       }
+      menu::install_app_menu(app.handle())?;
       Ok(())
     })
     .run(tauri::generate_context!())

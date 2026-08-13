@@ -41,8 +41,13 @@ keep.
 
 ### Shell
 
-- A side menu navigates between Craft, Applications, Queue, Follow-ups, Profile, Agent,
-  Preferences, and Timeline; Onboarding replaces the shell on first run.
+- A side menu navigates grouped destinations — **Work** (Craft, Applications, Queue,
+  Follow-ups), **You** (Profile, **Job Mail**, Sources), **System** (Agent, Timeline,
+  Preferences). Onboarding replaces the shell on first run.
+- **Job Mail** is the dedicated mailbox surface (sync, import feed, classify). Profile
+  also offers Connect Gmail / Outlook. Preferences no longer owns the mailbox dump.
+- **Sources** may ship as Coming soon until discovery adapters land.
+- Information architecture and slice order: [SHELL_IA.md](./SHELL_IA.md).
 - The menu carries an Agent privacy pill reflecting readiness ("Agent · On-device" /
   "Agent · Ready" / "Agent · Unavailable").
 - While Craft is preparing and the user is elsewhere, the shell shows one calm banner with
@@ -110,10 +115,26 @@ keep.
 ### Profile
 
 - The user can keep multiple profiles and select the active one.
-- Career paths can be created, updated, selected, and archived.
+- Career **Paths** can be created, updated, selected, and archived (e.g. Fullstack,
+  React Native). Résumés live under Paths as versions.
 - Résumés import with a parse preview before anything is committed; imported résumés are
   kept as versions the user can list and select.
+- Profile offers a calm **Connect Gmail / Outlook** CTA that deep-links into Job Mail.
 - All profile data lives on this device.
+
+### Job Mail
+
+- Opt-in inbound mailbox: connect, sync, and review an imported-mail feed grouped by
+  company / type. Not a full inbox client.
+- First sync uses the lookback window; later Sync now is incremental. Classification and
+  matching stay on this device. Nothing sends from this view.
+- See [GMAIL_AND_OUTLOOK.md](../guides/GMAIL_AND_OUTLOOK.md) and [SHELL_IA.md](./SHELL_IA.md).
+
+### Sources
+
+- Discovery entry point. Until adapters ship, the view is **Coming soon** and points users
+  to Craft (résumé + JD) and Job Mail. Planned: multiple sources + All; later Agent assist
+  from Path résumé + JD (user still owns send).
 
 ### Agent
 
@@ -134,6 +155,9 @@ keep.
   local `.env` or Preferences fields. Tokens stay in the host. JobJitsu never asks for a
   mailbox password. See [GMAIL_AND_OUTLOOK.md](../guides/GMAIL_AND_OUTLOOK.md).
 - Appearance: dark or light theme; dark is the default.
+- **Reset**: selective clean slate (checkboxes), local backup, and restore. Never deletes
+  developer `.env` OAuth client ids. Typed confirm for destructive wipe.
+- Mailbox connect / sync lives in **Job Mail** (and Profile CTA), not as a Preferences dump.
 
 ### Timeline
 

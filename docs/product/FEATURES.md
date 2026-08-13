@@ -18,7 +18,7 @@ Brand note: metaphor belongs in microcopy; navigation uses plain nouns (Applicat
 
 **Horizons** ([ROADMAP.md](./ROADMAP.md)) answer *when*. **Status** answers *commitment*. Promote Future → Experimental → Core only after the [module admission test](#module-admission-test).
 
-Functional detail: [PLATFORM_SPECIFICATION.md](./PLATFORM_SPECIFICATION.md).
+Functional detail: [PLATFORM_SPECIFICATION.md](./PLATFORM_SPECIFICATION.md). Shell IA plan: [SHELL_IA.md](./SHELL_IA.md).
 
 ---
 
