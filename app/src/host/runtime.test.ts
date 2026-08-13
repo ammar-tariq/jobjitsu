@@ -117,4 +117,14 @@ describe("createHostRuntime", () => {
     expect(serialized).not.toContain("refresh-secret");
     expect(result.ok).toBe(true);
   });
+
+  it("does not return mailbox OAuth tokens when Gmail connect starts", async () => {
+    const host = createHostRuntime({ version: "test" });
+    const started = await host.bridge.beginMailboxConnect("gmail");
+    expect(started.ok).toBe(true);
+    if (started.ok) {
+      expect(started.value.status).toBe("needs_client_id");
+      expect(JSON.stringify(started.value)).not.toMatch(/access_token|refresh_token/i);
+    }
+  });
 });

@@ -35,7 +35,7 @@ One calm operating system for the loop — not a cockpit of anxiety, not a cloud
 
 ## Status
 
-Early but usable locally: the desktop shell runs **Craft** (paste a résumé + job listing → the on-device Agent prepares a tailored résumé and cover letter → refine, save, export HTML/PDF), plus Applications, review Queue, Follow-ups, Profile, Preferences, and a session Timeline, with first-run onboarding. Agent orchestration, discovery sources, real outbound send, and the durable scheduler are not built yet — see the [backlog](docs/backlog/USER_STORIES.md) for the live map.
+Early but usable locally: the desktop shell runs **Craft** (paste a résumé + job listing → the on-device Agent prepares a tailored résumé and cover letter → refine, save, export HTML/PDF), plus Applications, review Queue, Follow-ups, Profile, Preferences, and a session Timeline, with first-run onboarding. **Gmail / Outlook** import is opt-in in the desktop app: copy `.env.example` to `.env` with your own Desktop OAuth client, then Connect Gmail ([guide](docs/guides/GMAIL_AND_OUTLOOK.md)). Agent orchestration, discovery sources, real outbound send, and the durable scheduler are not built yet — see the [backlog](docs/backlog/USER_STORIES.md) for the live map.
 
 ---
 

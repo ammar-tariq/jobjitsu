@@ -38,6 +38,20 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
     void refresh();
   }, [bridge]);
 
+  const syncing = integrations.some(
+    (row) => row.syncStatus === "syncing" || row.syncStatus === "processing",
+  );
+
+  useEffect(() => {
+    if (!syncing) {
+      return;
+    }
+    const id = window.setInterval(() => {
+      void refresh();
+    }, 1500);
+    return () => window.clearInterval(id);
+  }, [syncing, bridge]);
+
   const onConnectSample = (): void => {
     setBusy(true);
     setStatus(null);
@@ -60,16 +74,21 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
 
   const onBeginConnect = (provider: "gmail" | "outlook"): void => {
     setBusy(true);
-    setStatus(null);
+    setStatus(
+      provider === "gmail"
+        ? "A browser window will open. Finish Gmail sign-in there. Access stays on this device."
+        : "A browser window will open. Finish Outlook sign-in there. Access stays on this device.",
+    );
     void bridge
       .beginMailboxConnect(provider)
-      .then((result) => {
+      .then(async (result) => {
         setBusy(false);
         if (!result.ok) {
           setStatus(result.error.message ?? result.error.title);
           return;
         }
         setStatus(result.value.message);
+        await refresh();
       })
       .catch(() => {
         setBusy(false);
@@ -126,17 +145,27 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="contained"
+          onClick={() => onBeginConnect("gmail")}
+          disabled={busy}
+          data-testid="jj-mailbox-connect-gmail"
+        >
+          Connect Gmail
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => onBeginConnect("outlook")}
+          disabled={busy}
+          data-testid="jj-mailbox-connect-outlook"
+        >
+          Connect Outlook
+        </Button>
+        <Button
+          variant="text"
           onClick={onConnectSample}
           disabled={busy}
           data-testid="jj-mailbox-connect-sample"
         >
           Connect sample mailbox
-        </Button>
-        <Button variant="outlined" onClick={() => onBeginConnect("gmail")} disabled={busy}>
-          Connect Gmail
-        </Button>
-        <Button variant="outlined" onClick={() => onBeginConnect("outlook")} disabled={busy}>
-          Connect Outlook
         </Button>
       </Stack>
 
@@ -149,6 +178,7 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
         >
           <Typography variant="subtitle2">
             {integration.label}
+            {integration.emailAddress ? ` · ${integration.emailAddress}` : ""}
             {integration.connected ? " · Connected" : " · Disconnected"}
           </Typography>
           <Typography color="text.secondary" variant="body2">
@@ -184,58 +214,6 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
           </Stack>
         </Stack>
       ))}
-
-      {settings ? (
-        <Stack spacing={1}>
-          <TextField
-            label="Look back (days)"
-            type="number"
-            value={settings.lookbackDays}
-            onChange={(event) =>
-              setSettings({ ...settings, lookbackDays: Number(event.target.value) || 365 })
-            }
-            size="small"
-            helperText="How far back to import on the first sync. Later Sync now only fetches new mail. Stored on this device."
-          />
-          <TextField
-            label="Gmail client ID"
-            value={settings.gmailClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, gmailClientId: event.target.value })}
-            size="small"
-            fullWidth
-            helperText="From Google Cloud. Stored on this device. Never a password."
-          />
-          <TextField
-            label="Outlook client ID"
-            value={settings.outlookClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, outlookClientId: event.target.value })}
-            size="small"
-            fullWidth
-            helperText="From Microsoft Entra. Stored on this device."
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.notifyAssessments}
-                onChange={(_, checked) => setSettings({ ...settings, notifyAssessments: checked })}
-              />
-            }
-            label="Notice me about assessments"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.notifyInterviews}
-                onChange={(_, checked) => setSettings({ ...settings, notifyInterviews: checked })}
-              />
-            }
-            label="Notice me about interviews"
-          />
-          <Button variant="outlined" onClick={onSaveSettings} disabled={busy}>
-            Save email settings
-          </Button>
-        </Stack>
-      ) : null}
 
       {status ? (
         <Typography color="text.secondary" variant="body2" data-testid="jj-mailbox-status">

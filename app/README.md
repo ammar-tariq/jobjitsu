@@ -27,6 +27,8 @@ pnpm --filter @jobjitsu/app dev:tauri
 pnpm dev:desktop
 ```
 
+Gmail / Outlook: copy `.env.example` to `.env` with your Desktop OAuth client (never commit `.env`), then **Connect Gmail**. Steps: [GMAIL_AND_OUTLOOK.md](../docs/guides/GMAIL_AND_OUTLOOK.md).
+
 Opens a native window titled **JobJitsu** wrapping the React shell (Vite on `http://localhost:1420`). Status chrome starts as **Agent · Unavailable**, then **Agent · On-device** when the local Agent path is ready (never “Local LLM”; remote ready is **Agent · Ready**).
 
 ## Run the UI in a browser (no Rust)
@@ -85,6 +87,6 @@ See [EVENT_SYSTEM.md](../docs/architecture/EVENT_SYSTEM.md).
 
 - No career egress from the renderer; startup never sends mail.
 - Shell must not import `@jobjitsu/ai`.
-- Webview capabilities stay deny-by-default: dialog open/save + scoped FS for the on-device data folder, `allow_data_directory` for custom folders, and `allow-resource-snapshot` for local CPU/memory during Craft prepare — no shell/HTTP career egress. Save-dialog picks extend the fs scope only for the session, only where the user chose.
+- Webview capabilities stay deny-by-default: dialog open/save + scoped FS for the on-device data folder, `allow_data_directory` for custom folders, `allow-resource-snapshot` for local CPU/memory during Craft prepare, and `allow-mailbox-oauth` for Gmail/Outlook loopback (allowlisted browser URLs only) — no generic shell/HTTP plugins. Save-dialog picks extend the fs scope only for the session, only where the user chose.
 - Narrow IPC allowlist in `src/ipc` — unknown commands and `ai.complete` are denied ([ADR 0013](../docs/adr/0013-ipc-bridge.md)).
 - **Craft prepare** lives in the host session; while running, the shell shows a working view (inputs, phases, device load). Preparation survives navigation.

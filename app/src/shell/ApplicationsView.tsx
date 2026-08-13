@@ -33,13 +33,17 @@ const APPLICATION_FILTERS = [
 
 export type ApplicationsViewProps = {
   readonly bridge: IpcBridge;
+  readonly onOpenPreferences?: () => void;
 };
 
 /**
  * Create, list, and open application drafts on-device.
  * Tailor résumé and cover letter via host Agent. Queue / follow-up stay local. Never sends.
  */
-export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element {
+export function ApplicationsView({
+  bridge,
+  onOpenPreferences,
+}: ApplicationsViewProps): JSX.Element {
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
   const [dashboard, setDashboard] = useState<MailboxDashboardSnapshot | null>(null);
   const [filter, setFilter] = useState<string>("all");
@@ -342,7 +346,7 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
     <JjPage
       testId="jj-applications-view"
       title="Applications"
-      subtitle="Create local drafts, or connect email in Preferences for a calm job-search record. Nothing leaves from here."
+      subtitle="Create local drafts, or connect Gmail in Preferences to import job mail. Nothing leaves from here."
     >
       {dashboard ? <ApplicationSummary dashboard={dashboard} /> : null}
 
@@ -454,7 +458,19 @@ export function ApplicationsView({ bridge }: ApplicationsViewProps): JSX.Element
             <JjEmptyState
               testId="jj-application-empty"
               title="No applications yet"
-              body="Add a company and role when you are ready. Nothing leaves this device."
+              body="Add a company and role when you are ready, or connect Gmail to import job mail. Nothing leaves this device."
+              action={
+                onOpenPreferences ? (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={onOpenPreferences}
+                    data-testid="jj-application-connect-gmail"
+                  >
+                    Connect Gmail
+                  </Button>
+                ) : null
+              }
             />
           ) : (
             <List

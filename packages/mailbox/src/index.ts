@@ -41,6 +41,13 @@ export {
   type CreateMailboxServiceOptions,
   type MailboxService,
 } from "./service.js";
+export {
+  createPkcePair,
+  mergeMailboxOAuthClients,
+  type MailboxConnectResult,
+  type MailboxOAuthClientEnv,
+  type MailboxOAuthLoopback,
+} from "./oauth.js";
 export { ingestProviderMessage, processUnprocessedEmails } from "./process.js";
 export {
   applicationFunnel,
@@ -55,9 +62,13 @@ export {
   buildGmailAuthUrl,
   createGmailMailboxProvider,
   exchangeGmailCode,
+  readGmailAccountEmail,
+  refreshGmailTokens,
 } from "./providers/gmail.js";
 export {
   buildOutlookAuthUrl,
   createOutlookMailboxProvider,
   exchangeOutlookCode,
+  readOutlookAccountEmail,
+  refreshOutlookTokens,
 } from "./providers/outlook.js";

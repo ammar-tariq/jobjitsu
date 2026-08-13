@@ -931,4 +931,19 @@ describe("DesktopShell", () => {
       /[1-9]\d* applications/,
     );
   }, 20000);
+
+  it("opens Preferences Email from Applications so Gmail can be connected", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
+    await user.click(screen.getByTestId("jj-application-connect-gmail"));
+    expect(screen.getByTestId("jj-mailbox-preferences")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-mailbox-connect-gmail")).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-mailbox-connect-gmail"));
+    expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(/client ID/i);
+  });
 });

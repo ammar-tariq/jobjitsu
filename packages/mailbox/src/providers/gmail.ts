@@ -3,6 +3,11 @@ import type { MailboxProvider } from "./types.js";
 
 export type GmailMailboxProviderOptions = {
   readonly getTokens: () => Promise<MailboxOAuthTokens | undefined>;
+  readonly putTokens?: (tokens: MailboxOAuthTokens) => Promise<void>;
+  readonly getClientCredentials?: () => Promise<{
+    readonly clientId?: string;
+    readonly clientSecret?: string;
+  }>;
   readonly fetchImpl?: typeof fetch;
 };
 
@@ -91,7 +96,7 @@ export function createGmailMailboxProvider(options: GmailMailboxProviderOptions)
   return {
     id: "gmail",
     async listPage(input): Promise<MailboxListPage> {
-      const tokens = await options.getTokens();
+      const tokens = await resolveGmailTokens(options);
       if (!tokens?.accessToken) {
         throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
       }
@@ -261,6 +266,7 @@ export function buildGmailAuthUrl(input: {
 
 export async function exchangeGmailCode(input: {
   readonly clientId: string;
+  readonly clientSecret?: string;
   readonly code: string;
   readonly redirectUri: string;
   readonly codeVerifier: string;
@@ -274,6 +280,9 @@ export async function exchangeGmailCode(input: {
     grant_type: "authorization_code",
     code_verifier: input.codeVerifier,
   });
+  if (input.clientSecret) {
+    body.set("client_secret", input.clientSecret);
+  }
   const response = await fetchImpl("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -292,6 +301,86 @@ export async function exchangeGmailCode(input: {
   if (!json.access_token) {
     throw new Error("Gmail could not finish connecting. Try again.");
   }
+  return tokensFromGoogleJson(json);
+}
+
+export async function refreshGmailTokens(input: {
+  readonly clientId: string;
+  readonly clientSecret?: string;
+  readonly refreshToken: string;
+  readonly fetchImpl?: typeof fetch;
+}): Promise<MailboxOAuthTokens> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const body = new URLSearchParams({
+    client_id: input.clientId,
+    refresh_token: input.refreshToken,
+    grant_type: "refresh_token",
+  });
+  if (input.clientSecret) {
+    body.set("client_secret", input.clientSecret);
+  }
+  const response = await fetchImpl("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) {
+    throw new Error("Gmail access expired. Connect Gmail again in Preferences.");
+  }
+  const json = (await response.json()) as GoogleTokenResponse;
+  const next = tokensFromGoogleJson(json);
+  return {
+    ...next,
+    refreshToken: next.refreshToken ?? input.refreshToken,
+  };
+}
+
+export async function readGmailAccountEmail(
+  accessToken: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<string | undefined> {
+  const profile = (await gmailJson(fetchImpl, accessToken, "/users/me/profile")) as {
+    readonly emailAddress?: string;
+  };
+  return profile.emailAddress;
+}
+
+async function resolveGmailTokens(
+  options: GmailMailboxProviderOptions,
+): Promise<MailboxOAuthTokens | undefined> {
+  const tokens = await options.getTokens();
+  if (!tokens?.accessToken) {
+    return tokens;
+  }
+  if (!isExpiringSoon(tokens.expiresAt) || !tokens.refreshToken || !options.getClientCredentials) {
+    return tokens;
+  }
+  const credentials = await options.getClientCredentials();
+  if (!credentials.clientId) {
+    return tokens;
+  }
+  const next = await refreshGmailTokens({
+    clientId: credentials.clientId,
+    clientSecret: credentials.clientSecret,
+    refreshToken: tokens.refreshToken,
+    fetchImpl: options.fetchImpl,
+  });
+  await options.putTokens?.(next);
+  return next;
+}
+
+type GoogleTokenResponse = {
+  readonly access_token?: string;
+  readonly refresh_token?: string;
+  readonly expires_in?: number;
+  readonly token_type?: string;
+  readonly scope?: string;
+};
+
+function tokensFromGoogleJson(json: GoogleTokenResponse): MailboxOAuthTokens {
+  if (!json.access_token) {
+    throw new Error("Gmail could not finish connecting. Try again.");
+  }
   return {
     accessToken: json.access_token,
     refreshToken: json.refresh_token,
@@ -302,4 +391,12 @@ export async function exchangeGmailCode(input: {
     tokenType: json.token_type,
     scope: json.scope,
   };
+}
+
+function isExpiringSoon(expiresAt: string | undefined): boolean {
+  if (!expiresAt) {
+    return false;
+  }
+  const at = Date.parse(expiresAt);
+  return Number.isFinite(at) && at - Date.now() < 60_000;
 }
