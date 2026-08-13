@@ -12,10 +12,10 @@ Never build multiple features in parallel in the same change set.
 
 | Field | Value |
 |-------|--------|
-| **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
-| **Story** | Shell UX — calm chrome, `data-layout`, Applications list + detail |
-| **Status** | Testing · [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
-| **Note** | Presentation only. Do not change IPC, send, or Agent ownership. PE20 mailbox intelligence stays in Applications as quiet summary + attention, not a cockpit. |
+| **Epic** | [PE21 Shell IA](https://github.com/ammar-tariq/jobjitsu/issues/128) |
+| **Story** | [PE21-S01](https://github.com/ammar-tariq/jobjitsu/issues/129) — Document shell IA + backlog |
+| **Status** | In Progress · branch `feat/pe21-shell-ia` |
+| **Note** | Plan: `docs/product/SHELL_IA.md`. Next: [#130](https://github.com/ammar-tariq/jobjitsu/issues/130) Job Mail nav. |
 
 ## Completed slices
 
