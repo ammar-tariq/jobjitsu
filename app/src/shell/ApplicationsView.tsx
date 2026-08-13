@@ -1,6 +1,5 @@
 import { useEffect, useState, type JSX } from "react";
 import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import List from "@mui/material/List";
@@ -18,7 +17,7 @@ import type {
   MailboxEmailSnapshot,
   MailboxTimelineSnapshot,
 } from "../ipc/commands.js";
-import { JjEmptyState, JjPage, JjSurface, useShellLayout } from "./layout/index.js";
+import { JjEditorDialog, JjEmptyState, JjPage, JjSurface } from "./layout/index.js";
 
 const APPLICATION_FILTERS = [
   ["all", "All"],
@@ -37,8 +36,8 @@ export type ApplicationsViewProps = {
 };
 
 /**
- * Create, list, and open application drafts on-device.
- * Tailor résumé and cover letter via host Agent. Queue / follow-up stay local. Never sends.
+ * List applications on-device; New draft / row open the editor dialog.
+ * Tailor résumé and cover letter via host Agent. Never sends.
  */
 export function ApplicationsView({
   bridge,
@@ -51,6 +50,7 @@ export function ApplicationsView({
   const [timeline, setTimeline] = useState<readonly MailboxTimelineSnapshot[]>([]);
   const [emails, setEmails] = useState<readonly MailboxEmailSnapshot[]>([]);
   const [openEmail, setOpenEmail] = useState<MailboxEmailSnapshot | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState("");
   const [roleTitle, setRoleTitle] = useState("");
@@ -67,8 +67,6 @@ export function ApplicationsView({
   const [covering, setCovering] = useState(false);
   const busy = saving || tailoring || covering;
   const selected = applications.find((application) => application.id === selectedId);
-  const layout = useShellLayout();
-  const split = layout !== "compact";
 
   const refresh = async (): Promise<void> => {
     const result = await bridge.listApplications();
@@ -87,7 +85,7 @@ export function ApplicationsView({
     void refresh();
   }, [bridge]);
 
-  const clearForm = (): void => {
+  const resetFormFields = (): void => {
     setSelectedId(null);
     setCompanyName("");
     setRoleTitle("");
@@ -103,6 +101,16 @@ export function ApplicationsView({
     setOpenEmail(null);
   };
 
+  const openNewDraft = (): void => {
+    resetFormFields();
+    setStatus(null);
+    setEditorOpen(true);
+  };
+
+  const closeEditor = (): void => {
+    setEditorOpen(false);
+  };
+
   const onSelect = (application: ApplicationSnapshot): void => {
     setSelectedId(application.id);
     setCompanyName(application.companyName);
@@ -115,6 +123,8 @@ export function ApplicationsView({
     setFollowUpDraftText(application.followUpDraftText ?? "");
     setDuplicateWarning(null);
     setStatus(null);
+    setOpenEmail(null);
+    setEditorOpen(true);
     void bridge.listApplicationTimeline(application.id).then((result) => {
       if (result.ok) {
         setTimeline(result.value.events);
@@ -294,7 +304,8 @@ export function ApplicationsView({
           setStatus(result.error.message ?? result.error.title);
           return;
         }
-        clearForm();
+        resetFormFields();
+        setEditorOpen(false);
         setStatus("Application removed from this device. Nothing was sent.");
         await refresh();
       })
@@ -308,29 +319,29 @@ export function ApplicationsView({
     if (filter !== "archived" && application.archived) {
       return false;
     }
-    const status = (application.lifecycleStatus ?? "").toLowerCase();
+    const lifecycle = (application.lifecycleStatus ?? "").toLowerCase();
     if (filter === "active") {
-      if (status === "rejected" || status === "withdrawn" || status === "accepted") {
+      if (lifecycle === "rejected" || lifecycle === "withdrawn" || lifecycle === "accepted") {
         return false;
       }
     } else if (filter === "awaiting") {
-      if (status !== "applied" && status !== "no_response") {
+      if (lifecycle !== "applied" && lifecycle !== "no_response") {
         return false;
       }
     } else if (filter === "assessment") {
-      if (!status.includes("assessment")) {
+      if (!lifecycle.includes("assessment")) {
         return false;
       }
     } else if (filter === "interview") {
-      if (!status.includes("interview")) {
+      if (!lifecycle.includes("interview")) {
         return false;
       }
     } else if (filter === "offer") {
-      if (status !== "offer_received" && status !== "accepted") {
+      if (lifecycle !== "offer_received" && lifecycle !== "accepted") {
         return false;
       }
     } else if (filter === "rejected") {
-      if (status !== "rejected") {
+      if (lifecycle !== "rejected") {
         return false;
       }
     } else if (filter === "archived") {
@@ -342,11 +353,27 @@ export function ApplicationsView({
     return query.trim().length === 0 || haystack.includes(query.trim().toLowerCase());
   });
 
+  const editorTitle = selectedId
+    ? `Edit draft · ${selected?.trackingStatus ?? "Discovered"}`
+    : "New application draft";
+
   return (
     <JjPage
       testId="jj-applications-view"
       title="Applications"
       subtitle="Create local drafts, or connect Gmail in Job Mail to import job mail. Nothing leaves from here."
+      maxWidth="44rem"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          onClick={openNewDraft}
+          disabled={busy}
+          data-testid="jj-application-new-draft"
+        >
+          New draft
+        </Button>
+      }
     >
       {dashboard ? <ApplicationSummary dashboard={dashboard} /> : null}
 
@@ -415,52 +442,43 @@ export function ApplicationsView({
         </JjSurface>
       ) : null}
 
-      <Box
-        sx={{
-          display: "grid",
-          gap: 2,
-          gridTemplateColumns: split ? "minmax(17rem, 22rem) minmax(0, 1fr)" : "1fr",
-          alignItems: "start",
-        }}
-      >
-        <JjSurface testId="jj-application-list" spacing={1.25} sx={{ position: "sticky", top: 0 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ alignItems: "center", justifyContent: "space-between" }}
-          >
-            <Typography variant="subtitle2">On this device</Typography>
-            <Button size="small" variant="text" onClick={clearForm} disabled={busy}>
-              New draft
-            </Button>
-          </Stack>
-          <TextField
-            label="Search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            size="small"
-            placeholder="Company or role"
-            fullWidth
-          />
-          <Tabs
-            value={filter}
-            onChange={(_event, value: string) => setFilter(value)}
-            variant="scrollable"
-            scrollButtons="auto"
-            aria-label="Application filters"
-            sx={{ minHeight: 36, borderBottom: "1px solid", borderColor: "divider" }}
-          >
-            {APPLICATION_FILTERS.map(([id, label]) => (
-              <Tab key={id} value={id} label={label} />
-            ))}
-          </Tabs>
-          {visible.length === 0 ? (
-            <JjEmptyState
-              testId="jj-application-empty"
-              title="No applications yet"
-              body="Add a company and role when you are ready, or connect Gmail to import job mail. Nothing leaves this device."
-              action={
-                onOpenPreferences ? (
+      <JjSurface testId="jj-application-list" spacing={1.25}>
+        <TextField
+          label="Search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          size="small"
+          placeholder="Company or role"
+          fullWidth
+        />
+        <Tabs
+          value={filter}
+          onChange={(_event, value: string) => setFilter(value)}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="Application filters"
+          sx={{ minHeight: 36, borderBottom: "1px solid", borderColor: "divider" }}
+        >
+          {APPLICATION_FILTERS.map(([id, label]) => (
+            <Tab key={id} value={id} label={label} />
+          ))}
+        </Tabs>
+        {visible.length === 0 ? (
+          <JjEmptyState
+            testId="jj-application-empty"
+            title="No applications yet"
+            body="Add a company and role when you are ready, or connect Gmail to import job mail. Nothing leaves this device."
+            action={
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={openNewDraft}
+                  data-testid="jj-application-empty-new-draft"
+                >
+                  New draft
+                </Button>
+                {onOpenPreferences ? (
                   <Button
                     size="small"
                     variant="outlined"
@@ -469,288 +487,303 @@ export function ApplicationsView({
                   >
                     Connect Gmail
                   </Button>
-                ) : null
-              }
-            />
-          ) : (
-            <List
-              dense
-              disablePadding
-              aria-label="Application drafts"
-              sx={{ maxHeight: "min(70vh, 36rem)", overflow: "auto" }}
-            >
-              {visible.map((application) => (
-                <ListItemButton
-                  key={application.id}
-                  selected={selectedId === application.id}
-                  onClick={() => onSelect(application)}
-                  data-testid={`jj-application-row-${application.id}`}
-                  sx={{ borderRadius: 1, mb: 0.25 }}
-                >
-                  <ListItemText
-                    primary={`${application.companyName} · ${application.roleTitle}`}
-                    secondary={`${application.lifecycleLabel ?? application.trackingStatus}${
-                      application.lastActivityAt
-                        ? ` · ${application.lastActivityAt.slice(0, 10)}`
-                        : ""
-                    }`}
-                    slotProps={{
-                      primary: { noWrap: true },
-                      secondary: { noWrap: true },
-                    }}
-                  />
-                </ListItemButton>
-              ))}
-            </List>
-          )}
-        </JjSurface>
+                ) : null}
+              </Stack>
+            }
+          />
+        ) : (
+          <List dense disablePadding aria-label="Application drafts">
+            {visible.map((application) => (
+              <ListItemButton
+                key={application.id}
+                selected={editorOpen && selectedId === application.id}
+                onClick={() => onSelect(application)}
+                data-testid={`jj-application-row-${application.id}`}
+                sx={{ borderRadius: 1, mb: 0.25 }}
+              >
+                <ListItemText
+                  primary={`${application.companyName} · ${application.roleTitle}`}
+                  secondary={`${application.lifecycleLabel ?? application.trackingStatus}${
+                    application.lastActivityAt
+                      ? ` · ${application.lastActivityAt.slice(0, 10)}`
+                      : ""
+                  }`}
+                  slotProps={{
+                    primary: { noWrap: true },
+                    secondary: { noWrap: true },
+                  }}
+                />
+              </ListItemButton>
+            ))}
+          </List>
+        )}
+      </JjSurface>
 
-        <Stack spacing={2} sx={{ minWidth: 0 }}>
-          <JjSurface testId="jj-application-draft-form">
-            <Typography variant="subtitle2" data-testid="jj-application-detail-title">
-              {selectedId
-                ? `Edit draft · ${selected?.trackingStatus ?? "Discovered"}`
-                : "New application draft"}
-            </Typography>
+      {!editorOpen && status ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          role="status"
+          data-testid="jj-application-status"
+        >
+          {status}
+        </Typography>
+      ) : null}
+
+      <JjEditorDialog
+        open={editorOpen}
+        title={editorTitle}
+        titleTestId="jj-application-detail-title"
+        onClose={closeEditor}
+        testId="jj-application-draft-dialog"
+        actions={
+          <>
+            <Button
+              variant="contained"
+              onClick={onSave}
+              disabled={busy}
+              data-testid="jj-application-save"
+            >
+              {selectedId ? "Save changes" : "Save draft"}
+            </Button>
+            {selectedId ? (
+              <>
+                <Button
+                  variant="outlined"
+                  onClick={onTailorDraft}
+                  disabled={busy}
+                  data-testid="jj-application-tailor"
+                >
+                  {tailoring ? "Preparing draft…" : "Tailor draft"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={onCoverLetterDraft}
+                  disabled={busy}
+                  data-testid="jj-application-cover-letter"
+                >
+                  {covering ? "Preparing letter…" : "Cover letter"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={onReadyForReview}
+                  disabled={busy || selected?.stage === "queue"}
+                  data-testid="jj-application-ready-for-review"
+                >
+                  Ready for review
+                </Button>
+              </>
+            ) : null}
+            <Button
+              variant="text"
+              onClick={() => {
+                resetFormFields();
+                setStatus(null);
+              }}
+              disabled={busy}
+            >
+              Clear
+            </Button>
+            {selectedId ? (
+              <Button
+                variant="text"
+                color="error"
+                onClick={onDelete}
+                disabled={busy}
+                data-testid="jj-application-delete"
+              >
+                Delete
+              </Button>
+            ) : null}
+          </>
+        }
+      >
+        <TextField
+          label="Company"
+          value={companyName}
+          onChange={(event) => setCompanyName(event.target.value)}
+          size="small"
+          required
+          fullWidth
+          slotProps={{ htmlInput: { "data-testid": "jj-application-company" } }}
+        />
+        <TextField
+          label="Role title"
+          value={roleTitle}
+          onChange={(event) => setRoleTitle(event.target.value)}
+          size="small"
+          required
+          fullWidth
+          slotProps={{ htmlInput: { "data-testid": "jj-application-role" } }}
+        />
+        <TextField
+          label="Source URL"
+          value={sourceUrl}
+          onChange={(event) => setSourceUrl(event.target.value)}
+          size="small"
+          fullWidth
+          placeholder="Optional"
+          slotProps={{ htmlInput: { "data-testid": "jj-application-source-url" } }}
+        />
+        <TextField
+          label="Notes"
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          size="small"
+          fullWidth
+          multiline
+          minRows={2}
+          placeholder="Optional"
+          slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
+        />
+        {selectedId ? (
+          <>
             <TextField
-              label="Company"
-              value={companyName}
-              onChange={(event) => setCompanyName(event.target.value)}
+              label="Résumé draft"
+              value={resumeDraftText}
+              onChange={(event) => setResumeDraftText(event.target.value)}
               size="small"
-              required
               fullWidth
-              slotProps={{ htmlInput: { "data-testid": "jj-application-company" } }}
+              multiline
+              minRows={6}
+              placeholder="Tailor a draft, then edit freely. You remain the author."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
             />
             <TextField
-              label="Role title"
-              value={roleTitle}
-              onChange={(event) => setRoleTitle(event.target.value)}
-              size="small"
-              required
-              fullWidth
-              slotProps={{ htmlInput: { "data-testid": "jj-application-role" } }}
-            />
-            <TextField
-              label="Source URL"
-              value={sourceUrl}
-              onChange={(event) => setSourceUrl(event.target.value)}
+              label="Cover letter draft"
+              value={coverLetterDraftText}
+              onChange={(event) => setCoverLetterDraftText(event.target.value)}
               size="small"
               fullWidth
-              placeholder="Optional"
-              slotProps={{ htmlInput: { "data-testid": "jj-application-source-url" } }}
+              multiline
+              minRows={6}
+              placeholder="Prepare a cover letter, then edit freely. You remain the author."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
             />
             <TextField
-              label="Notes"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
+              label="Follow-up date"
+              type="date"
+              value={followUpAt}
+              onChange={(event) => setFollowUpAt(event.target.value)}
+              size="small"
+              fullWidth
+              slotProps={{
+                inputLabel: { shrink: true },
+                htmlInput: { "data-testid": "jj-application-followup-date" },
+              }}
+            />
+            <TextField
+              label="Follow-up note"
+              value={followUpDraftText}
+              onChange={(event) => setFollowUpDraftText(event.target.value)}
               size="small"
               fullWidth
               multiline
               minRows={2}
-              placeholder="Optional"
-              slotProps={{ htmlInput: { "data-testid": "jj-application-notes" } }}
+              placeholder="Optional reminder — never sent automatically."
+              slotProps={{ htmlInput: { "data-testid": "jj-application-followup-note" } }}
             />
-            {selectedId ? (
-              <>
-                <TextField
-                  label="Résumé draft"
-                  value={resumeDraftText}
-                  onChange={(event) => setResumeDraftText(event.target.value)}
-                  size="small"
-                  fullWidth
-                  multiline
-                  minRows={6}
-                  placeholder="Tailor a draft, then edit freely. You remain the author."
-                  slotProps={{ htmlInput: { "data-testid": "jj-application-resume-draft" } }}
-                />
-                <TextField
-                  label="Cover letter draft"
-                  value={coverLetterDraftText}
-                  onChange={(event) => setCoverLetterDraftText(event.target.value)}
-                  size="small"
-                  fullWidth
-                  multiline
-                  minRows={6}
-                  placeholder="Prepare a cover letter, then edit freely. You remain the author."
-                  slotProps={{ htmlInput: { "data-testid": "jj-application-cover-draft" } }}
-                />
-                <TextField
-                  label="Follow-up date"
-                  type="date"
-                  value={followUpAt}
-                  onChange={(event) => setFollowUpAt(event.target.value)}
-                  size="small"
-                  fullWidth
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    htmlInput: { "data-testid": "jj-application-followup-date" },
-                  }}
-                />
-                <TextField
-                  label="Follow-up note"
-                  value={followUpDraftText}
-                  onChange={(event) => setFollowUpDraftText(event.target.value)}
-                  size="small"
-                  fullWidth
-                  multiline
-                  minRows={2}
-                  placeholder="Optional reminder — never sent automatically."
-                  slotProps={{ htmlInput: { "data-testid": "jj-application-followup-note" } }}
-                />
-              </>
+          </>
+        ) : null}
+        {duplicateWarning ? (
+          <Alert severity="info" data-testid="jj-application-duplicate-warn">
+            {duplicateWarning}
+          </Alert>
+        ) : null}
+
+        {selectedId ? (
+          <Stack spacing={1} data-testid="jj-application-intelligence">
+            {selected?.lifecycleLabel ? (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Chip size="small" label={selected.lifecycleLabel} />
+              </Stack>
             ) : null}
-            {duplicateWarning ? (
-              <Alert severity="info" data-testid="jj-application-duplicate-warn">
-                {duplicateWarning}
+            {selected?.nextAction ? (
+              <Typography variant="body2">Next · {selected.nextAction}</Typography>
+            ) : null}
+            {selected?.recruiterEmail ? (
+              <Typography variant="body2">
+                Recruiter · {selected.recruiterName ?? selected.recruiterEmail}
+              </Typography>
+            ) : null}
+            <Button
+              size="small"
+              sx={{ alignSelf: "flex-start" }}
+              onClick={() => {
+                void bridge.archiveApplication(selectedId).then(() => {
+                  resetFormFields();
+                  setEditorOpen(false);
+                  void refresh();
+                });
+              }}
+            >
+              Archive
+            </Button>
+            {timeline.length > 0 ? (
+              <Stack spacing={0.5}>
+                <Typography variant="subtitle2">Timeline</Typography>
+                {timeline.map((event) => (
+                  <Stack
+                    key={event.id}
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: "center", flexWrap: "wrap" }}
+                  >
+                    <Typography variant="body2">
+                      {event.at.slice(0, 10)} · {event.summary}
+                    </Typography>
+                    {event.emailId ? (
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          void bridge.getMailboxEmail(event.emailId ?? "").then((result) => {
+                            if (result.ok) {
+                              setOpenEmail(result.value.email);
+                            }
+                          });
+                        }}
+                      >
+                        View email
+                      </Button>
+                    ) : null}
+                  </Stack>
+                ))}
+              </Stack>
+            ) : null}
+            {emails.length > 0 ? (
+              <Stack spacing={0.5}>
+                <Typography variant="subtitle2">Emails</Typography>
+                {emails.map((email) => (
+                  <Typography key={email.id} variant="body2">
+                    {email.subject} · {email.senderEmail}
+                  </Typography>
+                ))}
+              </Stack>
+            ) : null}
+            {openEmail ? (
+              <Alert
+                severity="info"
+                onClose={() => setOpenEmail(null)}
+                data-testid="jj-application-source-email"
+              >
+                <Typography variant="subtitle2">{openEmail.subject}</Typography>
+                <Typography variant="body2">{openEmail.snippet}</Typography>
               </Alert>
             ) : null}
-            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-              <Button
-                variant="contained"
-                onClick={onSave}
-                disabled={busy}
-                data-testid="jj-application-save"
-              >
-                {selectedId ? "Save changes" : "Save draft"}
-              </Button>
-              {selectedId ? (
-                <>
-                  <Button
-                    variant="outlined"
-                    onClick={onTailorDraft}
-                    disabled={busy}
-                    data-testid="jj-application-tailor"
-                  >
-                    {tailoring ? "Preparing draft…" : "Tailor draft"}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={onCoverLetterDraft}
-                    disabled={busy}
-                    data-testid="jj-application-cover-letter"
-                  >
-                    {covering ? "Preparing letter…" : "Cover letter"}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={onReadyForReview}
-                    disabled={busy || selected?.stage === "queue"}
-                    data-testid="jj-application-ready-for-review"
-                  >
-                    Ready for review
-                  </Button>
-                </>
-              ) : null}
-              <Button variant="text" onClick={clearForm} disabled={busy}>
-                Clear
-              </Button>
-              {selectedId ? (
-                <Button
-                  variant="text"
-                  color="error"
-                  onClick={onDelete}
-                  disabled={busy}
-                  data-testid="jj-application-delete"
-                >
-                  Delete
-                </Button>
-              ) : null}
-            </Stack>
-          </JjSurface>
+          </Stack>
+        ) : null}
 
-          {selectedId ? (
-            <JjSurface testId="jj-application-intelligence" spacing={1}>
-              {selected?.lifecycleLabel ? (
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                  <Chip size="small" label={selected.lifecycleLabel} />
-                </Stack>
-              ) : null}
-              {selected?.nextAction ? (
-                <Typography variant="body2">Next · {selected.nextAction}</Typography>
-              ) : null}
-              {selected?.recruiterEmail ? (
-                <Typography variant="body2">
-                  Recruiter · {selected.recruiterName ?? selected.recruiterEmail}
-                </Typography>
-              ) : null}
-              <Button
-                size="small"
-                sx={{ alignSelf: "flex-start" }}
-                onClick={() => {
-                  void bridge.archiveApplication(selectedId).then(() => {
-                    clearForm();
-                    void refresh();
-                  });
-                }}
-              >
-                Archive
-              </Button>
-              {timeline.length > 0 ? (
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2">Timeline</Typography>
-                  {timeline.map((event) => (
-                    <Stack
-                      key={event.id}
-                      direction="row"
-                      spacing={1}
-                      sx={{ alignItems: "center", flexWrap: "wrap" }}
-                    >
-                      <Typography variant="body2">
-                        {event.at.slice(0, 10)} · {event.summary}
-                      </Typography>
-                      {event.emailId ? (
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            void bridge.getMailboxEmail(event.emailId ?? "").then((result) => {
-                              if (result.ok) {
-                                setOpenEmail(result.value.email);
-                              }
-                            });
-                          }}
-                        >
-                          View email
-                        </Button>
-                      ) : null}
-                    </Stack>
-                  ))}
-                </Stack>
-              ) : null}
-              {emails.length > 0 ? (
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2">Emails</Typography>
-                  {emails.map((email) => (
-                    <Typography key={email.id} variant="body2">
-                      {email.subject} · {email.senderEmail}
-                    </Typography>
-                  ))}
-                </Stack>
-              ) : null}
-              {openEmail ? (
-                <Alert
-                  severity="info"
-                  onClose={() => setOpenEmail(null)}
-                  data-testid="jj-application-source-email"
-                >
-                  <Typography variant="subtitle2">{openEmail.subject}</Typography>
-                  <Typography variant="body2">{openEmail.snippet}</Typography>
-                </Alert>
-              ) : null}
-            </JjSurface>
-          ) : null}
-
-          {status ? (
-            <Typography
-              color="text.secondary"
-              variant="body2"
-              role="status"
-              data-testid="jj-application-status"
-            >
-              {status}
-            </Typography>
-          ) : null}
-        </Stack>
-      </Box>
+        {status ? (
+          <Typography
+            color="text.secondary"
+            variant="body2"
+            role="status"
+            data-testid="jj-application-status"
+          >
+            {status}
+          </Typography>
+        ) : null}
+      </JjEditorDialog>
     </JjPage>
   );
 }

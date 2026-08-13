@@ -289,12 +289,17 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Applications" }));
+    await user.click(screen.getByTestId("jj-application-new-draft"));
     await user.type(screen.getByTestId("jj-application-company"), "Acme");
     await user.type(screen.getByTestId("jj-application-role"), "Engineer");
     await user.click(screen.getByTestId("jj-application-save"));
     expect(await screen.findByText(/Application draft saved/i)).toBeInTheDocument();
     await user.click(screen.getByTestId("jj-application-ready-for-review"));
     expect(await screen.findByText(/Marked ready for review/i)).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-editor-dialog-close"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("jj-application-draft-dialog")).not.toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button", { name: "Queue" }));
     expect(screen.getByTestId("jj-queue-view")).toBeInTheDocument();
@@ -317,6 +322,7 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Applications" }));
     expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-new-draft"));
     await user.type(screen.getByTestId("jj-application-company"), "Acme");
     await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
     await user.click(screen.getByTestId("jj-application-save"));
@@ -347,6 +353,7 @@ describe("DesktopShell", () => {
     expect(screen.getByTestId("jj-application-empty")).toBeInTheDocument();
     expect(screen.getByText("No applications yet")).toBeInTheDocument();
 
+    await user.click(screen.getByTestId("jj-application-new-draft"));
     await user.type(screen.getByTestId("jj-application-company"), "Acme");
     await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
     await user.type(screen.getByTestId("jj-application-notes"), "Local craft notes");
@@ -363,6 +370,8 @@ describe("DesktopShell", () => {
       await screen.findByText(/Application draft saved\. Nothing was sent/i),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByTestId("jj-editor-dialog-close"));
+
     const list = screen.getByTestId("jj-application-list");
     expect(within(list).getByText(/Acme · Staff Engineer/i)).toBeInTheDocument();
     expect(within(list).getByText(/Globex · Platform Lead/i)).toBeInTheDocument();
@@ -374,6 +383,7 @@ describe("DesktopShell", () => {
     expect(acmeRow).toBeTruthy();
     await user.click(acmeRow!);
 
+    expect(screen.getByTestId("jj-application-draft-dialog")).toBeInTheDocument();
     expect(screen.getByTestId("jj-application-detail-title")).toHaveTextContent(
       /Edit draft · Discovered/i,
     );
@@ -394,6 +404,7 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Applications" }));
     expect(screen.getByTestId("jj-applications-view")).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-new-draft"));
     await user.type(screen.getByTestId("jj-application-company"), "Acme");
     await user.type(screen.getByTestId("jj-application-role"), "Staff Engineer");
     await user.click(screen.getByTestId("jj-application-save"));
