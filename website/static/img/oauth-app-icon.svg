@@ -1,22 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="JobJitsu">
-  <!-- Square app icon for Google OAuth consent (120×120). Unique JobJitsu mark + wordmark. -->
-  <rect width="120" height="120" rx="24" fill="#0B0A1A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="JobJitsu">
+  <!-- Official Leverage Belt icon — JobJitsu brand mark for OAuth consent -->
+  <rect width="64" height="64" rx="14" fill="#0B0A1A"/>
   <path
-    d="M28 26c18 0 23 5.5 23 18V78h-10V45c0-6.5-3-9.5-11-9.5H28V26z"
+    d="M18 14c14 0 18 4.5 18 14.5V48h-7.5V29.2c0-5.2-2.4-7.7-8.5-7.7H18V14z"
     fill="#F8FAFC"
   />
   <path
-    d="M58 76h18c4 0 7.5-3 7.5-7 0-5-3.5-7.5-8.5-7.5H66V54h7c4 0 6.5-2 6.5-5.5S76 43 72 43H58v33z"
+    d="M38 46h12.5c2.9 0 5.2-2.2 5.2-5 0-3.6-2.6-5.3-6.2-5.3H44V31h5c2.8 0 4.7-1.5 4.7-4.2 0-2.6-2.1-4.3-5-4.3H38V46z"
     fill="#2DD4BF"
   />
-  <text
-    x="60"
-    y="108"
-    text-anchor="middle"
-    fill="#F8FAFC"
-    font-family="Inter, system-ui, -apple-system, sans-serif"
-    font-size="14"
-    font-weight="700"
-    letter-spacing="-0.02em"
-  >JobJitsu</text>
+  <path
+    d="M44 35.7h5.8c1.5 0 2.5.8 2.5 2.1 0 1.2-.9 2.1-2.4 2.1H44v-4.2z"
+    fill="#0B0A1A"
+    opacity="0.35"
+  />
 </svg>
