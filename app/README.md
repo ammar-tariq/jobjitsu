@@ -49,7 +49,7 @@ pnpm --filter @jobjitsu/app test
 
 Material UI dashboard pattern (side drawer + main + status bar), themed with JobJitsu **Midnight Ink** (dark default) and Soft Cloud light. Toggle appearance under **Preferences** — stored on this device. No charts or SaaS cockpit chrome.
 
-The shell sets `data-layout="compact|standard|wide"` from window width ([RESPONSIVE.md](../docs/design-system/RESPONSIVE.md)): icon rail below 1024px; list + detail on Applications from 1024px. **Agent · On-device** stays in the main status bar so compact width never hides privacy chrome.
+The shell sets `data-layout="compact|standard|wide"` from window width ([RESPONSIVE.md](../docs/design-system/RESPONSIVE.md)): icon rail below 1024px; list + detail on Applications from 1024px. **Agent · On-device** stays in the main status bar so compact width never hides privacy chrome. Preferences, Craft, and Email settings use quiet section panels — not a dashboard of competing cards.
 
 ```
 ┌──────────────┬─────────────────────────────┐

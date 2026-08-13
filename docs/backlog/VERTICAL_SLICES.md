@@ -13,14 +13,15 @@ Never build multiple features in parallel in the same change set.
 | Field | Value |
 |-------|--------|
 | **Epic** | [PE01 Desktop Shell](https://github.com/ammar-tariq/jobjitsu/issues/1) |
-| **Story** | Shell UX — calm chrome, `data-layout`, Applications list + detail |
-| **Status** | Testing · [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
-| **Note** | Presentation only. Do not change IPC, send, or Agent ownership. PE20 mailbox intelligence stays in Applications as quiet summary + attention, not a cockpit. |
+| **Story** | Quiet panels for Preferences, Craft, Queue, Follow-ups, and onboarding |
+| **Status** | Testing · [PR #122](https://github.com/ammar-tariq/jobjitsu/pull/122) |
+| **Note** | Presentation only. Shell chrome landed in [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121). |
 
 ## Completed slices
 
 | Story | Date | Notes |
 |-------|------|-------|
+| Shell UX chrome | 2026-08-13 | `data-layout`; Applications list + detail; Agent status bar; [PR #121](https://github.com/ammar-tariq/jobjitsu/pull/121) |
 | Sellable local MVP | 2026-08-11 | Durable applications; Queue/Follow-ups/Timeline; approval prefs; no fake send; onboarding |
 | PE05-S07 | 2026-08-11 | List on-device Agent models from Ollama; PR #113 |
 | PE08-S04 | 2026-08-11 | Applications list + open detail; PR #111 |

@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { MailboxIntegrationSnapshot, MailboxSettingsSnapshot } from "../ipc/commands.js";
+import { JjSection } from "./layout/index.js";
 
 export type MailboxPreferencesProps = {
   readonly bridge: IpcBridge;
@@ -117,14 +118,11 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
   };
 
   return (
-    <Stack spacing={1.5} data-testid="jj-mailbox-preferences">
-      <Typography variant="h3">Email</Typography>
-      <Typography color="text.secondary" variant="body2">
-        Connect a mailbox to find applications, interviews, and assessments. Mail stays on this
-        device. The first sync looks back by your chosen window; later Sync now only imports new
-        mail. JobJitsu never asks for your password, and nothing is sent unless you choose to.
-      </Typography>
-
+    <JjSection
+      testId="jj-mailbox-preferences"
+      title="Email"
+      description="Connect a mailbox to find applications, interviews, and assessments. Mail stays on this device. The first sync looks back by your chosen window; later Sync now only imports new mail. JobJitsu never asks for your password, and nothing is sent unless you choose to."
+    >
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="contained"
@@ -244,6 +242,6 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
           {status}
         </Typography>
       ) : null}
-    </Stack>
+    </JjSection>
   );
 }
