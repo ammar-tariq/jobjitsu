@@ -146,6 +146,8 @@ export type CreateHostIpcOptions = {
    * After the data-folder preference changes — rebind durable stores under the new path.
    */
   readonly onDataRootChanged?: (snapshot: DataRootSnapshot) => Promise<void>;
+  /** PE21 Reset / backup / restore — never touches `.env`. */
+  readonly dataMaintenance?: ReturnType<typeof createDataMaintenance>;
   /** When set, successful imports emit Resume.Imported (id only). */
   readonly bus?: EventBus;
   /**
@@ -702,6 +704,84 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
                 ? cause.message
                 : "Choose a folder in the desktop app, or enter a path on this device.",
             detail: "storage:pickDataRoot",
+            cause,
+          }),
+        );
+      }
+    },
+    "storage.resetSelected": async (payload) => {
+      const maintenance = options.dataMaintenance;
+      if (!maintenance) {
+        return err(
+          createAppError("unavailable", "Reset not ready", {
+            message: "Open the JobJitsu desktop app to reset on-device data.",
+            detail: "storage:resetSelected:missing",
+          }),
+        );
+      }
+      try {
+        const cleared = await maintenance.resetSelected(payload);
+        return ok({ cleared });
+      } catch (cause) {
+        return err(
+          createAppError("unavailable", "Could not reset", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Could not clear that data on this device. Try again.",
+            detail: "storage:resetSelected",
+            cause,
+          }),
+        );
+      }
+    },
+    "storage.backupSelected": async (payload) => {
+      const maintenance = options.dataMaintenance;
+      if (!maintenance) {
+        return err(
+          createAppError("unavailable", "Backup not ready", {
+            message: "Open the JobJitsu desktop app to back up on-device data.",
+            detail: "storage:backupSelected:missing",
+          }),
+        );
+      }
+      try {
+        const backupPath = (await maintenance.backupSelected(payload)) ?? null;
+        return ok({ backupPath });
+      } catch (cause) {
+        return err(
+          createAppError("unavailable", "Could not back up", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Could not create a backup on this device. Try again.",
+            detail: "storage:backupSelected",
+            cause,
+          }),
+        );
+      }
+    },
+    "storage.restoreBackup": async () => {
+      const maintenance = options.dataMaintenance;
+      if (!maintenance) {
+        return err(
+          createAppError("unavailable", "Restore not ready", {
+            message: "Open the JobJitsu desktop app to restore a backup.",
+            detail: "storage:restoreBackup:missing",
+          }),
+        );
+      }
+      try {
+        const restored = await maintenance.restoreSelected();
+        return ok({ restored });
+      } catch (cause) {
+        return err(
+          createAppError("unavailable", "Could not restore", {
+            message:
+              cause instanceof Error
+                ? cause.message
+                : "Could not restore that backup on this device. Try again.",
+            detail: "storage:restoreBackup",
             cause,
           }),
         );

@@ -88,6 +88,7 @@ export async function createDurableHostRuntime(
     },
     dataRoot: dataRootStore,
     folderPicker,
+    maintenanceIo: io,
     onDataRootChanged: async (snapshot) => {
       assertAbsoluteDataPath(snapshot.path);
       await allowDataDirectory(snapshot.path);

@@ -346,7 +346,7 @@ export function ApplicationsView({
     <JjPage
       testId="jj-applications-view"
       title="Applications"
-      subtitle="Create local drafts, or connect Gmail in Preferences to import job mail. Nothing leaves from here."
+      subtitle="Create local drafts, or connect Gmail in Job Mail to import job mail. Nothing leaves from here."
     >
       {dashboard ? <ApplicationSummary dashboard={dashboard} /> : null}
 

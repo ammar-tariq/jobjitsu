@@ -443,7 +443,8 @@ describe("DesktopShell", () => {
     expect(
       screen.getByRole("heading", { level: 3, name: "On-device Agent model" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 3, name: "Email" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Reset" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 3, name: "Email" })).not.toBeInTheDocument();
     expect(screen.getByTestId("jj-preferences").textContent).not.toMatch(/llm/i);
   });
 
@@ -903,14 +904,15 @@ describe("DesktopShell", () => {
     expect(await screen.findByRole("status", { name: "Agent · On-device" })).toBeInTheDocument();
   });
 
-  it("connects a sample mailbox from Preferences and shows application intelligence", async () => {
+  it("connects a sample mailbox from Job Mail and shows application intelligence", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
-    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    await user.click(screen.getByRole("button", { name: "Job Mail" }));
+    expect(screen.getByTestId("jj-job-mail-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-mailbox-preferences")).toBeInTheDocument();
     await user.click(screen.getByTestId("jj-mailbox-connect-sample"));
     expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(
@@ -932,7 +934,7 @@ describe("DesktopShell", () => {
     );
   }, 20000);
 
-  it("opens Preferences Email from Applications so Gmail can be connected", async () => {
+  it("opens Job Mail from Applications so Gmail can be connected", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
@@ -941,9 +943,34 @@ describe("DesktopShell", () => {
 
     await user.click(screen.getByRole("button", { name: "Applications" }));
     await user.click(screen.getByTestId("jj-application-connect-gmail"));
-    expect(screen.getByTestId("jj-mailbox-preferences")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-job-mail-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-mailbox-connect-gmail")).toBeInTheDocument();
     await user.click(screen.getByTestId("jj-mailbox-connect-gmail"));
     expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(/client ID/i);
+  });
+
+  it("shows Sources as coming soon with links to Craft and Job Mail", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Sources" }));
+    expect(screen.getByTestId("jj-sources-view")).toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-sources-open-job-mail"));
+    expect(screen.getByTestId("jj-job-mail-view")).toBeInTheDocument();
+  });
+
+  it("keeps Preferences free of the mailbox dump and exposes Reset", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(screen.queryByTestId("jj-mailbox-connect-gmail")).not.toBeInTheDocument();
+    expect(screen.getByTestId("jj-preferences-reset")).toBeInTheDocument();
   });
 });

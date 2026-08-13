@@ -28,6 +28,9 @@ export const IPC_ALLOWLIST = [
   "storage.setDataRoot",
   "storage.resetDataRoot",
   "storage.pickDataRoot",
+  "storage.resetSelected",
+  "storage.backupSelected",
+  "storage.restoreBackup",
   "preferences.getApprovalBeforeSend",
   "preferences.setApprovalBeforeSend",
   "preferences.getOnboardingCompleted",
@@ -188,6 +191,16 @@ export type DataRootSnapshot = {
   readonly path: string;
   readonly defaultPath: string;
   readonly isCustom: boolean;
+};
+
+/** PE21 Reset — which on-device slices to clear / backup. Never includes `.env`. */
+export type DataResetSelectionSnapshot = {
+  readonly profiles: boolean;
+  readonly jobMail: boolean;
+  readonly applications: boolean;
+  readonly craft: boolean;
+  readonly timeline: boolean;
+  readonly agentModelPath: boolean;
 };
 
 export type CraftPreferencesSnapshot = {
@@ -524,6 +537,9 @@ export type IpcPayloadMap = {
   readonly "storage.setDataRoot": { readonly path: string };
   readonly "storage.resetDataRoot": undefined;
   readonly "storage.pickDataRoot": undefined;
+  readonly "storage.resetSelected": DataResetSelectionSnapshot;
+  readonly "storage.backupSelected": DataResetSelectionSnapshot;
+  readonly "storage.restoreBackup": undefined;
   readonly "preferences.getApprovalBeforeSend": undefined;
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getOnboardingCompleted": undefined;
@@ -623,6 +639,9 @@ export type IpcResultMap = {
     readonly dataRoot: DataRootSnapshot | null;
     readonly cancelled: boolean;
   };
+  readonly "storage.resetSelected": { readonly cleared: readonly string[] };
+  readonly "storage.backupSelected": { readonly backupPath: string | null };
+  readonly "storage.restoreBackup": { readonly restored: readonly string[] };
   readonly "preferences.getApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.setApprovalBeforeSend": { readonly requireApprovalBeforeSend: boolean };
   readonly "preferences.getOnboardingCompleted": { readonly completed: boolean };

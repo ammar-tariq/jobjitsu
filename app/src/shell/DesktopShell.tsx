@@ -21,6 +21,8 @@ import { PreferencesView } from "./PreferencesView.js";
 import { ProfileView } from "./ProfileView.js";
 import { QueueView } from "./QueueView.js";
 import { SideMenu } from "./SideMenu.js";
+import { SourcesView } from "./SourcesView.js";
+import { JobMailView } from "./JobMailView.js";
 import { TimelineView } from "./TimelineView.js";
 
 export type DesktopShellProps = {
@@ -169,10 +171,7 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             {activeId === "craft" ? (
               <CraftView bridge={bridge} />
             ) : activeId === "applications" ? (
-              <ApplicationsView
-                bridge={bridge}
-                onOpenPreferences={() => setActiveId("preferences")}
-              />
+              <ApplicationsView bridge={bridge} onOpenPreferences={() => setActiveId("job-mail")} />
             ) : activeId === "queue" ? (
               <QueueView bridge={bridge} />
             ) : activeId === "follow-ups" ? (
@@ -180,7 +179,14 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             ) : activeId === "agent" ? (
               <AgentView bridge={bridge} onOpenPreferences={() => setActiveId("preferences")} />
             ) : activeId === "profile" ? (
-              <ProfileView bridge={bridge} />
+              <ProfileView bridge={bridge} onOpenJobMail={() => setActiveId("job-mail")} />
+            ) : activeId === "job-mail" ? (
+              <JobMailView bridge={bridge} onOpenApplications={() => setActiveId("applications")} />
+            ) : activeId === "sources" ? (
+              <SourcesView
+                onOpenCraft={() => setActiveId("craft")}
+                onOpenJobMail={() => setActiveId("job-mail")}
+              />
             ) : activeId === "preferences" ? (
               <PreferencesView theme={theme} onThemeChange={onThemeChange} bridge={bridge} />
             ) : activeId === "timeline" ? (
