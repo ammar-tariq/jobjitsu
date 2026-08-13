@@ -1,6 +1,8 @@
 export { JjEmptyState, type JjEmptyStateProps } from "./JjEmptyState.js";
 export { JjPage, JjPageHeader, type JjPageHeaderProps, type JjPageProps } from "./JjPage.js";
+export { JjSection, type JjSectionProps } from "./JjSection.js";
 export { JjSurface, type JjSurfaceProps } from "./JjSurface.js";
+export { jjListRowSx } from "./jjListRowSx.js";
 export {
   COMPACT_DRAWER_WIDTH,
   layoutFromWidth,

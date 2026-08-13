@@ -1,7 +1,6 @@
 import { useEffect, useState, type JSX } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { AgentPrivacyState } from "@jobjitsu/ui";
 import type { IpcBridge } from "../ipc/bridge.js";
@@ -78,7 +77,7 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
         </Button>
       </JjSurface>
 
-      <Stack spacing={1}>
+      <JjSurface spacing={1}>
         <Typography variant="subtitle2">Recent activity</Typography>
         {recent.length === 0 ? (
           <Typography color="text.secondary" variant="body2">
@@ -94,20 +93,20 @@ export function AgentView({ bridge, onOpenPreferences }: AgentViewProps): JSX.El
               <Box
                 component="li"
                 key={`${entry.name}-${entry.occurredAt}-${index}`}
-                sx={(theme) => ({
+                sx={{
                   px: 2,
                   py: 1.25,
                   borderRadius: 1,
                   border: "1px solid",
-                  borderColor: theme.palette.divider,
-                })}
+                  borderColor: "divider",
+                }}
               >
                 <Typography variant="body2">{entry.summary}</Typography>
               </Box>
             ))}
           </Box>
         )}
-      </Stack>
+      </JjSurface>
     </JjPage>
   );
 }

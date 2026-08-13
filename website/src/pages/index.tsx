@@ -101,11 +101,67 @@ export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout
-      title="Home"
-      description="The gentle art of landing the job. On-device. On-target. On your terms."
+      title="JobJitsu"
+      description="JobJitsu — open-source AI Career Operating System. Local-first. On-device Agent. Optional readonly Gmail import. You own send."
     >
       <JjHero />
       <main>
+        <section className="jj-home-section" aria-labelledby="jj-purpose">
+          <div className="container">
+            <Heading as="h2" id="jj-purpose">
+              What JobJitsu does
+            </Heading>
+            <p className="jj-home-section__lede">
+              JobJitsu is a desktop companion for a calmer job search — not a job board and not a
+              cloud résumé vault.
+            </p>
+            <ul className="jj-purpose-list">
+              <li>
+                <strong>Prepare applications on your device</strong> — tailor résumé and
+                cover-letter drafts with an on-device Agent.
+              </li>
+              <li>
+                <strong>Track applications locally</strong> — queue, follow-ups, and timeline stay
+                on this machine.
+              </li>
+              <li>
+                <strong>Optional email import</strong> — connect Gmail or Outlook with readonly
+                OAuth so JobJitsu can surface job-related mail. JobJitsu never asks for your mailbox
+                password and does not send mail through that connection.
+              </li>
+              <li>
+                <strong>You own send</strong> — nothing leaves the device for apply or follow-up
+                unless you approve it.
+              </li>
+            </ul>
+
+            <Heading as="h2" id="jj-gmail">
+              Why JobJitsu requests Gmail access
+            </Heading>
+            <p className="jj-home-section__lede">
+              When you choose <strong>Connect Gmail</strong> in the JobJitsu desktop app, Google
+              asks you to allow JobJitsu to read your mail (<code>gmail.readonly</code>). JobJitsu
+              uses that access only to import messages that look job-related (applications,
+              interviews, recruiter mail) onto your device so you can track them locally.
+            </p>
+            <ul className="jj-purpose-list">
+              <li>JobJitsu does not send email as you through this connection.</li>
+              <li>JobJitsu does not ask for your Gmail password.</li>
+              <li>Tokens stay on your device; you can disconnect anytime.</li>
+              <li>
+                Details: <Link to="/privacy">Privacy Policy</Link>
+              </li>
+            </ul>
+
+            <p className="jj-home-section__more">
+              Privacy: <Link to="/privacy">Privacy Policy</Link>
+              {" · "}
+              Terms: <Link to="/terms">Terms of Service</Link>
+              {" · "}
+              Source: <Link href="https://github.com/ammar-tariq/jobjitsu">GitHub</Link>
+            </p>
+          </div>
+        </section>
         <JjFeatureCards />
         <Pipeline />
         <Paths />

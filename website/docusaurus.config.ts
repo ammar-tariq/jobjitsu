@@ -7,6 +7,8 @@ import rewriteRepoRootLinks from "./src/remark/rewriteRepoRootLinks";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+const siteBaseUrl = process.env.DOCUSAURUS_BASE_URL ?? "/";
+
 /**
  * JobJitsu docs site — content is the existing monorepo `/docs` directory.
  * No copies; Docusaurus reads markdown in place.
@@ -20,7 +22,7 @@ const config: Config = {
   favicon: "img/favicon.svg",
 
   url: process.env.DOCUSAURUS_URL ?? "https://jobjitsu.dev",
-  baseUrl: process.env.DOCUSAURUS_BASE_URL ?? "/",
+  baseUrl: siteBaseUrl,
 
   organizationName: "ammar-tariq",
   projectName: "jobjitsu",
@@ -33,14 +35,21 @@ const config: Config = {
       attributes: {
         rel: "icon",
         type: "image/svg+xml",
-        href: "/img/favicon.svg",
+        href: `${siteBaseUrl}img/favicon.svg`,
       },
     },
     {
       tagName: "link",
       attributes: {
         rel: "apple-touch-icon",
-        href: "/img/logo.svg",
+        href: `${siteBaseUrl}img/oauth-app-icon.png`,
+      },
+    },
+    {
+      tagName: "meta",
+      attributes: {
+        name: "application-name",
+        content: "JobJitsu",
       },
     },
     {
@@ -177,6 +186,8 @@ const config: Config = {
             { label: "Roadmap", to: "/roadmap" },
             { label: "Changelog", to: "/changelog" },
             { label: "Contributing", to: "/contributing" },
+            { label: "Privacy", to: "/privacy" },
+            { label: "Terms", to: "/terms" },
             {
               label: "Discussions",
               href: "https://github.com/ammar-tariq/jobjitsu/discussions",

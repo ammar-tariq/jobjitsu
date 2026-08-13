@@ -6,7 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { ApplicationSnapshot } from "../ipc/commands.js";
-import { JjEmptyState, JjPage } from "./layout/index.js";
+import { JjEmptyState, JjPage, jjListRowSx } from "./layout/index.js";
 
 export type FollowUpsViewProps = {
   readonly bridge: IpcBridge;
@@ -83,14 +83,7 @@ export function FollowUpsView({ bridge }: FollowUpsViewProps): JSX.Element {
               <ListItem
                 key={application.id}
                 alignItems="flex-start"
-                sx={{
-                  flexDirection: "column",
-                  alignItems: "stretch",
-                  gap: 1,
-                  py: 1.5,
-                  borderBottom: "1px solid",
-                  borderColor: "divider",
-                }}
+                sx={jjListRowSx}
                 data-testid={`jj-followup-row-${application.id}`}
               >
                 <ListItemText

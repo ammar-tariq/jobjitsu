@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { DataRootSnapshot, LocalModelsListStatus, ThemePreference } from "../ipc/commands.js";
 import { MailboxPreferences } from "./MailboxPreferences.js";
-import { JjPage } from "./layout/index.js";
+import { JjPage, JjSection } from "./layout/index.js";
 
 export type PreferencesViewProps = {
   readonly theme: ThemePreference;
@@ -215,14 +215,11 @@ export function PreferencesView({
       subtitle="Choose where JobJitsu keeps files on this device. Profile and Paths are under Profile."
       maxWidth="40rem"
     >
-      <Stack spacing={1.5} data-testid="jj-approval-before-send">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Outbound approval
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          When this is on, JobJitsu asks before anything leaves this device. Agent never sends on
-          its own.
-        </Typography>
+      <JjSection
+        testId="jj-approval-before-send"
+        title="Outbound approval"
+        description="When this is on, JobJitsu asks before anything leaves this device. Agent never sends on its own."
+      >
         <FormControlLabel
           control={
             <Switch
@@ -238,15 +235,13 @@ export function PreferencesView({
             {approvalStatus}
           </Typography>
         ) : null}
-      </Stack>
+      </JjSection>
 
-      <Stack spacing={1.5} data-testid="jj-craft-preferences">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Writing voice
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Optional tone for drafts (for example: calm and precise). Stored on this device.
-        </Typography>
+      <JjSection
+        testId="jj-craft-preferences"
+        title="Writing voice"
+        description="Optional tone for drafts (for example: calm and precise). Stored on this device."
+      >
         <TextField
           label="Tone"
           value={toneDraft}
@@ -268,16 +263,13 @@ export function PreferencesView({
             {craftStatus}
           </Typography>
         ) : null}
-      </Stack>
+      </JjSection>
 
-      <Stack spacing={1.5} data-testid="jj-data-folder">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Data folder
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Profile, paths, résumés, applications, and preferences are saved as files in this folder
-          on this device. Choose a folder you can back up.
-        </Typography>
+      <JjSection
+        testId="jj-data-folder"
+        title="Data folder"
+        description="Profile, paths, résumés, applications, and preferences are saved as files in this folder on this device. Choose a folder you can back up."
+      >
         <TextField
           label="Folder path"
           value={dataPathDraft}
@@ -315,16 +307,13 @@ export function PreferencesView({
             {dataRoot.isCustom ? "Custom folder" : "Default folder"} · {dataRoot.path}
           </Typography>
         ) : null}
-      </Stack>
+      </JjSection>
 
-      <Stack spacing={1.5} data-testid="jj-local-model-path">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          On-device Agent model
-        </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Agent runs through local Ollama on this device. Choose an installed model from the list —
-          nothing leaves this device until Agent is ready.
-        </Typography>
+      <JjSection
+        testId="jj-local-model-path"
+        title="On-device Agent model"
+        description="Agent runs through local Ollama on this device. Choose an installed model from the list — nothing leaves this device until Agent is ready."
+      >
         <FormControl size="small" fullWidth>
           <InputLabel id="jj-local-model-select-label">Installed model</InputLabel>
           <Select
@@ -381,14 +370,11 @@ export function PreferencesView({
             Choose a local model so Agent can run on this device.
           </Typography>
         ) : null}
-      </Stack>
+      </JjSection>
 
       <MailboxPreferences bridge={bridge} />
 
-      <Stack spacing={1.5} data-testid="jj-appearance">
-        <Typography component="h3" variant="body2" color="text.secondary">
-          Appearance
-        </Typography>
+      <JjSection testId="jj-appearance" title="Appearance">
         <ToggleButtonGroup
           exclusive
           size="small"
@@ -403,7 +389,7 @@ export function PreferencesView({
           <ToggleButton value="dark">Dark</ToggleButton>
           <ToggleButton value="light">Light</ToggleButton>
         </ToggleButtonGroup>
-      </Stack>
+      </JjSection>
     </JjPage>
   );
 }

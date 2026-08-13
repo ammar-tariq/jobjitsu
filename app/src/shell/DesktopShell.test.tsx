@@ -429,6 +429,24 @@ describe("DesktopShell", () => {
     expect(await appearance.getTheme()).toBe("light");
   });
 
+  it("groups Preferences into quiet panels without LLM copy", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Preferences" }));
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Outbound approval" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "On-device Agent model" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Email" })).toBeInTheDocument();
+    expect(screen.getByTestId("jj-preferences").textContent).not.toMatch(/llm/i);
+  });
+
   it("saves profile on-device through the identity bridge", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();

@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { IpcBridge } from "../ipc/bridge.js";
 import type { MailboxIntegrationSnapshot, MailboxSettingsSnapshot } from "../ipc/commands.js";
+import { JjSection } from "./layout/index.js";
 
 export type MailboxPreferencesProps = {
   readonly bridge: IpcBridge;
@@ -136,79 +137,11 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
   };
 
   return (
-    <Stack spacing={1.5} data-testid="jj-mailbox-preferences">
-      <Typography variant="h3">Email</Typography>
-      <Typography color="text.secondary" variant="body2">
-        Connect Gmail or Outlook to import job mail on this device. Use the desktop app (not the
-        browser preview). If this clone has a local .env, Connect Gmail works without pasting client
-        ids. JobJitsu never asks for your mailbox password, and nothing is sent unless you choose
-        to.
-      </Typography>
-
-      {settings ? (
-        <Stack spacing={1}>
-          <TextField
-            label="Gmail client ID"
-            value={settings.gmailClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, gmailClientId: event.target.value })}
-            size="small"
-            fullWidth
-            helperText="Optional when set in a local .env. Google Cloud Desktop client ID. Never your Gmail password."
-          />
-          <TextField
-            label="Gmail client secret"
-            value={settings.gmailClientSecret ?? ""}
-            onChange={(event) =>
-              setSettings({ ...settings, gmailClientSecret: event.target.value })
-            }
-            size="small"
-            fullWidth
-            type="password"
-            autoComplete="off"
-            helperText="Optional when set in a local .env. From the same Desktop client. Stored on this device."
-          />
-          <TextField
-            label="Outlook client ID"
-            value={settings.outlookClientId ?? ""}
-            onChange={(event) => setSettings({ ...settings, outlookClientId: event.target.value })}
-            size="small"
-            fullWidth
-            helperText="Optional when set in a local .env. Microsoft Entra application (client) ID."
-          />
-          <TextField
-            label="Look back (days)"
-            type="number"
-            value={settings.lookbackDays}
-            onChange={(event) =>
-              setSettings({ ...settings, lookbackDays: Number(event.target.value) || 365 })
-            }
-            size="small"
-            helperText="How far back to import on the first sync. Later Sync now only fetches new mail. Stored on this device."
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.notifyAssessments}
-                onChange={(_, checked) => setSettings({ ...settings, notifyAssessments: checked })}
-              />
-            }
-            label="Notice me about assessments"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={settings.notifyInterviews}
-                onChange={(_, checked) => setSettings({ ...settings, notifyInterviews: checked })}
-              />
-            }
-            label="Notice me about interviews"
-          />
-          <Button variant="outlined" onClick={onSaveSettings} disabled={busy}>
-            Save email settings
-          </Button>
-        </Stack>
-      ) : null}
-
+    <JjSection
+      testId="jj-mailbox-preferences"
+      title="Email"
+      description="Connect a mailbox to find applications, interviews, and assessments. Mail stays on this device. The first sync looks back by your chosen window; later Sync now only imports new mail. JobJitsu never asks for your password, and nothing is sent unless you choose to."
+    >
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="contained"
@@ -287,6 +220,6 @@ export function MailboxPreferences({ bridge }: MailboxPreferencesProps): JSX.Ele
           {status}
         </Typography>
       ) : null}
-    </Stack>
+    </JjSection>
   );
 }
