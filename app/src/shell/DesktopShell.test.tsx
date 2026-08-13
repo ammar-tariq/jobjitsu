@@ -945,6 +945,17 @@ describe("DesktopShell", () => {
 
     await waitFor(
       async () => {
+        const listed = await runtime.bridge.listMailboxIntegrations();
+        expect(listed.ok).toBe(true);
+        if (!listed.ok) {
+          return;
+        }
+        const row = listed.value.integrations[0];
+        expect(row?.emailsIngested).toBeGreaterThan(0);
+        expect(row?.emailsTotal).toBeUndefined();
+        const counts = screen.getByTestId(`jj-mailbox-counts-${row!.id}`);
+        expect(counts.textContent).toMatch(/Imported [1-9]/);
+        expect(counts.textContent).not.toMatch(/~/);
         const dash = await runtime.bridge.getMailboxDashboard();
         expect(dash.ok && dash.value.dashboard.summary.totalApplications).toBeGreaterThan(0);
       },

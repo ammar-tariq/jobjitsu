@@ -215,6 +215,8 @@ describe("@jobjitsu/mailbox", () => {
 
     expect(finished.syncStatus).toBe("idle");
     expect(finished.emailsProcessed).toBeGreaterThan(0);
+    expect(finished.emailsIngested ?? 0).toBeGreaterThan(0);
+    expect(finished.emailsTotal).toBeUndefined();
 
     const listed = await applications.list();
     const acmeRn = listed.filter(

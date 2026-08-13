@@ -179,7 +179,6 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     let processedTotal = integration.emailsProcessed;
     let jobRelated = integration.jobRelatedCount;
     let applicationsFound = integration.applicationsFound;
-    let totalEstimate = integration.emailsTotal;
     let ingestedTotal = integration.emailsIngested ?? 0;
     let pageIndex = 0;
     const provider = providerFor(integration);
@@ -193,6 +192,8 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
     try {
       await putIntegration({
         ...integration,
+        // Drop any prior provider estimate — UI shows only real ingested/classified counts.
+        emailsTotal: undefined,
         syncStatus: "syncing",
         syncError: undefined,
         updatedAt: new Date().toISOString(),
@@ -206,7 +207,6 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
           pageSize: PAGE_SIZE,
           exclusiveSince,
         });
-        totalEstimate = page.totalEstimate ?? totalEstimate;
         let pageIngested = 0;
         for (const message of page.messages) {
           const result = await ingestProviderMessage(
@@ -233,7 +233,6 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
           fetched: page.messages.length,
           pageIngested,
           ingestedTotal,
-          estimate: totalEstimate,
           hasNext: Boolean(cursor),
         });
         await store.putCheckpoint({
@@ -246,7 +245,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         });
         await putIntegration({
           ...(await requireIntegration(integration.id)),
-          emailsTotal: totalEstimate,
+          emailsTotal: undefined,
           emailsIngested: ingestedTotal,
           syncStatus: "syncing",
           updatedAt: new Date().toISOString(),
@@ -255,11 +254,12 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
 
       await putIntegration({
         ...(await requireIntegration(integration.id)),
+        emailsTotal: undefined,
         emailsIngested: ingestedTotal,
         syncStatus: "processing",
         updatedAt: new Date().toISOString(),
       });
-      mailboxLog("sync classify start", { ingestedTotal, estimate: totalEstimate });
+      mailboxLog("sync classify start", { ingestedTotal });
 
       let pending = (await store.unprocessedEmails()).filter(
         (email) => email.integrationId === integration.id,
@@ -300,6 +300,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       });
       await putIntegration({
         ...(await requireIntegration(integration.id)),
+        emailsTotal: undefined,
         emailsProcessed: processedTotal,
         emailsIngested: ingestedTotal,
         jobRelatedCount: jobRelated,

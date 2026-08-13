@@ -66,7 +66,6 @@ export function JobMailView({ onOpenApplications, onOpenProfile }: JobMailViewPr
   const activeStep = wizardStepFor(primary?.syncStatus, primary?.connected, connecting);
   const importCount = primary?.emailsIngested ?? 0;
   const classifyCount = primary?.emailsProcessed ?? 0;
-  const totalEstimate = primary?.emailsTotal;
 
   return (
     <JjPage
@@ -140,27 +139,16 @@ export function JobMailView({ onOpenApplications, onOpenProfile }: JobMailViewPr
 
           {syncing && primary ? (
             <Stack spacing={1}>
-              <LinearProgress
-                variant={totalEstimate && totalEstimate > 0 ? "determinate" : "indeterminate"}
-                value={
-                  totalEstimate && totalEstimate > 0
-                    ? Math.min(
-                        100,
-                        Math.round(
-                          ((primary.syncStatus === "processing" ? classifyCount : importCount) /
-                            totalEstimate) *
-                            100,
-                        ),
-                      )
-                    : undefined
-                }
-                aria-label="Importing job mail"
-              />
-              <Typography variant="body2" color="text.secondary">
+              <LinearProgress variant="indeterminate" aria-label="Importing job mail" />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontVariantNumeric: "tabular-nums" }}
+                data-testid="jj-mailbox-sync-progress"
+              >
                 {primary.syncStatus === "processing"
-                  ? `Classifying ${classifyCount}`
+                  ? `Classifying ${classifyCount} · Imported ${importCount}`
                   : `Importing ${importCount}`}
-                {totalEstimate ? ` / ~${totalEstimate} in this sync window` : ""}
               </Typography>
             </Stack>
           ) : null}
@@ -190,9 +178,13 @@ export function JobMailView({ onOpenApplications, onOpenProfile }: JobMailViewPr
                       ? "paused — try Sync now"
                       : "not yet"}
               </Typography>
-              <Typography color="text.secondary" variant="body2">
-                Imported {integration.emailsIngested ?? 0}
-                {integration.emailsTotal ? ` / ~${integration.emailsTotal}` : ""} · Classified{" "}
+              <Typography
+                color="text.secondary"
+                variant="body2"
+                sx={{ fontVariantNumeric: "tabular-nums" }}
+                data-testid={`jj-mailbox-counts-${integration.id}`}
+              >
+                Imported {integration.emailsIngested ?? 0} · Classified{" "}
                 {integration.emailsProcessed} · Job-related {integration.jobRelatedCount} ·
                 Applications {integration.applicationsFound}
               </Typography>
