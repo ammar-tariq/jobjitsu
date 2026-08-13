@@ -67,6 +67,17 @@ function mailboxLog(message: string, detail?: Record<string, unknown>): void {
   }
 }
 
+function humanizeMailboxSyncError(cause: unknown): string {
+  const raw = cause instanceof Error ? cause.message.trim() : "";
+  if (/load failed|failed to fetch|networkerror|network request failed|fetch failed/i.test(raw)) {
+    return "Mail import paused — the connection dropped. Imported mail stays on this device. Try Sync now in a minute.";
+  }
+  if (raw) {
+    return raw;
+  }
+  return "Mail sync paused. You can try again from Job Mail.";
+}
+
 export type MailboxService = {
   listIntegrations(): Promise<readonly MailboxIntegration[]>;
   getSettings(): Promise<MailboxSettings>;
@@ -189,6 +200,46 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
       initialComplete,
       exclusiveSince,
     });
+
+    const classifyPending = async (): Promise<void> => {
+      await putIntegration({
+        ...(await requireIntegration(integration.id)),
+        emailsTotal: undefined,
+        emailsIngested: ingestedTotal,
+        syncStatus: "processing",
+        updatedAt: new Date().toISOString(),
+      });
+      mailboxLog("sync classify start", { ingestedTotal });
+      let pending = (await store.unprocessedEmails()).filter(
+        (email) => email.integrationId === integration.id,
+      );
+      while (pending.length > 0) {
+        const batch = await processUnprocessedEmails({ store, applications, bus, ai, now });
+        processedTotal += batch.processed;
+        jobRelated += batch.jobRelated;
+        applicationsFound += batch.applicationsFound;
+        mailboxLog("sync classify batch", {
+          processed: batch.processed,
+          processedTotal,
+          jobRelated,
+          applicationsFound,
+          pendingLeft: Math.max(0, pending.length - batch.processed),
+        });
+        await putIntegration({
+          ...(await requireIntegration(integration.id)),
+          emailsProcessed: processedTotal,
+          emailsIngested: ingestedTotal,
+          jobRelatedCount: jobRelated,
+          applicationsFound,
+          syncStatus: "processing",
+          updatedAt: new Date().toISOString(),
+        });
+        pending = (await store.unprocessedEmails()).filter(
+          (email) => email.integrationId === integration.id,
+        );
+      }
+    };
+
     try {
       await putIntegration({
         ...integration,
@@ -252,43 +303,7 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         });
       } while (cursor);
 
-      await putIntegration({
-        ...(await requireIntegration(integration.id)),
-        emailsTotal: undefined,
-        emailsIngested: ingestedTotal,
-        syncStatus: "processing",
-        updatedAt: new Date().toISOString(),
-      });
-      mailboxLog("sync classify start", { ingestedTotal });
-
-      let pending = (await store.unprocessedEmails()).filter(
-        (email) => email.integrationId === integration.id,
-      );
-      while (pending.length > 0) {
-        const batch = await processUnprocessedEmails({ store, applications, bus, ai, now });
-        processedTotal += batch.processed;
-        jobRelated += batch.jobRelated;
-        applicationsFound += batch.applicationsFound;
-        mailboxLog("sync classify batch", {
-          processed: batch.processed,
-          processedTotal,
-          jobRelated,
-          applicationsFound,
-          pendingLeft: Math.max(0, pending.length - batch.processed),
-        });
-        await putIntegration({
-          ...(await requireIntegration(integration.id)),
-          emailsProcessed: processedTotal,
-          emailsIngested: ingestedTotal,
-          jobRelatedCount: jobRelated,
-          applicationsFound,
-          syncStatus: "processing",
-          updatedAt: new Date().toISOString(),
-        });
-        pending = (await store.unprocessedEmails()).filter(
-          (email) => email.integrationId === integration.id,
-        );
-      }
+      await classifyPending();
 
       await markNoResponse();
       await store.putCheckpoint({
@@ -323,14 +338,30 @@ export function createMailboxService(options: CreateMailboxServiceOptions): Mail
         });
       }
     } catch (cause) {
-      const message =
-        cause instanceof Error
-          ? cause.message
-          : "Mail sync paused. You can try again from Preferences.";
-      mailboxLog("sync failed", { message });
+      const message = humanizeMailboxSyncError(cause);
+      mailboxLog("sync failed", { message, ingestedTotal, processedTotal });
+      // Classify whatever already landed so Classified does not stay at 0 after a drop.
+      try {
+        const pending = (await store.unprocessedEmails()).filter(
+          (email) => email.integrationId === integration.id,
+        );
+        if (pending.length > 0) {
+          await classifyPending();
+        }
+      } catch (classifyCause) {
+        mailboxLog("sync classify after fail", {
+          message:
+            classifyCause instanceof Error ? classifyCause.message : "classify after fail failed",
+        });
+      }
       const tokenExpired = /expired/i.test(message);
       await putIntegration({
         ...(await requireIntegration(integration.id)),
+        emailsTotal: undefined,
+        emailsIngested: ingestedTotal,
+        emailsProcessed: processedTotal,
+        jobRelatedCount: jobRelated,
+        applicationsFound,
         syncStatus: tokenExpired ? "token_expired" : "failed",
         syncError: message,
         updatedAt: new Date().toISOString(),

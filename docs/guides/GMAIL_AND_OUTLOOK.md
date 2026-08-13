@@ -98,8 +98,8 @@ Client IDs and secrets stay in `.env` only. They are never shown or pasted in th
 
 | Action | What happens |
 | ------ | ------------ |
-| First sync | Walks the lookback window. Progress shows **real** Imported / Classified counts (no Gmail estimate). Job-related mail becomes applications, timeline, and “Needs your attention”. |
-| **Sync now** | Incremental only (Gmail history / Outlook delta). Already-classified mail is not sent through the Agent again. |
+| First sync | Walks the lookback window. Progress shows **real** Imported / Classified counts (no Gmail estimate). Job-related mail becomes applications, timeline, and “Needs your attention”. If the connection drops mid-import, already-imported mail is still classified; use **Sync now** to continue. |
+| **Sync now** | Incremental only (Gmail history / Outlook delta). Already-classified mail is not sent through the Agent again. Also resumes a paused import. |
 | **Disconnect** | Removes tokens. Imported mail stays until you delete it. |
 | **Delete imported mail** | Removes that connection’s mail and cursor on this device. |
 
@@ -117,6 +117,7 @@ To try the intelligence path without Google: **Connect sample mailbox** (fixture
 | Open the JobJitsu desktop app… | You are in the browser preview. Quit it and run `pnpm dev:desktop`. |
 | Sign-in was cancelled / timed out | Connect Gmail again. Finish the browser prompt within a few minutes. |
 | Gmail access expired | Connect Gmail again. Tokens stay on this device; they are not recovered from the cloud. |
+| Mail import paused / connection dropped | Wait a minute, then **Sync now**. Already-imported messages stay on this device and are classified even when a page fails. |
 | Google “app not verified” / access blocked | Add your Gmail as a **test user** on **your** OAuth consent screen. |
 | Token exchange failed | Confirm the client secret matches the Desktop client. Restart after editing `.env`. |
 
