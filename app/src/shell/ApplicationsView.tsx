@@ -32,7 +32,10 @@ const APPLICATION_FILTERS = [
 
 export type ApplicationsViewProps = {
   readonly bridge: IpcBridge;
+  /** @deprecated Prefer onOpenJobMail — kept for older call sites. */
   readonly onOpenPreferences?: () => void;
+  readonly onOpenJobMail?: () => void;
+  readonly onOpenProfile?: () => void;
 };
 
 /**
@@ -42,9 +45,13 @@ export type ApplicationsViewProps = {
 export function ApplicationsView({
   bridge,
   onOpenPreferences,
+  onOpenJobMail,
+  onOpenProfile,
 }: ApplicationsViewProps): JSX.Element {
+  const openJobMail = onOpenJobMail ?? onOpenPreferences;
   const [applications, setApplications] = useState<readonly ApplicationSnapshot[]>([]);
   const [dashboard, setDashboard] = useState<MailboxDashboardSnapshot | null>(null);
+  const [hasProfile, setHasProfile] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [timeline, setTimeline] = useState<readonly MailboxTimelineSnapshot[]>([]);
@@ -78,6 +85,10 @@ export function ApplicationsView({
     const dash = await bridge.getMailboxDashboard();
     if (dash.ok) {
       setDashboard(dash.value.dashboard);
+    }
+    const profiles = await bridge.listProfiles();
+    if (profiles.ok) {
+      setHasProfile(profiles.value.profiles.length > 0);
     }
   };
 
@@ -361,7 +372,7 @@ export function ApplicationsView({
     <JjPage
       testId="jj-applications-view"
       title="Applications"
-      subtitle="Create local drafts, or connect Gmail in Job Mail to import job mail. Nothing leaves from here."
+      subtitle="Create a profile, then local drafts or Job Mail import. Nothing leaves from here."
       maxWidth="44rem"
       action={
         <Button
@@ -467,7 +478,11 @@ export function ApplicationsView({
           <JjEmptyState
             testId="jj-application-empty"
             title="No applications yet"
-            body="Add a company and role when you are ready, or connect Gmail to import job mail. Nothing leaves this device."
+            body={
+              hasProfile
+                ? "Add a company and role when you are ready, or connect Gmail in Job Mail. Nothing leaves this device."
+                : "Create a profile first. Then add a draft here, or connect Gmail in Job Mail. Nothing leaves this device."
+            }
             action={
               <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                 <Button
@@ -478,11 +493,21 @@ export function ApplicationsView({
                 >
                   New draft
                 </Button>
-                {onOpenPreferences ? (
+                {!hasProfile && onOpenProfile ? (
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={onOpenPreferences}
+                    onClick={onOpenProfile}
+                    data-testid="jj-application-open-profile"
+                  >
+                    Open Profile
+                  </Button>
+                ) : null}
+                {hasProfile && openJobMail ? (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={openJobMail}
                     data-testid="jj-application-connect-gmail"
                   >
                     Connect Gmail

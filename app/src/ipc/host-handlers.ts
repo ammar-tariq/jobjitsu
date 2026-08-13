@@ -1386,6 +1386,14 @@ export function createHostIpcHandlers(options: CreateHostIpcOptions = {}): IpcHa
           message: "Email intelligence is not available yet.",
         });
       }
+      const profiles = getProfiles();
+      const listed = profiles ? await profiles.list() : [];
+      if (listed.length === 0) {
+        return ok({
+          status: "failed",
+          message: "Create a profile first, then connect Gmail or Outlook in Job Mail.",
+        });
+      }
       return ok(await mailbox.beginProviderConnect(payload.provider));
     },
     "mailbox.connectProvider": async (payload) => {

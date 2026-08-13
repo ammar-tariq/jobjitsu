@@ -922,6 +922,12 @@ describe("DesktopShell", () => {
     await configureStubLocalModel(runtime.preferences);
     await runtime.start();
 
+    await user.click(screen.getByRole("button", { name: "Profile" }));
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByLabelText(/Display name/i), "Sam");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    expect(await screen.findByTestId("jj-profile-job-mail-cta")).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Job Mail" }));
     expect(screen.getByTestId("jj-job-mail-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-mailbox-preferences")).toBeInTheDocument();
@@ -945,7 +951,7 @@ describe("DesktopShell", () => {
     );
   }, 20000);
 
-  it("opens Job Mail from Applications so Gmail can be connected", async () => {
+  it("opens Job Mail from Applications after a profile exists", async () => {
     const user = userEvent.setup();
     const runtime = createHostRuntime();
     render(<App runtime={runtime} />);
@@ -953,11 +959,37 @@ describe("DesktopShell", () => {
     await runtime.start();
 
     await user.click(screen.getByRole("button", { name: "Applications" }));
+    expect(screen.getByTestId("jj-application-open-profile")).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-application-connect-gmail")).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-application-open-profile"));
+    expect(screen.getByTestId("jj-profile")).toBeInTheDocument();
+
+    const createForm = screen.getByTestId("jj-profile-create-form");
+    await user.type(within(createForm).getByLabelText(/Display name/i), "Sam");
+    await user.click(within(createForm).getByRole("button", { name: "Create profile" }));
+    expect(await screen.findByTestId("jj-profile-job-mail-cta")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Applications" }));
     await user.click(screen.getByTestId("jj-application-connect-gmail"));
     expect(screen.getByTestId("jj-job-mail-view")).toBeInTheDocument();
     expect(screen.getByTestId("jj-mailbox-connect-gmail")).toBeInTheDocument();
     await user.click(screen.getByTestId("jj-mailbox-connect-gmail"));
     expect(await screen.findByTestId("jj-mailbox-status")).toHaveTextContent(/client ID/i);
+  });
+
+  it("requires a profile before Connect Gmail on Job Mail", async () => {
+    const user = userEvent.setup();
+    const runtime = createHostRuntime();
+    render(<App runtime={runtime} />);
+    await configureStubLocalModel(runtime.preferences);
+    await runtime.start();
+
+    await user.click(screen.getByRole("button", { name: "Job Mail" }));
+    expect(screen.getByTestId("jj-mailbox-requires-profile")).toBeInTheDocument();
+    expect(screen.queryByTestId("jj-mailbox-connect-gmail")).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("jj-mailbox-open-profile"));
+    expect(screen.getByTestId("jj-profile")).toBeInTheDocument();
+    expect(screen.getByTestId("jj-profile-connect-requires-profile")).toBeInTheDocument();
   });
 
   it("shows Sources as coming soon with links to Craft and Job Mail", async () => {

@@ -16,6 +16,7 @@ const SETUP_STEPS = ["Connect", "Import", "Classify", "Ready"] as const;
 export type JobMailViewProps = {
   readonly bridge: IpcBridge;
   readonly onOpenApplications?: () => void;
+  readonly onOpenProfile?: () => void;
 };
 
 function wizardStepFor(
@@ -38,9 +39,14 @@ function wizardStepFor(
  * Job Mail — connect, sync, and review inbound job mail on this device.
  * Not a full inbox. Nothing sends from here.
  */
-export function JobMailView({ bridge, onOpenApplications }: JobMailViewProps): JSX.Element {
+export function JobMailView({
+  bridge,
+  onOpenApplications,
+  onOpenProfile,
+}: JobMailViewProps): JSX.Element {
   const [integrations, setIntegrations] = useState<readonly MailboxIntegrationSnapshot[]>([]);
   const [settings, setSettings] = useState<MailboxSettingsSnapshot | null>(null);
+  const [hasProfile, setHasProfile] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -53,6 +59,10 @@ export function JobMailView({ bridge, onOpenApplications }: JobMailViewProps): J
     const current = await bridge.getMailboxSettings();
     if (current.ok) {
       setSettings(current.value.settings);
+    }
+    const profiles = await bridge.listProfiles();
+    if (profiles.ok) {
+      setHasProfile(profiles.value.profiles.length > 0);
     }
   };
 
@@ -78,6 +88,10 @@ export function JobMailView({ bridge, onOpenApplications }: JobMailViewProps): J
   const activeStep = wizardStepFor(primary, connecting);
 
   const onConnectSample = (): void => {
+    if (!hasProfile) {
+      setStatus("Create a profile first, then connect Job Mail.");
+      return;
+    }
     setBusy(true);
     setConnecting(true);
     setStatus(null);
@@ -101,6 +115,10 @@ export function JobMailView({ bridge, onOpenApplications }: JobMailViewProps): J
   };
 
   const onBeginConnect = (provider: "gmail" | "outlook"): void => {
+    if (!hasProfile) {
+      setStatus("Create a profile first, then connect Job Mail.");
+      return;
+    }
     setBusy(true);
     setConnecting(true);
     setStatus(
@@ -182,48 +200,71 @@ export function JobMailView({ bridge, onOpenApplications }: JobMailViewProps): J
     <JjPage
       testId="jj-job-mail-view"
       title="Job Mail"
-      subtitle="Connect Gmail or Outlook, import job mail on this device, then open Applications. Nothing is sent from here."
+      subtitle="Create a profile first, then connect Gmail or Outlook. Import stays on this device — nothing is sent from here."
     >
       <JjSection
         testId="jj-mailbox-preferences"
         title="Email setup"
-        description="A short path: connect, import, classify, then you’re ready."
+        description="A short path: profile, connect, import, classify, then you’re ready."
       >
         <Typography color="text.secondary" variant="body2">
           Step {activeStep + 1} of {SETUP_STEPS.length}: {SETUP_STEPS[activeStep]}
         </Typography>
         <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-            <Button
-              variant="contained"
-              onClick={() => onBeginConnect("gmail")}
-              disabled={busy}
-              data-testid="jj-mailbox-connect-gmail"
-            >
-              Connect Gmail
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => onBeginConnect("outlook")}
-              disabled={busy}
-              data-testid="jj-mailbox-connect-outlook"
-            >
-              Connect Outlook
-            </Button>
-            <Button
-              variant="text"
-              onClick={onConnectSample}
-              disabled={busy}
-              data-testid="jj-mailbox-connect-sample"
-            >
-              Connect sample mailbox
-            </Button>
-            {onOpenApplications ? (
-              <Button variant="text" onClick={onOpenApplications} disabled={busy}>
-                Open Applications
+          {!hasProfile ? (
+            <Stack spacing={1} data-testid="jj-mailbox-requires-profile">
+              <Typography variant="body2">
+                Create a profile before connecting Gmail or Outlook. Job mail links to your identity
+                on this device.
+              </Typography>
+              {onOpenProfile ? (
+                <Button
+                  variant="contained"
+                  onClick={onOpenProfile}
+                  data-testid="jj-mailbox-open-profile"
+                >
+                  Open Profile
+                </Button>
+              ) : null}
+            </Stack>
+          ) : (
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+              <Button
+                variant="contained"
+                onClick={() => onBeginConnect("gmail")}
+                disabled={busy}
+                data-testid="jj-mailbox-connect-gmail"
+              >
+                Connect Gmail
               </Button>
-            ) : null}
-          </Stack>
+              <Button
+                variant="outlined"
+                onClick={() => onBeginConnect("outlook")}
+                disabled={busy}
+                data-testid="jj-mailbox-connect-outlook"
+              >
+                Connect Outlook
+              </Button>
+              <Button
+                variant="text"
+                onClick={onConnectSample}
+                disabled={busy}
+                data-testid="jj-mailbox-connect-sample"
+              >
+                Connect sample mailbox
+              </Button>
+              {onOpenApplications ? (
+                <Button variant="text" onClick={onOpenApplications} disabled={busy}>
+                  Open Applications
+                </Button>
+              ) : null}
+            </Stack>
+          )}
+          {!hasProfile && onOpenApplications ? (
+            <Button variant="text" onClick={onOpenApplications} disabled={busy}>
+              Open Applications
+            </Button>
+          ) : null}
 
           {syncing && primary ? (
             <Stack spacing={1}>

@@ -171,7 +171,11 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             {activeId === "craft" ? (
               <CraftView bridge={bridge} />
             ) : activeId === "applications" ? (
-              <ApplicationsView bridge={bridge} onOpenPreferences={() => setActiveId("job-mail")} />
+              <ApplicationsView
+                bridge={bridge}
+                onOpenJobMail={() => setActiveId("job-mail")}
+                onOpenProfile={() => setActiveId("profile")}
+              />
             ) : activeId === "queue" ? (
               <QueueView bridge={bridge} />
             ) : activeId === "follow-ups" ? (
@@ -181,7 +185,11 @@ export function DesktopShell({ theme, onThemeChange, bridge }: DesktopShellProps
             ) : activeId === "profile" ? (
               <ProfileView bridge={bridge} onOpenJobMail={() => setActiveId("job-mail")} />
             ) : activeId === "job-mail" ? (
-              <JobMailView bridge={bridge} onOpenApplications={() => setActiveId("applications")} />
+              <JobMailView
+                bridge={bridge}
+                onOpenApplications={() => setActiveId("applications")}
+                onOpenProfile={() => setActiveId("profile")}
+              />
             ) : activeId === "sources" ? (
               <SourcesView
                 onOpenCraft={() => setActiveId("craft")}

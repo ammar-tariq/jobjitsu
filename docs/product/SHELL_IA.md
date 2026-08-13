@@ -55,7 +55,8 @@ Cross-links (connect where possible):
 
 - Profile → “Open Job Mail” after connect  
 - Job Mail → “Open Applications” when job-related mail appears  
-- Applications → “Connect in Profile / Job Mail” when empty  
+- Applications → “Create a profile” when empty and no identity yet; “Connect in Job Mail” once a profile exists  
+- **Connect Gmail / Outlook requires at least one profile** (UI + host gate)  
 - Agent unavailable → Preferences model  
 - Sources stub → link to Craft (prepare from résumé + JD) as the interim path  
 

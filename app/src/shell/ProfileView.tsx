@@ -1055,7 +1055,7 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
       subtitle="Create one or more profiles on this device. Paths and resumes nest under each profile. Connect Job Mail when you are ready — nothing is sent from here."
       maxWidth="44rem"
     >
-      {onOpenJobMail ? (
+      {onOpenJobMail && profiles.length > 0 ? (
         <Stack
           direction="row"
           spacing={1}
@@ -1069,6 +1069,15 @@ export function ProfileView({ bridge, onOpenJobMail }: ProfileViewProps): JSX.El
             Opens Job Mail. Paths (Fullstack, React Native, …) stay under this profile.
           </Typography>
         </Stack>
+      ) : null}
+      {profiles.length === 0 ? (
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          data-testid="jj-profile-connect-requires-profile"
+        >
+          Create a profile first. Then you can connect Gmail in Job Mail.
+        </Typography>
       ) : null}
       <List
         dense
