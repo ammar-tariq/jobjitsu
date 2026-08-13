@@ -10,20 +10,22 @@ type JjHeroProps = {
 };
 
 /**
- * Full-bleed homepage hero — brand name first (Google OAuth + BRAND_GUIDELINES §7).
+ * Full-bleed homepage hero — brand name + icon match Google OAuth consent branding.
  */
 export function JjHero({
   primaryTo = "/getting-started",
   secondaryTo = "/docs/product/PRODUCT_VISION",
 }: JjHeroProps): ReactNode {
-  const logoSrc = useBaseUrl("/img/logo-full-horizontal.svg");
+  const iconSrc = useBaseUrl("/img/oauth-app-icon.png");
+  const wordmarkSrc = useBaseUrl("/img/logo-full-horizontal.svg");
   return (
     <header className="hero hero--jj">
       <div className="hero--jj__plane" aria-hidden="true" />
       <div className="container hero--jj__compose">
+        <img className="hero--jj__mark" src={iconSrc} width={96} height={96} alt="JobJitsu" />
         <img
           className="hero--jj__mark hero--jj__mark--wordmark"
-          src={logoSrc}
+          src={wordmarkSrc}
           width={280}
           height={64}
           alt="JobJitsu"
@@ -37,6 +39,11 @@ export function JjHero({
           helps you tailor résumés and cover letters, track applications, and optionally import
           job-related email from Gmail or Outlook — with readonly access you approve. Your career
           data stays on your device. The Agent prepares drafts; you own every send.
+        </p>
+        <p className="hero--jj__legal">
+          <Link to="/privacy">Privacy Policy</Link>
+          {" · "}
+          <Link to="/terms">Terms of Service</Link>
         </p>
         <div className="hero--jj__actions">
           <Link className="button button--primary button--lg" to={primaryTo}>

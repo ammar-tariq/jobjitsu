@@ -134,6 +134,25 @@ export default function Home(): ReactNode {
                 unless you approve it.
               </li>
             </ul>
+
+            <Heading as="h2" id="jj-gmail">
+              Why JobJitsu requests Gmail access
+            </Heading>
+            <p className="jj-home-section__lede">
+              When you choose <strong>Connect Gmail</strong> in the JobJitsu desktop app, Google
+              asks you to allow JobJitsu to read your mail (<code>gmail.readonly</code>). JobJitsu
+              uses that access only to import messages that look job-related (applications,
+              interviews, recruiter mail) onto your device so you can track them locally.
+            </p>
+            <ul className="jj-purpose-list">
+              <li>JobJitsu does not send email as you through this connection.</li>
+              <li>JobJitsu does not ask for your Gmail password.</li>
+              <li>Tokens stay on your device; you can disconnect anytime.</li>
+              <li>
+                Details: <Link to="/privacy">Privacy Policy</Link>
+              </li>
+            </ul>
+
             <p className="jj-home-section__more">
               Privacy: <Link to="/privacy">Privacy Policy</Link>
               {" · "}
