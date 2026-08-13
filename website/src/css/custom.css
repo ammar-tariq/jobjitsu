@@ -121,6 +121,12 @@
   border-radius: 12px;
 }
 
+.hero--jj__mark--wordmark {
+  width: min(280px, 100%);
+  height: auto;
+  border-radius: 0;
+}
+
 .hero--jj__brand {
   margin: 0 0 1rem;
   font-size: 0.95rem;
@@ -130,13 +136,21 @@
   color: var(--jj-electric-teal);
 }
 
+.hero--jj__tagline {
+  margin: 0.75rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--jj-electric-teal);
+}
+
 .hero--jj .hero__title {
   font-size: clamp(2.25rem, 5vw, 3.25rem);
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.15;
   margin: 0;
-  max-width: 14ch;
+  max-width: none;
 }
 
 .hero--jj .hero__subtitle {
@@ -358,6 +372,18 @@
 .jj-home-section__more {
   color: #94a3b8;
   max-width: 36rem;
+}
+
+.jj-purpose-list {
+  margin: 1.25rem 0 0;
+  padding-left: 1.25rem;
+  max-width: 40rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+}
+
+.jj-purpose-list li + li {
+  margin-top: 0.75rem;
 }
 
 .jj-pipeline {

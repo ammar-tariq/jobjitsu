@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
 import Heading from "@theme/Heading";
 import { JjPrivacyPill } from "./JjIcons";
 
@@ -9,24 +10,33 @@ type JjHeroProps = {
 };
 
 /**
- * Full-bleed homepage hero — brand first, single composition (BRAND_GUIDELINES §7).
+ * Full-bleed homepage hero — brand name first (Google OAuth + BRAND_GUIDELINES §7).
  */
 export function JjHero({
   primaryTo = "/getting-started",
   secondaryTo = "/docs/product/PRODUCT_VISION",
 }: JjHeroProps): ReactNode {
+  const logoSrc = useBaseUrl("/img/logo-full-horizontal.svg");
   return (
     <header className="hero hero--jj">
       <div className="hero--jj__plane" aria-hidden="true" />
       <div className="container hero--jj__compose">
-        <img className="hero--jj__mark" src="/img/logo.svg" width={56} height={56} alt="" />
-        <p className="hero--jj__brand">JobJitsu</p>
+        <img
+          className="hero--jj__mark hero--jj__mark--wordmark"
+          src={logoSrc}
+          width={280}
+          height={64}
+          alt="JobJitsu"
+        />
         <Heading as="h1" className="hero__title">
-          The gentle art of landing the job.
+          JobJitsu
         </Heading>
+        <p className="hero--jj__tagline">The gentle art of landing the job.</p>
         <p className="hero__subtitle">
-          An open-source AI Career Operating System. Local Agent. On-device intelligence. Your
-          résumé stays on your machine — nothing leaves except what you choose to send.
+          JobJitsu is an open-source, local-first AI Career Operating System for your desktop. It
+          helps you tailor résumés and cover letters, track applications, and optionally import
+          job-related email from Gmail or Outlook — with readonly access you approve. Your career
+          data stays on your device. The Agent prepares drafts; you own every send.
         </p>
         <div className="hero--jj__actions">
           <Link className="button button--primary button--lg" to={primaryTo}>
