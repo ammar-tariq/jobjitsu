@@ -112,6 +112,18 @@ No scrapers or network discovery in the first PE21 slices.
 
 ---
 
+## Layout pattern (list screens)
+
+For Work list destinations (**Applications**, and later similar editors):
+
+1. **List is primary** — search, filters, and rows fill the page (reading width).
+2. **Create / edit in a dialog** — `New draft` or a row opens `JjEditorDialog`; the form is not a permanent second column.
+3. **Queue / Follow-ups** stay list + inline actions (no create form).
+
+One job per view; avoid permanent split panes for create/edit.
+
+---
+
 ## Visual language (icon-aligned)
 
 App icon accents (on black):

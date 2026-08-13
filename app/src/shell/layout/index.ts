@@ -1,4 +1,5 @@
 export { JjEmptyState, type JjEmptyStateProps } from "./JjEmptyState.js";
+export { JjEditorDialog, type JjEditorDialogProps } from "./JjEditorDialog.js";
 export { JjPage, JjPageHeader, type JjPageHeaderProps, type JjPageProps } from "./JjPage.js";
 export { JjSection, type JjSectionProps } from "./JjSection.js";
 export { JjSurface, type JjSurfaceProps } from "./JjSurface.js";
