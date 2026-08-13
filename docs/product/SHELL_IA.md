@@ -120,6 +120,8 @@ For Work list destinations (**Applications**, and later similar editors):
 1. **List is primary** — search, filters, and rows fill the page (reading width).
 2. **Create / edit in a dialog** — `New draft` or a row opens `JjEditorDialog`; the form is not a permanent second column.
 3. **Queue / Follow-ups** stay list + inline actions (no create form).
+4. **Profile** — full screen for the **active** identity; switch profiles via a select (no accordion tree).
+5. **Job Mail** — session state lives in `MailboxSessionProvider` (survives nav); shell shows an import banner when syncing elsewhere.
 
 One job per view; avoid permanent split panes for create/edit.
 

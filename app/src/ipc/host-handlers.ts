@@ -1641,6 +1641,7 @@ function toIntegrationSnapshot(integration: {
   readonly syncStatus: string;
   readonly syncError?: string;
   readonly emailsProcessed: number;
+  readonly emailsIngested?: number;
   readonly emailsTotal?: number;
   readonly jobRelatedCount: number;
   readonly applicationsFound: number;
@@ -1655,6 +1656,7 @@ function toIntegrationSnapshot(integration: {
     syncStatus: integration.syncStatus,
     syncError: integration.syncError,
     emailsProcessed: integration.emailsProcessed,
+    emailsIngested: integration.emailsIngested,
     emailsTotal: integration.emailsTotal,
     jobRelatedCount: integration.jobRelatedCount,
     applicationsFound: integration.applicationsFound,

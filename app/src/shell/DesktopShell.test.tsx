@@ -470,7 +470,7 @@ describe("DesktopShell", () => {
     expect(screen.getByTestId("jj-profile-tree")).toBeInTheDocument();
     expect(screen.getByTestId("jj-tree-create-profile")).toBeInTheDocument();
     expect(screen.getByTestId("jj-profile-create-form")).toBeInTheDocument();
-    expect(screen.getByText(/Create one or more profiles/i)).toBeInTheDocument();
+    expect(screen.getByText(/One identity on this screen/i)).toBeInTheDocument();
     expect(screen.queryByTestId("jj-path-library")).not.toBeInTheDocument();
     expect(screen.queryByText(/cloud sync/i)).not.toBeInTheDocument();
     expect(screen.queryByTestId("jj-preferences")).not.toBeInTheDocument();
@@ -519,8 +519,9 @@ describe("DesktopShell", () => {
     expect(await screen.findByText(/Profile created/i)).toBeInTheDocument();
 
     expect(await runtime.profiles.list()).toHaveLength(2);
-    expect(screen.getByText(/Contractor Face/)).toBeInTheDocument();
-    expect(screen.getByText(/Sam Chen/)).toBeInTheDocument();
+    await user.click(screen.getByRole("combobox", { name: /Active profile/i }));
+    expect(await screen.findByRole("option", { name: /Sam Chen/i })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: /Contractor Face/i })).toBeInTheDocument();
   });
 
   it("creates and selects a Path under identity without sending", async () => {

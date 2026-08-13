@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, type JSX } from "react";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -7,203 +7,66 @@ import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import type { IpcBridge } from "../ipc/bridge.js";
-import type { MailboxIntegrationSnapshot, MailboxSettingsSnapshot } from "../ipc/commands.js";
 import { JjPage, JjSection } from "./layout/index.js";
+import { useMailboxSession } from "./MailboxSessionProvider.js";
 
 const SETUP_STEPS = ["Connect", "Import", "Classify", "Ready"] as const;
 
 export type JobMailViewProps = {
-  readonly bridge: IpcBridge;
   readonly onOpenApplications?: () => void;
   readonly onOpenProfile?: () => void;
 };
 
 function wizardStepFor(
-  integration: MailboxIntegrationSnapshot | undefined,
+  syncStatus: string | undefined,
+  connected: boolean | undefined,
   connecting: boolean,
 ): number {
-  if (connecting || !integration?.connected) {
+  if (connecting || !connected) {
     return 0;
   }
-  if (integration.syncStatus === "syncing") {
+  if (syncStatus === "syncing") {
     return 1;
   }
-  if (integration.syncStatus === "processing") {
+  if (syncStatus === "processing") {
     return 2;
   }
   return 3;
 }
 
 /**
- * Job Mail — connect, sync, and review inbound job mail on this device.
+ * Job Mail chrome — session state lives in MailboxSessionProvider.
  * Not a full inbox. Nothing sends from here.
  */
-export function JobMailView({
-  bridge,
-  onOpenApplications,
-  onOpenProfile,
-}: JobMailViewProps): JSX.Element {
-  const [integrations, setIntegrations] = useState<readonly MailboxIntegrationSnapshot[]>([]);
-  const [settings, setSettings] = useState<MailboxSettingsSnapshot | null>(null);
-  const [hasProfile, setHasProfile] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-
-  const refresh = async (): Promise<void> => {
-    const listed = await bridge.listMailboxIntegrations();
-    if (listed.ok) {
-      setIntegrations(listed.value.integrations);
-    }
-    const current = await bridge.getMailboxSettings();
-    if (current.ok) {
-      setSettings(current.value.settings);
-    }
-    const profiles = await bridge.listProfiles();
-    if (profiles.ok) {
-      setHasProfile(profiles.value.profiles.length > 0);
-    }
-  };
+export function JobMailView({ onOpenApplications, onOpenProfile }: JobMailViewProps): JSX.Element {
+  const session = useMailboxSession();
+  const {
+    integrations,
+    settings,
+    hasProfile,
+    status,
+    busy,
+    connecting,
+    syncing,
+    primary,
+    refresh,
+    setSettings,
+    beginConnect,
+    connectSample,
+    sync,
+    disconnect,
+    deleteImported,
+    saveSettings,
+  } = session;
 
   useEffect(() => {
     void refresh();
-  }, [bridge]);
+  }, [refresh]);
 
-  const primary = integrations[0];
-  const syncing = integrations.some(
-    (row) => row.syncStatus === "syncing" || row.syncStatus === "processing",
-  );
-
-  useEffect(() => {
-    if (!syncing) {
-      return;
-    }
-    const id = window.setInterval(() => {
-      void refresh();
-    }, 1500);
-    return () => window.clearInterval(id);
-  }, [syncing, bridge]);
-
-  const activeStep = wizardStepFor(primary, connecting);
-
-  const onConnectSample = (): void => {
-    if (!hasProfile) {
-      setStatus("Create a profile first, then connect Job Mail.");
-      return;
-    }
-    setBusy(true);
-    setConnecting(true);
-    setStatus(null);
-    void bridge
-      .connectSampleMailbox()
-      .then(async (result) => {
-        setBusy(false);
-        setConnecting(false);
-        if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
-          return;
-        }
-        setStatus("Sample mailbox connected. Processing stays on this device.");
-        await refresh();
-      })
-      .catch(() => {
-        setBusy(false);
-        setConnecting(false);
-        setStatus("Could not connect the sample mailbox. Try again.");
-      });
-  };
-
-  const onBeginConnect = (provider: "gmail" | "outlook"): void => {
-    if (!hasProfile) {
-      setStatus("Create a profile first, then connect Job Mail.");
-      return;
-    }
-    setBusy(true);
-    setConnecting(true);
-    setStatus(
-      provider === "gmail"
-        ? "A browser window will open. Finish Gmail sign-in there. Access stays on this device."
-        : "A browser window will open. Finish Outlook sign-in there. Access stays on this device.",
-    );
-    void bridge
-      .beginMailboxConnect(provider)
-      .then(async (result) => {
-        setBusy(false);
-        setConnecting(false);
-        if (!result.ok) {
-          setStatus(result.error.message ?? result.error.title);
-          return;
-        }
-        setStatus(result.value.message);
-        await refresh();
-      })
-      .catch(() => {
-        setBusy(false);
-        setConnecting(false);
-        setStatus("Could not start that connection. Try again.");
-      });
-  };
-
-  const onSync = (id: string): void => {
-    setBusy(true);
-    setStatus("Importing mail on this device…");
-    void bridge.syncMailbox(id).then(async (result) => {
-      setBusy(false);
-      if (!result.ok) {
-        setStatus(result.error.message ?? result.error.title);
-        return;
-      }
-      const row = result.value.integration;
-      if (row.syncError) {
-        setStatus(row.syncError);
-      } else {
-        setStatus(`Ready. Processed ${row.emailsProcessed} · Job-related ${row.jobRelatedCount}.`);
-      }
-      await refresh();
-    });
-  };
-
-  const onDisconnect = (id: string): void => {
-    setBusy(true);
-    void bridge.disconnectMailbox(id).then(async () => {
-      setBusy(false);
-      setStatus("Disconnected. Imported mail is still on this device until you delete it.");
-      await refresh();
-    });
-  };
-
-  const onDelete = (id: string): void => {
-    setBusy(true);
-    void bridge.deleteMailboxData(id).then(async () => {
-      setBusy(false);
-      setStatus("Imported mail for that connection was removed from this device.");
-      await refresh();
-    });
-  };
-
-  const onSaveSettings = (): void => {
-    if (!settings) {
-      return;
-    }
-    setBusy(true);
-    void bridge
-      .updateMailboxSettings({
-        lookbackDays: settings.lookbackDays,
-        noResponseAfterDays: settings.noResponseAfterDays,
-        notifyAssessments: settings.notifyAssessments,
-        notifyInterviews: settings.notifyInterviews,
-        notifyRejections: settings.notifyRejections,
-        notifyOffers: settings.notifyOffers,
-      })
-      .then((result) => {
-        setBusy(false);
-        if (result.ok) {
-          setSettings(result.value.settings);
-          setStatus("Job Mail settings saved on this device.");
-        }
-      });
-  };
+  const activeStep = wizardStepFor(primary?.syncStatus, primary?.connected, connecting);
+  const importCount = primary?.emailsIngested ?? 0;
+  const classifyCount = primary?.emailsProcessed ?? 0;
+  const totalEstimate = primary?.emailsTotal;
 
   return (
     <JjPage
@@ -240,7 +103,7 @@ export function JobMailView({
             <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
               <Button
                 variant="contained"
-                onClick={() => onBeginConnect("gmail")}
+                onClick={() => beginConnect("gmail")}
                 disabled={busy}
                 data-testid="jj-mailbox-connect-gmail"
               >
@@ -248,7 +111,7 @@ export function JobMailView({
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => onBeginConnect("outlook")}
+                onClick={() => beginConnect("outlook")}
                 disabled={busy}
                 data-testid="jj-mailbox-connect-outlook"
               >
@@ -256,7 +119,7 @@ export function JobMailView({
               </Button>
               <Button
                 variant="text"
-                onClick={onConnectSample}
+                onClick={connectSample}
                 disabled={busy}
                 data-testid="jj-mailbox-connect-sample"
               >
@@ -278,23 +141,26 @@ export function JobMailView({
           {syncing && primary ? (
             <Stack spacing={1}>
               <LinearProgress
-                variant={
-                  primary.emailsTotal && primary.emailsTotal > 0 ? "determinate" : "indeterminate"
-                }
+                variant={totalEstimate && totalEstimate > 0 ? "determinate" : "indeterminate"}
                 value={
-                  primary.emailsTotal && primary.emailsTotal > 0
+                  totalEstimate && totalEstimate > 0
                     ? Math.min(
                         100,
-                        Math.round((primary.emailsProcessed / primary.emailsTotal) * 100),
+                        Math.round(
+                          ((primary.syncStatus === "processing" ? classifyCount : importCount) /
+                            totalEstimate) *
+                            100,
+                        ),
                       )
                     : undefined
                 }
                 aria-label="Importing job mail"
               />
               <Typography variant="body2" color="text.secondary">
-                {primary.syncStatus === "processing" ? "Classifying" : "Importing"}…{" "}
-                {primary.emailsProcessed}
-                {primary.emailsTotal ? ` / ~${primary.emailsTotal} in this sync window` : ""}
+                {primary.syncStatus === "processing"
+                  ? `Classifying ${classifyCount}`
+                  : `Importing ${importCount}`}
+                {totalEstimate ? ` / ~${totalEstimate} in this sync window` : ""}
               </Typography>
             </Stack>
           ) : null}
@@ -325,32 +191,36 @@ export function JobMailView({
                       : "not yet"}
               </Typography>
               <Typography color="text.secondary" variant="body2">
-                Processed {integration.emailsProcessed} · Job-related {integration.jobRelatedCount}{" "}
-                · Applications {integration.applicationsFound}
+                Imported {integration.emailsIngested ?? 0}
+                {integration.emailsTotal ? ` / ~${integration.emailsTotal}` : ""} · Classified{" "}
+                {integration.emailsProcessed} · Job-related {integration.jobRelatedCount} ·
+                Applications {integration.applicationsFound}
               </Typography>
               {integration.syncError ? (
-                <Alert severity="info">{integration.syncError}</Alert>
+                <Typography color="warning.main" variant="body2">
+                  {integration.syncError}
+                </Typography>
               ) : null}
-              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", pt: 0.5 }}>
                 <Button
                   size="small"
-                  variant="contained"
-                  onClick={() => onSync(integration.id)}
+                  variant="outlined"
+                  onClick={() => sync(integration.id)}
                   disabled={busy || syncing || !integration.connected}
                 >
                   Sync now
                 </Button>
                 <Button
                   size="small"
-                  onClick={() => onDisconnect(integration.id)}
-                  disabled={busy || syncing || !integration.connected}
+                  onClick={() => disconnect(integration.id)}
+                  disabled={busy || syncing}
                 >
                   Disconnect
                 </Button>
                 <Button
                   size="small"
                   color="error"
-                  onClick={() => onDelete(integration.id)}
+                  onClick={() => deleteImported(integration.id)}
                   disabled={busy || syncing}
                 >
                   Delete imported mail
@@ -404,7 +274,7 @@ export function JobMailView({
             }
             label="Notice me about interviews"
           />
-          <Button variant="outlined" onClick={onSaveSettings} disabled={busy}>
+          <Button variant="outlined" onClick={saveSettings} disabled={busy}>
             Save Job Mail settings
           </Button>
         </JjSection>
